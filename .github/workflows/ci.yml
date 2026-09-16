@@ -1,0 +1,49 @@
+name: CI
+
+# 目的：不要再把会崩的游戏页推上线。
+# 2026-09-16 有三处 `a``b` 漏写 `+`，被 JS 当成标签模板调用，线上直接报
+# "… is not a function"——而 `node --check` 全程通过，因为那种写法语法合法。
+# 所以这里跑的是**真的执行一遍**，不是只做语法检查。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: 游戏页冒烟测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 语法检查（brain.js / game_core.js）
+        run: |
+          node --check dodge/brain.js
+          node --check dodge/game_core.js
+
+      - name: 冒烟测试（用真实数据执行渲染路径）
+        run: node dodge/smoke_test.js
+
+      - name: Python 语法检查
+        run: |
+          python3 -m py_compile run_experiment.py connectome_vision_loop.py \
+            dodge/build.py dodge/measure_neurons_fullbrain.py \
+            dodge/subcircuit_vs_fullbrain_knockouts.py dodge/landing_pose_check.py \
+            vision/frontend_check.py
+
+      - name: 构建页面并确认与 docs/ 一致
+        run: |
+          python3 dodge/build.py
+          # build.py 自带 lint，模板有问题会在这里中止
+          if ! cmp -s results/dodge/fly_dodge.html docs/game.html; then
+            echo "::error::docs/game.html 与构建产物不一致——改完模板后请重新执行："
+            echo "::error::  python3 dodge/build.py && cp results/dodge/fly_dodge.html docs/game.html"
+            exit 1
+          fi
