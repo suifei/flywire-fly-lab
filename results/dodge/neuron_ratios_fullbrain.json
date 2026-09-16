@@ -1,0 +1,304 @@
+{
+ "protocol": {
+  "R": 6,
+  "sugar_freq_hz": 50,
+  "water_freq_hz": 160,
+  "note": "比值 = 敲除后读出 ÷ 同实现全部单敲除的中位数（板内中位数归一化，见报告 14.4 节）；一个类型有多个神经元时取效应最强的那个；不放电的神经元不参与"
+ },
+ "null_median": {
+  "sugar": [
+   19.5,
+   7.0,
+   12.0,
+   22.0,
+   14.0,
+   23.0
+  ],
+  "water": [
+   12.0,
+   8.0,
+   9.0,
+   7.0,
+   5.0,
+   6.0
+  ]
+ },
+ "neurons": [
+  {
+   "key": "Roundup",
+   "cell_type": "CB0553",
+   "full_sugar": 0.297,
+   "full_water": 0.0,
+   "game_sugar": 0.048,
+   "game_water": 0.111,
+   "sugar_detail": [
+    {
+     "fid": "720575940623211725",
+     "status": "ok",
+     "rate_hz": 7.33,
+     "ratio": 0.7897
+    },
+    {
+     "fid": "720575940607272649",
+     "status": "ok",
+     "rate_hz": 10.0,
+     "ratio": 0.4308
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940623211725",
+     "status": "ok",
+     "rate_hz": 7.5,
+     "ratio": 0.0
+    },
+    {
+     "fid": "720575940607272649",
+     "status": "ok",
+     "rate_hz": 0.5,
+     "ratio": 1.1277
+    }
+   ]
+  },
+  {
+   "key": "G2N-1",
+   "cell_type": "CB0616",
+   "full_sugar": 0.472,
+   "full_water": 0.957,
+   "game_sugar": 0.674,
+   "game_water": 1.072,
+   "sugar_detail": [
+    {
+     "fid": "720575940620874757",
+     "status": "ok",
+     "rate_hz": 38.83,
+     "ratio": 0.4718
+    },
+    {
+     "fid": "720575940623718380",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0667
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940620874757",
+     "status": "ok",
+     "rate_hz": 18.83,
+     "ratio": 0.9574
+    },
+    {
+     "fid": "720575940623718380",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0
+    }
+   ]
+  },
+  {
+   "key": "Clavicle",
+   "cell_type": "AN_GNG_30",
+   "full_sugar": 0.585,
+   "full_water": 0.021,
+   "game_sugar": 0.906,
+   "game_water": 0.01,
+   "sugar_detail": [
+    {
+     "fid": "720575940655014049",
+     "status": "ok",
+     "rate_hz": 29.17,
+     "ratio": 0.5846
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940655014049",
+     "status": "ok",
+     "rate_hz": 90.0,
+     "ratio": 0.0213
+    }
+   ]
+  },
+  {
+   "key": "CB0277",
+   "cell_type": "CB0277",
+   "full_sugar": 0.41,
+   "full_water": 0.979,
+   "game_sugar": 0.74,
+   "game_water": 1.076,
+   "sugar_detail": [
+    {
+     "fid": "720575940626835146",
+     "status": "ok",
+     "rate_hz": 25.67,
+     "ratio": 0.4103
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940626835146",
+     "status": "ok",
+     "rate_hz": 4.67,
+     "ratio": 0.9787
+    }
+   ]
+  },
+  {
+   "key": "CB0051",
+   "cell_type": "CB0051",
+   "full_sugar": 0.974,
+   "full_water": 0.489,
+   "game_sugar": 0.796,
+   "game_water": 0.016,
+   "sugar_detail": [
+    {
+     "fid": "720575940632365905",
+     "status": "ok",
+     "rate_hz": 1.67,
+     "ratio": 0.9744
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940632365905",
+     "status": "ok",
+     "rate_hz": 6.17,
+     "ratio": 0.4894
+    }
+   ]
+  },
+  {
+   "key": "Zorro",
+   "cell_type": "CB0192",
+   "full_sugar": 0.81,
+   "full_water": 0.468,
+   "game_sugar": 1.033,
+   "game_water": 0.917,
+   "sugar_detail": [
+    {
+     "fid": "720575940629888530",
+     "status": "ok",
+     "rate_hz": 66.5,
+     "ratio": 0.8103
+    },
+    {
+     "fid": "720575940611015122",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0667
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940629888530",
+     "status": "ok",
+     "rate_hz": 97.83,
+     "ratio": 0.4894
+    },
+    {
+     "fid": "720575940611015122",
+     "status": "ok",
+     "rate_hz": 0.5,
+     "ratio": 1.0
+    }
+   ]
+  },
+  {
+   "key": "Phantom",
+   "cell_type": "CB0062",
+   "full_sugar": 0.923,
+   "full_water": 3.021,
+   "game_sugar": 0.972,
+   "game_water": 2.064,
+   "sugar_detail": [
+    {
+     "fid": "720575940616103218",
+     "status": "ok",
+     "rate_hz": 26.17,
+     "ratio": 0.9231
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940616103218",
+     "status": "ok",
+     "rate_hz": 120.67,
+     "ratio": 3.0213
+    }
+   ]
+  },
+  {
+   "key": "Rattle",
+   "cell_type": "CB0499",
+   "full_sugar": 0.882,
+   "full_water": 0.638,
+   "game_sugar": 1.132,
+   "game_water": 0.985,
+   "sugar_detail": [
+    {
+     "fid": "720575940638103349",
+     "status": "ok",
+     "rate_hz": 36.67,
+     "ratio": 0.8821
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940638103349",
+     "status": "ok",
+     "rate_hz": 25.67,
+     "ratio": 0.6383
+    }
+   ]
+  },
+  {
+   "key": "CB0883",
+   "cell_type": "CB0883",
+   "full_sugar": 0.759,
+   "full_water": 1.0,
+   "game_sugar": 1.066,
+   "game_water": 1,
+   "sugar_detail": [
+    {
+     "fid": "720575940625102692",
+     "status": "ok",
+     "rate_hz": 12.67,
+     "ratio": 0.759
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940625102692",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0
+    }
+   ]
+  },
+  {
+   "key": "aBN1",
+   "cell_type": "SAD093",
+   "full_sugar": 1.0,
+   "full_water": 1.0,
+   "game_sugar": 1,
+   "game_water": 1,
+   "sugar_detail": [
+    {
+     "fid": "720575940630907434",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0667
+    }
+   ],
+   "water_detail": [
+    {
+     "fid": "720575940630907434",
+     "status": "ok",
+     "rate_hz": 0.0,
+     "ratio": 1.0
+    }
+   ]
+  }
+ ]
+}

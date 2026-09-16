@@ -1,0 +1,91 @@
+{
+ "seconds_per_seed": 120,
+ "seeds": 5,
+ "ball_speed": 60,
+ "results": [
+  {
+   "key": "intact",
+   "label": "完整大脑（文献映射）",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 210,
+   "hit": 116,
+   "jump": 329,
+   "dodge_rate": 0.6441717791411042,
+   "jumps_per_min": 32.9,
+   "turn_deg_per_s": 43.39865044737655
+  },
+  {
+   "key": "reversed",
+   "label": "反转转向映射",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 216,
+   "hit": 110,
+   "jump": 329,
+   "dodge_rate": 0.6625766871165644,
+   "jumps_per_min": 32.9,
+   "turn_deg_per_s": 28.46166242465106
+  },
+  {
+   "key": "no_gf",
+   "label": "切除巨纤维输出",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 199,
+   "hit": 127,
+   "jump": 0,
+   "dodge_rate": 0.6104294478527608,
+   "jumps_per_min": 0,
+   "turn_deg_per_s": 65.27855058557248
+  },
+  {
+   "key": "reversed_no_gf",
+   "label": "反转映射 + 切除巨纤维",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 60,
+   "hit": 267,
+   "jump": 0,
+   "dodge_rate": 0.1834862385321101,
+   "jumps_per_min": 0,
+   "turn_deg_per_s": 46.854573768228605
+  },
+  {
+   "key": "no_dna",
+   "label": "切除 DNa01/02 输出",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 200,
+   "hit": 126,
+   "jump": 329,
+   "dodge_rate": 0.6134969325153374,
+   "jumps_per_min": 32.9,
+   "turn_deg_per_s": 0
+  },
+  {
+   "key": "no_gf_dna",
+   "label": "巨纤维 + DNa 都切除",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 0,
+   "hit": 327,
+   "jump": 0,
+   "dodge_rate": 0,
+   "jumps_per_min": 0,
+   "turn_deg_per_s": 0
+  },
+  {
+   "key": "no_looming",
+   "label": "LC4 + LPLC2 断突触",
+   "seconds": 600,
+   "launched": 330,
+   "dodge": 0,
+   "hit": 327,
+   "jump": 0,
+   "dodge_rate": 0,
+   "jumps_per_min": 0,
+   "turn_deg_per_s": 0
+  }
+ ]
+}

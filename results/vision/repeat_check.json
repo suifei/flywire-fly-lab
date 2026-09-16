@@ -1,0 +1,66 @@
+{
+ "metric": "LPLC2_left_late_hz",
+ "n_repeats": 3,
+ "n_orientations": 8,
+ "counts": {
+  "逼近 > 远离": {
+   "per_repeat": [
+    8,
+    8,
+    8
+   ],
+   "all_equal": true
+  },
+  "逼近 > 远距平移": {
+   "per_repeat": [
+    8,
+    7,
+    8
+   ],
+   "all_equal": false
+  },
+  "逼近 > 近距平移": {
+   "per_repeat": [
+    0,
+    0,
+    1
+   ],
+   "all_equal": false
+  }
+ },
+ "per_condition": {
+  "loom_L": {
+   "mean_hz": 0.65,
+   "sd_between_repeats": 0.05,
+   "sd_between_orientations": 0.18
+  },
+  "loom_R": {
+   "mean_hz": 0.0,
+   "sd_between_repeats": 0.0,
+   "sd_between_orientations": 0.0
+  },
+  "recede_L": {
+   "mean_hz": 0.01,
+   "sd_between_repeats": 0.0,
+   "sd_between_orientations": 0.03
+  },
+  "translate_far_L": {
+   "mean_hz": 0.39,
+   "sd_between_repeats": 0.07,
+   "sd_between_orientations": 0.23
+  },
+  "translate_near_L": {
+   "mean_hz": 1.14,
+   "sd_between_repeats": 0.09,
+   "sd_between_orientations": 0.42
+  }
+ },
+ "variability": {
+  "median_sd_between_repeats": 0.05,
+  "median_sd_between_orientations": 0.18
+ },
+ "gf_baseline_hz": {
+  "mean": 46.1,
+  "sd": 5.6
+ }
+}

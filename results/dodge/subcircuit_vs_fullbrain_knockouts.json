@@ -1,0 +1,106 @@
+{
+ "note": "探索性事后分析；全脑与子回路两侧口径一致（见脚本头部）",
+ "n": 10,
+ "rows": [
+  {
+   "key": "Roundup",
+   "cell_type": "CB0553",
+   "full_sugar": 0.297,
+   "game_sugar": 0.048,
+   "full_water": 0.0,
+   "game_water": 0.111
+  },
+  {
+   "key": "G2N-1",
+   "cell_type": "CB0616",
+   "full_sugar": 0.472,
+   "game_sugar": 0.674,
+   "full_water": 0.957,
+   "game_water": 1.072
+  },
+  {
+   "key": "Clavicle",
+   "cell_type": "AN_GNG_30",
+   "full_sugar": 0.585,
+   "game_sugar": 0.906,
+   "full_water": 0.021,
+   "game_water": 0.01
+  },
+  {
+   "key": "CB0277",
+   "cell_type": "CB0277",
+   "full_sugar": 0.41,
+   "game_sugar": 0.74,
+   "full_water": 0.979,
+   "game_water": 1.076
+  },
+  {
+   "key": "CB0051",
+   "cell_type": "CB0051",
+   "full_sugar": 0.974,
+   "game_sugar": 0.796,
+   "full_water": 0.489,
+   "game_water": 0.016
+  },
+  {
+   "key": "Zorro",
+   "cell_type": "CB0192",
+   "full_sugar": 0.81,
+   "game_sugar": 1.033,
+   "full_water": 0.468,
+   "game_water": 0.917
+  },
+  {
+   "key": "Phantom",
+   "cell_type": "CB0062",
+   "full_sugar": 0.923,
+   "game_sugar": 0.972,
+   "full_water": 3.021,
+   "game_water": 2.064
+  },
+  {
+   "key": "Rattle",
+   "cell_type": "CB0499",
+   "full_sugar": 0.882,
+   "game_sugar": 1.132,
+   "full_water": 0.638,
+   "game_water": 0.985
+  },
+  {
+   "key": "CB0883",
+   "cell_type": "CB0883",
+   "full_sugar": 0.759,
+   "game_sugar": 1.066,
+   "full_water": 1.0,
+   "game_water": 1
+  },
+  {
+   "key": "aBN1",
+   "cell_type": "SAD093",
+   "full_sugar": 1.0,
+   "game_sugar": 1,
+   "full_water": 1.0,
+   "game_water": 1
+  }
+ ],
+ "sugar": {
+  "pearson": 0.745,
+  "spearman": 0.576,
+  "median_abs_diff": 0.236
+ },
+ "water": {
+  "pearson": 0.891,
+  "spearman": 0.842,
+  "median_abs_diff": 0.113
+ },
+ "water_without_phantom": {
+  "n": 9,
+  "pearson": 0.845,
+  "spearman": 0.783
+ },
+ "sugar_without_phantom": {
+  "n": 9,
+  "pearson": 0.742,
+  "spearman": 0.65
+ }
+}

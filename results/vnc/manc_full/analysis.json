@@ -1,0 +1,890 @@
+{
+ "none": {
+  "frac_oscillating": 0.0,
+  "median_freq_hz": null,
+  "reps": 8,
+  "active_all_median": 0,
+  "n_runaway": 0,
+  "active_legmn_median": 0,
+  "stim_rate_median": [],
+  "legs": {
+   "LF": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RF": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LM": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RM": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LH": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RH": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ },
+ "DNg100_LR_250": {
+  "frac_oscillating": 0.0,
+  "median_freq_hz": null,
+  "reps": 8,
+  "active_all_median": 19,
+  "n_runaway": 0,
+  "active_legmn_median": 0,
+  "stim_rate_median": [
+   9.7,
+   8.4
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RF": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LM": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RM": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LH": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RH": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ },
+ "DNg100_LR_350": {
+  "frac_oscillating": 0.75,
+  "median_freq_hz": 8.66,
+  "reps": 16,
+  "active_all_median": 327,
+  "n_runaway": 3,
+  "active_legmn_median": 11,
+  "stim_rate_median": [
+   16.6,
+   14.9
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 8.6,
+    "frac_leg_oscillating": 0.31,
+    "freq_median": 8.37
+   },
+   "RF": {
+    "active_mean": 6.4,
+    "frac_leg_oscillating": 0.19,
+    "freq_median": 9.52
+   },
+   "LM": {
+    "active_mean": 8.7,
+    "frac_leg_oscillating": 0.12,
+    "freq_median": 0.93
+   },
+   "RM": {
+    "active_mean": 9.2,
+    "frac_leg_oscillating": 0.44,
+    "freq_median": 9.88
+   },
+   "LH": {
+    "active_mean": 9.6,
+    "frac_leg_oscillating": 0.12,
+    "freq_median": 2.51
+   },
+   "RH": {
+    "active_mean": 15.8,
+    "frac_leg_oscillating": 0.75,
+    "freq_median": 9.52
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 4,
+    "circ_mean_deg": 49.3,
+    "R": 0.46,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 1,
+    "circ_mean_deg": 134.4,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 3,
+    "circ_mean_deg": 7.1,
+    "R": 0.41,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 5,
+    "circ_mean_deg": -3.4,
+    "R": 0.32,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 4,
+    "circ_mean_deg": 11.6,
+    "R": 0.87,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 3,
+    "circ_mean_deg": -138.1,
+    "R": 0.93,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 6,
+    "circ_mean_deg": 17.5,
+    "R": 0.93,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 2,
+    "circ_mean_deg": 54.5,
+    "R": 0.44,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 6,
+    "circ_mean_deg": -135.9,
+    "R": 0.96,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": 0.94,
+  "n_swing_stance": 13
+ },
+ "DNg100_LR_400": {
+  "frac_oscillating": 0.375,
+  "median_freq_hz": 2.79,
+  "reps": 8,
+  "active_all_median": 2847,
+  "n_runaway": 4,
+  "active_legmn_median": 111,
+  "stim_rate_median": [
+   18.8,
+   14.8
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 19.0,
+    "frac_leg_oscillating": 0.38,
+    "freq_median": 0.84
+   },
+   "RF": {
+    "active_mean": 14.8,
+    "frac_leg_oscillating": 0.12,
+    "freq_median": 0.78
+   },
+   "LM": {
+    "active_mean": 17.6,
+    "frac_leg_oscillating": 0.38,
+    "freq_median": 1.47
+   },
+   "RM": {
+    "active_mean": 18.6,
+    "frac_leg_oscillating": 0.38,
+    "freq_median": 3.13
+   },
+   "LH": {
+    "active_mean": 23.6,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 2.02
+   },
+   "RH": {
+    "active_mean": 30.2,
+    "frac_leg_oscillating": 0.5,
+    "freq_median": 3.12
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 1,
+    "circ_mean_deg": 8.2,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 1,
+    "circ_mean_deg": -167.1,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 1,
+    "circ_mean_deg": -5.5,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 1,
+    "circ_mean_deg": 1.2,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 2,
+    "circ_mean_deg": 23.3,
+    "R": 0.89,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 2,
+    "circ_mean_deg": 36.2,
+    "R": 0.99,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 1,
+    "circ_mean_deg": -58.0,
+    "R": 1.0,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 2,
+    "circ_mean_deg": 59.5,
+    "R": 0.94,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": 0.89,
+  "n_swing_stance": 5
+ },
+ "DNg100_LR_600": {
+  "frac_oscillating": 0.0,
+  "median_freq_hz": 1.42,
+  "reps": 8,
+  "active_all_median": 5154,
+  "n_runaway": 8,
+  "active_legmn_median": 202,
+  "stim_rate_median": [
+   30.6,
+   22.9
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 32.5,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.86
+   },
+   "RF": {
+    "active_mean": 29.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.92
+   },
+   "LM": {
+    "active_mean": 30.1,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.1
+   },
+   "RM": {
+    "active_mean": 32.8,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.7
+   },
+   "LH": {
+    "active_mean": 39.1,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.91
+   },
+   "RH": {
+    "active_mean": 41.9,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.94
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ },
+ "DNg100_L_350": {
+  "frac_oscillating": 0.5,
+  "median_freq_hz": 8.93,
+  "reps": 8,
+  "active_all_median": 88,
+  "n_runaway": 0,
+  "active_legmn_median": 0,
+  "stim_rate_median": [
+   16.9
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 0.6,
+    "frac_leg_oscillating": 0.5,
+    "freq_median": 10.85
+   },
+   "RF": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LM": {
+    "active_mean": 0.1,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RM": {
+    "active_mean": 0.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "LH": {
+    "active_mean": 0.4,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   },
+   "RH": {
+    "active_mean": 0.1,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": null
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 3,
+    "circ_mean_deg": -10.4,
+    "R": 0.89,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 1,
+    "circ_mean_deg": 74.5,
+    "R": 1.0,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 1,
+    "circ_mean_deg": 97.3,
+    "R": 1.0,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ },
+ "MDN_250": {
+  "frac_oscillating": 0.0,
+  "median_freq_hz": 2.3,
+  "reps": 8,
+  "active_all_median": 7378,
+  "n_runaway": 8,
+  "active_legmn_median": 279,
+  "stim_rate_median": [
+   62.0,
+   59.9,
+   50.6,
+   55.2
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 48.2,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 3.1
+   },
+   "RF": {
+    "active_mean": 53.2,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.92
+   },
+   "LM": {
+    "active_mean": 34.4,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.91
+   },
+   "RM": {
+    "active_mean": 38.9,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.66
+   },
+   "LH": {
+    "active_mean": 42.1,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.66
+   },
+   "RH": {
+    "active_mean": 58.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.91
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ },
+ "MDN_400": {
+  "frac_oscillating": 0.0,
+  "median_freq_hz": 1.94,
+  "reps": 8,
+  "active_all_median": 7224,
+  "n_runaway": 8,
+  "active_legmn_median": 274,
+  "stim_rate_median": [
+   115.0,
+   117.4,
+   108.2,
+   115.6
+  ],
+  "legs": {
+   "LF": {
+    "active_mean": 48.5,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.91
+   },
+   "RF": {
+    "active_mean": 53.8,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 0.75
+   },
+   "LM": {
+    "active_mean": 35.0,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.0
+   },
+   "RM": {
+    "active_mean": 36.2,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.3
+   },
+   "LH": {
+    "active_mean": 42.9,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.74
+   },
+   "RH": {
+    "active_mean": 57.8,
+    "frac_leg_oscillating": 0.0,
+    "freq_median": 1.69
+   }
+  },
+  "e1_phase": {
+   "LF-RF": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-RM": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LH-RH": {
+    "group": "同体节左右",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LM-LH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RF-RM": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "RM-RH": {
+    "group": "同侧相邻",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 180
+   },
+   "LF-LH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   },
+   "RF-RH": {
+    "group": "同侧前后（T1–T3）",
+    "n": 0,
+    "circ_mean_deg": null,
+    "R": null,
+    "expect_deg": 0
+   }
+  },
+  "swing_stance_corr_median": null,
+  "n_swing_stance": 0
+ }
+}

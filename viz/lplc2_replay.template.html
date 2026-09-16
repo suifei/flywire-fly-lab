@@ -1,0 +1,630 @@
+<title>LPLC2 回放台</title>
+<meta name="description" content="Fly-Brain-AI looming 实验的 three.js 回放：13.9 万神经元连接组驱动的 NeuroMechFly 身体">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --ground: #eef1f0;
+  --panel: #fbfcfb;
+  --panel-2: #f4f6f5;
+  --ink: #141c1a;
+  --ink-2: #3c4744;
+  --muted: #5a6663;
+  --rule: #d9dfdd;
+  --grid: #e6ebe9;
+  --accent: #9b2c1f;
+  --accent-soft: #f6e3df;
+  --left: #2a78d6;
+  --right: #eb6834;
+  --ctrl: #1baf7a;
+  --stage-top: #f7f9f8;
+  --stage-bottom: #dfe5e3;
+  --body: #7a5a3a;
+  --eye: #a8352a;
+  --shadow: 0 1px 0 rgba(20, 28, 26, .04), 0 8px 24px rgba(20, 28, 26, .06);
+  --display: "Familjen Grotesk", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0f1413; --panel: #161d1b; --panel-2: #1b2321; --ink: #e8eeec; --ink-2: #c4cecb;
+    --muted: #98a5a1; --rule: #2a3431; --grid: #222b29; --accent: #e0735f; --accent-soft: #3a211c;
+    --left: #3987e5; --right: #d95926; --ctrl: #199e70; --stage-top: #1a2220; --stage-bottom: #0c100f;
+    --body: #b08a60; --eye: #d0503f; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0f1413; --panel: #161d1b; --panel-2: #1b2321; --ink: #e8eeec; --ink-2: #c4cecb;
+  --muted: #98a5a1; --rule: #2a3431; --grid: #222b29; --accent: #e0735f; --accent-soft: #3a211c;
+  --left: #3987e5; --right: #d95926; --ctrl: #199e70; --stage-top: #1a2220; --stage-bottom: #0c100f;
+  --body: #b08a60; --eye: #d0503f; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+html, body { background: var(--ground); color: var(--ink); }
+body {
+  margin: 0; font-family: var(--sans); font-size: 14px; line-height: 1.55;
+  padding-inline: clamp(16px, 3vw, 36px); padding-block: 22px 48px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 18px; }
+
+/* ——— masthead ——— */
+.mast { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px 24px; }
+.mast h1 {
+  font-family: var(--display); font-weight: 700; font-size: clamp(26px, 3.4vw, 38px);
+  letter-spacing: -.01em; line-height: 1.05; margin: 0; text-wrap: balance;
+}
+.mast h1 small { display: block; font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.mast p { margin: 0; color: var(--muted); max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 11px/1 var(--mono); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-2); background: var(--panel); white-space: nowrap; }
+.chip b { font-weight: 500; color: var(--accent); }
+
+/* ——— main app grid ——— */
+.app { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .app { grid-template-columns: minmax(0, 1fr); } }
+
+.stage-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); display: grid; position: sticky; top: 16px; }
+@media (max-width: 900px) { .stage-card { position: static; } }
+.stage { position: relative; aspect-ratio: 16 / 11; max-width: 100%; background: linear-gradient(var(--stage-top), var(--stage-bottom)); }
+.stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+.hud { position: absolute; inset: 12px 12px auto 12px; display: flex; justify-content: space-between; gap: 10px; pointer-events: none; flex-wrap: wrap; }
+.hud-block { background: color-mix(in oklab, var(--panel) 86%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 10px; display: grid; gap: 1px; }
+.hud-k { font: 500 10px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hud-v { font: 500 15px/1.25 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.inject { position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; pointer-events: none;
+  font: 500 12px/1.2 var(--sans); background: color-mix(in oklab, var(--panel) 86%, transparent); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px; }
+.inject i { width: 10px; height: 10px; border-radius: 50%; background: var(--side, var(--muted)); box-shadow: 0 0 0 3px color-mix(in oklab, var(--side, var(--muted)) 25%, transparent); }
+.hint { position: absolute; right: 12px; bottom: 12px; font: 11px/1.3 var(--sans); color: var(--muted); pointer-events: none; }
+@media (max-width: 520px) { .hint { display: none; } }
+
+.transport { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--rule); }
+@media (max-width: 520px) { .transport { grid-template-columns: auto minmax(0, 1fr); } .transport .speed { grid-column: 1 / -1; } }
+button, select { font: inherit; color: inherit; }
+.btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel-2); cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn svg { width: 16px; height: 16px; fill: var(--ink); }
+.tcode { font: 500 13px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); min-width: 9ch; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.speed { display: flex; gap: 4px; }
+.seg { border: 1px solid var(--rule); background: var(--panel-2); border-radius: 6px; padding: 5px 8px; font: 500 12px/1 var(--mono); cursor: pointer; color: var(--ink-2); }
+.seg[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ——— right rail ——— */
+.rail { display: grid; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 14px 12px; display: grid; gap: 10px; }
+.panel h2 { margin: 0; font: 600 13px/1.3 var(--sans); color: var(--ink); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.panel h2 span { font: 400 11px/1.3 var(--mono); color: var(--muted); letter-spacing: .02em; }
+.conds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.cond { text-align: left; border: 1px solid var(--rule); background: var(--panel-2); border-radius: 8px; padding: 8px 9px; cursor: pointer; display: grid; gap: 3px; }
+.cond .nm { font: 600 13px/1.2 var(--sans); display: flex; align-items: center; gap: 6px; }
+.cond .nm i { width: 12px; height: 3px; border-radius: 2px; background: var(--c); }
+.cond[data-c="control"] .nm i { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 6px); }
+.cond .sub { font: 400 11px/1.3 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.cond[aria-pressed="true"] { border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); background: var(--panel); }
+
+.meters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.meter { display: grid; gap: 4px; }
+.meter .row { display: flex; justify-content: space-between; font: 500 12px/1.2 var(--sans); }
+.meter .row b { font: 500 12px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--c); border-radius: 3px; transition: width .15s linear; }
+
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { font: 10.5px var(--mono); fill: var(--muted); }
+.chart .lab { font: 500 11px var(--sans); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font: 12px/1.3 var(--sans); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 2px; background: var(--c); border-radius: 2px; }
+.legend i.dash { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 6px); }
+.tip { position: fixed; z-index: 5; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 8px; box-shadow: var(--shadow); font: 12px/1.35 var(--sans); min-width: 130px; }
+.tip .t { font: 500 11px var(--mono); color: var(--muted); margin-bottom: 2px; }
+.tip .r { display: flex; justify-content: space-between; gap: 12px; }
+.tip .r b { font: 500 12px var(--mono); font-variant-numeric: tabular-nums; }
+.tip .r em { font-style: normal; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.tip .r em i { width: 8px; height: 2px; background: var(--c); }
+
+/* ——— lower section ——— */
+.lower { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .lower { grid-template-columns: minmax(0, 1fr); } }
+.finding { border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--rule)); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; }
+.finding h3 { margin: 0; font: 700 18px/1.25 var(--display); color: var(--ink); text-wrap: balance; }
+.finding p { margin: 0; max-width: 66ch; color: var(--ink-2); }
+.tag { display: inline-block; font: 500 11px/1 var(--mono); padding: 3px 6px; border-radius: 4px; border: 1px solid currentColor; margin-right: 6px; vertical-align: 1px; }
+.tag.m { color: var(--accent); } .tag.i { color: var(--muted); }
+code { font: 12.5px var(--mono); background: color-mix(in oklab, var(--panel) 70%, transparent); padding: 1px 4px; border-radius: 4px; }
+.notes { display: grid; gap: 10px; }
+.notes details { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; }
+.notes summary { cursor: pointer; font: 600 13px/1.4 var(--sans); }
+.notes ul { margin: 8px 0 2px; padding-left: 18px; display: grid; gap: 4px; color: var(--ink-2); max-width: 72ch; }
+.tbl { overflow-x: auto; margin-top: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 500 11px/1.3 var(--mono); color: var(--muted); letter-spacing: .04em; }
+td { font-variant-numeric: tabular-nums; font-family: var(--mono); }
+td:first-child { font-family: var(--sans); }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <h1><small>Fly-Brain-AI · looming 实验 · seed 42</small>LPLC2 回放台</h1>
+      <p>在 FlyWire v783 的 138,639 个神经元 LIF 大脑中，向左或右侧 LPLC2（looming 检测神经元）注入 200 Hz，读出 350 个下行神经元并驱动 NeuroMechFly 身体行走 0.5 s。以下全部是本机实际运行后导出的数据。</p>
+    </div>
+    <div class="chips" aria-label="运行配置">
+      <span class="chip">brain dt <b>50 ms</b></span>
+      <span class="chip">body dt <b>0.1 ms</b></span>
+      <span class="chip">FlyGym <b>1.2.1</b></span>
+      <span class="chip">峰值内存 <b>4.2 GB</b></span>
+    </div>
+  </header>
+
+  <section class="app">
+    <div class="stage-card">
+      <div class="stage" id="stage">
+        <div class="hud">
+          <div class="hud-block"><span class="hud-k">模拟时间</span><span class="hud-v" id="hudT">0.000 s</span></div>
+          <div class="hud-block"><span class="hud-k">转向指令 turn_drive</span><span class="hud-v" id="hudTurn">+0.000</span></div>
+          <div class="hud-block"><span class="hud-k">横向位移 y（+ 左）</span><span class="hud-v" id="hudY">+0.00 mm</span></div>
+        </div>
+        <div class="inject" id="inject"><i></i><span id="injectTxt">左侧 LPLC2 注入 200 Hz（直接注入，场景中没有物体）</span></div>
+        <div class="hint">拖动旋转 · 滚轮缩放 · 相机跟随胸部</div>
+      </div>
+      <div class="transport">
+        <button class="btn" id="play" aria-label="暂停"><svg viewBox="0 0 16 16" id="playIcon"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
+        <span class="tcode" id="tcode">000 / 200</span>
+        <input type="range" id="scrub" min="0" max="199" value="0" aria-label="回放进度">
+        <div class="speed" role="group" aria-label="回放速度">
+          <button class="seg" data-speed="0.05" aria-pressed="false">0.05×</button>
+          <button class="seg" data-speed="0.1" aria-pressed="true">0.1×</button>
+          <button class="seg" data-speed="0.25" aria-pressed="false">0.25×</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <div class="panel">
+        <h2>实验条件 <span>点选切换</span></h2>
+        <div class="conds" id="conds"></div>
+      </div>
+
+      <div class="panel">
+        <h2>LPLC2 输入 <span>当前 50 ms 窗口平均</span></h2>
+        <div class="meters">
+          <div class="meter" style="--c: var(--left)"><div class="row"><span>左侧 108 个</span><b id="mL">0 Hz</b></div><div class="bar"><i id="bL"></i></div></div>
+          <div class="meter" style="--c: var(--right)"><div class="row"><span>右侧 102 个</span><b id="mR">0 Hz</b></div><div class="bar"><i id="bR"></i></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>下行神经元分组发放率 <span>Hz · 当前条件</span></h2>
+        <div class="legend"><span style="--c: var(--left)"><i></i>turn_left 组（146 个）</span><span style="--c: var(--right)"><i></i>turn_right 组（174 个）</span></div>
+        <svg class="chart" id="chRates" viewBox="0 0 360 150" role="img" aria-label="左转与右转下行神经元分组发放率随时间变化"></svg>
+      </div>
+
+      <div class="panel">
+        <h2>转向指令对比 <span>tanh((左−右)/12)</span></h2>
+        <div class="legend" id="turnLegend"></div>
+        <svg class="chart" id="chTurn" viewBox="0 0 360 150" role="img" aria-label="三个条件的转向指令随时间变化"></svg>
+      </div>
+
+      <div class="panel">
+        <h2>俯视轨迹 <span>mm · 起点对齐</span></h2>
+        <svg class="chart" id="chPath" viewBox="0 0 360 170" role="img" aria-label="三个条件的胸部俯视轨迹"></svg>
+      </div>
+    </aside>
+  </section>
+
+  <section class="lower">
+    <div class="finding">
+      <h3>转向方向与论文描述相反</h3>
+      <p><span class="tag m">实测</span>左侧注入时 <code>turn_drive</code> ≈ <b id="fL">+0.35</b>，身体向 <b>+y（左）</b>偏 <b id="fYL">4.08</b> mm；右侧注入时向右偏 <b id="fYR">5.57</b> mm。果蝇<b>转向</b>被注入的一侧，而不是逃离。</p>
+      <p><span class="tag i">代码</span><code>LocomotionBridge</code> 中 <code>left_scale = 1 − 0.3·max(0, turn_drive)</code>：正值缩小左腿步幅，使身体左转。而 <code>interfaces.py</code> 注释与论文草稿把正值写作“向右”，并据此报告“对侧逃逸”。</p>
+      <p><span class="tag i">推测</span>只有 1 个 seed、未跑打乱对照；坐标系已用 FlyGym 1.2.1 模型核对（左前腿基节 y = +0.17）。结论需要多 seed 复现后才能下定。</p>
+    </div>
+
+    <div class="notes">
+      <details open>
+        <summary>数据表（每个条件的汇总）</summary>
+        <div class="tbl"><table id="tbl"><thead><tr><th>条件</th><th>平均 turn_drive</th><th>前进 x (mm)</th><th>横向 y (mm)</th><th>turn_left Hz</th><th>turn_right Hz</th></tr></thead><tbody></tbody></table></div>
+      </details>
+      <details>
+        <summary>这份回放是怎么来的</summary>
+        <ul>
+          <li>代码：neilt93/Fly-Brain-AI @ 64bdbaf 的 <code>experiments/looming.py</code> 流程（仓库未声明许可证，仅本地运行）；大脑子模块缺失，手动放入 philshiu/Drosophila_brain_model @ 91bdd1e。</li>
+          <li>缺失的 <code>sensory_ids_v4_looming.npy</code> / <code>readout_ids_v4_looming.npy</code> 由 JSON 还原，规则已用仓库自带的 v2/v3 文件验证。</li>
+          <li>身体网格来自 FlyGym 1.2.1（Apache-2.0），经顶点聚类从 24.8 万顶点简化到约 3.4 万；每 2.5 ms 记录一帧。</li>
+          <li>场景中没有 looming 物体：刺激直接写入 LPLC2 的 Poisson 频率，视觉系统并未参与。</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script id="replay-data" type="application/json">/*__REPLAY_DATA__*/</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById("replay-data").textContent);
+  const trials = Object.fromEntries(DATA.trials.map(t => [t.condition, t]));
+  const ORDER = ["loom_left", "loom_right", "control"];
+  const LABEL = { loom_left: "左侧注入", loom_right: "右侧注入", control: "对照" };
+  const CVAR = { loom_left: "--left", loom_right: "--right", control: "--ctrl" };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NF = DATA.trials[0].frames.length;
+  const FRAME_DT = DATA.meta.frame_dt_s;
+  const BRAIN_DT = DATA.meta.brain_dt_ms / 1000;
+
+  // ——— derived per-trial summaries ———
+  for (const t of DATA.trials) {
+    const p0 = t.frames[0].thorax;
+    t.path = t.frames.map(f => [f.thorax[0] - p0[0], f.thorax[1] - p0[1]]);
+    const last = t.path[t.path.length - 1];
+    t.dx = last[0]; t.dy = last[1];
+    const mean = k => t.brain.reduce((s, b) => s + b[k], 0) / t.brain.length;
+    t.mTL = mean("turn_left_hz"); t.mTR = mean("turn_right_hz");
+  }
+
+  let cond = "loom_left", frame = 0, playing = true, speed = 0.1;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) { playing = false; }
+
+  // ——— condition buttons + table ———
+  const condsEl = document.getElementById("conds");
+  for (const c of ORDER) {
+    const t = trials[c];
+    const b = document.createElement("button");
+    b.className = "cond"; b.dataset.c = c; b.id = "cond-" + c;
+    b.style.setProperty("--c", `var(${CVAR[c]})`);
+    b.setAttribute("aria-pressed", String(c === cond));
+    b.innerHTML = `<span class="nm"><i></i></span><span class="sub"></span>`;
+    b.querySelector(".nm").append(LABEL[c]);
+    b.querySelector(".sub").textContent = `turn ${fmtS(t.mean_turn_drive, 3)} · y ${fmtS(t.dy, 2)}`;
+    b.addEventListener("click", () => setCond(c));
+    condsEl.append(b);
+  }
+  const tbody = document.querySelector("#tbl tbody");
+  for (const c of ORDER) {
+    const t = trials[c]; const tr = document.createElement("tr");
+    [LABEL[c], fmtS(t.mean_turn_drive, 3), t.dx.toFixed(2), fmtS(t.dy, 2), t.mTL.toFixed(1), t.mTR.toFixed(1)]
+      .forEach(v => { const td = document.createElement("td"); td.textContent = v; tr.append(td); });
+    tbody.append(tr);
+  }
+  document.getElementById("fL").textContent = fmtS(trials.loom_left.mean_turn_drive, 2);
+  document.getElementById("fYL").textContent = Math.abs(trials.loom_left.dy).toFixed(2);
+  document.getElementById("fYR").textContent = Math.abs(trials.loom_right.dy).toFixed(2);
+  function fmtS(v, d) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d); }
+
+  // ——— three.js stage ———
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 16 / 11, 0.05, 400);
+  camera.up.set(0, 0, 1);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = !reduceMotion; controls.minDistance = 3; controls.maxDistance = 80;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9490, 0.95));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-6, -10, 14); scene.add(sun);
+
+  // ground: 1 mm minor / 5 mm major grid on the z=0 plane
+  const groundGroup = new THREE.Group(); scene.add(groundGroup);
+  function buildGround() {
+    groundGroup.clear();
+    const minor = new THREE.GridHelper(60, 60, css("--grid"), css("--grid"));
+    const major = new THREE.GridHelper(60, 12, css("--rule"), css("--rule"));
+    for (const g of [minor, major]) { g.rotation.x = Math.PI / 2; g.position.set(20, 0, 0); groundGroup.add(g); }
+  }
+
+  // fly meshes
+  const fly = new THREE.Group(); scene.add(fly);
+  const parts = DATA.meshes.map(m => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(m.verts, 3));
+    geo.setIndex(m.faces); geo.computeVertexNormals();
+    const mat = new THREE.MeshStandardMaterial({ roughness: 0.62, metalness: 0.05, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geo, mat); mesh.name = m.name; fly.add(mesh);
+    return mesh;
+  });
+  function paintFly() {
+    for (const p of parts) {
+      const n = p.name, mat = p.material;
+      mat.transparent = false; mat.opacity = 1;
+      if (/Eye$/.test(n)) mat.color.set(css("--eye"));
+      else if (/Wing$/.test(n)) { mat.color.set(css("--muted")); mat.transparent = true; mat.opacity = 0.28; }
+      else if (/^L[FMH]/.test(n)) mat.color.set(css("--left"));
+      else if (/^R[FMH]/.test(n)) mat.color.set(css("--right"));
+      else mat.color.set(css("--body"));
+    }
+  }
+
+  // thorax trails: current condition solid, the others faint
+  const trails = {};
+  function buildTrails() {
+    for (const c of ORDER) {
+      if (trails[c]) scene.remove(trails[c]);
+      const t = trials[c];
+      const pts = t.frames.map(f => new THREE.Vector3(f.thorax[0], f.thorax[1], 0.02));
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = c === "control"
+        ? new THREE.LineDashedMaterial({ color: css(CVAR[c]), dashSize: 0.5, gapSize: 0.3, transparent: true })
+        : new THREE.LineBasicMaterial({ color: css(CVAR[c]), transparent: true });
+      const line = new THREE.Line(geo, mat); line.computeLineDistances();
+      scene.add(line); trails[c] = line;
+    }
+    styleTrails();
+  }
+  function styleTrails() {
+    for (const c of ORDER) trails[c].material.opacity = c === cond ? 1 : 0.25;
+  }
+
+  // LPLC2 injection marker: a ring beside the head on the stimulated side (not a stimulus object)
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.06, 12, 48), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85 }));
+  scene.add(ring);
+
+  const q = new THREE.Quaternion();
+  function applyFrame(i) {
+    const t = trials[cond], pose = t.frames[i].pose;
+    parts.forEach((p, k) => {
+      const o = k * 7;
+      p.position.set(pose[o], pose[o + 1], pose[o + 2]);
+      q.set(pose[o + 4], pose[o + 5], pose[o + 6], pose[o + 3]); // MuJoCo (w,x,y,z) → three (x,y,z,w)
+      p.quaternion.copy(q);
+    });
+    const th = t.frames[i].thorax;
+    // heading from displacement over ±12 frames to average out gait sway
+    const a = t.frames[Math.max(0, i - 12)].thorax, b = t.frames[Math.min(NF - 1, i + 12)].thorax;
+    const hx = b[0] - a[0], hy = b[1] - a[1], hl = Math.hypot(hx, hy) || 1;
+    const side = t.loom_left > 0 ? 1 : t.loom_right > 0 ? -1 : 0;
+    ring.visible = side !== 0;
+    if (side) {
+      const nx = -hy / hl * side, ny = hx / hl * side; // unit normal toward stimulated side
+      ring.position.set(th[0] + hx / hl * 0.9 + nx * 1.4, th[1] + hy / hl * 0.9 + ny * 1.4, th[2] + 0.4);
+      ring.lookAt(th[0], th[1], th[2] + 0.4);
+      const pulse = reduceMotion ? 1 : 0.85 + 0.15 * Math.sin(performance.now() / 180);
+      ring.scale.setScalar(pulse);
+    }
+    return th;
+  }
+
+  let lastTh = null;
+  function resetCamera() {
+    const th = trials[cond].frames[frame].thorax;
+    controls.target.set(th[0], th[1], th[2]);
+    camera.position.set(th[0] - 7, th[1] - 9, th[2] + 7);
+    lastTh = th.slice();
+    controls.update();
+  }
+  function follow(th) {
+    if (!lastTh) { resetCamera(); return; }
+    const d = new THREE.Vector3(th[0] - lastTh[0], th[1] - lastTh[1], th[2] - lastTh[2]);
+    camera.position.add(d); controls.target.add(d); lastTh = th.slice();
+  }
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage);
+
+  // ——— charts (SVG) ———
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.append(e); return e; };
+  const TMAX = NF * FRAME_DT; // 0.5 s
+  const box = { l: 34, r: 60, t: 8, b: 22, w: 360, h: 150 };
+  const sx = t => box.l + (t / TMAX) * (box.w - box.l - box.r);
+
+  function axes(svg, yMin, yMax, ticks, fmt) {
+    const sy = v => box.t + (1 - (v - yMin) / (yMax - yMin)) * (box.h - box.t - box.b);
+    const g = el("g", {}, svg);
+    for (const v of ticks) {
+      el("line", { x1: box.l, x2: box.w - box.r, y1: sy(v), y2: sy(v), stroke: css(v === 0 ? "--muted" : "--grid"), "stroke-width": v === 0 ? 1 : 1 }, g);
+      el("text", { x: box.l - 6, y: sy(v) + 3.5, "text-anchor": "end" }, g).textContent = fmt(v);
+    }
+    for (const t of [0, 0.1, 0.2, 0.3, 0.4, 0.5]) {
+      el("text", { x: sx(t), y: box.h - 6, "text-anchor": "middle" }, g).textContent = t.toFixed(1) + (t === 0.5 ? " s" : "");
+    }
+    return sy;
+  }
+  // step path: each brain value holds for its 50 ms window
+  function stepPath(brain, key, sy) {
+    let d = "";
+    brain.forEach((b, i) => {
+      const x0 = sx(b.t), x1 = sx(Math.min(TMAX, b.t + BRAIN_DT)), y = sy(b[key]);
+      d += (i ? `L${x0},${y}` : `M${x0},${y}`) + `L${x1},${y}`;
+    });
+    return d;
+  }
+  function endLabel(svg, text, y, color) {
+    el("text", { x: box.w - box.r + 6, y: y + 3.5, class: "lab", fill: css("--ink-2") }, svg).textContent = text;
+    el("line", { x1: box.w - box.r + 1, x2: box.w - box.r + 4, y1: y, y2: y, stroke: color, "stroke-width": 2 }, svg);
+  }
+  function playhead(svg) {
+    return el("line", { y1: box.t, y2: box.h - box.b, stroke: css("--accent"), "stroke-width": 1.5 }, svg);
+  }
+
+  const chRates = document.getElementById("chRates"), chTurn = document.getElementById("chTurn"), chPath = document.getElementById("chPath");
+  let phRates, phTurn, pathDots = {}, crossRates, crossTurn;
+
+  function drawRates() {
+    chRates.replaceChildren();
+    const t = trials[cond];
+    const vmax = Math.max(...DATA.trials.flatMap(tr => tr.brain.flatMap(b => [b.turn_left_hz, b.turn_right_hz])));
+    const top = Math.ceil(vmax / 10) * 10;
+    const sy = axes(chRates, 0, top, [0, top / 2, top], v => v.toFixed(0));
+    const series = [["turn_left_hz", "--left", "左转组"], ["turn_right_hz", "--right", "右转组"]];
+    const ends = [];
+    for (const [k, c, lab] of series) {
+      el("path", { d: stepPath(t.brain, k, sy), fill: "none", stroke: css(c), "stroke-width": 2, "stroke-linejoin": "round" }, chRates);
+      ends.push([lab, sy(t.brain[t.brain.length - 1][k]), css(c)]);
+    }
+    if (Math.abs(ends[0][1] - ends[1][1]) < 12) { const m = (ends[0][1] + ends[1][1]) / 2; ends[0][1] = m - 6; ends[1][1] = m + 6; }
+    ends.forEach(e => endLabel(chRates, ...e));
+    phRates = playhead(chRates);
+    crossRates = el("line", { y1: box.t, y2: box.h - box.b, stroke: css("--muted"), "stroke-width": 1, "stroke-dasharray": "2 2", visibility: "hidden" }, chRates);
+  }
+
+  function drawTurn() {
+    chTurn.replaceChildren();
+    const sy = axes(chTurn, -1, 1, [-1, -0.5, 0, 0.5, 1], v => (v > 0 ? "+" : "") + v);
+    const ends = [];
+    for (const c of ORDER) {
+      const t = trials[c];
+      el("path", { d: stepPath(t.brain, "turn_drive", sy), fill: "none", stroke: css(CVAR[c]), "stroke-width": c === cond ? 2.5 : 1.5,
+        "stroke-opacity": c === cond ? 1 : 0.45, "stroke-dasharray": c === "control" ? "4 2" : "none" }, chTurn);
+      ends.push([LABEL[c], sy(t.brain[t.brain.length - 1].turn_drive), css(CVAR[c])]);
+    }
+    ends.sort((a, b) => a[1] - b[1]);
+    for (let i = 1; i < ends.length; i++) if (ends[i][1] - ends[i - 1][1] < 12) ends[i][1] = ends[i - 1][1] + 12;
+    ends.forEach(e => endLabel(chTurn, ...e));
+    phTurn = playhead(chTurn);
+    crossTurn = el("line", { y1: box.t, y2: box.h - box.b, stroke: css("--muted"), "stroke-width": 1, "stroke-dasharray": "2 2", visibility: "hidden" }, chTurn);
+    const lg = document.getElementById("turnLegend"); lg.replaceChildren();
+    for (const c of ORDER) {
+      const s = document.createElement("span"); s.style.setProperty("--c", `var(${CVAR[c]})`);
+      const i = document.createElement("i"); if (c === "control") i.className = "dash";
+      s.append(i, LABEL[c]); lg.append(s);
+    }
+  }
+
+  function drawPath() {
+    chPath.replaceChildren();
+    const W = 360, H = 170, pad = { l: 34, r: 12, t: 10, b: 22 };
+    const xs = DATA.trials.flatMap(t => t.path.map(p => p[0])), ys = DATA.trials.flatMap(t => t.path.map(p => p[1]));
+    const xMax = Math.ceil(Math.max(...xs) / 5) * 5, yAbs = Math.ceil(Math.max(...ys.map(Math.abs), 2) / 2) * 2;
+    // equal mm per px on both axes so turning angles read true
+    const kx = (W - pad.l - pad.r) / xMax, ky = (H - pad.t - pad.b) / (2 * yAbs), k = Math.min(kx, ky);
+    const X = x => pad.l + x * k, Y = y => pad.t + (H - pad.t - pad.b) / 2 - y * k;
+    for (let y = -yAbs; y <= yAbs; y += yAbs / 2) {
+      el("line", { x1: X(0), x2: X(xMax), y1: Y(y), y2: Y(y), stroke: css(y === 0 ? "--muted" : "--grid"), "stroke-width": 1 }, chPath);
+      el("text", { x: pad.l - 6, y: Y(y) + 3.5, "text-anchor": "end" }, chPath).textContent = (y > 0 ? "+" : "") + y;
+    }
+    for (let x = 0; x <= xMax; x += 5) el("text", { x: X(x), y: H - 6, "text-anchor": "middle" }, chPath).textContent = x + (x === xMax ? " mm" : "");
+    el("text", { x: X(0) + 4, y: Y(yAbs) + 11, class: "lab", fill: css("--muted") }, chPath).textContent = "↑ 左 (+y)";
+    for (const c of ORDER) {
+      const t = trials[c];
+      el("path", { d: "M" + t.path.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("L"), fill: "none", stroke: css(CVAR[c]),
+        "stroke-width": c === cond ? 2.2 : 1.4, "stroke-opacity": c === cond ? 1 : 0.5, "stroke-dasharray": c === "control" ? "4 2" : "none", "stroke-linejoin": "round" }, chPath);
+      const last = t.path[t.path.length - 1];
+      el("text", { x: X(last[0]) - 6, y: Y(last[1]) - 8, "text-anchor": "end", class: "lab", fill: css("--ink-2") }, chPath).textContent = LABEL[c];
+      pathDots[c] = el("circle", { r: c === cond ? 4.5 : 3, fill: css(CVAR[c]), stroke: css("--panel"), "stroke-width": 2 }, chPath);
+    }
+    drawPath.map = { X, Y };
+  }
+
+  // hover: crosshair snapping to brain window, one tooltip listing all series
+  const tip = document.getElementById("tip");
+  function hookHover(svg, cross, rows) {
+    const move = ev => {
+      const r = svg.getBoundingClientRect();
+      const x = (ev.clientX - r.left) * (360 / r.width);
+      const tt = Math.max(0, Math.min(TMAX - 1e-6, ((x - box.l) / (box.w - box.l - box.r)) * TMAX));
+      const wi = Math.min(trials[cond].brain.length - 1, Math.floor(tt / BRAIN_DT));
+      const cx = sx(wi * BRAIN_DT + BRAIN_DT / 2);
+      cross().setAttribute("x1", cx); cross().setAttribute("x2", cx); cross().setAttribute("visibility", "visible");
+      tip.replaceChildren();
+      const head = document.createElement("div"); head.className = "t";
+      head.textContent = `${(wi * BRAIN_DT * 1000).toFixed(0)}–${((wi + 1) * BRAIN_DT * 1000).toFixed(0)} ms`;
+      tip.append(head);
+      for (const [label, color, val] of rows(wi)) {
+        const row = document.createElement("div"); row.className = "r";
+        const em = document.createElement("em"); const i = document.createElement("i"); i.style.setProperty("--c", color); em.append(i, label);
+        const b = document.createElement("b"); b.textContent = val; row.append(em, b); tip.append(row);
+      }
+      tip.hidden = false;
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.min(window.innerWidth - tw - 8, ev.clientX + 14) + "px";
+      tip.style.top = ev.clientY + 14 + "px";
+    };
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; cross().setAttribute("visibility", "hidden"); });
+  }
+  hookHover(chRates, () => crossRates, wi => {
+    const b = trials[cond].brain[wi];
+    return [["左转组", css("--left"), b.turn_left_hz.toFixed(1) + " Hz"], ["右转组", css("--right"), b.turn_right_hz.toFixed(1) + " Hz"]];
+  });
+  hookHover(chTurn, () => crossTurn, wi => ORDER.map(c => [LABEL[c], css(CVAR[c]), fmtS(trials[c].brain[wi].turn_drive, 3)]));
+
+  // ——— sync UI to frame ———
+  const $ = id => document.getElementById(id);
+  function updateUI() {
+    const t = trials[cond], f = t.frames[frame];
+    const time = f.t, wi = Math.min(t.brain.length - 1, Math.floor(time / BRAIN_DT)), b = t.brain[wi];
+    $("hudT").textContent = time.toFixed(3) + " s";
+    $("hudTurn").textContent = fmtS(b.turn_drive, 3);
+    $("hudY").textContent = fmtS(t.path[frame][1], 2) + " mm";
+    $("tcode").textContent = String(frame + 1).padStart(3, "0") + " / " + NF;
+    $("scrub").value = frame;
+    $("mL").textContent = b.lplc2_left_hz.toFixed(0) + " Hz"; $("bL").style.width = (b.lplc2_left_hz / 200 * 100) + "%";
+    $("mR").textContent = b.lplc2_right_hz.toFixed(0) + " Hz"; $("bR").style.width = (b.lplc2_right_hz / 200 * 100) + "%";
+    const x = sx(time);
+    for (const ph of [phRates, phTurn]) { ph.setAttribute("x1", x); ph.setAttribute("x2", x); }
+    const { X, Y } = drawPath.map;
+    for (const c of ORDER) { const p = trials[c].path[Math.min(frame, trials[c].path.length - 1)]; pathDots[c].setAttribute("cx", X(p[0])); pathDots[c].setAttribute("cy", Y(p[1])); }
+  }
+
+  function setCond(c) {
+    cond = c;
+    document.querySelectorAll(".cond").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.c === c)));
+    const inj = $("inject"), t = trials[c];
+    if (t.loom_left > 0) { inj.style.setProperty("--side", "var(--left)"); $("injectTxt").textContent = "左侧 LPLC2 注入 200 Hz（直接注入，场景中没有物体）"; }
+    else if (t.loom_right > 0) { inj.style.setProperty("--side", "var(--right)"); $("injectTxt").textContent = "右侧 LPLC2 注入 200 Hz（直接注入，场景中没有物体）"; }
+    else { inj.style.setProperty("--side", "var(--muted)"); $("injectTxt").textContent = "对照：两侧 LPLC2 均为基线 10 Hz"; }
+    ring.material.color.set(css(t.loom_left > 0 ? "--left" : "--right"));
+    styleTrails(); drawRates(); drawTurn(); drawPath();
+    applyFrame(frame); resetCamera(); updateUI();
+  }
+
+  function repaint() { buildGround(); paintFly(); buildTrails(); setCond(cond); }
+
+  // ——— transport ———
+  const playBtn = $("play"), playIcon = $("playIcon");
+  function setPlaying(p) {
+    playing = p;
+    playBtn.setAttribute("aria-label", p ? "暂停" : "播放");
+    playIcon.innerHTML = p ? '<rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/>' : '<path d="M4 2.5v11a.7.7 0 0 0 1.05.6l9-5.5a.7.7 0 0 0 0-1.2l-9-5.5A.7.7 0 0 0 4 2.5z"/>';
+  }
+  playBtn.addEventListener("click", () => setPlaying(!playing));
+  $("scrub").addEventListener("input", e => { frame = +e.target.value; acc = 0; setPlaying(false); applyFrame(frame); follow(trials[cond].frames[frame].thorax); updateUI(); });
+  document.querySelectorAll(".seg").forEach(b => b.addEventListener("click", () => {
+    speed = +b.dataset.speed; document.querySelectorAll(".seg").forEach(s => s.setAttribute("aria-pressed", String(s === b)));
+  }));
+
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", repaint);
+  new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  let acc = 0, prev = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.1, (now - prev) / 1000); prev = now;
+    if (playing) {
+      acc += dt * speed;
+      while (acc >= FRAME_DT) {
+        acc -= FRAME_DT; frame++;
+        if (frame >= NF) { frame = 0; resetCamera(); }
+      }
+    }
+    const th = applyFrame(frame);
+    follow(th);
+    controls.update();
+    renderer.render(scene, camera);
+    if (playing) updateUI();
+    requestAnimationFrame(tick);
+  }
+
+  resize(); setPlaying(playing); repaint();
+  requestAnimationFrame(tick);
+})();
+</script>

@@ -1,0 +1,41 @@
+[
+ {
+  "name": "糖 50 Hz",
+  "n_active": 313,
+  "n_scored": 313,
+  "frac_required": 0.0831,
+  "n_required": 26,
+  "gini": 0.7831,
+  "n80": 62,
+  "max_effect": 0.692,
+  "median_effect": 0.0,
+  "g3_spearman": 0.316,
+  "experiment": "6/10"
+ },
+ {
+  "name": "水 160 Hz",
+  "n_active": 216,
+  "n_scored": 216,
+  "frac_required": 0.0833,
+  "n_required": 18,
+  "gini": 0.9214,
+  "n80": 15,
+  "max_effect": 1.0,
+  "median_effect": 0.0,
+  "g3_spearman": 0.485,
+  "experiment": "9/10"
+ },
+ {
+  "name": "JON 160 Hz",
+  "n_active": 2076,
+  "n_scored": 326,
+  "frac_required": 0.0031,
+  "n_required": 1,
+  "gini": 0.8581,
+  "n80": 45,
+  "max_effect": 1.0,
+  "median_effect": 0.0,
+  "g3_spearman": 0.434,
+  "experiment": "1/1 可测（aBN1 判对；aBN2 在 v783 无对应 ID）"
+ }
+]

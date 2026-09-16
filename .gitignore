@@ -1,0 +1,102 @@
+# ── 绝不提交：第三方代码与数据 ───────────────────────────────
+# external/ 下是别人仓库的完整克隆，其中 Fly-Brain-AI 与 Pugliese_cpg_2025
+# **没有任何许可证**，法律上不得再分发；FlyWire 连接组与注释按 CC-BY-NC 处理。
+# 这些都由 setup 脚本按各自出处重新获取，不随本仓库分发。
+external/
+
+# ── 运行产物（约 9.4 GB）：默认全部排除，再逐级显式放行 ──────────
+# 只发布两类：(1) 游戏运行必需的数据；(2) 报告里每个结论对应的汇总 JSON（证据）。
+# 段文件、spike parquet、电压 npz、视频、图片一律不发——它们由脚本重新生成。
+# ⚠ 放行的 JSON 里包含 FlyWire 连接组派生数据，按 CC-BY-NC 处理，见 DATA_LICENSE.md。
+logs/
+results/*
+
+# 游戏与展示数据
+!results/dodge/
+results/dodge/*
+!results/dodge/*.json
+!results/dodge/fly_dodge.html
+# 裁剪网格搜索的中间产物，不发（只发最终选定的 subcircuit_v2.json）
+results/dodge/subcircuit_v2_w*.json
+
+!results/flight/
+results/flight/*
+!results/flight/flight_clips.json
+!results/flight/landing_pose_check.json
+
+# 虚拟敲除筛选的结论（报告 §14–26 的证据）
+!results/screen/
+results/screen/*
+!results/screen/*.json
+!results/screen/jon/
+results/screen/jon/*
+!results/screen/jon/*.json
+!results/screen/jon_paper/
+results/screen/jon_paper/*
+!results/screen/jon_paper/*.json
+!results/screen/jon_weak/
+results/screen/jon_weak/*
+!results/screen/jon_weak/*.json
+!results/screen/water/
+results/screen/water/*
+!results/screen/water/*.json
+
+# 其他章节的结论
+!results/language/
+results/language/*
+!results/language/*.json
+!results/vision/
+results/vision/*
+!results/vision/*.json
+!results/vnc/
+results/vnc/*
+!results/vnc/*/
+results/vnc/*/*
+!results/vnc/*/*.json
+!results/connectome_loop_frontend_looming/
+results/connectome_loop_frontend_looming/*
+!results/connectome_loop_frontend_looming/*.json
+!results/connectome_loop_frontend_looming/log.csv
+!results/connectome_loop_smoke/
+results/connectome_loop_smoke/*
+!results/connectome_loop_smoke/*.json
+!results/connectome_loop_smoke/log.csv
+
+# ── 大文件类型兜底（防止误加）────────────────────────────────
+*.npz
+*.npy
+*.parquet
+*.feather
+*.mp4
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.zip
+*.tar.gz
+
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+
+# ── Brian2 cpp_standalone 编译产物 ──────────────────────────
+.brian2_build*/
+**/static_arrays/
+**/code_objects/
+
+# ── 临时抓图 ────────────────────────────────────────────
+scratch/artifact-capture/
+
+# ── 系统 / 编辑器 ────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# ── GitHub Pages ────────────────────────────────────────
+# docs/ 全部发布（game.html 由 dodge/build.py 生成后复制过来）
+!docs/

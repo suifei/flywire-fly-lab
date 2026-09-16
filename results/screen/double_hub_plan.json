@@ -1,0 +1,69 @@
+{
+ "hubs": [
+  "720575940625102692",
+  "720575940620874757"
+ ],
+ "candidates": [
+  {
+   "fid": "720575940623453959",
+   "cell_type": "CB0030",
+   "ratio_single_6reps": 0.807
+  },
+  {
+   "fid": "720575940623211725",
+   "cell_type": "CB0553",
+   "ratio_single_6reps": 0.828
+  },
+  {
+   "fid": "720575940612692633",
+   "cell_type": "CB0799",
+   "ratio_single_6reps": 0.839
+  },
+  {
+   "fid": "720575940623210445",
+   "cell_type": "AN_GNG_21",
+   "ratio_single_6reps": 0.849
+  },
+  {
+   "fid": "720575940629888530",
+   "cell_type": "CB0192",
+   "ratio_single_6reps": 0.849
+  },
+  {
+   "fid": "720575940635578303",
+   "cell_type": "CB0855",
+   "ratio_single_6reps": 0.849
+  },
+  {
+   "fid": "720575940628598121",
+   "cell_type": "CB4055",
+   "ratio_single_6reps": 0.871
+  },
+  {
+   "fid": "720575940632047890",
+   "cell_type": "CB0393",
+   "ratio_single_6reps": 0.882
+  },
+  {
+   "fid": "720575940625874992",
+   "cell_type": "CB0910",
+   "ratio_single_6reps": 0.893
+  },
+  {
+   "fid": "720575940619173534",
+   "cell_type": "CB0919",
+   "ratio_single_6reps": 0.903
+  },
+  {
+   "fid": "720575940628755815",
+   "cell_type": "CB0890",
+   "ratio_single_6reps": 0.903
+  },
+  {
+   "fid": "720575940610001220",
+   "cell_type": "DNge173",
+   "ratio_single_6reps": 0.914
+  }
+ ],
+ "n_segments": 354
+}

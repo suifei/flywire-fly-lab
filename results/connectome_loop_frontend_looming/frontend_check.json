@@ -1,0 +1,53 @@
+{
+ "label": "新版前端（1.0 s，--frontend-only）",
+ "n_windows": 66,
+ "duration_s": 0.975,
+ "criteria": [
+  {
+   "id": "C1",
+   "name": "假阳性：前 0.3s LC4 最大值 < 20 Hz",
+   "value": 0.0,
+   "unit": "Hz",
+   "passed": true
+  },
+  {
+   "id": "C2",
+   "name": "不饱和：打满占比 < 20% 且翻转 < 3",
+   "value": "23% / 6 次",
+   "passed": false
+  },
+  {
+   "id": "C3",
+   "name": "真信号还在：最后 0.2s 均值 > 前 0.3s 均值",
+   "value": "21.4 vs 0.0 Hz",
+   "passed": true
+  },
+  {
+   "id": "C4",
+   "name": "暗面积稳定：前 0.3s 变异系数 < 10%",
+   "value": "无法计算（前 0.3s 暗面积恒为 0，原式 0/0；标准差 = 0.000000）",
+   "passed": null
+  }
+ ],
+ "n_passed": 2,
+ "raw": {
+  "far_max_hz": 0.0,
+  "far_mean_hz": 0.0,
+  "near_mean_hz": 21.43,
+  "sat_frac": 0.2273,
+  "flips": 6,
+  "dark_cv_far": null,
+  "dark_far_sd": 0.0,
+  "dark_far_mean": 0.0
+ },
+ "thresholds": {
+  "far_s": 0.3,
+  "near_s": 0.2,
+  "sat_hz": 200.0,
+  "fp_hz": 20.0,
+  "sat_frac_max": 0.2,
+  "flip_max": 3,
+  "dark_cv_max": 0.1,
+  "note": "阈值在跑新前端之前就写定，见 report.md 第 26 节；不得为凑结果改动"
+ }
+}

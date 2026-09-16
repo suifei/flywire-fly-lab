@@ -1,0 +1,120 @@
+{
+ "sentence_sent": "我闻到醋味。我尝到甜味。很热，很亮。我该怎么做？",
+ "model_requested": "claude-opus-5",
+ "system_prompt": "你是 Claude。",
+ "disallowed_tools": "Bash Edit Write Read Glob Grep WebFetch WebSearch NotebookEdit Task Agent",
+ "cwd": "/var/folders/8r/lc9rk4817v12c8mgj8k_g42h0000gn/T/fly_says_18y7vaun",
+ "command": "claude -p <sentence> --model claude-opus-5 --output-format json --no-session-persistence --setting-sources user --system-prompt \"你是 Claude。\" --disallowedTools \"Bash Edit Write Read Glob Grep WebFetch WebSearch NotebookEdit Task Agent\"",
+ "reply_text": "听起来你是一只苍蝇（或者果蝇），而且处境可能很危险。\n\n**醋味加甜味，很可能是陷阱。** 人类常用苹果醋、糖和一滴洗洁精做果蝇陷阱。洗洁精会破坏液体表面的张力，落上去就会沉下去，飞不起来。\n- **别落到液面上。** 如果你在一个杯口或瓶口附近，尤其是盖着保鲜膜、上面有小孔的那种，马上掉头飞走。\n- 真正的烂水果也有酸甜味，但闻起来会有发酵的果香，不会只有醋和糖。\n\n**又热又亮，要小心光源。**\n- 如果亮光是紫蓝色的，还伴随嗡嗡声，那可能是灭蚊灯，别靠近。\n- 如果是灯泡，太热会让你脱水，也会烤伤翅膀。\n- 如果是阳光照着的窗户，窗玻璃你是撞不穿的。沿着边缘找缝隙，或者往阴凉处飞。\n\n**建议你这样做：**\n1. 立刻飞离又热又亮的地方，去阴凉、有空气流动的角落。\n2. 离醋味最浓的地方远一点。\n3. 去找熟透的水果或者垃圾桶边缘，那里的吃的比较安全。\n4. 注意头顶有没有东西挥下来。\n\n---\n\n另外，如果你其实是人，而且突然闻到不存在的醋味、嘴里莫名发甜，还觉得发热、怕光，这可能是偏头痛先兆或神经系统方面的问题。请尽快就医。如果同时出现意识模糊、说话困难或一侧身体无力，请立刻拨打急救电话。",
+ "raw": {
+  "duration_api_ms": 27555,
+  "stop_reason": "end_turn",
+  "session_id": "a29003f9-cac7-4003-b778-80abddb3dc2a",
+  "total_cost_usd": 0.061434,
+  "usage": {
+   "input_tokens": 2,
+   "cache_creation_input_tokens": 3066,
+   "cache_read_input_tokens": 6404,
+   "output_tokens": 1062,
+   "output_tokens_details": {
+    "thinking_tokens": 461
+   },
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 3066,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 1062,
+     "cache_read_input_tokens": 6404,
+     "cache_creation_input_tokens": 3066,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 3066
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "modelUsage": {
+   "claude-haiku-4-5-20251001": {
+    "inputTokens": 922,
+    "outputTokens": 18,
+    "cacheReadInputTokens": 0,
+    "cacheCreationInputTokens": 0,
+    "webSearchRequests": 0,
+    "costUSD": 0.0010119999999999999,
+    "contextWindow": 200000,
+    "maxOutputTokens": 32000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-haiku-4-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   },
+   "claude-opus-5": {
+    "inputTokens": 2,
+    "outputTokens": 1062,
+    "cacheReadInputTokens": 6404,
+    "cacheCreationInputTokens": 3066,
+    "webSearchRequests": 0,
+    "costUSD": 0.060422000000000003,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 461,
+    "canonicalModel": "claude-opus-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+   "spawned": 0,
+   "requested": {
+    "background": 0,
+    "foreground": 0,
+    "unset": 0
+   },
+   "started_in_background": 0,
+   "max_depth": 0,
+   "spawned_by_subagents": 0,
+   "completed": 0,
+   "failed": 0,
+   "killed": {
+    "parent": 0,
+    "user": 0,
+    "system": 0
+   },
+   "refused": {
+    "depth_limit": 0,
+    "concurrency_limit": 0,
+    "budget": 0
+   },
+   "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "听起来你是一只苍蝇（或者果蝇），而且处境可能很危险。\n\n**醋味加甜味，很可能是陷阱。** 人类常用苹果醋、糖和一滴洗洁精做果蝇陷阱。洗洁精会破坏液体表面的张力，落上去就会沉下去，飞不起来。\n- **别落到液面上。** 如果你在一个杯口或瓶口附近，尤其是盖着保鲜膜、上面有小孔的那种，马上掉头飞走。\n- 真正的烂水果也有酸甜味，但闻起来会有发酵的果香，不会只有醋和糖。\n\n**又热又亮，要小心光源。**\n- 如果亮光是紫蓝色的，还伴随嗡嗡声，那可能是灭蚊灯，别靠近。\n- 如果是灯泡，太热会让你脱水，也会烤伤翅膀。\n- 如果是阳光照着的窗户，窗玻璃你是撞不穿的。沿着边缘找缝隙，或者往阴凉处飞。\n\n**建议你这样做：**\n1. 立刻飞离又热又亮的地方，去阴凉、有空气流动的角落。\n2. 离醋味最浓的地方远一点。\n3. 去找熟透的水果或者垃圾桶边缘，那里的吃的比较安全。\n4. 注意头顶有没有东西挥下来。\n\n---\n\n另外，如果你其实是人，而且突然闻到不存在的醋味、嘴里莫名发甜，还觉得发热、怕光，这可能是偏头痛先兆或神经系统方面的问题。请尽快就医。如果同时出现意识模糊、说话困难或一侧身体无力，请立刻拨打急救电话。",
+  "ttft_ms": 9638,
+  "type": "result",
+  "duration_ms": 26367,
+  "uuid": "3d0cc38f-06a6-4e97-959a-844eeb96335d",
+  "ttft_stream_ms": 2093,
+  "time_to_request_ms": 27,
+  "first_content_frame_ms": 2613,
+  "queued_turn_count": 0,
+  "result_index": 0
+ }
+}

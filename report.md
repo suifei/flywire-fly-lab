@@ -1,0 +1,2102 @@
+# Eon Systems “赛博果蝇”复现报告
+
+> 核实与实验日期：2026-09-13；机器：MacBook Pro M1 Pro（8 核 CPU，16 GB 内存，无 NVIDIA GPU），macOS 26.6.2
+> 标注约定：**【官方】** Eon 公开的内容；**【社区】** 第三方项目；**【实测】** 本机真实运行得到；**【推测】** 我的判断，未验证
+
+## 目录
+
+> 报告按时间顺序累积，越往后越新。**第 0 节是全篇摘要**；第 1–8 节是最初的复现与可行性核实，第 9–13 节是游戏与各条外围管线，第 14–26 节是虚拟敲除筛选、把结果搬回游戏、以及视觉前端的验证。第 23 节有**错误账本**，记录所有自查出来的错。
+
+- [0. 结论摘要](#0-结论摘要)
+- [1. 信息核实](#1-信息核实)
+  - [1.1 你给的线索，逐条核对](#11-你给的线索逐条核对)
+  - [1.2 开源范围](#12-开源范围)
+- [2. 环境配置](#2-环境配置)
+  - [2.1 本机实际使用（CPU / macOS arm64）【实测】](#21-本机实际使用cpu--macos-arm64实测)
+  - [2.2 Linux + NVIDIA GPU（官方路线）【未实测，按官方 README 整理】](#22-linux--nvidia-gpu官方路线未实测按官方-readme-整理)
+  - [2.3 遇到的报错与解决【实测，日志在 `logs/`】](#23-遇到的报错与解决实测日志在-logs)
+- [3. 运行结果【全部实测】](#3-运行结果全部实测)
+  - [3.1 官方 `main.py`（0.1 s，1 个 trial，sugar 实验）](#31-官方-mainpy01-s1-个-trialsugar-实验)
+  - [3.2 自写最小实验 `run_experiment.py`（默认 Brian2 standalone，1 s 模拟）](#32-自写最小实验-run_experimentpy默认-brian2-standalone1-s-模拟)
+  - [3.3 核对时发现的问题](#33-核对时发现的问题)
+- [4. 具身化可行性](#4-具身化可行性)
+  - [4.1 社区的大脑↔身体项目（2026-09-13 在 GitHub 和网页上补查；Eon 官方闭环代码仍然没有公开）](#41-社区的大脑身体项目2026-09-13-在-github-和网页上补查eon-官方闭环代码仍然没有公开)
+- [5. 许可证与使用限制](#5-许可证与使用限制)
+- [6. 风险与待确认问题](#6-风险与待确认问题)
+- [7. 最短使用路径](#7-最短使用路径)
+- [8. 交付物清单](#8-交付物清单)
+- [参考来源](#参考来源)
+- [9. 果蝇闪避游戏：视觉编码、真视觉与飞行（2026-09-14 追加）](#9-果蝇闪避游戏视觉编码真视觉与飞行2026-09-14-追加)
+  - [9.1 第 1 步：LC4/LPLC2 编码拆分 + 起飞离开（`dodge/step1_encoding.js` → `results/dodge/step1_encoding.json`）](#91-第-1-步lc4lplc2-编码拆分--起飞离开dodgestep1_encodingjs--resultsdodgestep1_encodingjson)
+  - [9.2 第 2 步：复眼 → flyvis → FlyWire 全脑（`vision/*.py` → `results/vision/`）](#92-第-2-步复眼--flyvis--flywire-全脑visionpy--resultsvision)
+  - [9.3 第 3 步：flybody 起飞动画（`flight/export_flight.py`、`dodge/step3_flight.js`）](#93-第-3-步flybody-起飞动画flightexport_flightpydodgestep3_flightjs)
+- [10. 补齐五项能力（2026-09-14 追加）](#10-补齐五项能力2026-09-14-追加)
+  - [10.0 先用全脑确认每条通路存在【实测】（`results/v2_ref/`，0.5 s × 4 次**独立**试次；表中数字已按第 17 节的重跑更新，旧版“× 4 次”实为同一次模拟的 4 份拷贝，见 14.0 节）](#100-先用全脑确认每条通路存在实测resultsv2_ref05-s--4-次独立试次表中数字已按第-17-节的重跑更新旧版-4-次实为同一次模拟的-4-份拷贝见-140-节)
+  - [10.1 子回路 v2（`dodge/subcircuit_v2.py`）](#101-子回路-v2dodgesubcircuit_v2py)
+  - [10.2 第 1 项：进食 + 苦味【实测】（`dodge/step_v3.js`，3 局 × 120 s，每种颗粒接触 30 次）](#102-第-1-项进食--苦味实测dodgestep_v3js3-局--120-s每种颗粒接触-30-次)
+  - [10.3 第 2 项：梳理【实测】](#103-第-2-项梳理实测)
+  - [10.4 第 3 项：正面威胁时后退【实测 + 探索性】](#104-第-3-项正面威胁时后退实测--探索性)
+  - [10.5 第 4 项：嗅觉导航【实测，阴性】](#105-第-4-项嗅觉导航实测阴性)
+  - [10.6 第 5 项：接腹神经索、让运动神经元驱动腿【实测，阴性】（`vnc/`）](#106-第-5-项接腹神经索让运动神经元驱动腿实测阴性vnc)
+  - [10.7 汇总](#107-汇总)
+- [11. 第 4 轮：多巴胺、后退重做、嗅觉诊断、腹神经索换模型（2026-09-14 追加）](#11-第-4-轮多巴胺后退重做嗅觉诊断腹神经索换模型2026-09-14-追加)
+  - [11.1 吃到糖，会分泌多巴胺吗？【实测，阴性】](#111-吃到糖会分泌多巴胺吗实测阴性)
+  - [11.2 LC16 剂量 → MDN【实测】](#112-lc16-剂量--mdn实测)
+  - [11.3 后退实验重做【实测，设计事先写定】（`dodge/backward_v4.js` → `results/dodge/backward_v4.json`）](#113-后退实验重做实测设计事先写定dodgebackward_v4js--resultsdodgebackward_v4json)
+  - [11.4 嗅觉：降低强度、换读出窗口、找失控源头【实测 + 探索性，阴性】](#114-嗅觉降低强度换读出窗口找失控源头实测--探索性阴性)
+  - [11.5 腹神经索：换成 Pugliese 2025 发放率模型【社区代码 · 实测】（`vnc/run_pugliese.py`、`vnc/analyze_pugliese.py`、`vnc/drive_legs_pugliese.py`）](#115-腹神经索换成-pugliese-2025-发放率模型社区代码--实测vncrun_pugliesepyvncanalyze_pugliesepyvncdrive_legs_pugliesepy)
+  - [11.6 游戏里的“闻着找”（手写，非连接组）【实测】（`dodge/odor_v4.js` → `results/dodge/odor_v4.json`）](#116-游戏里的闻着找手写非连接组实测dodgeodor_v4js--resultsdodgeodor_v4json)
+  - [11.7 加上强化训练会怎样？这台电脑能不能跑？【文献 + 实测速度 + 推测】](#117-加上强化训练会怎样这台电脑能不能跑文献--实测速度--推测)
+  - [11.8 汇总](#118-汇总)
+- [12. 腹神经索三项：全腹神经索 6 条腿、巨纤维电突触、本体感觉闭环（2026-09-14 追加）](#12-腹神经索三项全腹神经索-6-条腿巨纤维电突触本体感觉闭环2026-09-14-追加)
+  - [12.0 更正](#120-更正)
+  - [12.1 全腹神经索（MANC，23,532 个神经元）【社区模型 · 实测】（`vnc/manc_full.py`、`vnc/analyze_manc_full.py`）](#121-全腹神经索manc23532-个神经元社区模型--实测vncmanc_fullpyvncanalyze_manc_fullpy)
+  - [12.2 驱动 NeuroMechFly 的 6 条腿【实测】（`vnc/drive_legs_manc.py`）](#122-驱动-neuromechfly-的-6-条腿实测vncdrive_legs_mancpy)
+  - [12.3 巨纤维 → TTMn 电突触【实测 + 手写耦合】（`vnc/manc_full.py gap` → `results/vnc/manc_full/gap_summary.json`）](#123-巨纤维--ttmn-电突触实测--手写耦合vncmanc_fullpy-gap--resultsvncmanc_fullgap_summaryjson)
+  - [12.4 本体感觉闭环【实测 · 探索性，感受器编码为手写】（`vnc/export_manc_params.py`、`vnc/proprio_loop.py`）](#124-本体感觉闭环实测--探索性感受器编码为手写vncexport_manc_paramspyvncproprio_looppy)
+  - [12.4b 本体感觉闭环第二版：相位性编码【实测 · 探索性】（`vnc/proprio_loop.py run_phasic` → `results/vnc/manc_full/proprio_phasic_summary.json`）](#124b-本体感觉闭环第二版相位性编码实测--探索性vncproprio_looppy-run_phasic--resultsvncmanc_fullproprio_phasic_summaryjson)
+  - [12.5 汇总](#125-汇总)
+  - [12.6 用作者的全突触数据重跑【实测】（`MANC_DATASET=all`，`scratch/queue_manc_all.sh` → `results/vnc/manc_all/`）](#126-用作者的全突触数据重跑实测manc_datasetallscratchqueue_manc_allsh--resultsvncmanc_all)
+- [13. 让果蝇“说中文”，发给 Claude Opus 5（2026-09-14 追加）【实测】（`language/fly_words.py`、`language/ask_claude.py` → `results/language/`）](#13-让果蝇说中文发给-claude-opus-52026-09-14-追加实测languagefly_wordspylanguageask_claudepy--resultslanguage)
+- [14. 虚拟敲除筛选：糖 → MN9，哪些神经元不可缺？（2026-09-14 追加）【实测】（`screen/sugar_mn9_screen.py` → `results/screen/`）](#14-虚拟敲除筛选糖--mn9哪些神经元不可缺2026-09-14-追加实测screensugar_mn9_screenpy--resultsscreen)
+  - [14.0 更正：以前写的“× 4 次试验”其实是同一次模拟的 4 份拷贝](#140-更正以前写的-4-次试验其实是同一次模拟的-4-份拷贝)
+  - [14.1 做法（运行前写定）](#141-做法运行前写定)
+  - [14.2 验证（`results/screen/validation.json`）](#142-验证resultsscreenvalidationjson)
+  - [14.3 复现论文自己的筛选（183 个神经元）](#143-复现论文自己的筛选183-个神经元)
+  - [14.4 我们方法自带的一个偏差：网络混沌 + 单条基线轨迹【探索性，事后发现】](#144-我们方法自带的一个偏差网络混沌--单条基线轨迹探索性事后发现)
+  - [14.5 和真实实验比：10 个做过光遗传沉默的类型](#145-和真实实验比10-个做过光遗传沉默的类型)
+  - [14.6 穷举 50 Hz 下全部 313 个活跃神经元：论文漏掉了什么吗？](#146-穷举-50-hz-下全部-313-个活跃神经元论文漏掉了什么吗)
+  - [14.7 不跑模拟，光看连线能不能预测？（事先写定的对照）](#147-不跑模拟光看连线能不能预测事先写定的对照)
+  - [14.8 这件事有什么用、以及别当真的部分](#148-这件事有什么用以及别当真的部分)
+- [15. 解码器压力测试：像脑机接口那样只看到一部分神经元，还读得出吗？（2026-09-14 追加）【实测 · 离线分析】（`language/decoder_stress.py` → `results/language/stress.json`）](#15-解码器压力测试像脑机接口那样只看到一部分神经元还读得出吗2026-09-14-追加实测--离线分析languagedecoder_stresspy--resultslanguagestressjson)
+- [16. 双敲除：有没有“单独敲都没事、一起敲就断”的备份通路（2026-09-14 追加）【实测 · 探索性】（`screen/double_knockout.py` → `results/screen/double_summary.json`）](#16-双敲除有没有单独敲都没事一起敲就断的备份通路2026-09-14-追加实测--探索性screendouble_knockoutpy--resultsscreendouble_summaryjson)
+  - [16.1 还有没有别的 CB0883？（`screen/double_hub.py` → `results/screen/double_hub_summary.json`）](#161-还有没有别的-cb0883screendouble_hubpy--resultsscreendouble_hub_summaryjson)
+  - [16.2 CB0883 全扫描：把 312 个活跃神经元都和它一起敲一遍（`screen/hub_scan.py` → `results/screen/hub_scan_summary.json`）](#162-cb0883-全扫描把-312-个活跃神经元都和它一起敲一遍screenhub_scanpy--resultsscreenhub_scan_summaryjson)
+- [17. 把受种子 bug 影响的参考实验重跑一遍（2026-09-14 追加）【实测】（`scratch/rerun_refs.py` → `results/v2_ref/rerun_diff.csv`）](#17-把受种子-bug-影响的参考实验重跑一遍2026-09-14-追加实测scratchrerun_refspy--resultsv2_refrerun_diffcsv)
+- [18. 视觉管线：补上“每个条件只跑一次”的重复（2026-09-14 追加）【实测】（`vision/connectome_from_flyvis.py --repeats 3`、`vision/repeat_check.py` → `results/vision/repeat_check.json`）](#18-视觉管线补上每个条件只跑一次的重复2026-09-14-追加实测visionconnectome_from_flyvispy---repeats-3visionrepeat_checkpy--resultsvisionrepeat_checkjson)
+- [19. 同一套方法换一条通路：水味觉（2026-09-15 追加）【实测】（`screen/water_screen.py` → `results/screen/water/`）](#19-同一套方法换一条通路水味觉2026-09-15-追加实测screenwater_screenpy--resultsscreenwater)
+- [20. 一次数据体检，以及把“静默降级”改掉（2026-09-15 追加）【工程】（`screen/segments.py`、`screen/audit.py` → `results/screen/audit.json`）](#20-一次数据体检以及把静默降级改掉2026-09-15-追加工程screensegmentspyscreenauditpy--resultsscreenauditjson)
+- [21. 糖和水用的是同一批神经元吗？（2026-09-15 追加）【实测 · 只做分析，不跑新仿真】（`screen/pathway_compare.py` → `results/screen/pathway_compare.json`）](#21-糖和水用的是同一批神经元吗2026-09-15-追加实测--只做分析不跑新仿真screenpathway_comparepy--resultsscreenpathway_comparejson)
+  - [21.1 水通路也做一次全扫描：CB0051 × 全部活跃神经元（`screen/water_hub_scan.py` → `results/screen/water/hub_scan_summary.json`）](#211-水通路也做一次全扫描cb0051--全部活跃神经元screenwater_hub_scanpy--resultsscreenwaterhub_scan_summaryjson)
+- [22. 什么时候可以不跑模拟？（2026-09-15 追加）【实测 · 只做分析】（`screen/structure_vs_function.py` → `results/screen/structure_vs_function.json`）](#22-什么时候可以不跑模拟2026-09-15-追加实测--只做分析screenstructure_vs_functionpy--resultsscreenstructure_vs_functionjson)
+  - [22.1 换成“动力学指纹”：弱但方向对（`screen/dynamic_fingerprint.py` → `results/screen/dynamic_fingerprint.json`）](#221-换成动力学指纹弱但方向对screendynamic_fingerprintpy--resultsscreendynamic_fingerprintjson)
+  - [22.2 把“通路集中度”算出来（`screen/concentration.py` → `results/screen/concentration.json`）](#222-把通路集中度算出来screenconcentrationpy--resultsscreenconcentrationjson)
+- [23. 这一轮的方法学账本（2026-09-15 追加）](#23-这一轮的方法学账本2026-09-15-追加)
+- [24. 第三条通路：触角机械感觉 → 梳理指令 aDN1（2026-09-15 追加）【实测】（`screen/jon_screen.py` → `results/screen/jon/`）](#24-第三条通路触角机械感觉--梳理指令-adn12026-09-15-追加实测screenjon_screenpy--resultsscreenjon)
+  - [24.1 验证“差异来自刺激强度”：把刺激调弱再跑一遍（`screen/jon_weak.py` → `results/screen/jon_weak/`）](#241-验证差异来自刺激强度把刺激调弱再跑一遍screenjon_weakpy--resultsscreenjon_weak)
+  - [24.2 把论文的刺激名单反推出来，差异基本闭合（`screen/jon_paper.py` → `results/screen/jon_paper/`）](#242-把论文的刺激名单反推出来差异基本闭合screenjon_paperpy--resultsscreenjon_paper)
+  - [24.3 用论文名单把整条通路重做一遍，取代 24 节的数字（`screen/jon_paper.py full` / `full_analyze` → `results/screen/jon_paper/full_summary.json`）](#243-用论文名单把整条通路重做一遍取代-24-节的数字screenjon_paperpy-full--full_analyze--resultsscreenjon_paperfull_summaryjson)
+- [25. 把研究结果搬回游戏里：真实神经元开关、物理世界、水与口渴（2026-09-16 追加）【实测 + 工程】（`dodge/game_core.js`、`dodge/brain.js`、`dodge/fly_dodge.template.html`）](#25-把研究结果搬回游戏里真实神经元开关物理世界水与口渴2026-09-16-追加实测--工程dodgegame_corejsdodgebrainjsdodgefly_dodgetemplatehtml)
+  - [25.1 落地姿态修好了（用户报的 bug）](#251-落地姿态修好了用户报的-bug)
+  - [25.2 敲真实神经元的开关：搬进去才发现模型对不上](#252-敲真实神经元的开关搬进去才发现模型对不上)
+  - [25.3 物理世界：阳光、风、重力](#253-物理世界阳光风重力)
+  - [25.4 水滴与口渴：同一个动作，背后两套线路](#254-水滴与口渴同一个动作背后两套线路)
+  - [25.5 “果蝇在想什么”气泡](#255-果蝇在想什么气泡)
+  - [25.6 还有哪些研究结果没进游戏](#256-还有哪些研究结果没进游戏)
+- [26. 补上一个长期空白：视觉前端修复的验证（2026-09-16）【实测 · 事先写定判据】（`connectome_vision_loop.py --frontend-only`）](#26-补上一个长期空白视觉前端修复的验证2026-09-16实测--事先写定判据connectome_vision_looppy---frontend-only)
+
+---
+
+## 0. 结论摘要
+
+1. 官方仓库是 **`github.com/eonsystemspbc/fly-brain`**（不是 `eonsystems/fly-brain`），许可证 **GPL-2.0-or-later**。开源的只有“数字大脑”：FlyWire v783 LIF 模型 + 6 个后端的基准代码。**“大脑→MuJoCo 身体”的闭环代码没有公开**。
+2. **【实测】** 大脑在 16 GB Mac 上用纯 CPU 就能跑：1 s 大脑时间约 2.5 s 算完，峰值内存 3–4 GB。激活糖味神经元 → MN9（进食）98/69 Hz；沉默 6 个中间神经元 → MN9 降到 1 Hz；激活 LC4 → 巨纤维（逃逸）85/40 Hz。
+3. **【实测】** 身体方面，FlyGym 2.1（EPFL NeuroMechFly v2，Apache-2.0）的复眼视觉和行走在本机可用；“视觉→控制→行走”的玩具闭环能区分趋向、回避、盲走三种行为。
+4. **【实测】** 把复眼信号直接灌进光感受器（R1-6/R7/R8）**到不了任何下行神经元**；要从 LC4 这类视觉投射神经元注入才有效。真·连接组闭环原型只通过了 0.15 s 冒烟测试；其视觉前端的修复已于 2026-09-16 单独验证（第 26 节：假阳性消除，但 LC4 增益未标定、只有 0/200 两个值），**加载大脑之后的行为仍未验证**。
+5. 风险：GPL-2.0 与 Apache-2.0 的组合问题；FlyWire 数据可能仅限非商用；脑→腿的映射本质上是手工设计（Eon 自己也承认）。
+
+**后续工作摘要**（第 9–25 节，2026-09-14 起追加；数字均已于 2026-09-16 对照结果文件核对）：
+
+6. **【实测】虚拟敲除筛选**（14、19、24.3 节，合计 **17,628 段**全脑仿真、**9.88 h** 机时）：在三条通路上复现 Shiu et al. 2024 的沉默筛选。
+   与论文的判定一致性（Cohen κ，三条都用零参照归一化口径）：**糖 0.59、水 0.87、触角机械感觉 0.91**。
+   对论文自己做的光遗传实验：糖 6/10、水 9/10、JON 1/1 可测。**模型准不准是「按通路而定」的，不是一个总体结论。**
+7. **【实测】冗余结构只能靠模拟**（22 节，事先声明的假设）：两个神经元「到读出的图上路径重不重叠」与「一起敲会不会塌」**毫无关系**
+   （Spearman −0.008 / 0.013，且已排除指标退化）。换成动力学指纹方向对但很弱。**配对效应必须真跑，看连线看不出来。**
+8. **【实测】同一个动作，两套线路**（21 节）：糖和水都读出 MN9、都引发伸喙，但活跃神经元只重叠约三分之一，
+   枢纽各自私有（CB0883 在水通路里根本不放电；CB0051 在糖通路里敲了没影响）。
+9. **【实测】能做成能玩的东西**：4,599 个神经元的子回路在浏览器里实时决定躲球、起飞、进食、梳理、后退、喝水
+   （游戏页 `results/dodge/fly_dodge.html`）。子回路整体重现了全脑的敲除模式（糖 Pearson +0.75、水 +0.89），
+   但单个神经元会失真——最典型的是 CB0883 的枢纽效应在裁剪后**完全消失**。
+10. **方法学教训**（23 节错误账本，全部自查并如实登记）：Brian2 standalone 把随机种子编译进程序，导致早期「4 次试次」其实是同一次的 4 份拷贝；
+    混沌网络让配对设计产生系统性偏差；**极度不平衡的判定问题上「一致率」是骗人的，必须看 κ，而且 κ 在正例太少时同样不可靠**；
+    手写汇总数字是本项目最大的错误来源（一次核对查出 16 处，而约 300 个由脚本产出的数字无误）。
+
+---
+
+## 1. 信息核实
+
+### 1.1 你给的线索，逐条核对
+
+| 线索 | 核实结果 |
+|---|---|
+| 仓库 `eonsystems/fly-brain` | ❌ 不存在（`gh repo view` 报 “Could not resolve”）。实际是 **`eonsystemspbc/fly-brain`**：2026-03-05 创建，最后推送 2026-08-29，625★ |
+| 入口 `main.py` | ✅ 存在，但它是**基准测试 CLI**，不是交互式实验入口。只有 `sugar` 和 `p9` 两个实验，`--t_run` 只接受 0.1/1/10/100/1000 |
+| 后端 Brian2 / Brian2CUDA / PyTorch / NEST GPU / GeNN | ✅ 另有 Brian2GeNN，共 6 个 |
+| 约 12.5–13.9 万神经元、约 1500 万突触连接 | ✅ **【实测】** 数据文件为 138,639 个神经元、15,091,983 条连接（带权边），权重绝对值之和 54,492,922（≈ 突触数，与官网“约 5000 万突触”一致）。README 写的 “~5M synapses” 与数据对不上 |
+| LIF 模型 | ✅ 用的是 Shiu et al. 2024 *Nature* 的参数：v_rest −52 mV，阈值 −45 mV，τ_m 20 ms，τ_syn 5 ms，不应期 2.2 ms，延迟 1.8 ms，每突触 0.275 mV，dt 0.1 ms |
+| 具身化使用 MuJoCo | ✅ 官网称身体为 **NeuroMechFly v2（MuJoCo）**，每 15 ms 同步一次脑与身体 |
+| 官网两篇说明 | ✅ 均存在（2026-03-07/03-10），另有 `weve-uploaded-a-fruit-fly`（03-08）和 `more-flies-are-getting-uploaded`（09-11）。**都没有代码链接或预印本** |
+| 替代项目 NeuroMechFly / flybody | ✅ 见第 4 节。注意 FlyGym 已升到 **2.1.0**，API 与网上大部分 1.x 教程不兼容 |
+
+### 1.2 开源范围
+
+| 内容 | 状态 | 地址 / 许可证 |
+|---|---|---|
+| 全脑 LIF 模型 + 6 后端基准 | **【官方】开源** | eonsystemspbc/fly-brain，GPL-2.0-or-later（LICENSE 与 README 第 418 行明确写 “or any later version”） |
+| Shiu et al. 原始 Brian2 代码（仓库内 `code/paper-phil-drosophila/`） | 开源 | **MIT**（Philip Shiu & Nico Spiller） |
+| 连接组数据（仓库自带 v783 parquet/csv） | 随仓库分发 | 来自 FlyWire，许可证见第 5 节 |
+| Nature 基准完整 spike 数据（600 个 parquet） | 公开 | Google Drive（README 中给出链接） |
+| `eonsystemspbc/flybody` | 公开，但只是 TuragaLab/flybody 的**未修改 fork**（领先 0 个提交、落后 1 个） | Apache-2.0 |
+| `eonsystemspbc/drosophila_brain_model_lif` | philshiu/Drosophila_brain_model 的 fork，只多了一个 demo notebook | MIT |
+| `eonsystemspbc/pathintegrationBPU` | 连接组初始化的 RNN 训练，**与 MuJoCo 身体无关** | 未声明许可证（默认保留所有权利） |
+| **具身化闭环（大脑→NeuroMechFly/MuJoCo）** | **❌ 未公开**。官网只描述了做法，提供联系邮箱 | — |
+| 视觉通路（官网说用了 Lappalainen et al. 模型） | 未公开 Eon 的接入代码；flyvis 本身开源 | TuragaLab/flyvis，MIT |
+| 论文 / 预印本 | 未找到 Eon 2026 年的论文。README 里的 `nature_2026_07` 只是基准测试的 run-label | — |
+
+**【官方】** 官网描述的具身化做法：
+- 下行神经元当作“控制把手”：DNa01/DNa02 管转向，oDN1 管前进，触角 DN 管梳理，MN9 管进食。
+- 下层控制器把这些信号转成关节动作；映射系数是 “somewhat arbitrarily chosen by hand”。
+- 巨纤维（逃逸）和后退行走 “not shown in our demo”。
+
+**【社区】** 第三方的批评（Carboncopies Foundation，“No, a Fruit Fly has not been uploaded”）：步态是身体模型里预编程的，连接组只起“开关”作用。结合官网描述，**【推测】** 这个批评基本成立。
+
+---
+
+## 2. 环境配置
+
+完整脚本见 [`setup.sh`](setup.sh)。下面是要点。
+
+### 2.1 本机实际使用（CPU / macOS arm64）【实测】
+
+```bash
+conda create -y -n brain-fly-cpu -c conda-forge python=3.10 numpy=1.26.4 pandas pyarrow scipy matplotlib joblib tqdm brian2 pip cxx-compiler
+conda install -y -n brain-fly-cpu -c conda-forge pytorch      # 不要用 pip 装 torch，见 2.3 报错 1
+conda create -y -n flygym python=3.12
+conda run -n flygym pip install "flygym==2.1.0" torch pandas pyarrow
+```
+
+实测版本：brian2 2.9.0、torch 2.13.0（conda-forge）/ 2.14.0（flygym 环境里用 pip 装）、numpy 1.26.4 / 2.5.3、flygym 2.1.0、mujoco 3.9.0。
+
+### 2.2 Linux + NVIDIA GPU（官方路线）【未实测，按官方 README 整理】
+
+```bash
+sudo apt-get install -y pkg-config libffi-dev build-essential
+export CUDA_PATH=/usr/local/cuda-12.5 CUDA_HOME=/usr/local/cuda-12.5 PATH=/usr/local/cuda-12.5/bin:$PATH
+conda env create -f external/fly-brain/environment.yml && conda activate brain-fly
+python main.py --pytorch --genn --t_run 1 --n_run 1 --no_log_file
+```
+
+- 官方测试平台：Ubuntu 22.04 / WSL2 + RTX 4070 + CUDA 12.x。
+- NEST GPU 需要从源码编译，并拷入 `scripts/nestgpu_source_files` 里的 `user_m1` 模型。
+- Brian2GeNN 要单独用 `environment-brian2genn.yml` 建环境（它锁定 Brian2<2.6，与 Brian2CUDA 冲突）。
+
+### 2.3 遇到的报错与解决【实测，日志在 `logs/`】
+
+| # | 报错 | 原因 | 解决 |
+|---|---|---|---|
+| 1 | `OMP: Error #15: Initializing libomp.dylib, but found libomp.dylib already initialized.`（exit 134） | conda-forge 的 llvm-openmp 与 pip torch 自带的 libomp 冲突 | 卸掉 pip 装的 torch，改用 `conda install -c conda-forge pytorch`（`logs/pip_torch_OMP_conflict.txt`） |
+| 2 | `ImportError: Unable to find a usable engine; tried using: 'pyarrow'` | 系统 Python 没装 pyarrow | 在环境里运行 |
+| 3 | `NotImplementedError: Could not run 'new_compressed_tensor' from the 'mps:0' device` | MPS 不支持 CSR 稀疏张量 | MPS 上改用 COO + `torch.sparse.mm`，只替换官方 forward 里那一次稀疏乘法 |
+| 4 | **系统内存耗尽、死机**（激活 4,423 个 R1-6 时） | 官方 `poi()` 为每个被激活神经元建一个 `PoissonInput`，Brian2 standalone 于是生成了 **8,248 个 C++ 代码对象**，又默认用不限并行的 `make -j` 同时起几千个 clang | 超过 50 个被激活神经元时改用 1 个 `PoissonGroup` + 一对一突触（统计等价）；`extra_make_args_unix=["-j4"]`。修复后同一实验峰值 4.1 GB |
+| 5 | `ValueError: The truth value of an array ... is ambiguous`（`neu.rfc[idx] = 0*ms`） | Brian2 standalone 不支持按索引数组赋值 | 改为整体赋值 `neu.rfc = array*ms` |
+| 6 | 视觉 demo 里果蝇原地不动 | 默认地面棋盘格（0.3/0.4 灰）经复眼后亮度 <0.2，被当成暗物体，触发了“撞上就停” | 把地面纹理改亮（0.85/0.95） |
+| 7 | `flygym.__version__` 报 AttributeError | flygym 2.1 没有这个属性 | 不影响使用，改用 `pip show flygym` 查版本 |
+
+小注意：运行官方 `main.py` 会改写仓库里的 `data/benchmark-results.csv`（git 显示为 modified），可以用 `git checkout data/benchmark-results.csv` 还原。
+
+---
+
+## 3. 运行结果【全部实测】
+
+### 3.1 官方 `main.py`（0.1 s，1 个 trial，sugar 实验）
+
+| 后端 | 命令 | 建模/编译 | 仿真 | 活跃神经元 | spike 数 |
+|---|---|---|---|---|---|
+| Brian2 C++ standalone（CPU） | `python main.py --brian2-cpu --t_run 0.1 --n_run 1 --no_log_file` | 0.7 s + 编译 9.2 s | **1.41 s** | 324 | 1,566 |
+| PyTorch（CPU） | `python main.py --pytorch --t_run 0.1 --n_run 1 --no_log_file` | 7.2 s | 45.6 s | 326 | 1,403 |
+
+- 两个后端的活跃神经元数和 spike 数都很接近（Poisson 输入本身是随机的）。
+- 在 CPU 上 **Brian2 standalone 比 PyTorch 快约 30 倍**，所以 CPU 用户首选 Brian2。
+- 日志：`logs/official_*.log`。
+
+### 3.2 自写最小实验 `run_experiment.py`（默认 Brian2 standalone，1 s 模拟）
+
+| 实验 | 命令 | 结果 |
+|---|---|---|
+| 激活 21 个糖味 GRN @ 200 Hz | `python run_experiment.py --preset sugar --t_run 1` | 398 个活跃神经元、17,080 个 spike。18 个读出神经元中**只有 MN9 放电：左 98 Hz、右 69 Hz**，所有行走/逃逸 DN 都是 0。与 Shiu et al. 的“糖 → 伸喙”定性一致 |
+| 糖 + **沉默** 6 个 MN9 上游兴奋性神经元（CB0553×2、CB0493×2、DNge062×2，按到 MN9 的突触数和 sugar 条件下的活跃度挑选） | `python run_experiment.py --preset sugar --t_run 1 --compare --silence 720575940623211725 720575940607272649 720575940632252743 720575940621261296 720575940627099338 720575940615023535` | **MN9：98→1 Hz、69→1 Hz**；活跃神经元 398→347；spike 17,080→13,878 |
+| 激活左右 P9 @ 100 Hz | `python run_experiment.py --preset p9 --t_run 1` | P9_oDN1 16/12 Hz，DNa02 7/19 Hz，其余为 0；83 个活跃神经元 |
+| 激活左侧 54 个 LC4（looming 检测）@ 100 Hz，0.2 s | `python run_experiment.py --exc_type LC4:left --rate 100 --t_run 0.2` | **巨纤维 85/40 Hz**，DNa01 30 Hz，DNa02 10 Hz |
+| 同上，PyTorch on MPS（Apple GPU） | `... --backend torch --device mps` | 巨纤维 85/40 Hz、DNa01 30 Hz 与 Brian2 完全一致；**DNa02 不一致（20 Hz vs Brian2 的 10 Hz）**；活跃 254 vs 258 个、2,237 vs 2,297 个 spike；每 0.1 ms 步约 13 ms。两个后端的 Poisson 输入是各自独立抽的，小读出上的差别在噪声量级（2026-09-16 核对时补记：原文只写「与 Brian2 一致」，漏了 DNa02 这一项差异） |
+| 激活左眼 **R7+R8**（1,330 个）@ 100 Hz，0.2 s | `--exc_type R7:left R8:left` | 1,340 个活跃神经元（几乎只有被刺激的那些），**所有 DN/MN 都是 0 Hz** |
+| 激活左眼 **R1-6**（4,044 个）@ 100 Hz，0.2 s | `--exc_type R1-6:left` | 5,174 个活跃神经元，**所有 DN/MN 都是 0 Hz** |
+
+每个实验的输出目录（`results/<实验名>/`）包含：
+- `figure.png`：raster + 群体活动 + 读出神经元柱状图
+- `voltage.png`：膜电位轨迹
+- `rates.csv`：带 FlyWire cell_type 注释
+- `readout.csv`
+- `spikes_*.parquet`
+- `summary.json`
+
+**内存【实测】**：单次实验进程树峰值 **2.5–4.1 GB**（`memguard.sh` 记录）。8 GB 内存可以跑，16 GB 比较宽裕。只有 0.2–1 s 的短实验测过峰值；更长的模拟（例如官方的 100 s / 1000 s）会累积更多 spike 记录，内存会更高，未测。
+
+### 3.3 核对时发现的问题
+- 官方 notebook 里 P9、DNa01、DNa02、MN9 的 “left/right” 命名，**与 FlyWire 注释表的 `side`（胞体侧）正好相反**。可能是镜像/视角约定不同，未确认。做左右转向映射前必须先统一。我的闭环脚本统一使用注释表的 `side`。
+- 官方 `silence()` 只把该神经元的**传出**突触置 0，README 却写 “to and from”。代码与文档不一致，脚本按代码行为实现。
+- README 目录结构写的是 `code/paper-brian2/`，实际目录叫 `code/paper-phil-drosophila/`。
+
+---
+
+## 4. 具身化可行性
+
+详细路线见 [`embodiment_plan.md`](embodiment_plan.md)。现状：
+
+| 组件 | 状态 |
+|---|---|
+| 身体 + 3D 世界 + 复眼：FlyGym 2.1.0 | **【实测】可用**：`fly.add_vision()` → `sim.get_ommatidia_readouts()` 返回 (2 眼, 721 小眼, 2 通道)；第 2 次起每帧渲染约 19 ms；物理约 0.13–0.2× 实时 |
+| 玩具视觉闭环 `flygym_vision_demo.py`（手写规则，无连接组） | **【实测】** 2 s 内离黑柱（半径 1.2 mm）的最近距离：趋向 **0.29 mm**、盲走对照 **3.51 mm**、回避 **7.35 mm** |
+| 连接组闭环原型 `connectome_vision_loop.py` | **【实测】只通过 0.15 s 冒烟测试**（能跑、峰值 2.5 GB、0.15 s 用时 12 s）。冒烟测试暴露的问题：果蝇自己的腿出现在下半视野，步态抖动导致“暗面积增长率”误报，远处的球还没逼近 LC4 就被打满到 200 Hz。**修复已于 2026-09-16 验证（第 26 节）**：新增 `LoomingFrontEnd`，先把球藏起来校准，只用“天空 + 离地平线 40 px 以上”的小眼，并加低通滤波和死区；新增 `--frontend-only` 选项（不加载大脑，用来低成本检验前端）。按事先写定的 4 条判据跑 1.0 s：**腿造成的假阳性彻底消失**（前 0.3 s LC4 恒为 0 Hz，旧版是 200 Hz），**真 looming 信号保留**；但揪出一个新缺陷——**`lc4_gain` 从未标定，LC4 只有 0 或 200 两个值、没有分级响应**。**加载大脑之后的行为仍未验证** |
+| 社区现成的桥接 | 见 4.1。**全部【社区，未实测】** |
+
+### 4.1 社区的大脑↔身体项目（2026-09-13 在 GitHub 和网页上补查；Eon 官方闭环代码仍然没有公开）
+
+| 项目 | 大脑 / 身体 | 许可证 | 状态与要点 |
+|---|---|---|---|
+| [neilt93/Fly-Brain-AI](https://github.com/neilt93/Fly-Brain-AI) | FlyWire 13.9 万神经元 Brian2 LIF → **FlyGym v1.2.1**；另有 MANC/BANC VNC 发放率模型 | **未声明**（默认保留所有权利，只能读不能复用） | README 自报：因果损毁 10/10、气味效价 6/6、looming 逃逸 5/5，且都有 shuffled 连接组对照。最完整的“连接组在环 + 对照实验”实现，**最值得读** |
+| [nishkarsh1215/flywire-neuromechfly](https://github.com/nishkarsh1215/flywire-neuromechfly) | FlyWire LIF（GPU）→ 自建身体 / NeuroMechFly 适配器 | **未声明** | 自报 4 个行为中 2 个通过、2 个失败，逐项标注 REAL / ENGINEERED / FAILED。例如：视动转向和糖→伸喙级联是连接组驱动的；气味导航是手写的；连接组导航失败 |
+| [erojasoficial-byte/fly-brain](https://github.com/erojasoficial-byte/fly-brain)（53★；另有 fork Ma-Dan/fly-brain） | FlyWire v783 → FlyGym **1.x** | 标注 MIT，但 `run_pytorch.py` 与 Eon 的 GPL 文件高度相似，**许可证存疑** | 多模式状态机（走 / 逃 / 梳 / 吃 / 飞）；装 FlyGym 2.x 会跑不通 |
+| [JayceeB1/flybox](https://github.com/JayceeB1/flybox) | MaleCNS（雄性全 CNS）→ **FlyGym 2.x** | Apache-2.0 | 2026-09-12 新建，**只有规范和基础代码**，README 明说 “No behavioral claim has been made yet”。溯源分级（MEASURED / INFERRED / MODELED / ENGINEERED）的做法值得借鉴 |
+| [ZeroXClem/closed-loop-fly](https://github.com/ZeroXClem/closed-loop-fly) | MaleCNS LIF（WebGPU）+ NeuroMechFly 身体，浏览器内运行 | MIT | JS 实现，不是 Python/MuJoCo 路线 |
+| [abgnydn/webgpu-fly](https://github.com/abgnydn/webgpu-fly) | FlyWire + MANC + flybody，WebGPU/WASM | MIT | 浏览器实时 |
+| [mhdsilva/flywire-arduino](https://github.com/mhdsilva/flywire-arduino) | FlyWire 中裁出 583 个神经元的 looming→逃逸子回路，CPU LIF → Arduino 实物 | 未明确（NOASSERTION） | 带损毁 / 零模型对照实验 |
+| [seven-monarchs/NeuroFly](https://github.com/seven-monarchs/NeuroFly) | Brian2 + NeuroMechFly | 未声明 | 个人实验，自报每步约 34 s |
+
+**【推测】** 对你最有用的是 Fly-Brain-AI 和 flywire-neuromechfly：它们在接口设计、对照实验和失败记录上都走在前面。但两者都没有许可证，只能参考思路，不能直接拷代码。
+
+---
+
+## 5. 许可证与使用限制
+
+| 对象 | 许可证 | 对你的影响 |
+|---|---|---|
+| eonsystemspbc/fly-brain | GPL-2.0-or-later | 自己用、研究、修改都不受限。**对外分发**（包括分发修改版或把它链接进的程序）必须以 GPL 开源全部相关源码。 |
+| code/paper-phil-drosophila（Shiu 原始模型） | MIT | 最宽松。想做闭源/商用产品，**从这份 MIT 代码重写 LIF**，比基于 Eon 的 GPL 代码安全 |
+| FlyGym / flybody | Apache-2.0 | Apache-2.0 与 GPLv2 不兼容，但与 GPLv3 兼容。Eon 代码是 “or later”，所以组合后的程序可以按 **GPLv3** 整体分发。**【推测，非法律意见】** |
+| flyvis | MIT | 可自由组合 |
+| FlyWire 数据（v783 连接组 / 注释） | FlyWire 服务条款写明用户编辑与注释以 **CC-BY-NC 4.0** 发布；**v783 数据发布包本身的许可证未能确认**（Codex FAQ 未写，Zenodo 超时） | **按“仅限非商用、需署名引用”处理**，商用前请写信给 flywire@princeton.edu 确认 |
+| flyconnectome/flywire_annotations | GitHub 上未声明 SPDX 许可证 | 学术使用须引用 Schlegel et al. 2024 |
+| Codex（codex.flywire.ai） | 需 Google 登录并同意服务条款 | 我无法替你登录下载，所以改用 GitHub 上的公开注释表 |
+
+---
+
+## 6. 风险与待确认问题
+
+1. **“上传”的科学含义有限**：连接组只决定哪些 DN 被激活，步态、转向、梳理动作都来自身体侧的预编程控制器，映射系数是手调的。
+2. **LIF 模型没有学习、没有神经调质、没有分级电位**。光感受器输入无法驱动行为（3.2 已实测），视觉只能从 LC/LPLC 这类投射神经元注入，或像 Eon 那样接 flyvis。
+3. **左右侧约定**：notebook 的命名与注释表 `side` 相反，未确认谁对。直接影响转向方向。
+4. **算力**：CPU 上 Brian2 standalone 快，但不能逐窗交互推进，所以闭环只能用 PyTorch。MPS 上 1 s 大脑时间约 2 分钟；NVIDIA GPU 上官方基准可达实时量级（见 `data/benchmark-results.csv`，未在本机验证）。
+5. **待确认**：
+   - FlyWire v783 数据发布包的正式许可证
+   - Eon 用的是 FlyGym 1.x 还是 2.x
+   - Eon 视觉接入 flyvis 的具体方式
+   - GPU 路线（Brian2CUDA/GeNN/NEST GPU）在 Linux 上的实际表现
+
+---
+
+## 7. 最短使用路径
+
+```bash
+bash setup.sh cpu                                   # 或按 2.1 节手动装
+conda activate brain-fly-cpu
+
+# 激活一个/一组神经元，看效果（约 15 s，峰值约 3 GB）
+python run_experiment.py --preset sugar --t_run 1
+open results/sugar_brian2/figure.png
+
+# 激活任意一个 FlyWire 神经元（例：右侧 P9 = 720575940635872101），记录巨纤维膜电位
+python run_experiment.py --exc 720575940635872101 --rate 150 --record 720575940622838154
+
+# 按细胞类型激活（查询自 external/flywire_annotations 注释表）
+python run_experiment.py --exc_type LC4:left --rate 100 --t_run 0.2
+
+# 沉默并对比
+python run_experiment.py --preset sugar --compare --silence 720575940623211725 720575940607272649
+
+# 3D 世界 + 复眼 + 行走
+conda activate flygym
+python flygym_vision_demo.py --duration 2 --behavior attract
+```
+
+在 [FlyWire Codex](https://codex.flywire.ai/?dataset=fafb) 里查到任意神经元的 root ID（v783）后，直接填进 `--exc` 或 `--silence` 即可。
+
+## 8. 交付物清单
+
+| 文件 | 说明 |
+|---|---|
+| `report.md` | 本报告 |
+| `embodiment_plan.md` | 具身化路线与推荐 |
+| `setup.sh` | 环境配置（cpu / gpu / flygym） |
+| `run_experiment.py` | 最小实验：激活/沉默/记录/作图，支持 Brian2 与 PyTorch（CPU/CUDA/MPS） |
+| `flygym_vision_demo.py` | FlyGym 复眼 + 玩具视觉闭环 |
+| `connectome_vision_loop.py` | 连接组在环原型（**未验证**，见第 4 节已知问题） |
+| `scratch/memguard.sh` | 带内存上限的运行包装（超限自动杀进程） |
+| `logs/` | 所有实际运行日志与报错 |
+| `results/` | 所有实验输出 |
+| `external/fly-brain` | 官方仓库 @ a3db62f |
+| `external/flywire_annotations` | 公开注释表 |
+## 参考来源
+- 官方仓库 https://github.com/eonsystemspbc/fly-brain
+- Eon 官网更新：https://eon.systems/updates/embodied-brain-emulation 、https://eon.systems/updates/first-multi-behavior-brain-upload 、https://eon.systems/updates/weve-uploaded-a-fruit-fly
+- 批评文章 https://carboncopies.org/Blog/Posts/FruitFlyNotUploaded/Post/
+- Shiu et al. 2024 *Nature* https://www.nature.com/articles/s41586-024-07763-9
+- FlyGym https://github.com/NeLy-EPFL/flygym （PyPI flygym 2.1.0）；flygym-gymnasium https://github.com/NeLy-EPFL/flygym-gymnasium
+- flybody https://github.com/TuragaLab/flybody ；flyvis https://github.com/TuragaLab/flyvis
+- 社区桥接 https://github.com/erojasoficial-byte/fly-brain ；清单 https://github.com/cobanov/awesome-fly
+- FlyWire 注释 https://github.com/flyconnectome/flywire_annotations ；服务条款 https://flywire.ai/tos ；Codex https://codex.flywire.ai
+- 腹神经索发放率模型（Pugliese et al. 2025）代码与数据 https://github.com/smpuglie/Pugliese_cpg_2025 （无许可证）
+- flybody 论文 Vaxenburg et al. 2025 *Nature* https://www.nature.com/articles/s41586-025-09029-4 ；全文 https://pmc.ncbi.nlm.nih.gov/articles/PMC12310536/ ；数据与训练好的控制网络 https://doi.org/10.25378/janelia.25309105
+
+---
+
+## 9. 果蝇闪避游戏：视觉编码、真视觉与飞行（2026-09-14 追加）
+
+在线页面：[果蝇闪避](https://claude.ai/code/artifact/31fb7608-dd2f-4c63-8cf1-8fc2a955e6c2)（Version 2）。所有数值均为【实测】，来自下列脚本的输出文件。
+
+### 9.1 第 1 步：LC4/LPLC2 编码拆分 + 起飞离开（`dodge/step1_encoding.js` → `results/dodge/step1_encoding.json`）
+- **依据**：
+  - Ache et al. 2019 Curr Biol（PubMed 摘要）：巨纤维反应 = LC4 角速度线性项 + LPLC2 角尺寸高斯项。
+  - Card & Dickinson 2008 Curr Biol：起飞前约 200 ms 调整姿态，**直接背离逼近的威胁**起跳。
+  - 函数形式来自文献；**参数为手选**：LC4 0.5 Hz·(°/s)⁻¹，LPLC2 高斯中心 μ、宽 15°、峰值 200 Hz。原文全文未获取，所以对 μ 做了扫描。
+- **结果**（完整大脑，5 局 × 120 s，球速 60 mm/s）：
+
+| 编码 | 起跳方式 | 躲开率 | 起跳距撞击中位 |
+|---|---|---|---|
+| 第一版（dθ/dt） | 原地 | 64.4% | 0.53 s |
+| 新编码 μ30° | 原地 | 75.5% | 0.74 s |
+| 新编码 μ45°（事先声明的主设定） | 原地 | 60.7% | 0.32 s |
+| 新编码 μ60° | 原地 | 93.9% | 0.14 s |
+| 第一版 / 新编码 μ45° | 直线背离飞离 | 99.4% / 99.0% | — |
+
+- **解读**：
+  - 飞离类的高躲开率主要来自起飞规则本身。
+  - 编码影响的是**起跳时机**（μ 越大越接近碰撞），只有“原地起跳”这种时机敏感的规则能体现出来。
+  - μ 是手选参数，所有取值都已列出，不能据此宣称某个 μ 是“真实”的。
+- **损毁（新编码 μ45° + 飞离）**：
+
+| 条件 | 躲开率 | 说明 |
+|---|---|---|
+| 切除巨纤维 | 0% | |
+| LPLC2 断突触 | 90.2% | 起跳推迟到距撞击 0.11 s |
+| LC4 断突触 | 98.3% | |
+| 巨纤维 + DNa 都切除 | 0% | |
+
+### 9.2 第 2 步：复眼 → flyvis → FlyWire 全脑（`vision/*.py` → `results/vision/`）
+- **管线**：
+  1. 固定的 NeuroMechFly 看半径 2.5 mm 的黑球，FlyGym 1.2.1 复眼 200 Hz 渲染。
+  2. flyvis 1.2.0 预训练模型 flow/0000/000 逐帧计算。
+  3. 30 种柱状细胞的活动按 Codex `column_assignment`（Matsliah et al. 2024，无需登录的公开下载地址）映射到 FlyWire v783 的 44,252 个神经元，再注入 Brian2 全脑模型。
+- **检查**：flyvis 层左右侧化正确（左侧逼近时左眼 T4a 明显高于右眼）。**更正（2026-09-16）**：原文写的「10.9 / 1.8」和「约 2 倍」两组数字在任何结果文件或日志里都查不到；按管线自身的换算从 `flyvis_loom_L.npz` 复算，后段左/右是 **5.3 / 0.9 Hz**、平移/逼近能量比是 **1.69–1.75 倍**。方向性结论成立，但原来那两组具体数值无出处，已删。
+- **格子朝向未知**：8 种朝向全部运行。
+- **事先声明的指标**（刺激后 0.5–0.95 s，左侧神经元平均发放率，8 个朝向中位数）：
+
+| 刺激 | LPLC2 左 | LC4 左 |
+|---|---|---|
+| 逼近 | 0.6 Hz | 5.5 Hz |
+| 近距平移 | **1.2 Hz** | **9.4 Hz** |
+| 远距平移 | 0.3 Hz | 2.7 Hz |
+| 远离 | 0.0 Hz | 1.1 Hz |
+
+  LPLC2 逐朝向比较：逼近强于远离 8/8、强于远距平移 7/8，**但弱于近距平移 0/8**；侧化 8/8。（第 18 节重复 3 次后：8/8、7–8/8、0–1/8，结论不变。）
+- **结论**：按事先声明的指标，“LPLC2 对逼近的反应强于平移”**只部分成立**：能区分逼近与远离、远距平移，但不能区分逼近与近距平移。
+- **探索性（看过曲线后才加）**：碰撞前最后 150 ms 的峰值。LC4 逼近 27.8 Hz、近距平移 12.5 Hz（8/8）；LPLC2 逼近 2.5、近距平移 1.9 Hz（7/8）。这个窗口是事后选的，不能替代上面的结论。
+- **不可解读项**：巨纤维在刺激前基线期已有约 30 Hz，来自 4.4 万个注入输入的整流噪声汇聚。
+- **未验证 / 局限**：
+  - flyvis 与 FlyWire 两套格子的真实朝向对应；
+  - 活动值到发放率的换算（手选）；
+  - TmY3 等没有柱坐标的类型未注入（TmY3 占 LC4 输入的 15%）；
+  - 只有 1 个 flyvis 模型；每个条件原来只跑 1 次（第 18 节补了 3 次重复）。
+- **性能踩坑**：
+  - flygym 自带的 `RealisticVisionFly` 每帧重建 `LayerActivity`，经 datamate 反复读 h5 并 `sleep(0.1)` 重试，占约 60% 耗时。替换后单个刺激约 90 s，数值经过核对完全一致。
+  - 作为后台任务运行时，OpenGL 渲染被 macOS 节流到约 10% CPU，必须在前台运行。
+
+### 9.3 第 3 步：flybody 起飞动画（`flight/export_flight.py`、`dodge/step3_flight.js`）
+- **数据**：flybody figshare `datasets_flight-imitation`（**GPL-3.0+**）里的 184 条逃逸飞行轨迹（含镜像），来自 Muijres et al. 2014 Science 的真实果蝇躲避逼近目标记录；翅膀用 218 Hz 拍翅模式（实测主频 218–219 Hz、幅度 158°）。
+- **轨迹选择规则（事先定好）**：左转、右转两组各取净偏航角最接近该组中位数的一条：#67（+62°，150 mm/s）和 #44（−64°，194 mm/s）。
+- **分工**：
+  - 游戏里起飞**时机**由连接组决定；
+  - **飞行动作**是真实录像数据的运动学回放；
+  - 选哪条轨迹、起飞 20 ms 抬升到 5 mm 是手写规则；
+  - 飞行本身不是连接组或强化学习控制的。
+- **结果**：
+
+| 条件 | 躲开率 |
+|---|---|
+| 真实逃逸轨迹（新编码 μ45°） | 100% |
+| 同上，旧编码 | 100% |
+| 切除巨纤维 | 0% |
+| LPLC2 断突触 | 94.5% |
+| LC4 断突触 | 100% |
+| LC4 + LPLC2 都断 | 0% |
+
+  新旧编码在这个模式下逐球结果相同：每个球都触发了起飞，飞离足够快，时机差异不再起作用。
+
+---
+
+
+**飞行动画的真实性与显示修复（2026-09-14 补充）**【实测核对】：
+- **真实的部分**：身体的位置和姿态（含俯仰、滚转）来自 flybody 数据集里 Muijres et al. 2014 的原始逃逸轨迹。数据集同时收了镜像增广的轨迹，这里用的是原始那一半。
+  - 导出的速度与原始数据一致：左转 150 mm/s（数据集 151）、右转 **194 mm/s**（数据集 196；原文写 195，与本节前面自己写的 194 矛盾，已按 `logs/flight_export.log` 与轨迹复算更正）。速度在 51–597 mm/s 之间变化，100 Hz 以上的功率占比 ≤ 3%，是平滑的真实机动，不是换算噪声。
+  - 机头始终抬起约 45–60°（中位 49–50°）。每条轨迹有一次 32–38 ms 的大角度侧倾（最大 126° / 102°），帧间转角 ≤ 3.5°，是连续动作，不是数值翻转。
+  - 右转那条路程约 47 mm、净位移约 11 mm，同样来自原始数据：这只果蝇爬升了约 10 mm 并折返。
+- **不真实的部分**：
+  - 翅膀：数据集只有身体轨迹，翅膀用 flybody 通用拍翅模式（218 Hz），左右扇动角相关 1.000，没有真实转弯时左右翅的差别。
+  - 起飞和降落：被记录的果蝇在机动前就在飞，没有起跳；页面里的 20 ms 抬升 5 mm、50 ms 线性降落都是手写过渡。
+  - 起飞瞬间机身朝向与飞行方向相差约 50°：轨迹按“初始水平速度背离威胁”对齐，原始数据开头就有这么大的侧滑。
+- **显示 bug（已修）**：游戏每 5 ms 更新一次，飞行数据每 0.4 ms 一帧，一个拍翅周期 4.6 ms。
+  - 修复前每步跳 12–13 帧，约 1.09 个周期，看上去只前进 0.09 个周期。按原来 ×0.08 慢放，屏幕上翅膀约 1.4 Hz 慢慢摆；模拟 60 fps 刷新，119 个画面帧里只有 31 帧有变化，身体也一顿一顿的。
+  - 修复后，页面在两个游戏步之间按渲染时间逐帧取姿态：`game_core.js` 新增 `clipPose`，游戏步与页面共用。逐步核对 40 s 对局、23 次起飞、1,543 个飞行步，状态与修复前完全相同，游戏结果不变。
+  - 慢放改为 ×0.04：屏幕上约 8.7 Hz，每帧前进约 0.17 个周期。不慢放时 60 fps 采不到 218 Hz，改为叠加 3 组半透明翅膀显示扇动残影。
+
+**换成 flybody 训练好的飞行控制器（2026-09-14）**【官方模型与数据 · 本机实测】（`flight/policy_rollout.py`、`flight/tfp_compat.py` → `results/flight/flight_clips_policy.json`，现为 `flight_clips.json`；旧的运动学回放保留为 `flight_clips_kinematic.json`）：
+
+- **来源**：flybody 论文在 figshare（10.25378/janelia.25309105，数据许可 GPL-3.0+）公开的 `trained-fly-policies.zip`（6.5 MB），内含 flight、vision-bumps、vision-trench、walking 四个 TensorFlow SavedModel，这里用 flight。
+- **加载**：flybody 的 `[tf]` 依赖钉死 TensorFlow 2.8 和 dm-reverb，没有 macOS arm64 版本。所以复制出 `flybody-tf` 环境，装 TensorFlow 2.16.2 和 TFP 0.24。策略输出是 TFP 分布，新旧 TFP 的 TypeSpec 注册名不同（完整模块路径 → `tfp.distributions.…` 短名），加一条名字映射即可加载。输入 9 项观测与飞行任务完全一致，输出 12 维动作（头 3、翅膀 6、腹部 2、拍翅频率 1）。
+- **飞法**：同样两条原始逃逸轨迹（左转 067、右转 044），飞行任务用默认参数，只关掉随机起点，取策略均值；全程物理仿真。
+- **翅膀**：控制器设定拍翅频率，模式发生器按该频率给出目标角，控制器再给左右 6 个翅膀关节各加一份力修正，翅膀角度由物理引擎算出。
+
+| 指标 | 左转 067 | 右转 044 |
+|---|---|---|
+| 完成步数 / 参考步数 | 1,690 / 1,690 | 1,202 / 1,202 |
+| 身体位置跟踪误差 中位 / 最大 | 0.26 / 7.4 mm | 0.30 / 2.6 mm |
+| 机体姿态误差 中位 / 最大 | 5.5° / 51° | 7.0° / 32° |
+| 拍翅频率 | 218.9 Hz | 220.5 Hz |
+| 左右翅关节角相关（摆动 / 翻滚 / 俯仰） | 0.98 / **0.52** / 0.99 | 0.97 / **0.59** / 0.99 |
+| 翻滚角幅度 左 / 右 | 96° / 80° | 74° / 61° |
+
+- **跟踪过程**：大部分时间与记录相差不到 1 mm、机体朝向差约 4–6°。开头约 40–56 ms 有一次约 27° 的朝向偏差。左转那条在最后约 30 ms（307 ms 之后）逐渐偏离，终点偏离 7.1 mm、50°；右转那条终点偏离 2.4 mm、19°。
+- **翅膀变化**：原来通用模式下左右翅相关 1.000，现在翻滚角左右明显不同。注意这里的关节角幅度是模型关节量，没有和真实果蝇的拍翅角度做对比。
+- **顺带修掉的旧 bug**：原导出把飞行任务里的 ghost 参考果蝇（81 个网格，腿没收起、与真果蝇最多差 1.2 mm）也放进了飞行模型，页面上会多出一副伸着的腿。新导出只含真正的果蝇模型（85 个网格）。
+- **对局重跑**（`node dodge/step3_flight.js 120 5`）：6 种起飞方式与 5 个损毁条件的躲开率与运动学回放版完全相同（真实逃逸轨迹 100%，切除巨纤维 0%），因为两份轨迹几乎重合。
+- **起跳没有换成真实数据**：
+  - 能找到的高速起跳跟踪只有 Card 实验室 FlyPEZ（6,000 帧/秒，Dombrovski et al. 2023 Nature 等），数据声明写的是“合理请求可向作者索取”，公开的 Mendeley 数据只有共聚焦图像。
+  - Fontaine et al. 2009 JEB 做过 10 次起飞的三维身体与翅膀跟踪，没有公开数据。
+  - 2026 年的全身三维运动学数据集记录的是奔跑与求偶，不含起跳。
+  - 所以起飞 20 ms 抬升 5 mm、落地 50 ms 线性下降仍是手写过渡。
+
+## 10. 补齐五项能力（2026-09-14 追加）
+
+在线页面同一链接：[果蝇闪避](https://claude.ai/code/artifact/31fb7608-dd2f-4c63-8cf1-8fc2a955e6c2)（Version 3）。页面大脑换成**子回路 v2**；第 9 节里的对局数字是用第一版子回路测得的，页面上已注明。
+
+### 10.0 先用全脑确认每条通路存在【实测】（`results/v2_ref/`，0.5 s × 4 次**独立**试次；表中数字已按第 17 节的重跑更新，旧版“× 4 次”实为同一次模拟的 4 份拷贝，见 14.0 节）
+
+> **口径说明（2026-09-16 补）**：本节及 11.1 / 11.4 节表里的「活跃神经元」是 **4 个试次的并集**（如 DM1_L 8,541、SUGAR_L 534）；
+> 而第 17 节 `rerun_diff.csv` 与 CLAUDE.md 里的「约 8,300」是**逐试次均值**（8,333 / 502）。两种口径并存过去没有声明，判据「< 2,000 算不失控」在两种口径下结论相同。
+
+| 刺激 | 全脑结果 | 结论 |
+|---|---|---|
+| 糖味 LB3 左 | MN9 72.5/106 Hz | ✅ |
+| 糖 + 苦（LB1a–d） | MN9 18.5/16 Hz；单独苦味 → 所有下行神经元 0 Hz | ✅ 苦味压制进食；❌ 没有回避输出 |
+| JO 左（JO-C/E 各亚型） | aDN1（右）39 Hz | ✅ |
+| **JO 右** | **aDN1 0/0 Hz** | ⚠️ 全脑里就左右不对称 |
+| LC16 双侧 | MDN 30.5/31 Hz（同时 DNa02 47/38.5、BDN2 43/39） | ✅ 但信号混杂 |
+| 双侧 looming | MDN 4.8/5.8 Hz，巨纤维 154/172 Hz | 正面威胁主要触发逃逸 |
+| ORN DM1 / DA2 单侧（150 与 50 Hz） | 下行神经元侧化指数 \|LI\| ≤ 0.05；DM1 引发约 8,500 个神经元活动爆发；DA2 在 50 Hz 时 4 次里 3 次无反应、1 次失控 | ❌ 无侧化 |
+
+作为侧化指标的对照（读出神经元按（左 − 右）/（左 + 右）算）：JO 左刺激 → aDN1 只有右侧放电，LI = −1.00；糖味左刺激 → MN9 LI = −0.19。嗅觉刺激下行神经元的 |LI| ≤ 0.05，说明指标本身能测出侧化，是嗅觉真的没有。（旧版这里写的 +0.31 / +0.53 是另一种分组下、单次实现的值，已按重跑重算。）
+
+### 10.1 子回路 v2（`dodge/subcircuit_v2.py`）
+- 3 组候选对 9 个全脑条件做了验证。**事先定的规则**是：JSON ≤ 6 MB、JS 引擎 ≥ 3 倍实时、平均偏差最小。按此选中 **wmin=3、K=3**：4,599 个神经元、338,837 条连接，平均偏差 6.4 Hz。
+- wmin=5、K=4 这组偏差也小（6.8 Hz），但有 15,934 个神经元、JSON 22 MB，超过发布上限，浏览器里只能跑到约 1 倍实时。
+- 修复 `brain.js` 的 bug：原来只把 LC4/LPLC2 当作输入组，新输入设置频率后不生效。现在从子回路元数据读取全部输入组；修复后 JS 与 Python 结果一致。
+
+### 10.2 第 1 项：进食 + 苦味【实测】（`dodge/step_v3.js`，3 局 × 120 s，每种颗粒接触 30 次）
+
+| 条件 | 糖粒吃掉 | 苦粒 | 混合粒 |
+|---|---|---|---|
+| 完整 | 100% | 0% | 0% |
+| 糖味断突触 | 0% | 0% | 0% |
+| 苦味断突触 | 100% | 0% | **100%** |
+| 切除 MN9 输出 | 0% | 0% | 0% |
+
+- **结论**：进食受 MN9 控制；混合粒不被吃，是连接组里苦味对进食的抑制造成的。
+- **苦味只表现为“不吃”，不会绕开**：全脑里单独苦味不驱动任何下行神经元。
+- 伸喙是喙部网格的**纯视觉手写旋转**：模型里喙部没有关节。
+
+### 10.3 第 2 项：梳理【实测】
+- 72 次落灰 → 42 次梳理（58%），从落灰到开始梳理的中位延迟 0.07 s。
+- 切断 JO 或切除 aDN1 输出后都是 0%，通路是因果性的。
+- 只有六成是因为**右侧 JO 驱动不了 aDN1，全脑里也一样**。更可能是数据（注释/校对）或 LIF 阈值造成的，而不是生物学事实。
+- 梳理姿态：在 NeuroMechFly 上用逆运动学让前足尖触到同侧触角（残差 0.001 mm；该值由 `dodge/export_poses.py` 打印，未存进 `poses.json` 也无日志留存），参照 flybody 梳理姿态数据集（figshare，GPL-3.0+）里的前足梳理类型。
+
+### 10.4 第 3 项：正面威胁时后退【实测 + 探索性】
+- **事先设定**（LC16 = 0.5 Hz/(°/s) × 角速度，MDN 阈值 20 Hz，原地起跳模式）：
+  - 全场只后退约 0.2 s，正前方来球被击中率 **100%**（16 球）；
+  - 切断 LC16 或切除 MDN 前后无差别；
+  - 真实逃逸飞行模式下，正前方被击中率 0%：正面威胁靠起飞解决。
+- **探索性扫描**（事后加；2 局 × 90 s；正前方每格只有 8 球）：
+  - LC16 斜率升到 5 后，整体躲开率 53% → 83%（切除巨纤维时 4% → 83%，但**这两个数口径不同**：4% 是 MDN 阈值 20 那一行，83% 只有阈值 10 的行才对得上；同为阈值 20 时斜率 5 是 **80.6%**）；
+  - 切断 LC16 就回落到 47% / 0%；
+  - 但正前方来球仍被击中 88–100%。
+  - 提升可能来自 LC16 同时驱动的 DNa02 转向，或速度变化打乱了球的瞄准，**不能说明是后退救了命**。
+
+### 10.5 第 4 项：嗅觉导航【实测，阴性】
+- 全脑（10.0 节）：单侧气味刺激的侧化指数都在 ±0.05 以内。**口径提醒（2026-09-16 核对时补）**：这个 |LI| 是**全部 167–178 个下行神经元发放率求和**后算的；而 10.0 节拿来对照的「aDN1 LI = −1.00、MN9 LI = −0.19」是**单对读出神经元**，两者不是同一个量。用同一个「全下行求和」口径算，SUGAR_L 是 +0.29、JO_L 是 +0.51。结论不变，但那组对照是苹果比橘子。
+- **复现 Fly-Brain-AI 的气味实验**（DM1 吸引 / DM5 厌恶，3 seed + 打乱连接组对照；补建了缺失的 `brain-model/flywire_annotations_matched.csv`）：**4/6 通过**，README 宣称 6/6。
+  - DM1 吸引性转向对比 +0.0010，失败；
+  - DM5 +0.0198；
+  - 所有条件的转向都被约 −0.11 的共同偏置主导。
+- **结论**：这个 LIF 连接组做不到双侧嗅觉导航，所以**没有**把嗅觉接进游戏。
+
+### 10.6 第 5 项：接腹神经索、让运动神经元驱动腿【实测，阴性】（`vnc/`）
+- **数据**：Codex 公开存储上的 BANC v888 `neurons.csv.gz` 与 `connections_princeton.csv.gz`，无需登录。
+- **网络**：取腹神经索子网络 16,407 个神经元（内部 12,851、上行 1,849、下行 1,316、腿部运动神经元 391）、654,258 条连接、641 万个突触。
+  - 递质符号：BANC 连接表的 nt_type 列为空，所以按突触前神经元的预测递质定符号（GABA/GLUT 为 −1，其余为 +1），抑制性连接占 52%。
+- **下行神经元刺激 1 s（150 Hz）**：
+
+| 刺激 | 活跃腿部运动神经元 | 表现 |
+|---|---|---|
+| BDN2 | 81 | 主要是持续伸肌放电 |
+| BDN2 + oDN1 + P9 | 89 | 同上 |
+| MDN | 6 | |
+| P9 | 3 | |
+| 巨纤维 | **0** | TTMn 未被驱动。BANC 里巨纤维到 TTMn 只有少量化学突触（左 8 个、右 5 个；2026-09-14 复查），真实动物里这条通路主要靠连接组里没有的电突触 |
+
+  - **没有节律**：4–20 Hz 功率占比 ≈ 0.2–0.48，随机噪声水平约 0.33；左右腿相关系数 0.05–0.09。
+- **驱动腿**：按 BANC 标注的关节功能（屈/伸），把“伸肌 − 屈肌”发放率差转成 NeuroMechFly（FlyGym 1.2.1，果蝇固定）的关节角偏移，增益为手选：
+
+| 驱动方式 | 腿尖摆幅中位 | 4–30 Hz 节律占比 |
+|---|---|---|
+| CPG 步态对照 | 1.03 mm | **0.98**，12.2 Hz |
+| 运动神经元 · 前进组合 | 0.90 mm | 0.53（噪声约 0.52） |
+| 运动神经元 · MDN | 0.12 mm | — |
+
+- **结论**：腿由运动神经元带动了，但只是不规则的姿势变化，**没有交替迈步**。这一点来自运动神经元发放本身，与映射增益无关。没有本体感觉反馈、LIF 没有内在节律机制，是可能的原因。
+
+### 10.7 汇总
+
+| 项目 | 状态 |
+|---|---|
+| 进食 + 苦味 | ✅ 接入游戏，因果性经损毁验证；苦味只抑制进食，不回避 |
+| 梳理 | ✅ 接入游戏；只有左侧触角有效（全脑同样如此） |
+| 正面威胁后退 | ⚠️ 接入游戏；事先设定下几乎不起作用，加强 LC16 能提升整体躲避但解决不了正面来球 |
+| 嗅觉导航 | ❌ 连接组模型无侧化；Fly-Brain-AI 复现 4/6；未接入游戏 |
+| 腹神经索驱动腿 | ⚠️ 已接通并驱动了腿，但没有迈步节律 |
+
+## 11. 第 4 轮：多巴胺、后退重做、嗅觉诊断、腹神经索换模型（2026-09-14 追加）
+
+在线页面同一链接：[果蝇闪避](https://claude.ai/code/artifact/31fb7608-dd2f-4c63-8cf1-8fc2a955e6c2)（Version 4），新增多巴胺卡片、后退重做、嗅觉诊断、腹神经索发放率模型的表格，以及“闻着找”开关。
+
+全脑参考实验 11 组（`results/v2_ref/`，Brian2，每组峰值内存 3.9–4.1 GB，串行运行），分析脚本 `dodge/v4_refs_analysis.py` → `results/v2_ref/v4_analysis.json`。指标和判据都在看结果之前写进脚本开头。另有 2 组探索性沉默实验（11.4 节）。所有仿真都串行运行，并用 `scratch/memguard.sh` 限制内存。
+
+### 11.1 吃到糖，会分泌多巴胺吗？【实测，阴性】
+
+【文献】真实果蝇里，糖的奖赏信号由 PAM 簇多巴胺神经元送到蘑菇体（Liu et al. 2012 *Nature*；Burke et al. 2012 *Nature*），甜味和营养价值由不同的 PAM 亚群编码（Huetteroth et al. 2015 *Curr Biol*）；惩罚信号主要走 PPL1 簇。
+
+全脑模型里有 PAM 307 个、PPL1 16 个、PPL2 8 个。**事先写定的判据**：只有在没有全脑失控（活跃神经元 < 2000）的条件下 PAM 放电，才算“糖味激活了奖赏多巴胺”。
+
+| 刺激 | 全脑活跃神经元 | PAM 放电 | PPL1 放电 |
+|---|---|---|---|
+| 糖味左 200 Hz · 1 s | 549 | **0/307** | 0/16 |
+| 糖味左 200 Hz · 0.5 s | 534 | **0/307** | 0/16 |
+| 苦味双侧 200 Hz | 140 | **0/307** | 0/16 |
+| 糖味右 200 Hz | 8,848（失控） | 123/307，均值 18 Hz | 14/16，99 Hz |
+| 糖味双侧 100 Hz · 1 s | 8,851（失控） | 123/307，均值 9 Hz | 14/16，50 Hz |
+| 糖 + 苦 200 Hz | 9,004（失控） | 124/307，均值 18 Hz | 14/16，96 Hz |
+| 对照：气味 DM1 左 10 Hz | 8,481（失控） | 124/307，均值 19 Hz | 14/16，103 Hz |
+| 对照：LC16 双侧 150 Hz | 983 | **0/307** | 1/16，0 Hz |
+
+- 不失控时，糖味刺激下 PAM **一个都不放电**。
+- 多巴胺神经元只在全脑失控时放电，而且 PPL1（惩罚）比 PAM（奖赏）更强；气味引起的失控里也一模一样，所以是**非特异的**。
+- 重跑（第 17 节，试次之间互相独立）把这一条测得更干净：**同一个条件的不同试次里**，糖味双侧 100 Hz 有一个试次失控（8,805 个活跃）、PAM 放电 123/307，另一个试次不失控（566 个活跃）、PAM **0/307**；气味 DA2 左 50 Hz 也一样，3 个试次几乎无反应、PAM 0/307，第 4 个试次失控、PAM 120/307。放电与否只取决于有没有失控，与刺激是不是“奖赏”无关。
+- 不是没有连线：糖味神经元（LB3）到 PAM 最少 2 跳，全部 307 个都可达（中位 3 跳）；只算 ≥ 5 个突触的连接时，277/307 可达（中位 4 跳）。苦味神经元到 PAM 的跳数完全一样，结构上分不出奖赏和惩罚。
+- 【推测】原因：Shiu 模型把多巴胺、章鱼胺都当成普通的快速兴奋突触；真实奖赏通路里，章鱼胺经 G 蛋白偶联受体（OAMB）作用于 PAM（Burke 2012），是慢速神经调质。模型里也没有饥饿状态和突触可塑性。
+- 所以游戏里吃糖时**没有**可显示的多巴胺信号。
+
+### 11.2 LC16 剂量 → MDN【实测】
+
+| LC16 刺激 | MDN 左/右 | DNa02 左/右 | 巨纤维 | 发放最高的其他下行神经元 |
+|---|---|---|---|---|
+| 双侧 25 Hz | 0/0 | 0/0 | 0 | 无 |
+| 双侧 50 Hz | 0/0 | 4/0 | 0 | DNa13 5 Hz，DNp18 / DNp71 / DNa01 / DNa02 各 4 Hz |
+| 双侧 100 Hz | 11.5/14.0 | **32/15.5** | 0 | DNa13 30–48，DNb09 32，DNge050 26，BDN2（DNg100）**21.5/21.5** |
+| 双侧 150 Hz | 30.5/31.0 | **47/38.5** | 0 | DNa13 48–62，DNge050 **54**，DNb09 44，BDN2 **43/39** |
+| 只刺激左侧 100 Hz | 0/0 | 0/**18** | 0 | DNp43(l) 24，右侧 DNa01 **20**，DNa13(r) 18–19 |
+| 只刺激右侧 100 Hz | 4.2/6.2 | **41/2** | 0 | DNa13 40–42，左侧 DNa01 **33**，DNp71 32，BDN2 28/28 |
+
+> **更正（2026-09-16）**：本表除 MDN 一列外，其余各列长期停留在**第 17 节重跑之前**的旧值
+> （旧：双侧 150 Hz DNa02 32/44、双侧 100 Hz 30/18、左侧 0/16、右侧 40/0、BDN2 46 与 28–32）。
+> 因此本表和 §10.0 同一条件的数字**互相矛盾**（那里写的 47/38.5 才是重跑后的正确值），却一直没被发现。
+> 现已全部改按 `results/v2_ref/v4_analysis.json` 与 `rerun_diff.csv` 的重跑值。结论（MDN 需双侧 ≥ 100 Hz）不受影响。
+
+- MDN 要**双侧** LC16 ≥ 100 Hz 才开始放电；只刺激一侧几乎不行（≤ 5 Hz）。这和“正面威胁才后退”一致：正前方物体同时落在两眼视野里。
+- LC16 同时强烈驱动 DNa13、DNa01/DNa02，还有前进指令神经元 BDN2，**不是只管后退**。
+- 单侧 LC16 驱动对侧（按注释胞体侧）的 DNa01/DNa02。按游戏的转向映射，左眼 LC16 → 往右转，即背离威胁。
+- MDN 左右差很小，所以没有另加“MDN 左右差 → 转向”的映射。
+
+### 11.3 后退实验重做【实测，设计事先写定】（`dodge/backward_v4.js` → `results/dodge/backward_v4.json`）
+
+**设计**（写在脚本开头，跑之前定好）：
+- 每次只有一个威胁，从果蝇正前方 40 mm、方位 ±10° 发出。
+- 两种威胁：**滚球**是原游戏的球，按“果蝇继续前进”的提前量瞄准，穿过后继续滚；**扑击**瞄准发射时果蝇所在位置，到点停住 0.3 s 后消失。
+- 3 档速度（15/30/60 mm/s）× 3 档 LC16 编码斜率（0.5 是第 3 轮事先声明值，另加 2、5）× 5 种切除，每格 3 个种子 × 8 个威胁 = 24 个，共 2,160 个威胁，原地起跳模式。
+- 运行前修了 `game_core.js` 的提前量瞄准：球速低于果蝇行走速度（18 mm/s）时，原公式会把球瞄到果蝇身后；现在取最早的正解。页面的球速 35/60/95 mm/s 不受影响。
+- 事先写下的物理预期：后退速度 12 mm/s；滚球会继续滚，正面来球时后退只能推迟被击中；扑击要在接触前净退出 ≥ 3.9 mm（球半径 + 果蝇半径）才躲得开。
+
+**击中率**（“只剩后退”一列括号内是出现后退的威胁比例、接触前平均后退距离）：
+
+| 威胁 | 速度 | LC16 斜率 | 完整 | 切巨纤维（后退 + 转向） | + 切 MDN（只剩转向） | + 切 DNa（只剩后退） | + 断 LC16 |
+|---|---|---|---|---|---|---|---|
+| 滚球 | 15 mm/s | 0.5 | 92% | 100% | 96% | 100%（后退 8%，0.0 mm） | 100% |
+| 滚球 | 15 mm/s | 2 | 46% | 33% | 38% | 100%（后退 96%，0.4 mm） | 100% |
+| 滚球 | 15 mm/s | 5 | 33% | 29% | 17% | 100%（后退 100%，1.9 mm） | 100% |
+| 滚球 | 30 mm/s | 0.5 | 100% | 100% | 100% | 100%（后退 17%，0.0 mm） | 100% |
+| 滚球 | 30 mm/s | 2 | 100% | 96% | 75% | 100%（后退 100%，1.0 mm） | 100% |
+| 滚球 | 30 mm/s | 5 | 79% | 42% | 21% | 100%（后退 100%，4.6 mm） | 100% |
+| 滚球 | 60 mm/s | 0.5 | 100% | 100% | 100% | 100%（后退 29%，0.0 mm） | 100% |
+| 滚球 | 60 mm/s | 2 | 100% | 100% | 100% | 100%（后退 100%，1.8 mm） | 100% |
+| 滚球 | 60 mm/s | 5 | 92% | 100% | 79% | 100%（后退 100%，5.1 mm） | 100% |
+| 扑击 | 15 mm/s | 0.5 | 58% | 54% | 50% | 100%（后退 63%，0.0 mm） | 50% |
+| 扑击 | 15 mm/s | 2 | 50% | 46% | 42% | 100%（后退 100%，0.5 mm） | 50% |
+| 扑击 | 15 mm/s | 5 | 21% | 17% | 38% | 100%（后退 100%，2.1 mm） | 50% |
+| 扑击 | 30 mm/s | 0.5 | 100% | 96% | 96% | 100%（后退 67%，0.0 mm） | 96% |
+| 扑击 | 30 mm/s | 2 | 100% | 83% | 79% | 100%（后退 100%，1.0 mm） | 96% |
+| 扑击 | 30 mm/s | 5 | 54% | 42% | 38% | 100%（后退 100%，4.1 mm） | 96% |
+| 扑击 | 60 mm/s | 0.5 | 100% | 100% | 100% | 100%（后退 46%，0.0 mm） | 100% |
+| 扑击 | 60 mm/s | 2 | 100% | 100% | 88% | 100%（后退 100%，1.8 mm） | 100% |
+| 扑击 | 60 mm/s | 5 | 100% | 92% | 75% | 100%（后退 100%，5.0 mm） | 100% |
+
+- **单靠后退一次都没躲开**：18 格全部 100% 被击中，包括每个威胁都触发了后退、接触前退了 4–5 mm 的格子。果蝇发现威胁之前一直在往前走，后退只抵消了这段前进；滚球还会继续滚过来。
+- **躲开靠的是 LC16 驱动的转向**：只保留转向时，LC16 斜率 5 下击中率降到 17–79%，速度越快越难躲。事先声明的斜率 0.5 下，LC16 太弱，几乎来不及反应（50–100% 被击中）。
+- **在转向上再加后退，多数格子没有改善，有的更差**：例如滚球 30 mm/s、斜率 5 时，42% 对比只转向的 21%。只有扑击 15 mm/s、斜率 5 时后退有帮助（17% 对比 38%）。每格只有 24 个威胁，±20 个百分点以内的差异不能当真。
+- **断开 LC16 后滚球全部被击中**。慢速扑击（15 mm/s）仍有一半躲开，来自 LC4/LPLC2 驱动的转向或行走中的随机偏转。
+- **原地起跳模式下，保留巨纤维常常更容易被击中**：起跳那 0.3 s 里果蝇不能转向。
+- **结论**：在这个游戏里，连接组的 LC16 → MDN 后退通路没有带来躲避好处，LC16 → DNa 的转向才是有效成分。页面默认值没有按这些结果去改，仍是事先声明的斜率 0.5。
+- 游戏子回路 JS 引擎（node，单线程）：5,916 s 仿真用时 1,091 s，**5.4 倍实时**，峰值内存 194 MB。
+
+### 11.4 嗅觉：降低强度、换读出窗口、找失控源头【实测 + 探索性，阴性】
+
+**降低强度**（事先写定：失控起点 = 5 ms 分箱内活跃神经元首次 ≥ 500 的时刻；比较起点之前的左右脉冲；侧化成立 = 左、右刺激的下行神经元 LI 符号相反且 |LI| ≥ 0.2）。表中脉冲数是每次试验、起点之前的左/右合计：
+
+| 刺激 | 全脑活跃神经元 | 失控起点 | 投射神经元 左/右 | 下行神经元 左/右 |
+|---|---|---|---|---|
+| DM1 左 10 Hz（35 个受体） | 8,481 | 30 ms | 67 / 27 | 0 / 0 |
+| DM1 左 20 Hz | 8,519 | 20 ms | 30 / 7 | 0 / 0 |
+| DM1 右 20 Hz | 8,509 | 25 ms | 103 / 40 | 1 / 0 |
+| DM1 左 50 Hz | 8,505 | 20 ms | 110 / 53 | 1 / 1 |
+| DA2 左 100 Hz（16 个受体） | 8,441 | 65 ms | 156 / 91 | 8 / 5 |
+| DA2 左 50 Hz | 8,071（4 个试次里 3 次只有被刺激的 16–17 个神经元活动、1 次失控到 8,071） | 320 ms | 118 / 70 | 4 / 2 |
+
+- 降到 10 Hz 照样失控，而且是全或无：每个试次要么只有被刺激的几十个神经元动，要么直接冲到 8,000 多个，中间状态没有。
+- **更正（第 17 节重跑）**：旧数据说“DA2 左 50 Hz 完全无反应”，那只是一个试次。试次独立之后，同样的刺激 4 次里有 1 次失控（8,071 个活跃）、3 次几乎无反应——阈值附近**是概率性的**。糖味双侧 100 Hz 同样，2 次里 1 次失控。失控前下行神经元的脉冲最多也只有个位数（0–8 个），左右差没有稳定符号，**判据仍然不成立**。
+- 失控集合与刺激无关：DM1 左 10 Hz 与 DA2 左 100 Hz、DM1 右 20 Hz、糖味双侧 100 Hz 的活跃神经元重叠（Jaccard）分别为 0.97、0.97、0.91。
+- **右侧 DM1 刺激时，反而左侧投射神经元更活跃**。查了结构：右侧 DM1 受体 → 左侧 DM1 投射神经元 1,664 个突触，→ 右侧 1,288 个；左侧受体 → 左 2,064、→ 右 1,183。左侧 DM1 投射神经元的输入整体更多，所以左右读出首先受重建数据的左右差影响。【推测】可能与感觉神经元 side 标注的定义或重建完整度有关。
+
+**找失控源头**（探索性，事后提出）：
+- 失控前 15 ms 最先放电的是触角叶局部神经元（lLN2T、lLN2P、v2LN30、il3LN6）、侧角神经元（LHCENT12b、LHAV4a1_b）和 DM1 投射神经元；糖味引起的失控则从咽下神经节（CB0700、MNx01 等）开始。
+- 5 个失控条件里有 ≥ 4 个共有的“点火”神经元只有 4 个：M_l2PNl20、2 个 lLN2T_b、lLN2X04。lLN2T_b/c 的预测递质是 5-羟色胺、已知递质是乙酰胆碱，模型里两种都按兴奋处理。
+- 沉默实验（DM1 左 20 Hz，判据：活跃 < 2,000 才算阻止失控，阻止了才跑右侧）：
+
+| 条件 | 全脑活跃神经元 | 下行神经元 LI | 投射神经元 LI |
+|---|---|---|---|
+| 原样 | 8,519 | -0.01 | +0.05 |
+| 沉默 4 个核心 | 8,248 | -0.03 | +0.02 |
+| 沉默 120 个兴奋性局部神经元（乙酰胆碱/5-羟色胺） | 3,414 | +0.14 | +0.53 |
+
+- 沉默兴奋性局部神经元后失控明显减弱（8,519 → 3,414），但仍超过判据，按规则没有跑右侧。而且左侧 LI 只有 +0.14，本来就达不到 0.2。
+- **结论**：这个 LIF 连接组里，嗅觉输入是“全或无”的全脑失控，给不出转向信号。游戏里的“闻着找”只能手写（11.6 节）。
+
+### 11.5 腹神经索：换成 Pugliese 2025 发放率模型【社区代码 · 实测】（`vnc/run_pugliese.py`、`vnc/analyze_pugliese.py`、`vnc/drive_legs_pugliese.py`）
+
+- **来源**：【社区】Pugliese et al. 2025 bioRxiv，代码 github.com/smpuglie/Pugliese_cpg_2025 @ `faee4b0`。**仓库没有许可证**，只在本机 import 调用，没有复制代码；新建 conda 环境 `vnc-sim`（JAX 0.9.2、diffrax 0.7.0，只用 CPU）。
+- **模型**（作者代码与默认参数，未改）：发放率神经元 τ·dr/dt = −r + max(0, r_max·tanh(a/r_max·(W·r + I − θ)))；τ、a、θ、r_max 每个神经元随机抽样，每组抽样叫一个“副本”。网络是作者发布的 MANC 前足神经节，4,604 个神经元，其中下行 1,318、中间 2,471、左右前腿运动神经元各 72 个。
+- **容差**：用作者教程建议的宽松容差（rtol 1e-4、atol 1e-7）。先用 2 个副本和默认容差对比：发放率最大差 0.38 Hz，振荡得分差 ≤ 0.015，频率相同，速度快约 3.6 倍。单个副本 2 s 仿真耗时 0.2–36 s（DNg100 约 9–16 s，MDN 15–36 s），峰值内存 ≤ 2.2 GB。
+- **节律判据**：用作者的振荡得分（自相关峰，≥ 0.5 记为振荡）。
+
+| 刺激 | 振荡副本 | 频率中位 | 每副本活跃运动神经元（> 1 Hz） | 主要活跃模块 |
+|---|---|---|---|---|
+| 不刺激 | 0/16 | — | 0 | — |
+| 左 DNg100（前进指令，作者默认实验） | **16/16** | **10.6 Hz** | 1.9 | 左腿 coxa swing |
+| 双侧 DNg100 | **16/16** | **11.2 Hz** | 3.1 | 左 coxa swing、右 femur/tr flex |
+| 4 个 MDN（后退），I = 250 | 0/16 | — | 83.6 | 两侧屈肌为主，持续放电 |
+| MDN，I = 150（事后追加） | 0/8 | — | 90.2 | 同上 |
+| MDN，I = 100（事后追加） | 0/8 | — | 94.5 | 同上 |
+| 左 DNa02（转向），I = 300 | 1/16 | — | 6.0 | 左 coxa stance、femur reductor、tibia flex |
+
+- **有节律了**：第 3 轮的 BANC LIF 模型没有节律；换成作者的发放率模型后，DNg100 刺激在 16 个副本里全部出现约 11 Hz 的运动神经元振荡。
+- **但不是完整步态**：每个副本只有 2–4 个运动神经元参与（共 144 个）。事先写定的指标下，双侧刺激时同一条腿“摆动模块”与“支撑模块”发放率的相关中位是 **+0.73**（同相，不是交替），左右腿相关 +0.06（无关）。
+- **MDN 在三档刺激强度下都没有节律**，而是招募 80–95 个运动神经元持续放电。
+
+**驱动前腿**（FlyGym 1.2.1，身体固定，中腿和后腿固定在平均姿态）：
+- 模块 → 关节：coxa swing/stance → ThC，femur/tr extend/flex → CTr，tibia extend/flex → FTi。
+- 方向取自 FlyGym 预设步态（真实果蝇运动学）在摆动相与支撑相的平均角。
+- 目标角 = 支撑极值 + u × (摆动极值 − 支撑极值)，u = 摆动发放率 / (摆动 + 支撑)。
+
+| 驱动方式 | 左前腿 摆幅 · 节律占比 | 右前腿 | 左右相位差 |
+|---|---|---|---|
+| CPG 三足步态对照 | 0.83 mm · 0.98 @ 12.1 Hz | 0.83 mm · 0.99 | −179°（交替） |
+| 左 DNg100 #0 | 0.20 mm · 0.84 @ 11.6 Hz | 基本不动（0.02 mm） | — |
+| 双侧 DNg100 #0/#1/#3 | 0.18–0.19 mm · 0.80–0.92 @ 10.5–12.1 Hz | 基本不动（≤ 0.014 mm） | — |
+| 双侧 DNg100 #2 | 0.20 mm · 0.75 @ 5.8 Hz | 0.31 mm · 0.25（无节律） | — |
+| MDN #0 | 0.94 mm · 0.06（无节律，姿势偏移） | 0.26 mm · 0.22 | — |
+| 左 DNa02 #0 / 不刺激 | 不动 | 不动 | — |
+
+- **结论**：从“完全没有节律”进步到“左前腿按 11–12 Hz 节律摆动”。但幅度只有 CPG 的约 1/4，右前腿基本不动，左右不交替，摆动和支撑同相，**还不是迈步**。
+- 【推测】原因：网络只有前足神经节，没有中后足和腿间耦合；没有本体感觉反馈；作者论文用了 1,024 个副本和剪枝去找核心回路，这里只随机抽了 16 个。
+
+**当时没做、后来在第 12 节补做的部分**：巨纤维 → TTMn 电突触（12.3 节）、本体感觉闭环（12.4 节）、全腹神经索 6 条腿（12.1–12.2 节）。
+
+### 11.6 游戏里的“闻着找”（手写，非连接组）【实测】（`dodge/odor_v4.js` → `results/dodge/odor_v4.json`）
+
+- **为什么是手写的**：11.4 节说明连接组模型给不出气味转向信号，所以这一步不经过连接组。
+- **规则**（`game_core.js` 的 `odorNav`，页面开关“闻着找”，默认关）：
+  - 颗粒散发高斯气味场，σ = 15 mm；
+  - 左右触角位于胸部前方 1.0 mm、左右相距 0.6 mm，各采一次浓度；
+  - 浓度 > 0.01 时，朝浓度高的一侧以 120°/s 转向，叠加在 DNa 转向上；
+  - 尝过（碰过）的颗粒不再吸引。
+- **吃不吃仍由连接组决定**：碰到颗粒 → 糖/苦味觉神经元 → MN9。
+- **检验设计**（事先写定）：每局依次放 6 颗（糖 → 苦 → 混合，各 2 颗），距果蝇 25 mm、方位随机；每颗最多等 20 s；3 个种子。
+
+| 闻着找 | 20 s 内碰到颗粒 | 用时中位 | 糖 吃掉/碰到 | 苦 | 混合 |
+|---|---|---|---|---|---|
+| 关 | 0/18 | — | 0/0 | 0/0 | 0/0 |
+| 开（手写） | 18/18 | 1.9 s | 6/6 | 0/6 | 0/6 |
+
+- 结果符合构造：规则是手写的，找到颗粒是必然的，这**不是**连接组能力的证据。
+- 有意思的是分工：手写嗅觉把果蝇带到每一颗颗粒前，连接组只吃糖粒，苦粒和混合粒都不吃。
+
+### 11.7 加上强化训练会怎样？这台电脑能不能跑？【文献 + 实测速度 + 推测】
+
+**先说清楚现状**：现在的连接组模型**不会学习**。突触权重是固定的测量值，没有可塑性；11.1 节也测到，吃糖时奖赏多巴胺神经元根本不放电。所以“强化训练”要么是给模型加上学习机制，要么是在模型外面训练别的东西。
+
+**四条路线**：
+
+| 路线 | 训练什么 | 能回答的问题 | 本机 |
+|---|---|---|---|
+| ① 蘑菇体多巴胺学习（推荐） | Kenyon 细胞 → 蘑菇体输出神经元（MBON）的突触，由多巴胺神经元门控 | 果蝇能不能在连接组约束下“学会”把气味和糖联系起来 | 能跑，分钟级【推测】 |
+| ② 调游戏里手写接口的参数 | 视觉编码斜率、阈值、转向增益等十几个数，连接组不动 | 手写接口最优能躲到多好 | 能跑，小时级【推测】 |
+| ③ 训练身体控制器（flybody 路线） | 行走/飞行神经网络策略 | 身体怎么走、怎么飞 | 从零训练很慢（见下），论文训练好的控制器可以下载 |
+| ④ 训练连接组权重本身 | 每类突触的强度（符号与连线不变） | 连接组结构能否支持某个任务 | 子回路上能跑；训练后不再是“测得的连接组” |
+
+- **① 为什么推荐**：这是果蝇自己的强化学习机制。【文献】多巴胺神经元把奖赏/惩罚信号送到蘑菇体，与气味同时出现时改变 Kenyon 细胞 → MBON 突触的强度（Hige et al. 2015 *Neuron*）；不同 MBON 分别驱动趋近或回避（Aso et al. 2014 *eLife*）。FlyWire 里有全部 5,177 个 Kenyon 细胞、96 个 MBON、331 个多巴胺神经元。
+  - 要手写的部分：一条多巴胺门控的可塑性规则（有文献依据）。另外，因为模型里吃糖激活不了 PAM，只能把“吃到糖”直接接成 PAM 放电，相当于实验里用光遗传激活 PAM 当奖赏。
+  - 可以做的实验：气味 A 配糖训练若干次 → 看 MBON 对气味 A 的反应变化 → 游戏里果蝇学会靠近气味 A。
+  - 风险：11.4 节里嗅觉输入在全脑会失控，需要先在蘑菇体子回路里验证不失控。
+- **② 的限制**：训练出来躲避率更高，只说明手写接口调得好，**不能**当成“果蝇大脑更聪明”的证据。这正是前面几轮一直避免的“为了结果去调手写规则”，只能作为明确标注的工程模式。
+- **③ 的数字**：
+  - 【官方论文】flybody（Vaxenburg et al. 2025 *Nature*）原文：训练需要约 10⁹ 个仿真步（行走）和 10⁸ 步（飞行），另有 10⁸ / 10⁷ 次策略网络更新；他们用 Ray 做多 CPU + GPU 并行，“把训练时间从几周降到几天或几小时”；训练好的控制网络在 Figshare 公开。
+  - 【实测】本机 flybody 环境随机动作步进（`scratch/probe_rl_speed.py`）：walk_on_ball 每秒 345 个控制步（控制步长 2 ms，每步含 10 个物理步）；flight_imitation 每秒 217 个控制步（0.2 ms，每步含 4 个物理步）。
+  - 【推测，线性估算，只算仿真、不算网络更新】论文没说“仿真步”指控制步还是物理步，所以给两个数：行走 10⁹ 步单进程约 34 天（按控制步）或 3.4 天（按物理步）；飞行 10⁸ 步约 5.3 天或 1.3 天。本机 6 个性能核理想并行再除以 6。网络更新另算：10⁸ 次更新哪怕每次只要 1 ms，也要约 28 小时。
+  - 所以本机从零训练身体控制器按“天到周”计；更实际的是下载论文训练好的控制器直接用。这一点我还没下载验证。
+- **本机其他实测速度**，供参考：
+  - 全脑 LIF（Brian2）：1 s 大脑时间约 2.6–3.8 s，峰值 4 GB；
+  - 腹神经索发放率模型：2 s 仿真 9–36 s，≤ 2.2 GB；
+  - 游戏子回路 JS 引擎（4,599 个神经元）：5.4 倍实时，194 MB。路线 ② 里评估一组参数、打一局 60 s，约 11 s；1,000 次评估约 3 小时。
+
+### 11.8 汇总
+
+| 项目 | 状态 |
+|---|---|
+| 吃到糖分泌多巴胺 | ❌ 模型里没有：不失控时 PAM 0/307 放电；失控时的放电是非特异的；原因推测是模型没有神经调质和可塑性 |
+| 正面威胁后退 | ⚠️ MDN 需要双侧 LC16 ≥ 100 Hz；重做实验里单靠后退 18/18 格全被击中，躲开靠 LC16 → DNa 转向 |
+| 嗅觉导航 | ❌ 连接组给不出信号：10 Hz 刺激就全或无失控，沉默点火神经元也救不回；✅ 游戏里加了明确标注的手写“闻着找”（18/18 找到，只吃糖粒） |
+| 腹神经索驱动腿 | ⚠️ 换成 Pugliese 发放率模型后有约 11 Hz 节律（16/16），左前腿能节律摆动；但只有 2–4 个运动神经元、幅度约 1/4、左右不交替，还不是迈步；MDN 无节律 |
+| 强化训练 | 📋 未实施，只给了路线与本机实测速度：推荐蘑菇体多巴胺学习（本机能跑）；身体控制器从零训练按天到周计 |
+
+**本轮新增文件**：
+- 分析：`dodge/v4_refs_analysis.py`、`dodge/v4_olfaction_runaway.py`、`dodge/v4_olfaction_silencing.py`
+- 对局：`dodge/backward_v4.js`、`dodge/odor_v4.js`
+- 腹神经索：`vnc/run_pugliese.py`、`vnc/analyze_pugliese.py`、`vnc/drive_legs_pugliese.py`
+- 页面：`dodge/collect_v4_results.py`
+- 运行脚本：`scratch/queue_v4.sh`、`scratch/olf_silence.sh`、`scratch/probe_rl_speed.py`
+- 改动：`dodge/game_core.js`（扑击威胁、提前量瞄准修正、`odorNav`）、`dodge/fly_dodge.template.html`、`dodge/build.py`
+- 结果：`results/v2_ref/{v4_analysis,olfaction_runaway,olfaction_silencing}.json`、`results/vnc/pugliese/`、`results/dodge/{backward_v4,odor_v4,rl_speed,v4_results}.json`
+
+
+## 12. 腹神经索三项：全腹神经索 6 条腿、巨纤维电突触、本体感觉闭环（2026-09-14 追加）
+
+### 12.0 更正
+
+- 11.8 节之后我在对话里说过“MANC 里巨纤维到 TTMn 的化学突触是 0”，这是错的：读作者矩阵时列号错开了一位。
+- 按正确的列重读：MANC 里巨纤维到 TTMn 有化学突触，右 146 个、左 135 个，都是同侧配对。BANC 里只有 8 个（左）和 5 个（右）。巨纤维与 TTMn 之间的电突触，两个连接组里都没有。
+- 10.6 节表格和页面里的相应说法已改正。
+
+### 12.1 全腹神经索（MANC，23,532 个神经元）【社区模型 · 实测】（`vnc/manc_full.py`、`vnc/analyze_manc_full.py`）
+
+**做法**：
+- 作者的全腹神经索矩阵照作者代码稠密载入要约 9 GB，所以改成稀疏存储：1,372,404 条连接、2,415 万个突触，按列分块转换用时 3 s，峰值 634 MB。
+- 方程、参数抽样、求解器与作者一致，只把矩阵乘法换成稀疏版本。
+- **先在前足网络上对齐检验**：用自写代码按作者方式抽样，参数与作者 `prepare_neuron_params` 完全相同。稀疏版运动神经元发放率与作者稠密版最大差 0.11–0.15 Hz（判据 ≤ 0.5 Hz），速度还快一倍——**这半句无出处**：只记录了稀疏版的 4.5/4.7 s，没有稠密版计时（最大差 0.11–0.15 Hz 那半句有据可查）。
+- 全腹神经索每个副本 **0.4–109.9 s**，峰值内存 1.25 GB。
+
+**刺激强度要重新定**：
+- 作者的全腹神经索配置没有公开。作者按“网络里神经元大小的中位数”缩放阈值和增益，全腹神经索的中位数比前足网络小，同样的电流驱动更弱。
+- 探针：双侧 DNg100 在 I = 250 时只有 9.5/9.8 Hz，腿部运动神经元一个都不动。
+- 所以在看任何节律结果之前，按“DNg100 发放率与前足网络默认实验相同（约 16 Hz）”反推出 I ≈ 350，定为主条件；保留 250/400/600 做剂量对照。
+
+| 条件 | 振荡副本 | 失控副本（全网 ≥ 2,000 个神经元活跃） | 振荡副本的频率 | 振荡副本里活跃的腿部运动神经元 |
+|---|---|---|---|---|
+| 不刺激 | 0/8 | 0/8 | — | — |
+| 双侧 DNg100，I = 250 | 0/8 | 0/8 | — | 0 |
+| **双侧 DNg100，I = 350（主条件）** | **12/16** | 3/16 | 8.0–11.5 Hz | 4–18 个 |
+| 双侧 DNg100，I = 400 | 3/8 | 4/8 | 7.2–10.8 Hz | 9–26 个 |
+| 双侧 DNg100，I = 600 | 0/8 | **8/8** | — | — |
+| 左侧 DNg100，I = 350 | 4/8 | 0/8 | 6.6–11.5 Hz | 0–1 个（振荡幅度 < 1 Hz） |
+| 4 个 MDN，I = 250 | 0/8 | **8/8** | — | — |
+| 4 个 MDN，I = 400 | 0/8 | **8/8** | — | — |
+
+**主条件下每条腿的情况**（16 个副本；“振荡”指该腿运动神经元的作者得分均值 ≥ 0.5）：
+
+| 腿 | 前左 | 前右 | 中左 | 中右 | 后左 | 后右 |
+|---|---|---|---|---|---|---|
+| 振荡的副本比例 | 31% | 19% | 12% | 44% | 12% | **75%** |
+| 频率中位 | 8.4 Hz | 9.5 Hz | — | 9.9 Hz | — | 9.5 Hz |
+
+**腿间相位**（用每条腿的 E1 中间神经元，作者 Extended Data Fig. 8 用的同一类；只在振荡副本里、两条腿都振荡且频率相差 ≤ 1 Hz 时算）：
+
+| 腿对 | 三足步态预期 | 实测圆均值（一致性 R，样本数） |
+|---|---|---|
+| 前左–前右 | 180° | 49°（0.46，4） |
+| 中左–中右 | 180° | 134°（1 个样本） |
+| 后左–后右 | 180° | 7°（0.41，3） |
+| 中左–后左 | 180° | 12°（0.87，4） |
+| 中右–后右 | 180° | 18°（0.93，6） |
+| 前右–中右 | 180° | −138°（0.93，3） |
+| 前右–后右 | 0° | −136°（0.96，6） |
+
+- **结论**：有了中后足之后，DNg100 的节律会传到 6 条腿的运动神经元，但节律窗口很窄：I = 250 不动，I = 350 多数振荡，I ≥ 400 大多失控。
+- 腿间相位与三足步态不符：同侧中–后腿几乎同相（12°、18°，一致性高），前右与后右反相。每对样本只有 1–6 个，只能说“没有看到三足步态”。
+- 同一条腿的摆动模块与支撑模块强烈同相（相关 +0.94），不是交替。
+- MDN（后退指令）两档强度下 16/16 全部失控，没有节律。
+
+### 12.2 驱动 NeuroMechFly 的 6 条腿【实测】（`vnc/drive_legs_manc.py`）
+
+**映射**：
+- 与前足网络的映射相同，推广到 6 条腿。
+- 用哪个关节自由度由规则决定：取 FlyGym 真实步态数据里摆动相与支撑相平均角差最大的那个。结果是胸-基节全用 Coxa，基-转节前中腿用 Femur_roll、后腿用 Femur，腿节-胫节用 Tibia。
+- 身体固定。
+
+| 驱动方式 | 前左 | 中左 | 后左 | 前右 | 中右 | 后右 |
+|---|---|---|---|---|---|---|
+| CPG 三足步态对照 | 0.83 mm · 0.98 | 1.07 · 0.96 | 1.03 · 0.98 | 0.83 · 0.99 | 1.07 · 0.97 | 1.03 · 0.98（12.1 Hz） |
+| 主条件 #0 | 0.04 | 0.07 | 0.03 | 0.04 | 0.07 | **0.72 mm · 0.89 @ 9.5 Hz** |
+| 主条件 #1 | 0.04 | 0.07 | 0.03 | 0.04 | 0.07 | **0.59 · 0.48 @ 8.9 Hz** |
+| 主条件 #2 | 0.03 | 0.05 | 0.02 | 0.03 | 0.05 | **0.59 · 0.86 @ 10.0 Hz** |
+| 主条件 #3（失控） | 0.45 · 0.14 | 1.27 · 0.08 | 1.33 · 0.21 | 0.29 · 0.13 | 1.20 · 0.05 | 1.58 · 0.42 |
+| 双侧 I = 600 #0（失控） | 0.44 · 0.49 | 1.39 · 0.45 | 1.46 · 0.29 | 0.28 · 0.71 | 1.04 · 0.27 | 1.52 · 0.38 |
+| MDN I = 400 #0（失控） | 0.63 · 0.41 | 0.52 · 0.49 | 0.62 · 0.36 | 0.42 · 0.25 | 0.42 · 0.29 | 0.85 · 0.15 |
+| 左侧 I = 350 #0、不刺激 | 不动 | 不动 | 不动 | 不动 | 不动 | 不动 |
+
+表中数字为腿尖前后摆幅（mm）· 4–30 Hz 节律占比。
+
+- **相位指标本身是可靠的**：CPG 对照测得左右 −179°、同侧相邻 ±155°、同侧前后 −5°，正是三足步态。
+- 主条件下，**只有右后腿稳定地按 9–10 Hz 节律摆动**，幅度 0.6–0.7 mm，约为 CPG 的 60–70%；其余 5 条腿摆幅 ≤ 0.07 mm。它们一起抖的频率**各副本并不相同**（rep0 14.2 Hz、rep1 6.3 Hz、rep2 10.0 Hz；原文只写了 rep0 的 14.2 Hz），是身体振动，不是迈步。按事先的 0.05 mm 门槛算出了中左–中右 ±180° 的相位，但这是振动造成的，没有意义。
+- 失控时 6 条腿都大幅乱动，但没有节律。
+- **结论**：全腹神经索比前足网络多了一条能节律摆动的腿（右后腿），幅度也更大，但仍然没有腿间协调，不是步态。
+
+### 12.3 巨纤维 → TTMn 电突触【实测 + 手写耦合】（`vnc/manc_full.py gap` → `results/vnc/manc_full/gap_summary.json`）
+
+**设计**（运行前写定）：
+- 刺激双侧巨纤维（DNp01）两档强度：按副本平均参数反推，让巨纤维发放率达到 16 Hz（I ≈ 1,925）或 100 Hz（I ≈ 9,670）。
+- 发放率模型没有膜电位，电突触只能近似为对称的发放率耦合：TTMn 的输入加上 g·(r_巨纤维 − r_TTMn)，巨纤维的输入加上 g·(r_TTMn − r_巨纤维)。
+- g = 等效突触数 × 0.03，与化学突触同单位；同侧配对，取 0（只有化学突触）、150（≈ 化学突触数）、1,500 三档。
+- 副本 0–3，参数与 12.1 节相同。
+
+**结果**（4 个副本的中位数；TTMn 发放率为 230 ms 之后的平均）：
+
+| 巨纤维刺激 | 电突触 | 实际巨纤维 右/左 | TTMn 右/左 | TTMn 峰值 右/左 | 半峰时间 | 失控副本 |
+|---|---|---|---|---|---|---|
+| 标定 16 Hz | 无（只有化学突触） | 1.2 / 2.1 Hz | 0 / 0 | 2 / 0 Hz | 75 ms | 4/4 |
+| 标定 16 Hz | 150 | 1.2 / 2.0 | 0 / 0 | 5 / 0 | 67 ms | 4/4 |
+| 标定 16 Hz | 1,500 | 0.8 / 1.4 | 0 / 0 | 12 / 6 | 27 ms | 4/4 |
+| 标定 100 Hz | 无（只有化学突触） | 82 / 82 | 0 / 0 | 14 / 2 | 23 ms | 4/4 |
+| 标定 100 Hz | 150 | 79 / 78 | 0 / 0 | 26 / 10 | 22 ms | 4/4 |
+| 标定 100 Hz | **1,500** | 66 / 63 | **30 / 25 Hz**（范围 21–36 / 14–31） | 62 / 46 | 17 ms | 4/4 |
+
+- **只有化学突触时，TTMn 不会持续放电**：巨纤维 80 Hz、化学突触 135/146 个，TTMn 也只在刺激后约 20 ms 出现一个短峰，随后被压到 0。它最强的输入是抑制性中间神经元（IN21A026、IN13A022 等）。
+- **加上约为化学突触 10 倍的电突触耦合（等效 1,500 个），TTMn 才能跟住巨纤维**，持续 25–30 Hz。这个结果取决于我选的耦合强度，**不能说明真实电突触有多强**。
+- **24 次模拟全部让全腹神经索失控**（逐次 **5,165–8,375** 个神经元活跃、中足 **50–92** 个运动神经元一起放电；按 6 个条件各自 4 副本的中位数看是 5,786–7,660 与 65–83。原文的「5,000–7,900 / 65–83」把逐次口径和条件中位数口径混在了一句里，2026-09-16 更正）。“标定 16 Hz”那档，巨纤维自己也被网络反馈压到 1–2 Hz，反推的强度没有达到目标。这个模型给不出“巨纤维 → 只触发跳跃”这样干净的输出。
+- 发放率模型的时间常数是 20 ms，表现不了真实电突触毫秒级的快速传递。所以这里只看得到“能不能跟住”，不看时间。
+- 没有接身体：MANC 表里 TTMn 没有模块标注，要驱动中足得再手写一套映射。游戏里起跳本来就由巨纤维发放触发。
+
+### 12.4 本体感觉闭环【实测 · 探索性，感受器编码为手写】（`vnc/export_manc_params.py`、`vnc/proprio_loop.py`）
+
+**做法**：
+- 两个 conda 环境没法合并（JAX 在 `vnc-sim`，FlyGym 1.2.1 在 `fba`），所以先把重加权后的连接矩阵和副本 0–3 的参数导出成 numpy 文件。闭环里用 numpy 定步长 RK4（0.5 ms），与身体（0.1 ms）每 1 ms 交换一次。
+- **先对齐检验**（事先判据：主频相差 ≤ 0.5 Hz 且相关 ≥ 0.8）：不接身体的定步长开环与 12.1 节 Dopri5 结果对比，副本 0–2 主频完全相同（9.0/9.0/10.2 Hz），相关 0.999/0.993/0.999，最大差 0.26–0.68 Hz，**通过**。
+- **感受器**：只用经腿神经进入的本体感受器，按入口神经（ProLN/MesoLN/MetaLN）分到 6 条腿，共弦音器 394 个、毛板 78 个、钟形感器 9 个。左右数量不对称，例如前左 27 个、前右 66 个，来自重建数据本身。被编码的感受器发放率直接钳制为编码值。
+- **手写编码**（运行前写定）：
+  - 弦音器 → 腿节-胫节角：一半偏好大角度、一半偏好小角度，S 形曲线，中点和宽度取自 FlyGym 预设步态；
+  - 毛板 → 胸-基节角接近两端；
+  - 钟形感器 → 基-转节与腿节-胫节的扭矩，用 CPG 对照的中位数归一化。
+- **最高发放率**：16 Hz，与标定后 DNg100 的发放率同量级；另做 50 Hz 敏感性检查。
+- **对照**：开环；感受信号整体错位到别的腿（例如前左腿的感受器读中左腿的关节）。
+
+| 条件 | 活跃腿部运动神经元 | 运动神经元总活动 主频 · 节律占比 | 摆幅 ≥ 0.1 mm 的腿（摆幅 mm · 节律占比） | 感受器平均发放率（弦音器 / 毛板 / 钟形感器） |
+|---|---|---|---|---|
+| 开环 #0 | 12 | 9.0 Hz · 0.99 | 右后 0.72 · 0.89 | — |
+| 闭环 16 Hz #0 | 255 | 4.5 Hz · 0.18 | 6 条腿 0.34–1.05 · 0.10–0.33 | 8.0 / 3.2 / 1.6 Hz |
+| 信号错位 #0 | 237 | 2.8 Hz · 0.14 | 6 条腿 0.36–1.02 · 0.09–0.31 | 8.0 / 3.5 / 1.4 Hz |
+| 开环 #1 | 6 | 9.0 Hz · 1.00 | 右后 0.59 · 0.49 | — |
+| 闭环 16 Hz #1 | 257 | 2.3 Hz · 0.21 | 6 条腿 0.73–1.52 · 0.06–0.35 | 8.0 / 5.1 / 1.8 Hz |
+| 信号错位 #1 | 244 | 3.4 Hz · 0.27 | 6 条腿 0.38–1.46 · 0.05–0.37 | 8.0 / 5.0 / 2.0 Hz |
+| 开环 #2 | 8 | 10.2 Hz · 0.99 | 右后 0.59 · 0.86 | — |
+| 闭环 16 Hz #2 | 271 | 2.8 Hz · 0.67 | 6 条腿 0.66–1.41 · 0.05–0.19 | 8.0 / 4.5 / 1.9 Hz |
+| 信号错位 #2 | 274 | 2.8 Hz · 0.45 | 6 条腿 0.47–1.53 · 0.07–0.33 | 8.0 / 4.5 / 2.0 Hz |
+| 闭环 50 Hz #0 | 244 | 2.8 Hz · 0.11 | 6 条腿 0.25–1.55 · 0.05–0.61 | 25.0 / 9.7 / 4.5 Hz |
+
+- **接上本体感觉后，节律反而没了**：开环时只有右后腿按 9–10 Hz 规律摆动；闭环后 6 条腿都在大幅乱动，活跃的腿部运动神经元从 6–12 个跳到 237–274 个，与 12.1 节失控副本的水平（254–278 个）相当，节律占比降到 0.05–0.35。
+- **正确对应和错位的感受信号结果几乎一样**，50 Hz 也一样，说明起作用的不是“哪条腿、什么角度”的反馈信息。
+- 【推测】更可能是编码里很大的持续成分：弦音器平均 8 Hz，相当于 394 个弦音器一直在给网络加兴奋，把它推进了失控状态。
+- **结论**：按这套手写编码，本体感觉反馈没有帮助形成步态，只是非特异的额外兴奋。这不能说明真实果蝇的本体感觉没用，只说明这套编码不行。
+- 下一步可以改成“只在关节运动时放电、平均为零”的相位性编码，但编码形式又多一层手选。这次没有跑。
+- 用时：每次闭环 2 s 仿真 42–57 s，峰值内存 1.44 GB。
+
+### 12.4b 本体感觉闭环第二版：相位性编码【实测 · 探索性】（`vnc/proprio_loop.py run_phasic` → `results/vnc/manc_full/proprio_phasic_summary.json`）
+
+**为什么改**：第一版的持续编码让弦音器平均 8 Hz 一直放电，把网络推进失控，而且正确对应与错位对应结果一样。第二版改成“关节动了才放电、静止时为 0”。
+
+**编码**（运行前写定）：
+- 弦音器 → 腿节-胫节角速度；毛板 → 胸-基节角速度。两者都按方向分成两半：一半只在正向转动时放电，一半只在反向转动时放电，r = r_max·tanh(速度/ω0)。
+- 钟形感器 → 负载增加的速度。
+- ω0 等归一化常数取 CPG 步态里的中位数：腿节-胫节 10–21 rad/s，胸-基节 10–14 rad/s。
+- 最高发放率 16 Hz，副本 0 另做 50 Hz。开环结果沿用第一版（同一积分器和身体，没有随机性）。
+
+**判据**（运行前写定）：
+- A 不破坏节律：活跃腿部运动神经元 < 50，且总活动节律占比 ≥ 0.5。
+- B 有改善：节律腿（摆幅 ≥ 0.1 mm 且节律占比 ≥ 0.5）多于开环的 1 条。
+- C 反馈信息起作用：同一副本里正确对应与错位对应在 A 或 B 上结论不同，或节律腿数相差 ≥ 2。
+
+| 条件 | 活跃腿部运动神经元 | 总活动 主频 · 节律占比 | 摆幅 ≥ 0.1 mm 的腿（摆幅 mm · 节律占比） | 节律腿数 | A | B | 感受器平均发放率（弦音器 / 毛板 / 钟形） | 感受器活跃时间比例 |
+|---|---|---|---|---|---|---|---|---|
+| 开环 #0 | 12 | 9.0 Hz · 0.99 | 后右 0.72 · 0.89 | 1 | ✅ | ❌ | — | — |
+| 相位性 16 Hz #0 | 12 | 9.0 Hz · 0.99 | 后右 0.99 · 0.86 | 1 | ✅ | ❌ | 0.19 / 0.44 / 0.37 Hz | 2.7% / 5.3% / 3.1% |
+| 相位性 16 Hz · 错位 #0 | **274** | 3.4 Hz · 0.10 | 6 条腿乱动（0.28–1.51 mm） | 1 | ❌ | ❌ | 0.30 / 0.25 / 0.24 Hz | 4.9% / 4.8% / 3.9% |
+| 开环 #1 | 6 | 9.0 Hz · 1.00 | 后右 0.59 · 0.49 | 0 | ✅ | ❌ | — | — |
+| 相位性 16 Hz #1 | 7 | 7.9 Hz · 0.97 | 后右 0.17 · 0.65 | 1 | ✅ | ❌ | 0.05 / 0.30 / 0.22 Hz | 1.4% / 2.2% / 1.8% |
+| 相位性 16 Hz · 错位 #1 | 8 | 7.3 Hz · 0.98 | 中右 0.56 · 0.75，后右 0.59 · 0.72 | **2** | ✅ | ✅ | 0.12 / 0.16 / 0.14 Hz | 1.5% / 1.8% / 1.2% |
+| 开环 #2 | 8 | 10.2 Hz · 0.99 | 后右 0.59 · 0.86 | 1 | ✅ | ❌ | — | — |
+| 相位性 16 Hz #2 | 10 | 9.0 Hz · 0.98 | 后右 0.60 · 0.59 | 1 | ✅ | ❌ | 0.16 / 0.32 / 0.23 Hz | 2.2% / 3.2% / 1.9% |
+| 相位性 16 Hz · 错位 #2 | 11 | 8.5 Hz · 0.99 | 后右 0.59 · 0.88 | 1 | ✅ | ❌ | 0.15 / 0.19 / 0.16 Hz | 1.8% / 2.1% / 1.4% |
+| 相位性 50 Hz #0 | **261** | 2.3 Hz · 0.08 | 6 条腿乱动（0.42–1.54 mm） | 1 | ❌ | ❌ | 0.91 / 0.98 / 0.70 Hz | 5.6% / 6.1% / 4.4% |
+
+- **编码确实变成了“动了才放电”**：感受器只在 1–6% 的时间里放电，平均 0.05–1 Hz；第一版是弦音器平均 8 Hz。
+- **判据 A**：正确对应 3/3 保持节律（第一版 0/3）。错位对应 2/3 保持，副本 0 失控。50 Hz 时副本 0 也失控。
+- **判据 B**：正确对应 0/3，仍然只有右后腿按节律摆动。节律频率变化不大（9.0→9.0、9.0→7.9、10.2→9.0 Hz）；右后腿摆幅一次变大（0.72→0.99 mm）、一次变小（0.59→0.17 mm）、一次不变。唯一多出一条节律腿（中右）的是错位对应的副本 1。
+- **判据 C**：3 个副本里只有副本 0 成立，而且方向是“错位对应失控”。副本 1 里反而是错位对应多了一条腿。没有一致的证据说明反馈内容（哪条腿、往哪边转）在起作用。
+- **结论**：相位性编码解决了“反馈把网络推进失控”的问题（16 Hz 时），但没有带来更多腿的节律或腿间协调。反馈再强一点（50 Hz）又会失控，说明这个网络本身就在失控边缘。
+- **局限**：
+  - 只有 3 个副本；
+  - 身体是固定的，没有地面接触，所以没有真实的支撑相负载；
+  - 除右后腿外其他腿几乎不动，它们的感受器也就几乎没有输入，反馈很难“带动”一条不动的腿；
+  - 编码仍是手写的。
+- 用时：每组 44–46 s，峰值内存 1.18 GB。
+
+### 12.5 汇总
+
+| 项目 | 结果 |
+|---|---|
+| 全腹神经索 6 条腿 | ⚠️ 节律会传到 6 条腿的运动神经元，但窗口窄（I = 350 时 12/16 振荡，I ≥ 400 大多失控）。腿间相位不是三足步态；驱动身体后只有右后腿稳定摆动（9–10 Hz，0.6–0.7 mm） |
+| 巨纤维 → TTMn 电突触 | ⚠️ 只有化学突触时 TTMn 只出约 20 ms 的短峰。手加约 10 倍强的电突触后才持续跟随（25–30 Hz），结果由手选耦合决定。巨纤维刺激 24/24 让全腹神经索失控 |
+| 本体感觉闭环 | ❌ 第一版持续编码：反馈把网络推进失控，正确与错位结果相同。⚠️ 第二版相位性编码（12.4b）：16 Hz 时 3/3 保持节律，但仍只有右后腿有节律，错位对照没有一致差别；50 Hz 又失控 |
+| 本机资源 | 全部串行；最大峰值内存 1.44 GB；全腹神经索每个副本 **0.4–115.9 s**（含 GF 耦合扫描的 54.9–115.9 s） |
+
+**本节新增文件**：
+- 模型与分析：`vnc/manc_full.py`（build/bench/parity/run/gap）、`vnc/analyze_manc_full.py`、`vnc/drive_legs_manc.py`、`vnc/export_manc_params.py`、`vnc/proprio_loop.py`（parity/run/run_phasic）
+- 运行脚本：`scratch/queue_vnc6.sh`
+- 结果：`results/vnc/manc_full/`（W_csc.npz、summary.json、analysis.json、legs_summary.json、gap_summary.json、proprio_parity.json、proprio_summary.json、proprio_phasic_summary.json 与各条件的 npz）
+
+### 12.6 用作者的全突触数据重跑【实测】（`MANC_DATASET=all`，`scratch/queue_manc_all.sh` → `results/vnc/manc_all/`）
+
+**数据差别**：
+- 12.1–12.4 用的是作者较早的 `W_20251006`（23,532 个神经元，137 万条连接）。
+- 作者仓库里另有较新的全突触矩阵 `W_20260522_allSynapses`（23,628 个神经元）。它是 4.5 GB 的稠密矩阵，这次从 zip 流里逐列读成稀疏格式：530 万条连接、3,093 万个突触，用时 7.9 s，峰值 266 MB。
+- 两份数据里共有的连接，权重完全相同（相关 1.0、符号一致 100%）。全突触版多出 393 万条弱连接，中位只有 1 个突触（原有连接中位 10 个），另多 96 个神经元。
+
+**做法**：
+- 方程、参数抽样、判据都不变。标定规则（DNg100 16 Hz）算出 I = 360。
+- 条件缩减为和步态相关的 5 个：I = 600 和 MDN 在旧数据里全部失控，这次不重复。
+- 矩阵大了 3.9 倍，每个副本 **0.8–318.8 s**。
+
+**腹神经索（主条件：旧数据 I = 350，全突触 I = 360）**：
+
+| 指标 | 旧数据 | 全突触数据 |
+|---|---|---|
+| 振荡副本 | 12/16 | **14/16** |
+| 失控副本 | 3/16 | **1/16** |
+| 振荡频率 | 8.0–11.5 Hz | 7.2–12.5 Hz |
+| I = 400：振荡 / 失控 | 3/8、4/8 | 3/8、5/8 |
+| 左侧刺激：振荡 | 4/8 | 5/8 |
+| 各腿振荡副本比例（前左/前右/中左/中右/后左/后右） | 31/19/12/44/12/75% | 50/25/12/**69**/12/**88**% |
+| 同一条腿摆动与支撑模块相关 | +0.94 | +0.94 |
+| E1 腿间相位 | 不是三足步态 | 仍不是三足步态（中右–后右 40°，一致性 0.76，12 个样本） |
+
+**驱动 NeuroMechFly 6 条腿**（腿尖摆幅 mm · 节律占比）：
+
+| 驱动 | 前左 | 中左 | 后左 | 前右 | 中右 | 后右 |
+|---|---|---|---|---|---|---|
+| 主条件 #0 | 0.04 | 0.07 | 0.03 | 0.04 | 0.07 | **0.59 · 0.74** |
+| 主条件 #1 | 0.06 | 0.12 · 0.83 | 0.05 | 0.06 | **0.59 · 0.90** | **0.80 · 0.74** |
+| 主条件 #2（失控） | 0.46 · 0.22 | 0.85 · 0.15 | 1.50 · 0.23 | 0.38 · 0.09 | 1.01 · 0.18 | 1.53 · 0.30 |
+| 主条件 #3 | 0.07 | 0.14 · 0.92 | 0.05 | 0.07 | **0.62 · 0.75** | 0.60 · 0.45 |
+| I = 400 #0 | 0.26 · 0.79 | 0.13 · 0.92 | 0.80 · 0.90 | 0.07 | 0.61 · 0.90 | 0.68 · 0.72 |
+
+- 旧数据里只有右后腿会摆；全突触数据里，中右腿也常常一起摆（副本 1、3）。副本 1 中右与右后两腿相位差 164°，接近同侧相邻腿交替。
+- 中左腿 0.12–0.14 mm 接近身体振动水平。
+- I = 400 时有 4–5 条腿在动，但各腿频率不同（6.3/9.5/11.6 Hz），谈不上协调。
+- 前左、前右、后左腿仍基本不动，不是步态。
+
+**相位性编码本体感觉闭环**（判据与 12.4b 相同；积分器检验 3/3 通过：主频相同、相关 0.989–1.0，但最大绝对差 3–5 Hz，比旧数据大）：
+
+| 副本 | 开环 | 相位性 16 Hz（正确对应） | 相位性 16 Hz（错位） |
+|---|---|---|---|
+| #0 | 9 个运动神经元，10.7 Hz；节律腿：后右 | 10 个，9.0 Hz；后右（0.66 mm） | 13 个，7.9 Hz；中左 0.11、中右 0.59、后右 0.60 mm |
+| #1 | 9 个，11.3 Hz；中左 0.11、中右 0.58、后右 0.79 mm（中右–后右 168°） | 14 个，11.3 Hz；中左 0.15、中右 0.63、**后右 1.02 mm**（161°） | **失控**（293 个） |
+| #2 | **失控**（235 个） | 仍失控（232 个） | 仍失控（235 个） |
+| 50 Hz #0 | — | 12 个，9.0 Hz，后右 0.29 mm（未失控） | — |
+
+- 判据 A（不破坏节律）：正确对应在开环不失控的 2 个副本里都保持。副本 2 开环就失控，反馈没能拉回来。
+- 判据 B（节律腿多于 1 条）：正确对应只在副本 1 成立，但它的开环本来就有 3 条，没有比开环更多。
+- 判据 C（反馈内容起作用）：副本 0、1 成立，但方向相反：副本 0 错位后多出两条腿，副本 1 错位后失控。与旧数据一样，**没有一致证据**说明“哪条腿、往哪边转”的信息在起作用。
+
+**巨纤维 → TTMn**（缩减网格，运行前写定：巨纤维标定 16 Hz 只做无电突触；100 Hz 做无电突触与等效 1,500 个突触两档；各 4 个副本，中位数）：
+
+| 巨纤维刺激 | 电突触 | 实际巨纤维 右/左 | TTMn 右/左（旧数据） | TTMn 右/左（全突触） | 失控 |
+|---|---|---|---|---|---|
+| 标定 16 Hz | 无 | 0.05 / 0.1 Hz | 0 / 0 | 0 / 0（一个副本 8 Hz，但半峰在 681 ms，是全网失控带起来的） | 4/4 |
+| 标定 100 Hz | 无 | 78 / 85 | 0 / 0 | 0.25 / 0（范围 0–1 Hz） | 4/4 |
+| 标定 100 Hz | 1,500 | 58 / 61 | 30 / 25 | **23 / 13**（范围 16–36 / 7–16） | 4/4 |
+
+- 结论与旧数据相同：只有化学突触时 TTMn 基本不放电；手加强电突触才能跟随，而且全突触数据里跟得更弱一点；巨纤维刺激每次都让全腹神经索失控。
+
+**结论（用全突触数据会不会更好）**：
+- **稍好**：标定强度下失控更少（1/16 对 3/16），更多腿出现节律，常有两条同侧腿（中右、右后）接近交替摆动。
+- **没有质变**：仍不是三足步态，同一条腿的摆动与支撑依旧同相。本体感觉反馈（相位性）仍然只是“不破坏”，看不到稳定的改善。网络对扰动依然敏感，错位反馈、较强刺激都会让个别副本失控。
+- 巨纤维 → TTMn 电突触的结论不变。
+- 用时：整个重跑 2 小时 49 分钟（15:46–18:35），峰值内存 1.53 GB。
+
+## 13. 让果蝇“说中文”，发给 Claude Opus 5（2026-09-14 追加）【实测】（`language/fly_words.py`、`language/ask_claude.py` → `results/language/`）
+
+起因是新闻报道 @chetaslua 把整颗果蝇大脑模拟接入 ChatGPT（用线性读出把放电“翻译”成词）。我们没看到对方代码，按公开描述在本机自己实现了一遍，词和句子都用中文，最后用本机 Claude Code 的登录配置调用 Opus 5。
+
+**先说清楚这是什么、不是什么**：
+- 果蝇不会说话。词表、每个词对应哪群感觉神经元、句子模板，都是我们写的。
+- “翻译器”是用“给了哪些刺激”当标签训练出来的线性分类器。它能检验的是：刺激信息传到下游（非感觉神经元、下行 / 运动神经元）以后，还能不能被线性地读出来。
+
+**设计**（运行前写进脚本）：
+- 12 个中文词，各对应一群感觉神经元，左右两侧都刺激，100 Hz：
+  - 味道：甜 = LB3；苦 = LB1a–d。
+  - 气味：醋 = ORN_DM1 + VA2；霉味 = ORN_DA2；二氧化碳 = ORN_V。
+  - 温湿度：热 = TRN_VP2；冷 = TRN_VP3a/b；干 = HRN_VP4；湿 = HRN_VP5。
+  - 光：亮 = R1-6。
+  - 触角：声音 = JO-A/B；风 = JO-C/E。
+- 300 个试次，每个词独立以 0.2 概率出现，每次刺激 0.25 s、空白 0.25 s。前 240 个训练，后 60 个测试。
+- 第 301 个试次固定刺激“醋、甜、热、亮”作为“第一句话”，不参与训练。
+- 特征：刺激窗口内的脉冲数。A = 121,706 个非感觉神经元；B = 1,409 个下行 + 运动神经元。
+- 读出：每个词一个岭回归，正则强度在训练集内 5 折交叉验证选定。
+- 句子：按手写中文模板拼。
+- 全脑 Brian2 编译一次，一次跑完 150.75 s 脑内时间，用时 429 s，峰值内存 3.29 GB。每个试次中位约 7,970 个非感觉神经元有放电，气味刺激常引发全脑失控（见 11.4 节）。
+
+**测试集结果**（60 个试次，每个词 7–18 个阳性）：
+
+| 特征 | 平均准确率 | 平均平衡准确率 | 12 个词全对的试次 | 较弱的词（平衡准确率） |
+|---|---|---|---|---|
+| A 非感觉神经元 | 99.0% | 96.0% | 88.3% | 热 0.94、湿 0.57 |
+| B 下行 + 运动神经元 | 85.3% | 76.3% | 15.0% | 亮 0.43、霉味 0.54、热 0.54、醋 0.67、湿 0.67、冷 0.69 |
+
+- 只看下行 + 运动神经元时，甜、苦、声音、风仍然 100%，“亮”却比随机还差。这与第 3 节“光感受器的信号到不了下行神经元”一致。
+- **第一句话**：刺激“醋、甜、热、亮”，读出分数为醋 0.94、甜 0.87、热 0.58、亮 0.98，其他词都 ≤ 0.13，四个词全部读对。拼成：
+
+> 我闻到醋味。我尝到甜味。很热，很亮。我该怎么做？
+
+**发给 Opus 5**：
+- 调用方式：`claude -p <句子> --model claude-opus-5 --output-format json --no-session-persistence --setting-sources user --system-prompt "你是 Claude。" --disallowedTools <全部工具>`。
+- 在项目目录之外的新建空目录里运行，用的是本机 Claude Code 的登录，没有另配 API key。
+- **踩坑**：第一次在项目内的空文件夹里运行，Claude Code 往上层目录读到了本项目的 `CLAUDE.md`（多出约 2.4 万 token 上下文），回复里出现了本项目的【实测】标注和实验结果，不算“原话对话”。这份回复存档为 `claude_reply_contaminated.json`（花费 0.27 美元），不采用。
+- 重发后上下文只剩约 9,500 token，回复用时 26 s，Opus 5 花费 0.06 美元（Claude Code 另用 Haiku 4.5 做了一次约 0.001 美元的后台小调用）。Opus 5 的回复原文：
+
+> 听起来你是一只苍蝇（或者果蝇），而且处境可能很危险。
+>
+> **醋味加甜味，很可能是陷阱。** 人类常用苹果醋、糖和一滴洗洁精做果蝇陷阱。洗洁精会破坏液体表面的张力，落上去就会沉下去，飞不起来。
+> - **别落到液面上。** 如果你在一个杯口或瓶口附近，尤其是盖着保鲜膜、上面有小孔的那种，马上掉头飞走。
+> - 真正的烂水果也有酸甜味，但闻起来会有发酵的果香，不会只有醋和糖。
+>
+> **又热又亮，要小心光源。**
+> - 如果亮光是紫蓝色的，还伴随嗡嗡声，那可能是灭蚊灯，别靠近。
+> - 如果是灯泡，太热会让你脱水，也会烤伤翅膀。
+> - 如果是阳光照着的窗户，窗玻璃你是撞不穿的。沿着边缘找缝隙，或者往阴凉处飞。
+>
+> **建议你这样做：**
+> 1. 立刻飞离又热又亮的地方，去阴凉、有空气流动的角落。
+> 2. 离醋味最浓的地方远一点。
+> 3. 去找熟透的水果或者垃圾桶边缘，那里的吃的比较安全。
+> 4. 注意头顶有没有东西挥下来。
+>
+> ---
+>
+> 另外，如果你其实是人，而且突然闻到不存在的醋味、嘴里莫名发甜，还觉得发热、怕光，这可能是偏头痛先兆或神经系统方面的问题。请尽快就医。如果同时出现意识模糊、说话困难或一侧身体无力，请立刻拨打急救电话。
+
+- 【推测】这段回复是 Opus 5 按字面把自己当成在给一只果蝇出主意（醋 + 糖可能是捕蝇陷阱、又热又亮可能是灯），并补了一句“如果你其实是人”的就医提醒。回复内容与模型内部的放电无关，也没有回传给果蝇大脑。
+- 与新闻对照：新闻说糖让 MN9 放电 78 Hz、加苦味降到 3 Hz。我们在全脑模型里测到左侧糖味 → MN9 66/114 Hz，糖 + 苦 → 18/18 Hz（10.0 节），方向一致，数值不同。新闻的“16 个词 100% 命中、只用下行和运动神经元 85%”我们没法核实；我们自己的词表下分别是 88%（整句全对）和 15%。
+
+
+## 14. 虚拟敲除筛选：糖 → MN9，哪些神经元不可缺？（2026-09-14 追加）【实测】（`screen/sugar_mn9_screen.py` → `results/screen/`）
+
+复现并扩展 Shiu et al. 2024 Nature 图 1F 的全脑沉默筛选：刺激右侧唇瓣糖味受体神经元（GRN），逐个沉默网络里的神经元，看伸喙运动神经元 MN9 放电掉多少。论文的补充表（CC BY 4.0，存放在 `external/shiu2024_supp/`）里有它自己对 200 个神经元的筛选结果，以及 10 个细胞类型的真实光遗传沉默实验结论，所以这次既能和论文的模型比，也能和真实实验比。
+
+### 14.0 更正：以前写的“× 4 次试验”其实是同一次模拟的 4 份拷贝
+
+- 发现过程：为这次筛选读 Brian2 源码时看到，C++ standalone 模式把 `b2.seed(x)` 编译成 `main.cpp` 里的常数，于是每次 `device.run()` 都从同一个种子开始。回查旧结果，`results/dodge_ref/`（5 个条件）和 `results/v2_ref/`（29 个条件）里每个条件的 4 个（或 2 个）试次脉冲序列逐位相同。小网络上复现：设种子 → 3 次运行完全相同；不设种子 → 各不相同。
+- 影响：第 10.0 节表头的“0.5 s × 4 次”、11.1/11.2/11.4 节用到的全脑参考、以及子回路 v1/v2 选参数时的全脑参考，**都只是 1 次模拟（一个输入噪声实现）**，不是 4 次平均。数值本身没算错（4 份相同拷贝的平均等于那 1 次），但没有试次间变异的信息。差别大的结论（失控与否、MN9 0 Hz 对 66 Hz）【推测】不会因重跑而翻转；差别小的（侧化指数 ±0.05、MDN 6/7 Hz、子回路平均偏差 6.4 Hz）不知道噪声有多大。
+- 不受影响：单试次的结果（`sugar_brian2` 等）、第 9.2 节视觉管线（它根本没有调用 `b2.seed()`，40 次运行本来就各自独立——缺的只是每个条件的重复，见第 18 节）、第 13 节（一次连续模拟）、腹神经索（JAX/numpy）、Fly-Brain-AI（Brian2 runtime 模式）。
+- 修复：`run_experiment.py` 只在单试次时设种子；多试次时由系统随机源播种，试次彼此独立（代价是不能逐位复现）。本节的筛选换了另一种办法：把 R 个独立输入实现一起编译进程序，运行时选用哪一个——既独立又可复现。
+- 旧的参考实验没有重跑（约 34 个条件，估计 20–30 min）。
+
+### 14.1 做法（运行前写定）
+
+- 模型：官方 `create_model`（Shiu 2024 参数，FlyWire v783，138,639 个神经元），Brian2 cpp_standalone，dt 0.1 ms。论文用的是 v630，补充表里那 200 个神经元有 **184 个 ID 在 v783 中没变**，比较只用这些。
+- 刺激：`run_experiment.py` 的 sugar 预设 21 个 GRN。**50 Hz 为主**（论文判定“必需”用的频率），100 Hz 为辅。读出：MN9 `720575940660219265`，每个试次从静息开始 1.000 s 内的脉冲数。
+- 沉默：让被沉默的神经元不能放电（下游效果与官方 `silence()` 把传出突触置 0 相同，逐位核对见 14.2）。
+- 试次：6 个固定输入实现，所有条件都在同样的实现上跑（配对比较）。原计划 8 个，按事先写好的时间预算规则（只看基线活跃数和实测速度）降到 6 个。
+- 判定：比值 = Σ MN9(沉默) / Σ MN9(基线) ≤ 0.8 记为“必需”（论文的“下降超过 20%”）。
+- 三个候选集合：**P** = 论文 200 个里 v783 还在的 183 个（去掉读出 MN9 自己），50 与 100 Hz 都筛；**E** = 50 Hz 基线里放过电的全部 313 个神经元（论文只筛了按 200 Hz 反应排前 200 的）；**T** = 论文做过真实沉默实验的 10 个类型，**两侧一起沉默**（真实实验用的 split-GAL4 是两侧都标记的）。
+- 工程：一条长模拟切成 2,614 段，每段 1.010 s = 1.000 s 试次 + 10 ms 安静期（清空 1.8 ms 突触延迟里的在途脉冲），段首把 v、g 复位到静息；沉默谁、用哪个输入实现由运行时参数决定，所以只编译一次。总用时 87 min，峰值内存 3.3 GB，2,614 段里**没有一段失控**（活跃神经元最多几百个）。
+
+### 14.2 验证（`results/screen/validation.json`）
+
+| 检查 | 结果 |
+|---|---|
+| V1 同一实现重复跑 | 逐位相同 ✅ |
+| V2 沉默一个基线里不放电的神经元 | 与基线逐位相同 ✅（所以这类条件不必模拟，直接等于基线） |
+| V3 阻断放电 vs 官方的“传出突触权重置 0”（Roundup_l 的 255 条传出突触） | 3 个条件逐位相同 ✅（MN9 都是 14 / 7 / 53） |
+| 补跑时重新编译的程序 | 重跑主运行里的 20 个段，全部逐位相同 ✅ |
+| 基线 MN9 对照论文补充表 1A | 50 Hz：我们 17.3 ± 7.9 Hz（6 个实现），论文 19.4 ± 6.5 Hz（30 次）；100 Hz：70.0 ± 6.0 对 65.7 ± 3.3 ✅ |
+| 基线活跃神经元 | 50 Hz 136–266 个，100 Hz 350–360 个 |
+
+### 14.3 复现论文自己的筛选（183 个神经元）
+
+| 频率 | 相关（Pearson / Spearman） | 判为“必需”的个数：我们 / 论文 / 都判 | 判定一致率 | Cohen κ | 归一化值中位绝对差 |
+|---|---|---|---|---|---|
+| 50 Hz | 0.83 / 0.54 | 31 / 19 / 17 | 91.3% | 0.63 | 0.090 |
+| 100 Hz | 0.84 / 0.59 | 2 / 2 / 2 | 100% | 1.00 | 0.057 |
+
+- 效应大的神经元两边一致（Pearson 0.83–0.84）；Spearman 偏低是因为大多数神经元比值都在 1 附近，排序主要在比噪声。
+- 50 Hz 下 16 个判定不一致，**几乎全是“我们判必需、论文判不必需”**，其中 8 个是被刺激的糖 GRN 自己。按“论文的值离 0.8 超过 2 个标准误”且“我们去掉任一实现判定不变”两个条件筛，只剩 4 个真正矛盾：sugar_l_17（论文 0.99 / 我们 0.69）、sugar_l_9（0.90 / 0.63）、sugar_l_6（0.94 / 0.70）、CB0030（GABA，论文 1.13 / 我们 0.72，方向相反）。
+- 这种系统性偏差有一部分来自我们自己的方法，见下一节。
+
+### 14.4 我们方法自带的一个偏差：网络混沌 + 单条基线轨迹【探索性，事后发现】
+
+- 检查发现：在 50 Hz 下，**沉默任何一个神经元（哪怕它整段只放 1–3 个脉冲）都倾向于把 MN9 往中间拉**。例如基线 MN9 = 29 的那个实现，248 个不同沉默条件的 MN9 中位数是 22；基线 = 22 的实现中位数是 18；而基线 = 7 的实现中位数还是 7。
+- 原因【推测】：网络本身没有噪声，但对初值敏感。基线只是“没被扰动的那一条轨迹”，是条件分布里的一个样本；任何扰动都会让轨迹改变，结果向条件均值回归。论文用的是 30 次独立试次分别求平均，基线和沉默都是均值，所以没有这个问题；我们的配对设计换来了低方差，却带来了偏差。
+- 大小：把“同一实现里所有单个沉默条件的 MN9 中位数”当作零效应参照，它与基线的比值是 **50 Hz 0.894、100 Hz 0.964**。也就是说 50 Hz 下一个完全无关的神经元平均也会显示出约 11% 的“下降”。这解释了为什么 50 Hz 我们判出 31 个而论文只有 19 个，而 100 Hz 两边都是 2 个。
+- 事后修正（筛选里常用的板内中位数归一化）：改用这个参照重算，50 Hz 我们判出 **16 个**（论文 19 个），一致率 92.9%，κ 0.59；100 Hz 不变（2 对 2，κ 1.00）。下文凡标“修正后”的都是这个算法。
+
+### 14.5 和真实实验比：10 个做过光遗传沉默的类型
+
+实验结论取自论文补充表 2 的“沉默后伸喙是否受影响”（Fdg 两篇文献结论相反，按论文补充表 10 的算法记为“否”）。比值 ≤ 0.8 记为模型预测“必需”。
+
+| 类型（v783 注释） | 真实实验 | 论文模型 50 Hz | 我们单个 50 Hz | 我们两侧 50 Hz | 修正后单个 / 两侧 |
+|---|---|---|---|---|---|
+| Clavicle（AN_GNG_30） | 必需 | 0.66 ✅ | 0.55 ✅ | 0.55 ✅ | 0.61 ✅ / 0.61 ✅ |
+| G2N-1（CB0616） | 必需 | 0.62 ✅ | 0.44 ✅ | 0.44 ✅ | 0.50 ✅ / 0.50 ✅ |
+| Zorro（CB0192） | 必需 | 0.77 ✅ | 0.76 ✅ | 0.76 ✅ | 0.85 ❌ / 0.85 ❌ |
+| Rattle（CB0499） | 必需 | 0.86 ❌ | 0.83 ❌ | 0.83 ❌ | 0.93 ❌ / 0.93 ❌ |
+| FMIn（CB0366） | 必需 | 1.31 ❌ | 1.33 ❌ | 1.33 ❌ | 1.48 ❌ / 1.48 ❌ |
+| Usnea（CB0008，GABA） | 必需 | 1.23 ❌ | 1.37 ❌ | 1.43 ❌ | 1.53 ❌ / 1.60 ❌ |
+| Bract（DNge173 + 174，4 个） | 不必需 | 1.09 ✅ | 0.82 ✅ | 0.81 ✅ | 0.91 ✅ / 0.90 ✅ |
+| Phantom（CB0062，GABA） | 不必需 | 1.08 ✅ | 0.87 ✅ | 0.87 ✅ | 0.97 ✅ / 0.97 ✅ |
+| Fdg（CB0038） | 不必需 | 0.85 ✅ | 0.95 ✅ | 0.89 ✅ | 1.07 ✅ / 1.00 ✅ |
+| Roundup（CB0553） | 不必需 | 0.67 ❌ | 0.74 ❌ | **0.28 ❌** | 0.83 ✅ / 0.31 ❌ |
+| **对的个数** | — | **6 / 10** | **6 / 10** | **6 / 10** | 6 / 10 ／ 5 / 10 |
+
+- **我们的单个神经元结果和论文几乎一模一样**（判定集合完全相同：Clavicle、G2N-1、Roundup、Zorro），换了连接组版本（v630 → v783）、换了试次方案，结论没变。
+- **“两侧一起沉默”基本没有改变结论**：右侧糖刺激下，大多数类型的对侧神经元根本不放电，沉默它等于什么都没做。唯一例外是 Roundup——它的对侧神经元也在放电，两侧一起沉默把 MN9 压到 28%，**反而让预测更错**（实验说 Roundup 不是必需的）。所以“模型比实验更看重 Roundup”不是单边/双边的问题。
+- 模型答错的 4 个仍然是论文指出的那 4 个：Rattle、FMIn、Usnea（实验必需、模型说不必需）和 Roundup（反过来）。论文对 Usnea 的解释是它可能靠神经肽起作用，而模型里只有经典递质。
+- 100 Hz 下只剩 Roundup 一个被判必需（10 个里对 3 个）：糖输入一强，MN9 接近饱和，单个神经元的影响被淹没。**论文选 50 Hz 是有道理的**。
+
+### 14.6 穷举 50 Hz 下全部 313 个活跃神经元：论文漏掉了什么吗？
+
+- 这个模型里静息放电率是 0，**沉默一个不放电的神经元对下游没有任何影响**（V2 已逐位验证）。所以“50 Hz 下放过电的 313 个神经元”就是单个敲除的全集，穷举是完备的。论文筛的是按 200 Hz 反应排前 200 的神经元。
+- 结果：修正后 19 个判为必需（未修正 34 个），其中 16 个在论文的 200 个名单里。名单外的 3 个：
+  - `720575940639259967`（LB3 糖 GRN）：就是论文的 sugar_l_13，只是 v783 换了 ID，不算新的。
+  - **CB0277**（`720575940626835146`，放电 25.7 Hz，修正后 0.43）：效应排第 2，比大多数已知的前运动神经元还强。它不在名单里【推测】是因为论文那 200 个 ID 里有 16 个在 v783 变了 ID；其中一个（`720575940612611301`）在论文里 50 Hz 刺激时放电 24.3 Hz、沉默后归一化 0.58，和 CB0277 很像，很可能就是同一个神经元。
+  - CB0190（`720575940637144944`，只放 1–4 个脉冲，修正后 0.785）：贴着门槛，是唯一可能真的被漏掉的，但效应小。
+- 反方向（沉默后 MN9 升高 ≥ 20%）修正后 21 个，几乎都是 GABA 能神经元，最强的是 DNge031（升到 3.3 倍；它也不在名单里，论文里对应的 `720575940615041430` 值是 2.65，【推测】同一个神经元换了 ID）。
+- 结论：**论文“按 200 Hz 反应取前 200 个”的做法，在 50 Hz 下基本没有漏掉重要的神经元**——穷举没有找出被忽略的关键节点。
+
+### 14.7 不跑模拟，光看连线能不能预测？（事先写定的对照）
+
+在 313 个神经元上，把模拟出的效应（1 − 比值）与三个只用连接组算的指标比：
+
+| 指标 | 与模拟效应的 Spearman | 模拟前 20 名里命中几个 |
+|---|---|---|
+| G1 直接连到 MN9 的带符号突触数 | 0.14 | 5 / 20 |
+| G2 基线放电率 × G1 | 0.14 | 4 / 20 |
+| G3 基线放电率 × 长度 1–3 的带符号通路权重和 | **0.34** | **9 / 20** |
+
+- 直接连到 MN9 的突触数几乎没有预测力：最强的几个必需神经元（CB0277、G2N-1、Clavicle、多数糖 GRN）**对 MN9 一条直接突触都没有**，全靠多跳通路。
+- 加上活跃度和多跳通路好一些（0.34），但离模拟还很远。**想知道敲掉谁会让伸喙失效，光看连线不够，得跑模型。**
+
+### 14.8 这件事有什么用、以及别当真的部分
+
+- 组合敲除（找备份通路）见第 16 节。
+- 用处：这是一个可以真正跑起来的“虚拟敲除筛选”——在 87 min 内把 313 个神经元逐个敲掉、每个 6 次重复，给出一份按效应排序、可以拿去做实验的候选名单，并且能说明哪些是模型和实验已经对上的、哪些是模型的已知失败点。真实实验做同样的事需要每个类型一条 split-GAL4 品系。
+- 别当真的部分：
+  - 模型只有经典递质、没有神经肽和神经调质，静息放电率为 0；Usnea 这种靠神经肽的神经元模型天生答不对。
+  - 判定门槛 0.8 是照搬论文的；离门槛近的（Bract 0.82、Rattle 0.83、Zorro 0.76 在未修正下）去掉任一个输入实现判定就会翻转。
+  - 14.4 的偏差说明：**用“一条没被扰动的基线轨迹”做配对参照，在这种对初值敏感的网络里会系统性地高估效应**。要严格比较，应该像论文那样用多次独立试次的均值，或者用这里的中位数归一化。
+  - 连接组版本不同（v630 vs v783）、输入实现只有 6 个，这两点都会带来差异。
+
+## 15. 解码器压力测试：像脑机接口那样只看到一部分神经元，还读得出吗？（2026-09-14 追加）【实测 · 离线分析】（`language/decoder_stress.py` → `results/language/stress.json`）
+
+用第 13 节“果蝇说中文”的数据（300 个试次 × 121,706 个非感觉神经元的脉冲数，12 个词），**不再跑脑模拟**，只改“能看到什么”，看线性读出从什么时候开始失灵。设计在运行前写进脚本；全部跑完用时 160 s，峰值内存 1.4 GB。
+
+**做法**
+- 解码器与第 13 节相同，只是正则强度固定为第 13 节交叉验证选出的值。另在 30、300、3,000 个神经元上重新交叉验证选正则强度，平衡准确率差 ≤ 0.01，固定值没有让小规模条件吃亏。
+- 指标：60 个测试试次上 12 个词的平均平衡准确率（0.5 = 瞎猜）。把训练标签随机打乱 20 次，得到 0.50，整句全对 0%，这就是机会水平。
+- 每个条件独立抽样 20 次（噪声条件 10 次），表中是中位数。用全部神经元时复现了第 13 节的结果（0.96，整句全对 88%）。
+
+**一、能看到多少个神经元、看的是哪些**（平衡准确率中位数）
+
+| 采样方式 | 10 个 | 100 个 | 1,000 个 | 3,000 个 | 10,000 个 | 全部 |
+|---|---|---|---|---|---|---|
+| 随机抽（全部非感觉神经元，像随机插电极） | 0.50 | 0.60 | 0.82 | 0.90 | 0.96 | 0.96（121,706 个） |
+| 只抽训练时放过电的（像只留有信号的通道） | 0.59 | 0.82 | **0.95** | 0.96 | 0.96 | 0.96（12,609 个） |
+| 只看下行 + 运动神经元（像只记录神经输出） | 0.54 | 0.66 | 0.75 | — | — | 0.76（1,409 个） |
+| 局部探针：离随机一点最近的 n 个（像一块电极阵列） | 0.50 | 0.52 | 0.54 | 0.55 | 0.69 | 30,000 个时 0.93 |
+| 按训练集方差挑前 n 个（不看标签，参考上限） | 0.54 | 0.79 | 0.93 | **0.99** | 0.98 | — |
+
+- 这些试次里 90% 的神经元一次都不放电。**随机插“电极”要 3,000 个才到 0.9；只留有信号的通道，300 个就有 0.896，1,000 个到 0.95**（整句全对 80%）。按事先定的门槛（中位数 ≥ 0.9），所需最少数量分别是 3,000 个和 1,000 个。
+- **局部探针最差**：3,000 个相邻神经元（半径约 49 µm）只有 0.55，接近瞎猜；要 30,000 个（半径约 157 µm）才到 0.93。结果也很看落点：10,000 个时四分位范围是 0.55–0.88。【推测】每个词的信息在各自的感觉通路里，一小块区域只看得到其中一两类。
+- 只看输出（下行 + 运动神经元）最高只有 0.76，与第 13 节一致。
+- 按方差挑 3,000 个比用全部神经元还好（0.99 对 0.96，整句全对 97% 对 88%）：大量几乎不动的神经元只会给读出加噪声。
+- 第一句话“醋、甜、热、亮”要四个词全对：随机 1,000 个时 20 次里只有 15% 做到，只留有信号的 1,000 个时 75%，全部神经元时做到。
+
+**二、记录有噪声**
+
+漏检：每个脉冲只以概率 p 被记到（像钙成像漏掉脉冲）。训练和测试都加同样的噪声。
+
+| 看的神经元 | p = 1 | 0.5 | 0.2 | 0.1 | 0.02 |
+|---|---|---|---|---|---|
+| 全部 121,706 个 | 0.96 | 0.81 | 0.73 | 0.67 | 0.61 |
+| 有信号的 1,000 个 | 0.95 | 0.81 | 0.75 | 0.70 | 0.60 |
+
+假脉冲：每个被记录的神经元每秒额外多出 λ 个随机脉冲（像背景噪声、串扰）。
+
+| 看的神经元 | 0 | 1 Hz | 4 Hz | 16 Hz | 64 Hz |
+|---|---|---|---|---|---|
+| 全部 121,706 个 | 0.96 | **0.65** | 0.58 | 0.54 | 0.54 |
+| 有信号的 1,000 个 | 0.94 | **0.91** | 0.88 | 0.79 | 0.70 |
+
+- 漏掉一半脉冲，准确率就掉约 15 个百分点；整句全对从 88% 降到 37%。
+- **通道多不一定好**：全部 121,706 个通道每秒各多 1 个假脉冲，准确率就掉到 0.65；只记 1,000 个有信号的通道，同样的噪声下还有 0.91。原本不放电的 11 万个通道全变成了噪声，把信号淹没了。
+
+**三、通道中途坏掉**（有信号的 1,000 个通道，先用干净数据训练）
+
+| 坏掉比例 | 0 | 10% | 25% | 50% | 75% | 90% |
+|---|---|---|---|---|---|---|
+| 坏通道读数变 0，不重新训练 | 0.94 | **0.62** | 0.58 | 0.51 | 0.50 | 0.50 |
+| 只用剩下的通道重新训练 | 0.94 | 0.94 | 0.95 | 0.91 | 0.90 | 0.81 |
+| 【探索性】知道哪些坏了、填上训练均值，不重新训练 | 0.95 | 0.93 | 0.89 | 0.79 | 0.53 | 0.50 |
+
+- **坏 10% 的通道、又不重新校准，准确率就从 0.94 掉到 0.62。** 坏通道读数为 0，对原本活跃的神经元来说是个很大的负值，线性读出整个被带偏。
+- 重新训练后，坏一半通道仍有 0.91，坏 90%（剩 100 个）还有 0.81。
+- 最后一行是看到“读数变 0”崩得这么快之后才加的（独立随机种子，没有改动前面的结果）：只要知道哪些通道坏了、把它们填成平均值，坏 25% 时还有 0.89。
+
+**这说明什么**（【推测】，只针对这个模型和这个任务）
+- 与脑机接口的常识一致：**覆盖面比通道数重要；只留有信号的通道比盲目加通道好；通道坏了要么剔除或填补，要么重新校准。**
+- 局限：刺激很强（100 Hz 直接驱动感觉神经元），多数试次伴随全脑失控（第 13 节：每个试次中位约 7,970 个非感觉神经元放电）；标签只是“给没给某种刺激”；只有 240 个训练试次；模型里除输入的泊松噪声外没有别的噪声，真实大脑的变异大得多。所以这些数字只说明趋势，不能换算成真实实验需要的电极数。
+
+## 16. 双敲除：有没有“单独敲都没事、一起敲就断”的备份通路（2026-09-14 追加）【实测 · 探索性】（`screen/double_knockout.py` → `results/screen/double_summary.json`）
+
+单个敲除只能回答“少了它行不行”。真实回路常有冗余：两条通路都能把信号送到 MN9，敲掉任一条都看不出问题，两条一起敲才断。这种组合实验在真实果蝇上要同时做两条 split-GAL4，几乎没人做；在模型里只是多跑几段。
+
+**设计**（运行前写定）：与第 14 节同一个编译好的程序、同样 6 个输入实现、50 Hz 糖刺激。
+- **A 组（通路冗余）**：50 Hz 下修正后效应最强的 12 个**非感觉**神经元，两两组合 66 对。
+- **B 组（输入冗余）**：随机去掉 k 个糖味受体神经元，k ∈ {2, 3, 5, 8, 13, 21}，每个 k 三个随机子集。
+- **C 组（零参照）**：20 对“单独敲都没有效果”的神经元对。因为 14.4 节的偏差，双敲除要用自己的零参照；实测双敲除零参照 / 单敲除零参照 = 0.968（6 个实现；12 个实现是 0.957），即“多敲一个神经元”本身几乎不额外拉低 MN9。
+- **判据**：效应 E = 1 − 比值；独立预期 E_exp = 1 − (1 − E_a)(1 − E_b)；协同 = E_ab > E_exp + 0.1，亚可加 = E_ab < E_exp − 0.1。
+- 605 段仿真，20 min，峰值内存 3.2 GB。
+
+**两轮结果**：先用 6 个输入实现跑了一遍（协同 7、可加 39、亚可加 20；留一稳定 4、21、13），判定一半会翻，所以又把输入实现加到 **12 个**重算（`screen/double_extend.py`，补跑 837 段、27.5 min；核对过前 6 个实现与原来逐位相同）。12 个实现下：**协同 10 对、可加 45 对、亚可加 11 对，留一稳定 7、28、6**——原来那 20 对“亚可加”里有一半是噪声，而协同反而更多、更稳。下表是 12 个实现、留一稳定的协同。
+
+| 一起敲的两个 | 各自单独敲 | 一起敲 | 独立预期效应 | 实测效应 |
+|---|---|---|---|---|
+| CB0883 + CB0542 | 0.75 / 0.65 | **0.17** | 0.51 | 0.83 |
+| CB0883 + AN_GNG_30（Clavicle） | 0.75 / 0.65 | **0.24** | 0.51 | 0.76 |
+| CB0883 + CB0177 | 0.75 / 0.71 | **0.30** | 0.47 | 0.70 |
+| CB0883 + DNge080 | 0.75 / 0.79 | **0.36** | 0.41 | 0.64 |
+| CB0616（G2N-1）+ CB0883 | 0.60 / 0.75 | **0.25** | 0.55 | 0.75 |
+| CB0616 + CB0493 | 0.60 / 0.67 | **0.24** | 0.60 | 0.76 |
+| CB0616 + CB0177 | 0.60 / 0.71 | **0.26** | 0.58 | 0.74 |
+
+- **CB0883 是最像“备份”的节点**：单独敲只到 0.75（按 0.8 的门槛算不必需，单个筛选根本不会注意它），但 7 对稳定协同里有 **5 对含它**——和 CB0542、Clavicle、CB0177、DNge080、G2N-1 里任何一个一起敲，MN9 都掉到 0.17–0.36。G2N-1（CB0616）是第二个枢纽，占 3 对。这正是单个敲除筛选会漏掉、而真实实验很难做的那一类。
+- **反方向也有**：12 个实现下仍有 2 对稳定的“多敲一个反而回升”——CB0277 单独敲 0.45、加上 CB0177 变成 0.64；Roundup（CB0553）单独敲 0.44、加上 CB0177 变成 0.60。（6 个实现时看起来有 4 对，多出来的两对在 12 个实现下没站住。）
+  - 连线上的解释【推测，只看结构、没有单独验证】：CB0177 一边兴奋 Roundup（模型里最强的前运动神经元，权重 +99），一边兴奋一串 GABA 神经元（CB0480 两条共 +243、CB0021 +110，还有 DNg38、CB0890、CB0863）；CB0277 则兴奋 DNge051（GABA，对 MN9 −173）。这条通路同时携带兴奋和前馈抑制：单敲时兴奋占上风，双敲把抑制也一起拿掉，MN9 反而回来。CB0480 本身也在 14.6 节“沉默后 MN9 升高”的名单里（1.9–2.2 倍），与这个解释一致。
+
+**输入端几乎没有冗余**（随机去掉 k 个糖味受体神经元，共 21 个，MN9 比值中位数）：
+
+| 去掉几个 | 2 | 3 | 5 | 8 | 13 | 21 |
+|---|---|---|---|---|---|---|
+| MN9 比值 | 0.69 | 0.31 | 0.14 | 0.06 | 0.00 | 0.00 |
+
+- 去掉 3 个受体神经元（21 个里的 1/7），MN9 就掉掉三分之二。50 Hz 正处在输入–输出曲线最陡的一段（10 Hz 几乎无反应、100 Hz 已接近饱和），所以这里对输入数量极其敏感。这也与 14.3 节的分歧方向一致：论文认为单个糖 GRN 影响不大，我们测到影响很大。
+
+### 16.1 还有没有别的 CB0883？（`screen/double_hub.py` → `results/screen/double_hub_summary.json`）
+
+上面 7 对稳定协同里 5 对含 CB0883、3 对含 G2N-1（CB0616），所以问题变成：这种“单独看不出来、配对才显形”的神经元还有多少？全部两两组合太贵（前 25 个要 300 对），改成**拿这两个枢纽去配效应排名 13–24 的 12 个神经元**（24 个组合 × 12 个实现 = 354 段，12 min）。这一步是上一轮结果提出来的假设，判据（同样的 ±0.1 缓冲、同样的零参照）在跑之前写定。
+
+结果：24 个组合里协同 5 个（留一稳定 4 个）、可加 13 个、亚可加 6 个。
+
+| 候选（单独敲） | 枢纽（单独敲） | 一起敲 | 独立预期效应 | 实测效应 |
+|---|---|---|---|---|
+| CB0393（0.84） | CB0883（0.75） | **0.43** | 0.37 | 0.57 |
+| **CB0192 = Zorro**（0.83） | CB0883（0.75） | **0.43** | 0.38 | 0.57 |
+| CB0799（0.82） | CB0616 = G2N-1（0.60） | **0.32** | 0.51 | 0.68 |
+| CB0553 = Roundup（0.75） | CB0883（0.75） | **0.44** | 0.44 | 0.56 |
+
+- **确实还有**：排名 13–24 里至少有 3 个（CB0393、Zorro、CB0799）单独敲都算不上必需，配上枢纽就把 MN9 压到 0.32–0.43。单个敲除筛选系统性地看不见这一类。
+- **一个可能的线索**【推测，未验证】：Zorro 在真实实验里是“伸喙必需”的，而我们（和论文）的单个敲除都判它不必需（14.5 节的 4 个错项之一）。这里它与 CB0883 有稳定协同，说明模型里 Zorro 处在一条有备份的通路上——**模型与实验不符的一部分，可能正是冗余造成的**：单独敲有备份顶上，实验里的 GtACR1 沉默却未必只影响这一个细胞类型。这条线索要验证，需要真实实验同时沉默两条通路。
+- 反过来也有 6 个亚可加组合（例如 CB4055 + CB0883：各自 0.87 / 0.75，一起只有 0.79），说明它们共用同一个瓶颈。
+
+
+### 16.2 CB0883 全扫描：把 312 个活跃神经元都和它一起敲一遍（`screen/hub_scan.py` → `results/screen/hub_scan_summary.json`）
+
+既然 CB0883 是枢纽，那就把 50 Hz 下全部 312 个活跃神经元（去掉 CB0883 自己和 MN9）逐个和它配对，画一张完整的“谁和它互为备份”的图。
+两阶段（事先写定）：阶段 A 全部候选 × 前 6 个实现（1,740 段，60 min）；阶段 B 把 Δ ≥ 0.05 的 50 个补到 12 个实现（426 段，14 min）。
+
+**结果**：50 个进入阶段 B 的里，协同 32 个、留一稳定 19 个。但这里要分两类看——
+
+- **12 个可以解释为“备份通路”**（它们单独敲本来就让 MN9 下降，只是下降有限；加上 CB0883 就塌了）：
+
+| 和 CB0883 一起敲 | 自身放电 | 单独敲 | 一起敲 | Δ |
+|---|---|---|---|---|
+| 糖味受体 LB3 #1 | 45.5 Hz | 0.87 | **0.34** | +0.32 |
+| CB0542 | 16.2 Hz | 0.65 | **0.17** | +0.31 |
+| 糖味受体 LB3 #2 | 53.8 Hz | 0.78 | **0.29** | +0.30 |
+| AN_GNG_30 = Clavicle | 29.2 Hz | 0.65 | **0.24** | +0.25 |
+| DNge080 | 7.7 Hz | 0.79 | **0.36** | +0.23 |
+| CB0177 | 21.8 Hz | 0.71 | **0.30** | +0.23 |
+| 糖味受体 LB3 #3 | 53.0 Hz | 0.59 | **0.24** | +0.21 |
+| CB0393 | 29.7 Hz | 0.84 | **0.43** | +0.20 |
+| CB0616 = G2N-1 | 38.8 Hz | 0.60 | **0.25** | +0.20 |
+| CB0192 = Zorro | 66.5 Hz | 0.83 | **0.43** | +0.19 |
+| 糖味受体 LB3 #4 | 51.3 Hz | 0.92 | **0.51** | +0.18 |
+| CB0553 = Roundup | 7.3 Hz | 0.75 | **0.44** | +0.12 |
+
+  - 其中 4 个单独敲在 0.8 门槛之上（**单个筛选根本看不见**）：两个糖味受体、CB0393、Zorro。
+  - **5 个是糖味受体神经元自己**：输入和 CB0883 也互为备份——少几个受体或者少了 CB0883 都还能撑住，两样一起少就不行。
+- **另外 7 个不能算备份**（CB0480、Usnea、FMIn、DNg103、CB0762、CB0853、CB0573）：它们单独敲是让 MN9**升高**的（1.03–1.81 倍），乘性独立预期对这种反向效应本来就不适用，判成“协同”只是算法口径的结果。这一条是分析时才意识到的，写在这里避免误读。
+- **多数神经元反而是“共用瓶颈”**：312 个候选的 Δ 中位数是 -0.016，有 108 个 ≤ −0.05（亚可加）、只有 50 个 ≥ +0.05。也就是说，绝大部分神经元和 CB0883 走的是同一条通路，真正互为备份的是上面那一小撮。
+
+**局限**：判据带 ±0.1 的缓冲，12 个实现下“可加”这一档仍有 45 对里 17 对留一会翻（协同和亚可加已经稳多了：7/10 与 6/11）。上面的名单是**模型内的预测**，没有任何实验验证；真实验证需要同时做两条 split-GAL4。
+
+## 17. 把受种子 bug 影响的参考实验重跑一遍（2026-09-14 追加）【实测】（`scratch/rerun_refs.py` → `results/v2_ref/rerun_diff.csv`）
+
+14.0 节发现 Brian2 standalone 把随机种子编译进了程序，旧的“× 4 次试次”其实是同一次模拟的 4 份拷贝。这里把受影响的 **34 个条件**（`results/v2_ref/` 29 个、`results/dodge_ref/` 5 个）按原参数重跑，试次之间互相独立；旧结果原样备份在 `results/v2_ref_seedbug/`、`results/dodge_ref_seedbug/`。用时 13 min，峰值内存 4.1 GB。第 10、11 节里受影响的数字已经就地更新。
+
+**大部分结论没变**：糖味 → MN9、JO 左 → aDN1（右侧 39 Hz，右侧刺激仍然 0/0）、LC16 双侧 ≥ 100 Hz 才驱动 MDN、正面 looming 主要驱动巨纤维、嗅觉无侧化、苦味压制进食——都和原来一样。数值上有 26 个读出的旧值偏离新均值 ≥ 2 个试次标准差，多数是几 Hz 的量级（例如糖味左 MN9 由 66/114 变成 72.5/106，LC16 双侧 MDN 由 32/31 变成 30.5/31）。
+
+**但有一条结论必须更正，而且正是种子 bug 掩盖的那一类**：
+
+| 条件 | 旧（1 次实现） | 新（独立试次） |
+|---|---|---|
+| 气味 DA2 左 50 Hz | 16 个神经元活跃，“完全无反应” | 4 次里 **3 次无反应（16–17 个）、1 次失控（8,071 个）** |
+| 糖味双侧 100 Hz | 8,794 个活跃（失控） | 2 次里 **1 次失控（8,805 个）、1 次不失控（566 个）** |
+
+- 全脑失控在阈值附近**是概率性的**：同样的刺激，有的试次什么都不发生，有的试次冲到 8,000 多个神经元。中间状态没有，所以“全或无”的说法仍然成立，但“DA2 在 50 Hz 不反应”这种单次结论不成立。
+- 这反过来让 11.1 节的多巴胺结论更硬：**同一个条件的不同试次**里，失控的试次 PAM 放电 123/307，不失控的试次 0/307（DA2 左 50 Hz 同样：3 次 0/307，失控那次 120/307）。以前只能跨条件比较，现在是同条件内的对照。
+- 其余 32 个条件在 4 次试次里失控与否完全一致（要么都失控、要么都不失控）。
+
+**顺带修掉的一个 bug**：`dodge/v4_refs_analysis.py` 会遍历 `results/v2_ref/` 下所有目录，而两个“沉默”条件的 `rates.csv` 只有 silenced 列、没有 baseline 列（它们是这个分析跑完之后才生成的，当时没触发）。现在跳过这类目录。
+
+**没有重跑的部分**：第 13 节的语言实验（一次连续模拟）、腹神经索（JAX / numpy，不经过 Brian2 standalone）。
+
+**更正一处我自己先写错的话**：写 14.0 节时我说视觉管线“40 次运行共用同一个噪声实现”。查 `results/vision/.brian2_build/main.cpp` 后确认不是——`vision/connectome_from_flyvis.py` 从来没有调用 `b2.seed()`，所以每次 `device.run` 由系统随机源播种，40 次运行的噪声本来就互相独立。真正的缺口是**每个条件只跑了一次、没有重复**，这一点在第 18 节补上。
+
+## 18. 视觉管线：补上“每个条件只跑一次”的重复（2026-09-14 追加）【实测】（`vision/connectome_from_flyvis.py --repeats 3`、`vision/repeat_check.py` → `results/vision/repeat_check.json`）
+
+**先更正我自己的一句话**：写 14.0 节时我说视觉管线“40 次运行共用同一个噪声实现”。查 `results/vision/.brian2_build/main.cpp` 后确认不是——`vision/connectome_from_flyvis.py` 从来没有调用 `b2.seed()`，所以每次 `device.run` 都由系统随机源播种，40 次运行的泊松噪声本来就互相独立。真正的缺口是**每个刺激 × 朝向只跑了一次**，没法知道那些“8/8、7/8、0/8”里有多少是噪声。
+
+**做法**：同样 5 个刺激 × 8 种格子朝向，每个条件重复 3 次（共 120 次运行，13 min，峰值 3.6 GB）。判据沿用 9.2 节事先声明的指标：刺激开始后 0.5–0.95 s、左侧 LPLC2 的平均发放率。
+
+| 事先声明的比较（每次重复各在 8 种朝向上数一遍） | 三次重复的计数 | 原来的结论 |
+|---|---|---|
+| 逼近 > 远离 | 8 / 8 / 8 | 8/8，**稳** |
+| 逼近 > 远距平移 | 8 / 7 / 8 | 原写 7/8，其实在 7–8 之间抖，方向不变 |
+| 逼近 > 近距平移 | 0 / 0 / 1 | 0/8，**稳**（LPLC2 对近距平移反而更强） |
+
+- **变异主要来自映射，不是噪声**：同一条件跨重复的标准差中位数 0.05 Hz，而同一次重复跨 8 种朝向的标准差中位数 0.18 Hz——**格子对齐方式（没有文献依据、只能全跑）带来的差异是随机噪声的 3–4 倍**。所以这条管线最不确定的仍然是映射本身。
+- **绝对量级很小**：LPLC2 后段平均 0.65 Hz（逼近）、1.14（近距平移）、0.39（远距平移）、0.01（远离）、0.00（右侧逼近）。这些比较是在接近 0 的数值之间做的，这一点比“几比几”更值得记住。
+- **巨纤维仍然不可解读**：同一条件跨重复的标准差**中位 4.3 Hz（范围 0–13.1）**、极差**中位 8.7 Hz（范围 0–26.1）**（40 个条件 × 左右两侧，从 `connectome_responses_reps.csv` 重算，存于 `results/vision/gf_repeat_variability.json`）；而且远离刺激下 50.8 Hz 比逼近的 46.1 Hz 还高。与 9.2 节“巨纤维在这条管线里读不出意义”的结论一致。（先前写的“标准差 4–6 Hz、极差 8–12 Hz”是把中位数当成了范围，已更正。）
+
+## 19. 同一套方法换一条通路：水味觉（2026-09-15 追加）【实测】（`screen/water_screen.py` → `results/screen/water/`）
+
+糖那条通路上模型对真实实验只对 6/10。水这条通路论文自己报的是 10/11，而且**表 5 的实验全是这篇论文自己做的**，不是引用旧文献。
+同一套方法（同样的段落安排、同样的零参照口径、同样的判据）换一条通路，能看出“对得上多少”是通路特定的，还是碰运气。
+
+**设计**（运行前写定）：刺激右侧 18 个唇瓣水味觉受体神经元、160 Hz（论文表 5 判定“必需”用的频率），读出同一个 MN9。
+两阶段：阶段 A 全部候选 × 前 6 个实现（990 段，32 min）；阶段 B 把效应 ≥ 10% 的 104 个补到 12 个实现，并做 66 对双敲除（1,654 段，53 min）。
+零参照与糖同口径（50 个随机单敲除的每实现中位数 / 20 对对照对的中位数）。
+
+**基线对得上**：12 个实现的 MN9 是 [12, 8, 9, 7, 5, 6, 14, 7, 9, 9, 7, 13]，平均 8.8 Hz，论文补充表 6A 同频率是 10.0 Hz。
+
+**与论文自己的水筛选（补充表 6C，186 个 ID 在 v783 未变）比——比糖那条通路吻合得多**：
+
+| | 糖（50 Hz） | 水（160 Hz） |
+|---|---|---|
+| 相关（Pearson） | 0.83 | **0.96** |
+| 判定一致率 | 91% | **97%** |
+| Cohen κ | 0.59 | **0.87** |
+| 判为“必需”：我们 / 论文 | 16 / 19 | 19 / 24 |
+
+**对论文自己做的沉默实验**（比值 ≤ 0.8 判为“必需”）：
+
+| 类型 | 真实实验 | 论文模型 | 我们单个 | 我们两侧 |
+|---|---|---|---|---|
+| Bract | 必需 | 0.55 | 0.69 | 0.69 |
+| Clavicle | 必需 | 0.10 | 0.04 | 0.04 |
+| G2N-1 | 不必需 | 0.82 | 0.84 | 0.84 |
+| Phantom | 不必需 | 2.80 | 2.93 | 2.95 |
+| Rattle | 必需 | 0.53 | 0.59 | 0.59 |
+| Roundup | 必需 | 0.00 | 0.03 | 0.02 |
+| Tophat | 不必需 | 0.94 | 1.17 | 1.18 |
+| Tulip | 不必需 | 2.88 | 1.99 | 3.23 |
+| Usnea | 必需 | 1.89 | 2.07 | 2.77 |
+| Zorro | 必需 | 0.39 | 0.43 | 0.45 |
+
+- **论文 9/10，我们也 9/10**，而且错的是同一个：**Usnea**——实验里水的伸喙需要它，模型里沉默它反而让 MN9 升到 2 倍以上。论文对 Usnea 的解释是它可能靠神经肽起作用（在糖那条通路上它也是错的），模型里只有经典递质。
+- 水通路上模型对得准，糖通路上只对 6/10，**说明“连接组模型能不能预测沉默实验”是通路特定的**：水的读出 MN9 基线低（8.8 Hz）、通路更集中（Roundup 单独敲就把 MN9 打到 0.03），糖的通路则分散、冗余更多。
+- 两侧一起沉默几乎不改变结论（只有 Tulip 从 1.99 变到 3.23），原因和糖一样：单侧刺激下对侧神经元基本不放电。
+
+**水通路的双敲除**（效应最强的 12 个非感觉神经元，66 对，12 个实现）：协同 15 对、可加 45 对、亚可加 6 对，留一稳定的协同 10 对。
+
+| 一起敲 | 各自单独敲 | 一起敲 | Δ |
+|---|---|---|---|
+| DNge173 = Bract + CB0051 | 0.69 / 0.49 | **0.01** | +0.33 |
+| CB0501 + CB0051 | 0.64 / 0.49 | **0.01** | +0.30 |
+| CB0051 + CB0499 = Rattle | 0.49 / 0.59 | **0.01** | +0.28 |
+| CB0872 + CB0051 | 0.83 / 0.49 | **0.16** | +0.25 |
+| CB0616 = G2N-1 + CB0360 | 0.84 / 0.95 | **0.60** | +0.20 |
+| CB0461 + CB0616 = G2N-1 | 0.95 / 0.84 | **0.62** | +0.18 |
+| CB0192 = Zorro + CB0051 | 0.43 / 0.49 | **0.04** | +0.17 |
+| CB0051 + CB0360 | 0.49 / 0.95 | **0.29** | +0.17 |
+
+- **水通路也有自己的枢纽：CB0051**，10 对稳定协同里有 7 对含它。它单独敲是 0.49（已经算“必需”），但和 Bract、CB0501、Rattle、Zorro 任一个一起敲，MN9 直接归零（0.01–0.04）。
+- 第二个枢纽是 **G2N-1**（3 对）——有意思的是它在真实实验里**不是**水伸喙必需的，模型单独敲也判不必需（0.84），但配对时是关键节点。这与糖通路上的 CB0883 是同一种情况：**单个敲除筛选系统性地漏掉这类"配对才显形"的神经元，而且两条通路上都有**。
+
+## 20. 一次数据体检，以及把“静默降级”改掉（2026-09-15 追加）【工程】（`screen/segments.py`、`screen/audit.py` → `results/screen/audit.json`）
+
+这一轮里“分析要用的段没跑到”出了三次：
+1. 类型代表 Bract 不在论文 200 名单里，它 100 Hz 的单敲除段没进计划（分析时直接 KeyError，好在报错了）；
+2. `hub_scan` 存盘文件名是 `stageA_*.npz`，读取时却按 `chunk_*.npz` 匹配 —— 312 个候选只读到 23 个，**数据其实都在盘上**；
+3. 水通路双敲除前 12 名里的 CB0872 效应只有 4%，没进“补到 12 个实现”的名单，66 对里缺了 11 对。
+
+共同的毛病不是“跑漏了”，而是**分析在缺数据时静默降级**（跳过该条件，或回退成基线），所以缺口不会自己暴露；
+第 2 次是偶然发现的，第 3 次是因为我顺手数了一下对数。做法上改两点：
+
+- **把“分析需要哪些段”变成可枚举的清单**（`screen/segments.py`）：`needed_keys(基线, 实现数, 条件集合)` 按“某实现里被沉默的神经元全都不放电 ⇒ 结果等于基线、不需要段”的规则展开；`Repo.need()` 回答缺哪些，`Repo.fill()` 只补缺的。
+- **缺段不再静默**：`hub_scan`、`water_screen` 的分析改成记录并打印缺失条件（并写进结果 JSON），而不是 `continue`。
+
+**体检结果**（`python screen/audit.py`，纯读盘，不跑仿真）：报告第 14、16、19 节的全部结论共依赖 **13,515 段**，逐项核对后**一个不缺**：
+
+| 数据集 | 需要的段 | 缺口 |
+|---|---|---|
+| sugar_P_50Hz | 932 | 0 |
+| sugar_P_100Hz | 1,095 | 0 |
+| sugar_E_50Hz | 1,401 | 0 |
+| sugar_T_50Hz | 115 | 0 |
+| sugar_T_100Hz | 120 | 0 |
+| double6_A+B+C | 676 | 0 |
+| double12_all | 1,636 | 0 |
+| double_hub | 426 | 0 |
+| hub_scan_stageA(6) | 3,267 | 0 |
+| hub_scan_stageB(12) | 1,191 | 0 |
+| water_P(6) | 805 | 0 |
+| water_T+null(12) | 915 | 0 |
+| water_double(12) | 936 | 0 |
+
+改完之后重跑了 `hub_scan analyze` 与 `water_screen analyze`，输出与改动前逐字段一致，说明这次改的只是“缺数据时怎么表现”，没有动结果。
+
+## 21. 糖和水用的是同一批神经元吗？（2026-09-15 追加）【实测 · 只做分析，不跑新仿真】（`screen/pathway_compare.py` → `results/screen/pathway_compare.json`）
+
+同一个读出（MN9），两条输入通路，各自的筛选数据都在盘上，于是可以直接问：网络用的是不是同一批神经元？
+口径：两边都用各自的零参照修正后的比值、前 6 个实现、同一个 ≤ 0.8 门槛。
+
+**活跃集合只重叠三分之一**：糖 313 个、水 216 个，共同 139 个（Jaccard 0.356），
+糖独有 174 个、水独有 77 个。
+
+| | 共同 139 个 | 糖独有 174 个 | 水独有 77 个 |
+|---|---|---|---|
+| 中枢神经元 | 77 | 109 | 48 |
+| 下行神经元 | 44 | 22 | 8 |
+| 运动神经元 | 14 | 14 | 3 |
+| 感觉神经元 | 2 | 24 | 18 |
+
+共同的那批以中枢和下行神经元为主（下行 44 个、运动 14 个），也就是靠近输出的一段；
+各自独有的以中枢神经元和自己的受体神经元为主。
+
+**就算是同一个神经元，"敲掉它要不要紧"也很不一样**（128 个共同活跃神经元上）：
+
+| 指标 | 值 |
+|---|---|
+| 效应（1 − 比值）的 Spearman | 0.176 |
+| 效应的 Pearson | 0.415 |
+| “必需”判定一致率 | 88.3% |
+| Cohen κ | 0.152 |
+
+判定一致率看着高（88%），但那是因为绝大多数神经元两边都不必需；κ 只有 0.152，说明**一致得并不比随机分配好多少**。
+- 只在糖通路必需的：CB0553、DNge059、CB0616、CB0030、CB0277、DNge080、CB0542、CB0177 等；
+- 只在水通路必需的：DNge173、CB0501、CB0192、CB0051、CB0499；
+- **两条通路都必需的只有两个类型**：Roundup（CB0553）与 Clavicle（AN_GNG_30）——正好是论文在两条通路上都点名的那两个。
+
+**两个"枢纽"是通路私有的**：
+
+| | 在糖通路 | 在水通路 |
+|---|---|---|
+| CB0883（糖的枢纽） | 活跃，单独敲 0.759 | **根本不放电**（所以沉默它对水的 MN9 是严格的零效应） |
+| CB0051（水的枢纽） | 活跃，单独敲 0.974（等于没影响） | 单独敲 0.489 |
+
+- 糖的枢纽在水通路里连电都不放；水的枢纽在糖通路里放电却完全不重要。**“枢纽”不是网络的固有属性，而是被输入选出来的。**
+- 【推测】这也解释了第 19 节的观察：模型在水通路上预测得准（9/10）、在糖通路上只有 6/10——两条通路的结构本来就不同，糖的更分散、备份更多，水的更集中（Roundup 单独敲就把 MN9 打到 0.03）。冗余越多，单个敲除越难预测行为。
+
+### 21.1 水通路也做一次全扫描：CB0051 × 全部活跃神经元（`screen/water_hub_scan.py` → `results/screen/water/hub_scan_summary.json`）
+
+和 16.2 节同口径（两阶段 6 → 12 个实现，Δ ≥ 0.05 进阶段 B），把水通路 215 个活跃神经元逐个和 CB0051 配对。
+
+| | 糖：CB0883 × 312 个 | 水：CB0051 × 215 个 |
+|---|---|---|
+| 枢纽自己单独敲 | 0.75（算不上必需） | **0.49（本来就必需）** |
+| 进入阶段 B（Δ ≥ 0.05） | 50 | **142** |
+| 协同 / 留一稳定 | 32 / 19 | 65 / 43 |
+| 其中可解释为备份 | 12 | 13 |
+| 单独敲反而升高（乘性预期不适用） | 7 | 30 |
+| 亚可加（共用瓶颈） | **108** | **6** |
+
+**两条通路的组合结构完全不同**：糖通路上大多数神经元和枢纽共用同一个瓶颈（108 个亚可加），真正互为备份的是一小撮；
+水通路几乎没有亚可加（6 个），而是**只要把 CB0051 和几乎任何一个还有作用的神经元一起敲，MN9 就塌到 0**。
+【推测】原因是水通路本来就工作在阈值附近（基线 MN9 只有 8.8 Hz，Roundup 单独敲就打到 0.03），
+任何叠加的削弱都足以让它掉到零；糖通路基线更高、通路更宽，得同时切中特定的两条才行。
+
+水通路里可解释为备份的 13 个：
+
+| 和 CB0051 一起敲 | 单独敲 | 一起敲 | Δ |
+|---|---|---|---|
+| DNge173 = Bract | 0.69 | **0.01** | +0.33 |
+| CB0501 | 0.64 | **0.01** | +0.30 |
+| CB0499 = Rattle | 0.59 | **0.01** | +0.28 |
+| CB0872 | 0.83 | **0.16** | +0.25 |
+| 水味觉受体 #1 | 0.54 | **0.05** | +0.21 |
+| 水味觉受体 #2 | 0.60 | **0.11** | +0.18 |
+| CB0192 = Zorro | 0.43 | **0.04** | +0.17 |
+| CB0360 | 0.95 | **0.29** | +0.17 |
+| CB0461 | 0.95 | **0.30** | +0.16 |
+| CB0573 | 0.93 | **0.30** | +0.15 |
+| 水味觉受体 #3 | 0.63 | **0.16** | +0.14 |
+| 水味觉受体 #4 | 0.76 | **0.23** | +0.14 |
+| 水味觉受体 #5 | 0.56 | **0.14** | +0.14 |
+
+- **两条通路都出现同一个模式：输入端的受体神经元和枢纽互为备份**——糖通路 12 个备份里有 4 个是糖味觉受体，水通路 13 个里有 5 个是水味觉受体。
+- 注意水通路的比值都很小（很多是 0.01–0.30），而基线每试次只有约 9 个脉冲，所以这些数字的分辨率有限，乘性预期在接近 0 处也被拉伸得厉害。
+  这一段的结论只适合读作“方向”，不适合读作精确倍数。
+
+## 22. 什么时候可以不跑模拟？（2026-09-15 追加）【实测 · 只做分析】（`screen/structure_vs_function.py` → `results/screen/structure_vs_function.json`）
+
+14.7 节发现：在糖通路上只看连线预测单敲除效应很差。现在有了第二条通路（水，更集中）和两次枢纽全扫描
+（共 516 个带标签的配对），可以把问题问得更准：**哪一部分能靠结构算出来，哪一部分必须跑模型？**
+两个假设都在看结果之前写定。
+
+**假设 A：通路越集中，连线越能预测单敲除效应 —— 成立**
+
+| 只用连线的指标 | 糖 50 Hz（313 个） | 水 160 Hz（216 个） |
+|---|---|---|
+| G1 对 MN9 的带符号直接突触数 | 0.143（前 20 名命中 5） | -0.01（命中 2） |
+| G2 放电率 × G1 | 0.143（命中 4） | -0.007（命中 2） |
+| G3 放电率 × 1–3 跳带符号通路和 | **0.342（命中 9）** | **0.454（命中 13）** |
+
+- 直接突触数在两条通路上都没用（水通路上甚至是 -0.01），因为效应最强的那些神经元对 MN9 一条直接突触都没有。
+- 加上活跃度与多跳通路（G3）在水通路上确实更准（0.454 对 0.342，前 20 名命中 13 对 9），与“水通路更集中”的印象一致。
+- 但即使是 0.454，也只能当粗筛：用它挑前 20 个，也会漏掉 7 个真正要紧的。
+
+**假设 B：互为备份 = 各走各的路 —— 不成立**
+
+事先定义的“路径重叠度”是两个神经元到 MN9 的路径画像（经过哪些中间神经元、权重多少）的余弦相似度，
+事先声明的方向是“重叠度越低、Δ 越大（越像备份）”。实测：
+
+| | 糖 | 水 |
+|---|---|---|
+| 重叠度与 Δ 的 Spearman | -0.008 | 0.013 |
+| 协同组重叠度中位 | 0.0（n = 50） | 0.0001（n = 137） |
+| 亚可加组重叠度中位 | 0.0（n = 108） | 0.0（n = 6） |
+
+**完全没有预测力。** 不是指标退化——枢纽自己的路径画像有 **27**（糖）/ **43**（水）个非零中间节点，
+312 个配对里 **83** 个（27%）、204 个里 **99** 个（49%）有非零重叠，最大重叠度到 **0.594 / 0.699**。
+只看有重叠的那些，相关是 **−0.26**（糖）和 **−0.04**（水）：糖那边方向与事先声明一致（重叠越高越像共用瓶颈）但很弱，
+水那边基本没有。所以这个假设在这个模型里**基本被证伪**，只在糖通路有重叠的子集里留下一点痕迹。
+
+> **更正（2026-09-16）**：本段先前写的是「101 个 / 109 个」与「−0.12 和 +0.03」，**在任何结果文件里都查不到**——
+> 这几个量当时只在终端打印过、没有存盘。已改为把它们写入 `structure_vs_function.json`（字段 `pairs.degeneracy_check`）后重算。
+> 27/43 与 0.59/0.70 两组数字复核无误。
+
+**结论**：单敲除的效应，部分能用“活跃度 × 多跳通路”粗筛出来（越集中的通路越准）；
+但**"两个神经元一起敲会不会塌"——也就是单敲除看不见的那部分——完全看不出结构规律，只能跑模型。**
+这恰好是这套虚拟敲除最有价值的地方：它算的正是连线本身答不出的那一半。
+
+【推测】为什么结构预测不了配对效应：备份与否取决于**在给定输入下、动力学上谁在实际承载信号**（哪条路真的在放电、抑制有没有被激活），
+而不只是“图上有没有另一条路”。这与 14.4 节看到的“网络对扰动很敏感”是同一件事的两面。
+
+### 22.1 换成“动力学指纹”：弱但方向对（`screen/dynamic_fingerprint.py` → `results/screen/dynamic_fingerprint.json`）
+
+22 节里“图上路径重不重叠”完全预测不了冗余。换一个同样**不用跑新仿真**、但用到动力学的量：
+段文件里存的是每段**全部神经元**的脉冲数，所以“敲掉 c 之后全脑哪些神经元变了”这张指纹 Δ(c) 已经在盘上。
+事先声明：动力学重叠 = cos(Δ(c), Δ(枢纽))，**重叠越高 → Δ 越负（越像共用瓶颈）**；同时报告“指纹大小”作为对照。
+
+| | 糖 × CB0883（280 个） | 水 × CB0051（182 个） |
+|---|---|---|
+| 动力学重叠 vs 配对 Δ | **-0.206** | **-0.142** |
+| 协同组重叠中位 | 0.379 | -0.1959 |
+| 亚可加组重叠中位 | 0.4644 | -0.3469 |
+| 对照：指纹大小 vs 配对 Δ | -0.191 | 0.474 |
+| 控制幅度后的偏相关 | -0.13 | -0.205 |
+
+- **方向与事先声明一致**，而且比静态连线好一个量级（静态：−0.008 / 0.013；动力学：-0.206 / -0.142）。
+  两组的分布中位数也分得开一点（糖：协同 0.379 对亚可加 0.4644）。
+- **但仍然很弱，而且有一部分不是"重叠"的功劳**：水通路上“敲掉它在全脑造成多大扰动”这个更简单的量预测得更好（0.474）。
+  控制幅度后，重叠度的偏相关只剩 -0.13 / -0.205——有信号，但远不足以替代模拟。
+- 【推测】所以“会不会互为备份”确实和动力学有关（指纹比图结构好得多），但**要预测它，需要的信息量已经接近直接把这一对敲掉跑一遍**：
+  指纹本身就是每个神经元单独敲的全脑仿真结果。换句话说，**省不掉那一次配对仿真**，只能省掉一部分筛选。
+
+### 22.2 把“通路集中度”算出来（`screen/concentration.py` → `results/screen/concentration.json`）
+
+前面反复说糖通路“分散”、水通路“集中”、JON 通路“只有一个瓶颈”，那是印象。这里把它定义清楚再检验
+（指标和方向都写在算之前）：效应 e = max(0, 1 − 修正后比值)，前 6 个实现；
+基尼系数（0 = 人人一样，1 = 全压在一个神经元上）、n80（贡献 80% 总效应需要几个神经元）。
+**事先声明的方向：越集中 → 只看连线越能预测敲除效应。**
+
+| 通路 | 活跃神经元 | 效应 ≥ 0.2 的个数 | 基尼 | n80 | 最大效应 | 连线 G3 预测力 | 模型对真实实验 |
+|---|---|---|---|---|---|---|---|
+| 糖 50 Hz | 313 | 26 | 0.783 | 62 | 0.69 | **0.316** | 6/10 |
+| 水 160 Hz | 216 | 18 | **0.921** | **15** | 1.00 | **0.485** | 9/10 |
+| JON 160 Hz（论文名单） | 596 | 5 | **0.922** | 44 | 1.00 | **0.288** | 1/1 可测 |
+
+三行现在**口径完全一致**：都是该通路全部活跃神经元逐个单敲、零参照中位数修正、前 6 个实现
+（JON 这一行为此补跑了 1,319 段、45 分钟，见 `results/screen/jon_paper/concentration_full.json`）。
+
+- **事先声明的方向被自己的数据推翻了一半。** 声明的是「越集中 → 只看连线越能预测」。实际：
+  - 基尼：**JON 0.922 ≈ 水 0.921 ≫ 糖 0.783**
+  - 连线预测力 G3：**水 0.485 > 糖 0.316 > JON 0.288**
+  - **JON 是最集中的（并列第一），却是连线最预测不了的**。三条通路上「集中 → 可预测」并不成立。
+- 为什么会这样，可以从 n80 看出来：水 15、JON 44、糖 62。**基尼和 n80 度量的不是同一件事**——
+  JON 的基尼高，是因为 596 个神经元里绝大多数效应恰好为 0（aBN1 一个就吃掉全部效应）；
+  但真正「扛住 80% 效应」仍需要 44 个神经元，因为剩下的效应摊得很平。
+  水通路才是真正的「少数几个各扛一部分」（n80 = 15）。
+  换成 n80 也救不回来：n80 排序是 水 15 < JON 44 < 糖 62，而 G3 排序是 水 0.485 > 糖 0.316 > JON 0.288——糖和 JON 仍然是反的。
+  **两个集中度指标都解释不了连线预测力的排序。** 事先声明的假设在这三条通路上**不成立**，如实记在这里；
+  何况 n = 3，本来也撑不起结论——之前写「三条通路的排序完全一致、事先声明的方向都成立」是错的，
+  那是建立在 JON 那一行用了已作废运行、且只给 304 个神经元评分的基础上。
+- **JON 通路是最极端的一种集中**：596 个活跃神经元里只有 5 个敲掉会让 aDN1 掉 20% 以上，其中 aBN1（SAD093）一敲就归零。
+  所以「集中」至少有两种：水通路是**少数几个神经元各扛一部分**，JON 通路是**一个绝对瓶颈 + 一大片几乎无关的神经元**。
+- 模型对实验的准确率：糖 6/10、水 9/10、JON 1/1 可测（样本太小，不能与前两者并列比较）。
+
+> **更正（2026-09-16）**：本表此前有两处问题，都已修。
+> (1) JON 那一行原先用的是 24 节「全部 1,091 个 JO-」那次运行（活跃 2,076、必需 1、基尼 0.858、n80 45、G3 0.434），
+> 该运行已被 24.3 节宣布作废；现已用论文刺激名单把 596 个活跃神经元**全部**重跑。
+> (2) 最后一列 JON 那一格长期写作「2/2（aBN1、aBN2）」，但这是 `screen/concentration.py` 里**手写的字符串**，不是算出来的：
+> Hampel et al. 2015 验证的 aBN2，其 v630 编号 `720575940611163610` 在 **v783 模型里不存在**，我们根本没测过它；
+> 而且论文自己的补充表 7D 里同一个编号（那里叫「Descending BN2_3」，不叫 aBN2，所以按名字检索漏掉了）160 Hz 比值是 **0.844**，
+> 按论文自己的 0.8 门槛也判不出必需。诚实的写法是 **1/1 可测**。这条违反了「绝不报告没真跑过的结果」，已在 23 节错误账本登记。
+
+- 口径提醒：这里的效应做了 max(0, ·) 截断（只看“下降”），所以 G3 的数值与 22 节（不截断）略有差别（糖 0.316 对 0.342，水 0.485 对 0.454），排序不变。
+
+## 23. 这一轮的方法学账本（2026-09-15 追加）
+
+第 14–22 节一共提了 8 个**在跑之前写定**的假设或判据。把它们和结果放在一起，比任何单条结论都更说明这套做法值不值：
+
+| # | 事先写定的东西 | 结果 |
+|---|---|---|
+| 1 | 判定门槛照搬论文（沉默后读出 ≤ 0.8 记为“必需”） | 三条通路一直没改过 |
+| 2 | 时间预算规则：按基线活跃数把重复数从 8 降到 6（只看速度，不看结果） | 执行了；后来发现 6 个不够，又加到 12（16 节） |
+| 3 | 协同 / 亚可加判据带 ±0.1 缓冲 + 留一检验 | 6 个实现时一半判定会翻；12 个实现后协同 7/10 稳、亚可加 6/11 稳 |
+| 4 | “换一条通路看模型准不准”（19 节） | **成立**：水 9/10、糖 6/10，而且错的是同一个 Usnea |
+| 5 | 两侧一起沉默会更贴近真实实验（14.5、19 节） | **基本无效**：单侧刺激下对侧神经元几乎不放电；唯一例外 Roundup 反而让预测更差 |
+| 6 | 通路越集中，只看连线越能预测单敲除效应（22 节假设 A） | **两条通路上成立、三条通路上被推翻**：水 0.45（前 20 命中 13）对糖 0.34（命中 9）；但补齐 JON 全量后，JON 最集中（基尼 0.922）却连线最预测不了（G3 0.288 < 糖 0.316）。见 22.2 节 |
+| 7 | 互为备份 = 到读出的图上路径各走各的（22 节假设 B） | **被自己的数据证伪**：相关 −0.008 / 0.013，且不是指标退化 |
+| 8 | 动力学指纹重叠越高 → 越像共用瓶颈（22.1 节） | **方向对但弱**：−0.21 / −0.14；控制扰动幅度后只剩 −0.13 / −0.21 |
+
+**自己犯过、又自己查出来的错**（都写在相应小节里，没有事后掩盖）：
+
+| 错误 | 怎么发现的 | 影响 |
+|---|---|---|
+| Brian2 standalone 把随机种子编译进程序，“× 4 试次”其实是同一次的 4 份拷贝 | 设计这次筛选时读 Brian2 源码 | 34 个旧参考实验重跑（17 节），更正了“DA2 50 Hz 无反应”这条结论 |
+| 分析在缺段时静默降级（3 次） | 1 次报错、1 次偶然、1 次数对数 | 改成显式报缺口 + 全量体检（20 节），13,515 段 0 缺口 |
+| 误判视觉管线“共用同一噪声实现” | 查 main.cpp 后自证 | 更正并补了 3 次重复（18 节） |
+| 配对设计在混沌网络里有系统性偏差 | 检查“沉默无关神经元”的结果时 | 事后修正口径（14.4 节），糖通路判定从 31 个降到 16 个 |
+| 同进程第二次建 Brian2 网络崩溃 | 新工具第一次使用时 | 修在 `Screen` 里，所有脚本受益 |
+| **在三通路对照表里把糖通路的 κ 填成 1.00** | 写完 24.3 节“要看 κ”那段之后，回头核对自己引用的数字 | 已发布的页面上错了两版：1.00 是 100 Hz 那一列（MN9 饱和、两边各只判出 2 个必需神经元的退化情况）；第一次改成 0.633 仍然不对，那是**未做零参照归一化**的值，和水 / JON 两列口径不同；同口径的正确值是 **0.59**。**同一节里刚强调“别只看一个数字”，自己连栽两次**，因此 24.3 节补上了 κ 的反例与口径说明 |
+| **把“模型对真实实验 2/2”当成结果报了出去，其实从没测过 aBN2** | 系统核对三通路表里每一个手写数字时（就是查 κ 那次的延伸） | aBN2 的 v630 编号在 v783 模型里不存在，测不了；而且论文表 7D 里它的比值是 0.844，按 0.8 门槛也判不出。**这是“报告了没真跑过的结果”，是本项目最不该犯的错。** 已全部改为“1/1 可测”，并查明原因：该神经元在表 7D 里叫 “Descending BN2_3”，我们按 “aBN” 检索名字时漏掉了 |
+| **§11.2 的 LC16 表除 MDN 一列外全是第 17 节重跑前的旧值** | 第二轮核对（§9–13）；它和 §10.0 同一条件的数字直接打架却一直没被发现 | 双侧 150 Hz 的 DNa02 实为 47/38.5（表里写 32/44）、双侧 100 Hz 32/15.5（写 30/18）、BDN2 43/39 与 21.5/21.5（写 46 与 28–32）等，已全部按 `v4_analysis.json` 重写。**教训：局部更新一张表时，必须整表重生成，不能只改被关注的那一列** |
+| **§9.2 那对 flyvis 侧化数字（10.9 / 1.8）查无出处** | 第二轮核对 | 复算是 5.3 / 0.9 Hz；「平移能量约 2 倍」实为 1.69–1.75 倍。方向性结论成立，具体数值已删 |
+| **§12 三处「每副本耗时」的下界都把某个条件的最大值当成了全局最小值** | 第二轮核对 | 实为 0.4–109.9 s、0.4–115.9 s、0.8–318.8 s（原写 1.5–110 / 1.5–116 / 1.9–319）；而且同一个量在 §12.1 和 §12.5 的上界还不一致 |
+| **“子回路只重现水通路”这个结论是口径混用造出来的** | 核对 κ 之后顺手检查同一个脚本，发现糖用未归一化值、水用归一化值 | 统一口径并把样本从 6 个补到 10 个后，糖 Pearson 从 **+0.21 升到 +0.75**，水 +0.89。**原结论不成立**，改写为“水那一侧更贴近一些”。同时发现页面上那列“全脑值”混了至少三种口径（Roundup 未归一化、Phantom 1.08 查无来源、CB0883 来自 12 实现双敲除），已写 `dodge/measure_neurons_fullbrain.py` 统一重算 |
+| **页面上那 10 个神经元的敲除比值是临时手测的，没有脚本可复现** | 把结果写进报告时想引用口径，发现无从查起 | 写了 `dodge/measure_neurons.js` 全部重测替换（Clavicle 0.78 → 0.91 等），并顺带发现了 25.2 节那个“子回路只重现水通路”的结果 |
+
+**计算账本**（第 14 节以来的全部筛选；2026-09-16 从盘上全部 `*.npz` 逐块重数，见 `results/screen/compute_ledger.json`）：
+
+| 数据集 | 段数 | 仿真机时 | 秒/段 |
+|---|---|---|---|
+| 枢纽全扫描（16.2 + 21.1 节，CB0883 与 CB0051） | 4,411 | 2.42 h | 1.97 |
+| JON 全部 JO-（24 节，已被 24.3 取代） | 3,357 | 1.97 h | 2.11 |
+| 糖主筛选（14 节） | 2,680 | 1.46 h | 1.97 |
+| 水通路（19 节） | 2,662 | 1.45 h | 1.96 |
+| JON 论文名单（24.2 + 24.3 节） | 2,212 | 1.25 h | 2.04 |
+| 双敲除（16 节，6 / 12 实现 + 枢纽配对） | 1,808 | 1.01 h | 2.01 |
+| JON 弱刺激（24.1 节） | 498 | 0.32 h | 2.33 |
+| **合计** | **17,628 段** | **9.88 h**（共 4.95 h 果蝇脑内时间） | 2.02 |
+
+> **更正（2026-09-16）**：先前这张表把 JON 那两行写成「1,432 段 / 0.83 h」和「1,750 段 / 0.35 h」，合计 14,743 段 / 7.52 h，
+> 都偏低——前者漏了 stageB、后者只算了 fullpairs 那 13 分钟，而且 0.35 h 对应 0.72 秒/段，与其余各行的 ~2.0 秒/段自相矛盾，
+> 账本自身就不自洽却没被发现。现在改成从盘上逐块重数，并加一列「秒/段」作为自洽性检查。
+
+峰值内存始终在 2.9–4.2 GB，没有超过 16 GB 机器的安全线；全部结果 1.3 GB，可断点续跑。
+
+## 24. 第三条通路：触角机械感觉 → 梳理指令 aDN1（2026-09-15 追加）【实测】（`screen/jon_screen.py` → `results/screen/jon/`）
+
+> **⚠️ 本节的数值已被 24.3 节取代**：这里用的刺激名单（全部 1,091 个 JO- 神经元）比论文宽得多。
+> 用反推出来的论文名单（146 个）重做后，基线 23.4 Hz（论文 23.3）、κ 从 0.281 升到 0.907、判出 5/6 个必需神经元。
+> 本节保留作为过程记录；**结论性数字请看 24.3**。唯一不变的结论是“JON → aDN1 是单瓶颈通路、零协同”。
+
+前面所有方法学结论都来自味觉 → MN9。换一条**不同模态、不同读出**的通路：刺激全部 Johnston 器神经元（听觉/机械感觉），
+读出梳理指令神经元 aDN1。论文补充表 7D 给了同一条通路上 299 个神经元的沉默筛选，可以直接对照；
+真实实验对照来自 Hampel et al. 2015（aBN1、aBN2 是梳理必需的，论文表 10 记为 2/2）。**注意**：我们只能测 aBN1——aBN2 的 v630 编号在 v783 模型里不存在（详见 22.2 节下方的更正）。
+
+**一处偏差要先说明**：论文 notebook 里的 `neu_JON_all` 列表没能提取出来（只找到 JON_CE / JON_F / JON_D_m 三个子集），
+所以我们按注释表取了 cell_type 以 "JO-" 开头的**全部 1,091 个**神经元，160 Hz。结果是我们的刺激更强：
+aDN1 基线 32.3 Hz，论文同频率 23.3 Hz。归一化后的比较仍然有效，但这点会影响判定门槛附近的结论（见下）。
+
+**与论文补充表 7D 比**（280 个 ID 在 v783 未变）：
+
+| 指标 | 值 | 对比糖 / 水 |
+|---|---|---|
+| Pearson | **0.915** | 糖 0.83、水 0.96 |
+| Spearman | 0.435 | 糖 0.54、水 0.55 |
+| 判定一致率 | 98.2% | 糖 91%、水 97% |
+| Cohen κ | 0.281 | 糖 0.59、水 0.87 |
+| 判为“必需”：我们 / 论文 | **1 / 6** | — |
+
+- **效应大小对得很好（Pearson 0.915），但判定数差很多**（我们 1 个、论文 6 个）。
+  5 处不一致全部是同方向的边缘情况：论文 0.68–0.74、我们 0.83–0.90（JO_EVL_1、JO_FDP_5、JO_EDM_7、JO_EDM_14、aDN2）。
+  【推测】原因就是上面那处偏差——我们的刺激更强，把 aDN1 推离了阈值，单个神经元的影响被压缩。
+  这与 14.5 节看到的现象一致：糖通路在 100 Hz（接近饱和）时也只剩一个神经元被判必需。
+- **我们唯一判为必需的是 aBN1（SAD093）：敲掉它 aDN1 完全归零（0.00），论文同样是 0.00。**
+  这正是 Hampel et al. 2015 实验里梳理必需的那个神经元。
+
+**这条通路几乎没有可分解的结构**：
+
+| | 糖 50 Hz | 水 160 Hz | JON 160 Hz |
+|---|---|---|---|
+| 活跃神经元 | 313 | 216 | **2,076** |
+| 效应 ≥ 20% 的个数 | 26 | 18 | **1** |
+| 双敲除 66 对：协同 / 可加 / 亚可加 | 10 / 45 / 11 | 15 / 45 / 6 | **0 / 66 / 0** |
+
+- 66 对双敲除**没有一对是协同或亚可加**：aBN1 一个人决定一切，其余 11 个（比值 0.96–0.99）加不加都没区别，
+  所以每一对都恰好落在“独立相乘”的预期上。
+- 三条通路因此构成一个梯度：**糖 = 分散且有备份网络 → 水 = 少数几个各扛一部分、互相之间大量协同 → JON = 单一瓶颈、无冗余可言**。
+  连线预测力（22.2 节的 G3）和模型对实验的准确率，都沿着这个梯度变化。
+
+### 24.1 验证“差异来自刺激强度”：把刺激调弱再跑一遍（`screen/jon_weak.py` → `results/screen/jon_weak/`）
+
+24 节的推测是：我们只判 1 个必需、论文判 6 个，是因为我们的 JON 刺激更强、把 aDN1 推离了阈值。
+这个推测可以直接验证，而且**两种结果都有信息**：翻过来说明是刺激强度；翻不过来说明另有原因。
+
+事先写定：先只看基线扫 4 个频率，选 aDN1 最接近论文 23.3 Hz 的那个（不看任何敲除结果），
+再在该频率下重跑论文表 7D 里效应最强的 30 个（一定覆盖论文判必需的 6 个）+ 50 个随机零参照，6 个实现。
+**事先声明的预测：论文判必需的 6 个里，我们应当判出明显多于 1 个。**
+
+- 频率扫描：80 Hz → 1.3 Hz、100 Hz → 6.9 Hz、120 Hz → 17.2 Hz、140 Hz → 25.2 Hz（论文 23.3 Hz）→ 按规则选定 **f\* = 140 Hz**（基线 25.2 Hz）。
+
+| | 我们 160 Hz（24 节） | 我们 140 Hz | 论文 |
+|---|---|---|---|
+| aDN1 基线 | 32.3 Hz | **25.2 Hz** | 23.3 Hz |
+| 论文效应最强的 30 个里判为“必需” | 1 | **3** | 6 |
+| 效应大小的相关（Pearson） | 0.915 | **0.981** | — |
+| 判定一致率 | 98.2%（全部 280 个） | 90%（这 30 个） | — |
+
+| 神经元 | 论文名称 | 论文 | 我们（140 Hz） |
+|---|---|---|---|
+| SAD093 | aBN1 | 0.00 | 0.00 |
+| DNge078 | aDN2_l | 0.71 | 0.75 |
+| JO-FD2 | JO_FDP_5 | 0.68 | 0.77 |
+| JO-EV1 | JO_EVL_1 | 0.72 | 0.81 |
+| JO-FD2 | JO_FDP_6 | 0.81 | 0.84 |
+| JO-ED2_b | JO_EDM_7 | 0.74 | 0.85 |
+| JO-FD2 | JO_FDP_1 | 0.87 | 0.86 |
+| JO-CM | JO_EDM_14 | 0.74 | 0.89 |
+
+**推测部分成立**：刺激调弱后判定数从 1 个升到 3 个（都与论文重合），效应大小的吻合度也从 0.915 提到 **0.981**——
+这是这三条通路里与论文吻合得最好的一次。但论文的 6 个里仍有 3 个我们判不出来（JO_EVL_1 0.81 对 0.72、JO_EDM_7 0.85 对 0.74、JO_EDM_14 0.89 对 0.74），
+而且我们的比值**系统性地略高**（效应略小）。
+
+【推测】剩下的差距来自刺激**集合**而不是强度：我们刺激了全部 1,091 个 JO 神经元，论文的 `neu_JON_all` 显然是个更小的集合，
+输入端神经元越多、彼此越能互相顶替，单个下游神经元就越不关键（这与 16 节“输入端受体神经元和枢纽互为备份”是同一回事）。
+光调频率补不回集合差异。要彻底对齐，需要论文那份具体名单。
+
+### 24.2 把论文的刺激名单反推出来，差异基本闭合（`screen/jon_paper.py` → `results/screen/jon_paper/`）
+
+24.1 节留下的判断是：剩余差异来自**刺激集合**而不是强度。论文 notebook 里 `neu_JON_all` 这个变量提取不到，
+但名单其实可以从已发表的数据里反推——**被刺激的神经元，放电率会精确跟随刺激频率**
+（补充表 7A 的 20 Hz 列 ≈ 20、100 ≈ 100、200 ≈ 200，因为泊松输入直驱且这些神经元不应期设为 0）。
+
+- 按这个特征筛，得到 **146 个**，其中 145 个注释 cell_type 以 JO 开头（另 1 个无注释），145 个在 v783 模型里。
+- **独立核对**：notebook 里 JON_CE(70) + JON_F(60) + JON_D_m(16) 的并集**恰好是同一批 146 个**，两条路径完全一致。
+  所以论文的 `neu_JON_all` 就是这三个子集的并集，名单存在 `results/screen/jon_all_paper.json`。
+
+用这份名单、160 Hz 重跑（活跃神经元从 2,076 降到 596）：
+
+| | 全部 1,091 个 JO（24 节） | 调弱到 140 Hz（24.1 节） | **论文名单 146 个 · 160 Hz** | 论文 |
+|---|---|---|---|---|
+| aDN1 基线 | 32.3 Hz | 25.2 Hz | **23.4 Hz** | 23.3 Hz |
+| 论文效应最强 30 个里判“必需” | 1 | 3 | **5**（全部与论文重合） | 6 |
+| 效应相关（Pearson） | 0.915 | 0.981 | **0.986** | — |
+| 判定一致率 | — | 90% | **96.7%** | — |
+
+| 神经元 | 论文名称 | 论文 | 我们（论文名单） |
+|---|---|---|---|
+| SAD093 | aBN1 | 0.00 | 0.00 |
+| JO-FD2 | JO_FDP_5 | 0.68 | 0.68 |
+| JO-ED2_b | JO_EDM_7 | 0.74 | 0.73 |
+| JO-EV1 | JO_EVL_1 | 0.72 | 0.74 |
+| DNge078 | aDN2_l | 0.71 | 0.74 |
+| JO-CM | JO_EDM_14 | 0.74 | 0.82 |
+
+- **推测两部分都成立**：刺激强度补回一部分（1 → 3），刺激集合补回其余（3 → 5）。
+  只剩 JO_EDM_14 一个仍在门槛外（论文 0.74、我们 0.82），差距已经落到连接组版本（v630 vs v783）与试次噪声的量级。
+- 方法学上的副产品：**论文没有公开的输入名单，可以从它自己发表的放电率表里认出来**——被直接驱动的神经元在各个刺激频率上都精确跟随。
+  这条对复现别人的连接组模拟很实用。
+
+### 24.3 用论文名单把整条通路重做一遍，取代 24 节的数字（`screen/jon_paper.py full` / `full_analyze` → `results/screen/jon_paper/full_summary.json`）
+
+24.2 节只重跑了“论文效应最强的 30 个”。既然确认了刺激名单是差异的主因，24 节里那一整套数字（280 个神经元的对照、66 对双敲除）
+就都是用**过宽的刺激**算出来的，必须用论文名单重做。这次跑了 1,758 段（`full` 1,362 段 45.8 min + `fullpairs` 396 段 13.3 min，合计约 59 min，峰值 3.3 GB），
+口径与糖 / 水通路、与 24 节逐项一致，**唯一的差别就是刺激名单**（146 个论文 JON vs 1,091 个全部 JO-）。
+
+| 与论文补充表 7D 对照（280 个神经元） | 24 节（全部 1,091 个 JO-） | **24.3（论文名单 146 个）** |
+|---|---|---|
+| aDN1 基线 | 32.3 Hz | **24.2 Hz**（论文 23.3；这是本节所用的 6 个实现，12 个实现是 23.4） |
+| 活跃神经元 | 2,076 | **596** |
+| Pearson | 0.915 | **0.945** |
+| Spearman | 0.435 | **0.501** |
+| 我们判“必需”/论文判“必需” | 1 / 6 | **5 / 6** |
+| 判定一致率 | 98.2% | **99.6%** |
+| **κ（去掉“都判不必需”的运气成分）** | **0.281** | **0.907** |
+| 比值中位绝对差 | 0.02 | 0.024 |
+
+**κ 从 0.281 跳到 0.907** 是这一节最该看的数字：一致率两边都在 98% 以上，只是因为 280 个里 274 个双方都判“不必需”；
+去掉这份运气之后，24 节的模型其实**几乎没有复现论文的判定**（κ 0.28 属于“勉强一致”），而换成论文名单后变成“高度一致”。
+这也说明：**一致率这个指标在极度不平衡的判定问题上是骗人的**，前面几节凡是报了一致率的地方都应该同时看 κ。
+实际的值是（三条通路都用**零参照归一化**后的口径，才可比）：
+**糖 50 Hz κ = 0.59**、**水 160 Hz κ = 0.87**、**JON 160 Hz κ = 0.91**。
+糖那一列未归一化时是 0.633，14.4 节的混沌偏差修正把它压到 0.59——引用时必须说清是哪一个。
+
+但 κ 也有它自己的陷阱，而且就在我们自己的数据里：**糖通路 100 Hz 的 κ = 1.00**，看着完美，
+其实是因为 100 Hz 下 MN9 饱和、两边各自只判出 2 个必需神经元——**正例只有 2 个时 κ 同样不可靠**。
+所以糖通路真正有信息量的是 50 Hz 那一列。结论是：一致率、κ 都要连同**正例个数**一起看，任何单个数字都能骗人。
+
+- **单个瓶颈的结论不变，而且更干净**：66 对双敲除里**协同 0 对**，可加 65、亚可加 1（24 节：协同 0、可加 66）。
+  Δ 最大的一对只有 +0.07（DNge078 + CB2558），远在 +0.1 的判定门槛之下。
+  对比糖通路（CB0883 这样的枢纽、Clavicle+G2N-1 的真协同）和水通路，**JON → aDN1 就是一条单瓶颈通路**：
+  切掉 aBN1（SAD093）梳理指令直接归零（比值 0.00），其余任何神经元、任何配对都撼动不了。
+- **集中度**（口径同 22.2 节）：基尼 **0.878**、n80 = **34**、最大效应 1.0、必需 5 个。
+  注意这里只给 304 个活跃神经元评了分（论文表 7D 的 280 个 + 50 个零参照），不是全部 596 个，
+  所以这组数字**不能直接放进 22.2 节的三通路排序表**；要可比需要再跑约 1,750 段（约 1 小时）。
+- **24 节的哪些说法要改**：24 节写的“我们只判出 1 个必需、论文判 6 个”“κ 0.281”“基线 32.3 Hz”**全部作废**，
+  以本节为准。24 节写的“JON 是单瓶颈通路、零协同”**保持成立**，而且在正确刺激下更干净。
+  24 节的方法本身没错，错在刺激名单——这正是 24.1 / 24.2 两节事先声明要检验的那个推测。
+
+---
+
+## 25. 把研究结果搬回游戏里：真实神经元开关、物理世界、水与口渴（2026-09-16 追加）【实测 + 工程】（`dodge/game_core.js`、`dodge/brain.js`、`dodge/fly_dodge.template.html`）
+
+14–24 节做了 17,628 段全脑仿真（见 23 节账本），但游戏页上一版只体现了其中一小部分。这一节把三件事搬进去，并把**搬进去之后发现的不一致**如实记下来。
+
+### 25.1 落地姿态修好了（用户报的 bug）
+
+反馈是“每次都是屁股插入到地面里面去了，这样看起来就非常假”。实测确认（`python dodge/landing_pose_check.py` → `results/flight/landing_pose_check.json`）：
+按降落结束时游戏给的终态（`clipPose` 在 landU = 1 时把 z 置 0）+ 轨迹末帧姿态，把 85 个 mesh 的 16,661 个顶点摆好再放大 2 倍，
+
+| 飞行片段 | 末帧俯仰 | 末帧翻滚 | 机体最低点 | 插入地面 |
+|---|---|---|---|---|
+| `evasion_044` | **抬头 42.0°** | +14.5° | −4.53 mm | **4.53 mm** |
+| `evasion_067` | −0.0° | +1.7° | −2.56 mm | **2.56 mm** |
+
+（先前正文写的是「俯仰 −43°、4.74 mm / 2.25 mm」，是当时在 node 里临时量的、没有存盘；现在改成可复现的脚本，
+数值基本吻合，俯仰的符号约定相反——这里正号表示抬头。即使 `evasion_067` 姿态近乎水平也会插进去 2.56 mm，
+说明问题不只出在抬头姿态上，机体本身就需要抬起来。）
+原因是手写的 50 ms 线性降落只移动了高度，没有动姿态——真实逃逸飞行结束时果蝇本来就是抬头姿态，直接落下去自然会插进地里。
+修法两步（都在 `clipPose` / `poseFlyer`）：降落进度 `landU` 上用四元数球面插值把姿态转回水平，同时按**当前姿态下机体包围盒的最低点**抬升，保证脚先着地。
+
+### 25.2 敲真实神经元的开关：搬进去才发现模型对不上
+
+页面上多了一排开关，敲的是 14–24 节筛出来的**真实神经元**（Roundup、Clavicle、G2N-1、CB0883、CB0051、aBN1 等 10 个），
+切断传出突触的语义与全脑筛选完全一致。但**子回路只有 4,599 个神经元（全脑的 3%），敲除效果与全脑筛选并不一致**——这一点必须写在页面上，也写在这里：
+
+| 神经元 | 全脑（糖） | 子回路（糖） | 子回路（水） | 怎么回事 |
+|---|---|---|---|---|
+| Roundup (CB0553) | 0.74 | **0.05** | **0.11** | 裁剪后它成了两条通路共用的出口，比全脑更关键 |
+| CB0883 | 0.75（配对才塌的枢纽） | **1.07** | 1.00 | 枢纽效应**完全消失**：它依赖的旁路不在子回路里 |
+| Clavicle (AN_GNG_30) | 0.61 | 0.91 | **0.01** | 对糖几乎没影响，对水直接归零 |
+| CB0051 | 0.97 | 0.80 | **0.02** | 同上；全脑糖通路里它毫无作用（0.97） |
+| G2N-1 (CB0616) | 0.50 | **0.67** | 1.07 | 反过来：只管糖，完全不管水 |
+| Phantom (CB0062) | 1.08（抑制性） | 0.97 | **2.06** | 敲掉这个 GABA 神经元，水通路的 MN9 翻倍 |
+| aBN1 (SAD093) | 梳理 0.00 | 1.00 | 1.00 | 梳理 aDN1 **59.8 → 0 Hz**，与全脑、与 Hampel 2015 三方一致 |
+
+口径可复现：`node dodge/measure_neurons.js`（颗粒钉在头部前方 1.3 mm 持续接触 → 味觉神经元 200 Hz，3 个种子，2.5 s 取后 1.25 s 平均）
+→ `results/dodge/neuron_ratios.json`。**这一版之前页面上标的比值是临时手测的、没有脚本可复现，现已全部重测替换。**
+
+- **Clavicle + G2N-1 在子回路里是真协同**：各自 0.91 / 0.67，一起 0.50（独立预期 0.61）。
+- **子回路更像哪条通路？【探索性 · 事后分析 · n = 10】**（`dodge/subcircuit_vs_fullbrain_knockouts.py`）：
+  10 个神经元、两侧同一口径（全脑用 `dodge/measure_neurons_fullbrain.py` 重算，一起敲 + 零参照归一化 + 6 个实现）。
+
+  | 神经元 | 全脑糖 | 游戏糖 | 全脑水 | 游戏水 |
+  |---|---|---|---|---|
+  | Roundup | 0.30 | 0.05 | 0.00 | 0.11 |
+  | G2N-1 | 0.47 | 0.67 | 0.96 | 1.07 |
+  | Clavicle | 0.58 | 0.91 | 0.02 | 0.01 |
+  | CB0277 | 0.41 | 0.74 | 0.98 | 1.08 |
+  | CB0051 | 0.97 | 0.80 | 0.49 | 0.02 |
+  | Zorro | 0.81 | 1.03 | 0.47 | 0.92 |
+  | Phantom | 0.92 | 0.97 | 3.02 | 2.06 |
+  | Rattle | 0.88 | 1.13 | 0.64 | 0.98 |
+  | CB0883 | 0.76 | 1.07 | 1.00 | 1.00 |
+  | aBN1 | 1.00 | 1.00 | 1.00 | 1.00 |
+  | **Pearson / Spearman** | — | **+0.75 / +0.58** | — | **+0.89 / +0.84** |
+  | **中位绝对差** | — | **0.24** | — | **0.11** |
+
+  **水那一侧确实更像，但差距没有第一版说的那么大。** 剔除 Phantom 这个唯一的极端值（3.02）后是糖 +0.74 / 水 +0.85，排序不变。
+  Phantom 仍是最漂亮的一行：敲掉这个抑制性神经元，**全脑水通路 MN9 变 3.02 倍、子回路 2.06 倍**，方向和量级都对上了。
+
+  > **更正（2026-09-16）**：本节第一版报的是"糖 +0.21、水 +0.92"，那是错的，原因有二：
+  > (1) **口径混用**——糖用了未做零参照归一化的值，水用了归一化的；
+  > (2) 只取了论文里有命名的 6 个类型，漏掉 CB0277 / CB0051 / CB0883 / aBN1。
+  > 统一口径并补全 10 个后，糖从 +0.21 升到 +0.75。**"子回路只重现水通路、完全重现不了糖通路"这个说法不成立**，
+  > 正确的说法是"水那一侧更像一些"。这是本轮第三次自查出的引用错误，已在 23 节错误账本登记。
+
+- 结论（按更正后的数据）：**子回路整体上重现了全脑的敲除模式（糖 +0.75、水 +0.89），水那一侧更贴近**。
+  单个神经元上仍有裁剪造成的明显失真，最典型的是 **CB0883**：全脑里它是"单独敲 0.76、配对才塌到 0.24"的枢纽，
+  子回路里完全没作用（1.07），配对也只是可加——它依赖的旁路在 wmin ≥ 3、K ≤ 3 的裁剪里被切掉了。
+  **"裁剪保住集中通路、毁掉分散通路"这个解释，在 n = 10 的数据上只剩很弱的支持**（Spearman 0.84 对 0.58），不宜当成结论。
+  页面上每个开关同时标了糖 / 水两个子回路实测比值，悬停能看到全脑的对应值。
+
+### 25.3 物理世界：阳光、风、重力
+
+用户问“能不能给虚拟世界加物理特性”。加了三样，**各自属于哪一类都标清楚**：
+
+- **风**【连接组 · 半】：游戏的 JO 输入组正是 JO-C/E 亚型，即风觉 / 重力觉神经元（Yorozu et al. 2009），也正是 13 节“果蝇说中文”里“风”那个词对应的那群。
+  所以“起风 → 这群神经元放电 → 下游读出”是连接组算的；**风速→频率的换算、触角迎风几何、风把果蝇吹偏的力**全是手写的（没有该模型下的定标数据）。
+  风用随机游走（时间常数 6 s）演化，有风向标显示，画面上有随风飘的尘粒。
+- **阳光**【手写】：只调节视觉前端增益（暗 → 对比度低 → 逼近检测弱，最低到 35%）与画面明暗。
+  **没有假装是连接组算的**——第 3 节实测过：直接刺激光感受器（R1-6/R7/R8）在这个 LIF 模型里驱动不了任何下行神经元。
+- **重力**：飞行段本来就在 MuJoCo 物理里跑（flybody 训练好的控制器），重力是真的；地面行走段没有独立的重力模拟。
+
+### 25.4 水滴与口渴：同一个动作，背后两套线路
+
+这是 19 / 21 节结果最直观的体现：**水通路和糖通路用的是两批不同的神经元，只重叠约三分之一**，但读出是同一个 MN9、同一个伸喙动作。
+
+- 水滴刺激的是**真实的水味觉受体**：19 节用的 18 个右侧唇瓣水感 GRN 里，**17 个在游戏子回路中**。
+  它们的注释 cell_type 也是 LB3（本来就混在糖味觉组里），所以之前游戏把它们当糖用了；现在单独取出来。
+- **实测差别**（颗粒放在头下、3 个种子、取后 1.25 s 平均）：
+
+| | 糖粒（刺激全部 122 个 LB3） | 水滴（只刺激那 17 个） |
+|---|---|---|
+| MN9 | **82.9 Hz** | **14.1 Hz** |
+| 不渴时（阈值 30 Hz）进食时间占比 | 100% | 1% |
+| 口渴 0.9 时（阈值 3.6 Hz） | — | 99% |
+
+- **口渴是手写的**，理由写在页面上：口渴度每秒 +0.06、喝水时 −0.5，阈值 = 30 Hz ×（1 − 口渴度，下限 0.12）。
+  论文做水味觉实验用的是**脱水果蝇**，这条规则是照着那个做法补的；但这个 LIF 模型**没有内部状态**，所以“渴”完全是外挂上去的。
+- 副产品一个真实的 bug：一开始我在 JS 里用**数字字面量**写 FlyWire root ID，而这些 ID（约 7.2×10¹⁷）**超过了 JavaScript 的 2^53 整数精度**，
+  查表全部落空，我据此错误地下了“水味觉神经元不在子回路里”的结论。回到 Python 核对才发现 17 个都在。
+  **教训：JS 里的 FlyWire ID 必须始终是字符串。**
+
+### 25.5 “果蝇在想什么”气泡
+
+13 节解码出的第一句中文是离线算的，游戏里看不到。现在画面上有气泡，实时显示：
+
+- **触发每个词的量都是真实的**：甜 / 苦 / 水 / 风 / 痒是当前注入那些感觉神经元的频率，吃 / 梳理 / 后退 / 飞是**读出神经元的平滑发放率**。
+- **词的阈值与中文句子模板是手写的**。与 13 节的差别：那里是 121,706 个神经元 + 岭回归解码 12 个词，
+  这里子回路只有 4,599 个神经元、也没有醋 / 霉味 / 温湿度那些通路，所以只能用游戏里真实存在的这几路输入，且用阈值而非回归。
+
+### 25.6 还有哪些研究结果没进游戏
+
+如实列一下（用户问过“还有哪些没体现”）：
+
+| 结果 | 进游戏了吗 | 为什么 |
+|---|---|---|
+| 14–24 节虚拟敲除筛选 | ✅ 10 个神经元开关 + 全部表格 | — |
+| 19 节水通路 | ✅ 水滴 + 口渴 | — |
+| 13 节说中文 | ⚠️ 简化版气泡 | 子回路没有那 12 个词需要的全部通路 |
+| 12 节全腹神经索（6 条腿、本体感觉闭环） | ❌ 只有表格 | JAX 模型跑不进浏览器；游戏的腿是录制步态循环 |
+| 11 节 Pugliese 腹神经索 + 多巴胺 | ❌ 只有表格 | 同上；且模型里根本没有奖赏信号（PAM 不放电） |
+| 视觉管线（flyvis → 全脑） | ❌ 只有表格和曲线图 | 离线跑 1.2 s 刺激要 90 s，比实时慢 75 倍 |
+| 嗅觉导航 | ⚠️ 手写“闻着找” | 全脑模型给不出转向信号（11.4 节实测） |
+
+
+---
+
+## 26. 补上一个长期空白：视觉前端修复的验证（2026-09-16）【实测 · 事先写定判据】（`connectome_vision_loop.py --frontend-only`）
+
+第 4 节与 CLAUDE.md 里挂着一条一年没动的空白：`connectome_vision_loop.py` 的视觉前端在 0.15 s 冒烟测试里暴露了假阳性
+（果蝇自己的腿在下半视野随步态晃动 → “暗面积增长率”误报），**代码改了但从没跑过验证，行为结论一直是空的**。
+这一节先把判据写死，再跑。
+
+**旧版前端在冒烟测试里的实际表现**（`results/connectome_loop_smoke/log.csv`，10 个窗口，含全脑）：
+
+| t (s) | 暗面积 左/右 | LC4 左/右 (Hz) | 巨纤维 (Hz) |
+|---|---|---|---|
+| 0.000–0.030 | 0.010 / 0.007 | 0 / 0 | 0 |
+| **0.045** | 0.011 / 0.010 | **200 / 200** | **133** |
+| 0.060 | 0.012 / 0.012 | 200 / 200 | 100 |
+| 0.075–0.105 | 0.012 / 0.012 | 0 / 0 | 67 → 0 |
+| 0.120 | 0.012 / 0.014 | 0 / 200 | 67 |
+| 0.135 | 0.014 / 0.014 | 200 / 0 | 67 |
+
+暗面积只涨了 0.1 个百分点，LC4 就直接打满 200 Hz，而且来回闪烁、左右乱跳——球那时还在远处。
+
+**事先写定的判据**（写在运行之前；用 `--frontend-only`，不加载大脑，所以这里只检验前端，不涉及行为）：
+
+- **C1 假阳性**：球还远的阶段（前 0.3 s），LC4 两侧的**最大值应 < 20 Hz**。旧版在 0.045 s 就到 200 Hz。
+- **C2 不饱和、不闪烁**：整段里 LC4 打满 200 Hz 的窗口占比应 **< 20%**，且不出现“打满 → 归零 → 又打满”的相邻翻转 ≥ 3 次。旧版 10 个窗口里 4 个饱和、翻转 3 次。
+- **C3 真信号还在**：球真正逼近的最后 0.2 s，LC4 均值应**高于**前 0.3 s 的均值。若 C1 达标但 C3 不达标，说明修过头了——把真 looming 也滤掉了，要照实写。
+- **C4 暗面积稳定**：球还远的阶段，暗面积的窗口间标准差应低于同阶段的均值的 10%（旧版腿部抖动让它持续爬升）。
+
+**任何一条不达标都照实记录，不调参数去凑。** 前端的参数（天空阈值、地平线 margin、低通时间常数、死区）在跑之前保持代码里现有的值不动。
+判定由 `vision/frontend_check.py` **机械执行**，阈值写在脚本顶部，不靠肉眼看曲线。
+
+先用旧版数据验证这个判定脚本本身（若判据写松了，旧版就会"通过"）：**旧版 0/3 条通过**
+（C1 最大 200 Hz、C2 饱和 40% 且翻转 3 次、C4 变异系数 19.9%）。
+C3 对旧版**不适用**——那次冒烟测试只有 0.135 s，比 C1 的 0.3 s 窗口还短，远近两段会重叠，
+所以新版至少要跑满 0.5 s，四条才都能判；实际打算跑 1.0 s。
+
+**结果**（`--frontend-only --duration 1.0`，66 个窗口，峰值 831 MB，身体 6 s；
+`results/connectome_loop_frontend_looming/`，判定见同目录 `frontend_check.json`）：
+
+| 判据 | 结果 | 实测 |
+|---|---|---|
+| **C1 假阳性** | **通过** | 前 0.3 s LC4 最大值 **0.0 Hz**（旧版 200 Hz） |
+| **C2 不饱和** | **不通过** | 打满占比 **23%**（门槛 20%）、翻转 **6 次**（门槛 3） |
+| **C3 真信号还在** | **通过** | 最后 0.2 s 均值 **21.4 Hz** vs 前 0.3 s **0.0 Hz** |
+| **C4 暗面积稳定** | **无法计算** | 前 0.3 s 暗面积**恒为 0**，原式 0/0 无定义；标准差 = 0.000000 |
+
+- **腿的假阳性彻底消失了。** 旧版前端的暗面积基线是 0.010（果蝇自己的腿），随步态抖动到 0.014，LC4 在 0.045 s 就打满。
+  新版把上半视野掩膜校准出左 244 / 右 291 个“天空”小眼，**前 0.495 s 暗面积精确为 0**，LC4 全程 0 Hz。C1 与 C4 的意图都达到了。
+  C4 按原式算不出来（0/0），**不算作“通过”**：原式是标准差 ÷ 均值，而这里均值恰好是 0；原始标准差为 0，意图以最强形式满足，但指标本身无定义。
+- **但这次验证也揪出一个原先没发现的缺陷：LC4 的增益完全没标定。**
+  球第一次被看见时暗面积只有 **0.4%**，LC4 就已经打满 200 Hz；之后暗面积一路涨到 99%，LC4 始终是 200 Hz。
+  **整段过程里 LC4 只有“0 或 200”两个值，没有任何分级响应**，而且中间还熄灭过（0.495 → 0.570 之间断了，共 6 次翻转）。
+  这正是 C2 不通过的原因。`lc4_gain` 这个手写参数当初是拍脑袋定的，从没按真实场景标定过。
+- **结论**：前端修好了它当初要修的那个问题（腿造成的假阳性），**但没修好“分级响应”**。
+  在标定 `lc4_gain` 之前，这条管线的 LC4 只能当二值开关用，不能当作角速度的编码。
+  **不调参数去凑**：本节按事先声明只跑一次、如实记录 2/3 通过。要改增益应当另立一节、重新声明判据再跑。
+- 另外，本次场景里球只从左侧接近，**右眼全程暗面积为 0**，所以左右对比没有被检验到。
+
+> 这条空白挂了近一年（第 4 节写着“已改代码但尚未运行验证”“行为结论目前为空”）。现在至少前端部分有了可核对的结论。
+> 仍未验证的是**加载大脑之后的行为**——那需要完整闭环跑，按 CLAUDE.md 的估算约 2–3 分钟每模拟秒，且渲染任务必须前台跑。

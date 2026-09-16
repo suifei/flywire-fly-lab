@@ -1,0 +1,29 @@
+[
+ {
+  "rep": 0,
+  "freq_rk4": 9.034443817052512,
+  "freq_dopri5": 9.034443817052512,
+  "corr": 0.999,
+  "max_abs_diff_hz": 0.42,
+  "passed": true,
+  "sim_s": 29.1
+ },
+ {
+  "rep": 1,
+  "freq_rk4": 9.034443817052512,
+  "freq_dopri5": 9.034443817052512,
+  "corr": 0.993,
+  "max_abs_diff_hz": 0.68,
+  "passed": true,
+  "sim_s": 29.1
+ },
+ {
+  "rep": 2,
+  "freq_rk4": 10.163749294184075,
+  "freq_dopri5": 10.163749294184075,
+  "corr": 0.999,
+  "max_abs_diff_hz": 0.26,
+  "passed": true,
+  "sim_s": 29.0
+ }
+]

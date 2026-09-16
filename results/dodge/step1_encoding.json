@@ -1,0 +1,256 @@
+{
+ "seconds_per_seed": 120,
+ "seeds": 5,
+ "ball_speed": 60,
+ "profiles": [
+  {
+   "key": "v1",
+   "label": "第一版：旧编码 + 原地起跳",
+   "cfg": {},
+   "launched": 330,
+   "dodge": 210,
+   "hit": 116,
+   "dodge_rate": 0.6441717791411042,
+   "jumps_per_min": 32.9,
+   "front_n": 28,
+   "front_hit_rate": 1,
+   "lead_median_s": 0.5273888717496433,
+   "lead_p10_s": 0.43283238275684255,
+   "lead_p90_s": 0.6134943712365697
+  },
+  {
+   "key": "v1_flyaway",
+   "label": "旧编码 + 背离飞离",
+   "cfg": {
+    "takeoff": "flyaway"
+   },
+   "launched": 330,
+   "dodge": 158,
+   "hit": 1,
+   "dodge_rate": 0.9937106918238994,
+   "jumps_per_min": 32.9,
+   "front_n": 22,
+   "front_hit_rate": 0,
+   "lead_median_s": 0.563647625371706,
+   "lead_p10_s": 0.34571160440832216,
+   "lead_p90_s": 0.7260988091641352
+  },
+  {
+   "key": "ache30_hop",
+   "label": "新编码 μ30° + 原地起跳",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 30
+   },
+   "launched": 330,
+   "dodge": 246,
+   "hit": 80,
+   "dodge_rate": 0.754601226993865,
+   "jumps_per_min": 33,
+   "front_n": 28,
+   "front_hit_rate": 0.39285714285714285,
+   "lead_median_s": 0.7429417876823106,
+   "lead_p10_s": 0.6653211470503226,
+   "lead_p90_s": 0.9338932071159007
+  },
+  {
+   "key": "ache45_hop",
+   "label": "新编码 μ45° + 原地起跳",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 45
+   },
+   "launched": 330,
+   "dodge": 198,
+   "hit": 128,
+   "dodge_rate": 0.6073619631901841,
+   "jumps_per_min": 32.9,
+   "front_n": 28,
+   "front_hit_rate": 1,
+   "lead_median_s": 0.3215920535679935,
+   "lead_p10_s": 0.22934512320733802,
+   "lead_p90_s": 0.4314976435395437
+  },
+  {
+   "key": "ache60_hop",
+   "label": "新编码 μ60° + 原地起跳",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 60
+   },
+   "launched": 330,
+   "dodge": 306,
+   "hit": 20,
+   "dodge_rate": 0.9386503067484663,
+   "jumps_per_min": 32.7,
+   "front_n": 28,
+   "front_hit_rate": 0.14285714285714285,
+   "lead_median_s": 0.1400851526096858,
+   "lead_p10_s": 0.10739388907988712,
+   "lead_p90_s": 0.18499768822942642
+  },
+  {
+   "key": "ache30_fly",
+   "label": "新编码 μ30° + 背离飞离",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 30,
+    "takeoff": "flyaway"
+   },
+   "launched": 330,
+   "dodge": 115,
+   "hit": 10,
+   "dodge_rate": 0.92,
+   "jumps_per_min": 35.5,
+   "front_n": 21,
+   "front_hit_rate": 0.09523809523809523,
+   "lead_median_s": 0.40817242725934477,
+   "lead_p10_s": 0.03508515260978129,
+   "lead_p90_s": 0.9060823322928329
+  },
+  {
+   "key": "ache45_fly",
+   "label": "新编码 μ45° + 背离飞离（主设定）",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 45,
+    "takeoff": "flyaway"
+   },
+   "launched": 330,
+   "dodge": 288,
+   "hit": 3,
+   "dodge_rate": 0.9896907216494846,
+   "jumps_per_min": 32.7,
+   "front_n": 27,
+   "front_hit_rate": 0,
+   "lead_median_s": 0.3992059020283776,
+   "lead_p10_s": 0.24390169421045016,
+   "lead_p90_s": 0.5962684792881845
+  },
+  {
+   "key": "ache60_fly",
+   "label": "新编码 μ60° + 背离飞离",
+   "cfg": {
+    "gfTau": 0.02,
+    "encoding": "ache2019",
+    "lplc2Mu": 60,
+    "takeoff": "flyaway"
+   },
+   "launched": 330,
+   "dodge": 309,
+   "hit": 18,
+   "dodge_rate": 0.944954128440367,
+   "jumps_per_min": 30,
+   "front_n": 28,
+   "front_hit_rate": 0.25,
+   "lead_median_s": 0.14484685507528994,
+   "lead_p10_s": 0.10287696070545849,
+   "lead_p90_s": 0.2001914832402889
+  }
+ ],
+ "lesions": [
+  {
+   "key": "intact",
+   "label": "完整大脑",
+   "launched": 330,
+   "dodge": 288,
+   "hit": 3,
+   "dodge_rate": 0.9896907216494846,
+   "jumps_per_min": 32.7,
+   "front_n": 27,
+   "front_hit_rate": 0,
+   "lead_median_s": 0.3992059020283776,
+   "lead_p10_s": 0.24390169421045016,
+   "lead_p90_s": 0.5962684792881845
+  },
+  {
+   "key": "no_gf",
+   "label": "切除巨纤维输出",
+   "launched": 330,
+   "dodge": 0,
+   "hit": 327,
+   "dodge_rate": 0,
+   "jumps_per_min": 0,
+   "front_n": 28,
+   "front_hit_rate": 1,
+   "lead_median_s": null,
+   "lead_p10_s": null,
+   "lead_p90_s": null
+  },
+  {
+   "key": "no_dna",
+   "label": "切除 DNa01/02 输出",
+   "launched": 330,
+   "dodge": 287,
+   "hit": 2,
+   "dodge_rate": 0.9930795847750865,
+   "jumps_per_min": 32.8,
+   "front_n": 28,
+   "front_hit_rate": 0,
+   "lead_median_s": 0.38999768822945846,
+   "lead_p10_s": 0.24307004862589565,
+   "lead_p90_s": 0.5913958163901345
+  },
+  {
+   "key": "reversed_no_gf",
+   "label": "反转映射 + 切除巨纤维",
+   "launched": 330,
+   "dodge": 0,
+   "hit": 327,
+   "dodge_rate": 0,
+   "jumps_per_min": 0,
+   "front_n": 28,
+   "front_hit_rate": 1,
+   "lead_median_s": null,
+   "lead_p10_s": null,
+   "lead_p90_s": null
+  },
+  {
+   "key": "no_lplc2",
+   "label": "LPLC2 断突触",
+   "launched": 330,
+   "dodge": 293,
+   "hit": 32,
+   "dodge_rate": 0.9015384615384615,
+   "jumps_per_min": 28.8,
+   "front_n": 28,
+   "front_hit_rate": 0.25,
+   "lead_median_s": 0.10638574838457515,
+   "lead_p10_s": 0.07522337356017772,
+   "lead_p90_s": 0.1647236804997334
+  },
+  {
+   "key": "no_lc4",
+   "label": "LC4 断突触",
+   "launched": 330,
+   "dodge": 293,
+   "hit": 5,
+   "dodge_rate": 0.9832214765100671,
+   "jumps_per_min": 32.7,
+   "front_n": 28,
+   "front_hit_rate": 0,
+   "lead_median_s": 0.3603152867883921,
+   "lead_p10_s": 0.209714275100211,
+   "lead_p90_s": 0.5569000290485349
+  },
+  {
+   "key": "no_gf_dna",
+   "label": "巨纤维 + DNa 都切除",
+   "launched": 330,
+   "dodge": 0,
+   "hit": 327,
+   "dodge_rate": 0,
+   "jumps_per_min": 0,
+   "front_n": 28,
+   "front_hit_rate": 1,
+   "lead_median_s": null,
+   "lead_p10_s": null,
+   "lead_p90_s": null
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "n": 23628,
+ "nnz": 5303491,
+ "exc_nnz": 2766250,
+ "inh_nnz": 2537241,
+ "abs_synapses": 30930102.0,
+ "build_s": 7.9,
+ "source": "W_20260522_allSynapses.npz"
+}

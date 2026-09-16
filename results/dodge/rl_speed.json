@@ -1,0 +1,16 @@
+{
+ "walk_on_ball_steps_per_s": 345,
+ "flight_imitation_steps_per_s": 217,
+ "estimates": [
+  {
+   "label": "行走 1e9 步",
+   "days_1proc": 33.5,
+   "days_8proc": 4.2
+  },
+  {
+   "label": "飞行 1e8 步",
+   "days_1proc": 5.3,
+   "days_8proc": 0.7
+  }
+ ]
+}

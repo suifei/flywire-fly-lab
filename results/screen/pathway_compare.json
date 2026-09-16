@@ -1,0 +1,89 @@
+{
+ "n_active": {
+  "sugar": 313,
+  "water": 216,
+  "both": 139,
+  "only_sugar": 174,
+  "only_water": 77
+ },
+ "jaccard": 0.356,
+ "super_class": {
+  "both": {
+   "central": 77,
+   "descending": 44,
+   "motor": 14,
+   "ascending": 2,
+   "sensory": 2
+  },
+  "only_sugar": {
+   "central": 109,
+   "sensory": 24,
+   "descending": 22,
+   "motor": 14,
+   "ascending": 3,
+   "visual_centrifugal": 2
+  },
+  "only_water": {
+   "central": 48,
+   "sensory": 18,
+   "descending": 8,
+   "motor": 3
+  }
+ },
+ "effects_on_common": {
+  "n": 128,
+  "spearman": 0.176,
+  "pearson": 0.415,
+  "call_agreement": 0.883,
+  "kappa": 0.152,
+  "required_sugar_only": [
+   "CB0553",
+   "DNge059",
+   "CB0616",
+   "CB0030",
+   "CB0277",
+   "DNge080",
+   "CB0542",
+   "CB0177",
+   "CB0493",
+   "LB3"
+  ],
+  "required_water_only": [
+   "DNge173",
+   "CB0501",
+   "CB0192",
+   "CB0051",
+   "CB0499"
+  ],
+  "required_both": [
+   "CB0553",
+   "AN_GNG_30"
+  ]
+ },
+ "hubs": {
+  "CB0883": {
+   "in_sugar_active": [
+    "CB0883"
+   ],
+   "in_water_active": [],
+   "ratio_sugar": [
+    0.759
+   ],
+   "ratio_water": []
+  },
+  "CB0051": {
+   "in_sugar_active": [
+    "CB0051"
+   ],
+   "in_water_active": [
+    "CB0051"
+   ],
+   "ratio_sugar": [
+    0.974
+   ],
+   "ratio_water": [
+    0.489
+   ]
+  }
+ }
+}
