@@ -48,6 +48,8 @@ results/language/*
 !results/vision/
 results/vision/*
 !results/vision/*.json
+# 这张图是 dodge/build.py 重建游戏页的必需输入（246 KB），不放行的话别人 clone 下来构建会失败
+!results/vision/lplc2_looming_vs_translation.png
 !results/vnc/
 results/vnc/*
 !results/vnc/*/
