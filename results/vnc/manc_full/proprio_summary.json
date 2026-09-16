@@ -1,0 +1,620 @@
+{
+ "tau0": {
+  "LF": 1.9341868107147775e-09,
+  "LM": 1.645235281344526e-09,
+  "LH": 1.906515834093625e-09,
+  "RF": 1.9455930200251714e-09,
+  "RM": 1.6344170461479735e-09,
+  "RH": 1.9189954070242266e-09
+ },
+ "runs": {
+  "open_rep0": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.035,
+     "rhythm_power": 0.97,
+     "peak_hz": 13.7
+    },
+    "LM": {
+     "ap_span_mm": 0.068,
+     "rhythm_power": 0.97,
+     "peak_hz": 13.7
+    },
+    "LH": {
+     "ap_span_mm": 0.026,
+     "rhythm_power": 0.97,
+     "peak_hz": 13.7
+    },
+    "RF": {
+     "ap_span_mm": 0.035,
+     "rhythm_power": 0.97,
+     "peak_hz": 13.7
+    },
+    "RM": {
+     "ap_span_mm": 0.068,
+     "rhythm_power": 0.97,
+     "peak_hz": 13.7
+    },
+    "RH": {
+     "ap_span_mm": 0.723,
+     "rhythm_power": 0.89,
+     "peak_hz": 9.5
+    }
+   },
+   "phase": {
+    "LF-RF": null,
+    "LM-RM": 180.0,
+    "LH-RH": null,
+    "LF-LM": null,
+    "LM-LH": null,
+    "RF-RM": null,
+    "RM-RH": 29.7,
+    "LF-LH": null,
+    "RF-RH": null
+   },
+   "wall_s": 41.7,
+   "legmn_active_total": 12,
+   "legmn_active": {
+    "LF": 1,
+    "LM": 0,
+    "LH": 0,
+    "RF": 0,
+    "RM": 2,
+    "RH": 9
+   },
+   "legmn_sum_freq": 9.034443817052512,
+   "legmn_sum_rhythm": 0.991,
+   "sensor_mean_hz": {}
+  },
+  "closed16_rep0": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.615,
+     "rhythm_power": 0.19,
+     "peak_hz": 4.7
+    },
+    "LM": {
+     "ap_span_mm": 0.877,
+     "rhythm_power": 0.1,
+     "peak_hz": 5.3
+    },
+    "LH": {
+     "ap_span_mm": 0.339,
+     "rhythm_power": 0.33,
+     "peak_hz": 4.7
+    },
+    "RF": {
+     "ap_span_mm": 0.357,
+     "rhythm_power": 0.32,
+     "peak_hz": 4.7
+    },
+    "RM": {
+     "ap_span_mm": 1.049,
+     "rhythm_power": 0.14,
+     "peak_hz": 4.7
+    },
+    "RH": {
+     "ap_span_mm": 0.948,
+     "rhythm_power": 0.26,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -154.0,
+    "LM-RM": 176.6,
+    "LH-RH": 51.6,
+    "LF-LM": 27.3,
+    "LM-LH": -9.5,
+    "RF-RM": -2.0,
+    "RM-RH": 131.4,
+    "LF-LH": 17.9,
+    "RF-RH": 172.8
+   },
+   "wall_s": 55.8,
+   "legmn_active_total": 255,
+   "legmn_active": {
+    "LF": 37,
+    "LM": 58,
+    "LH": 47,
+    "RF": 28,
+    "RM": 37,
+    "RH": 48
+   },
+   "legmn_sum_freq": 4.517221908526256,
+   "legmn_sum_rhythm": 0.183,
+   "sensor_mean_hz": {
+    "chordotonal organ": 7.99,
+    "campaniform sensilla": 1.59,
+    "hair plate": 3.2
+   }
+  },
+  "shuffled16_rep0": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.653,
+     "rhythm_power": 0.2,
+     "peak_hz": 6.3
+    },
+    "LM": {
+     "ap_span_mm": 0.883,
+     "rhythm_power": 0.09,
+     "peak_hz": 5.8
+    },
+    "LH": {
+     "ap_span_mm": 0.359,
+     "rhythm_power": 0.3,
+     "peak_hz": 4.7
+    },
+    "RF": {
+     "ap_span_mm": 0.389,
+     "rhythm_power": 0.31,
+     "peak_hz": 4.7
+    },
+    "RM": {
+     "ap_span_mm": 1.023,
+     "rhythm_power": 0.15,
+     "peak_hz": 4.2
+    },
+    "RH": {
+     "ap_span_mm": 0.94,
+     "rhythm_power": 0.25,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -147.8,
+    "LM-RM": -140.9,
+    "LH-RH": 52.0,
+    "LF-LM": 78.5,
+    "LM-LH": 1.7,
+    "RF-RM": 14.5,
+    "RM-RH": 165.7,
+    "LF-LH": 23.0,
+    "RF-RH": -179.8
+   },
+   "wall_s": 56.1,
+   "legmn_active_total": 237,
+   "legmn_active": {
+    "LF": 33,
+    "LM": 54,
+    "LH": 43,
+    "RF": 29,
+    "RM": 34,
+    "RH": 44
+   },
+   "legmn_sum_freq": 2.82326369282891,
+   "legmn_sum_rhythm": 0.138,
+   "sensor_mean_hz": {
+    "chordotonal organ": 7.98,
+    "campaniform sensilla": 1.44,
+    "hair plate": 3.49
+   }
+  },
+  "open_rep1": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.034,
+     "rhythm_power": 0.92,
+     "peak_hz": 11.1
+    },
+    "LM": {
+     "ap_span_mm": 0.066,
+     "rhythm_power": 0.92,
+     "peak_hz": 11.1
+    },
+    "LH": {
+     "ap_span_mm": 0.025,
+     "rhythm_power": 0.92,
+     "peak_hz": 11.1
+    },
+    "RF": {
+     "ap_span_mm": 0.034,
+     "rhythm_power": 0.92,
+     "peak_hz": 11.1
+    },
+    "RM": {
+     "ap_span_mm": 0.066,
+     "rhythm_power": 0.92,
+     "peak_hz": 11.1
+    },
+    "RH": {
+     "ap_span_mm": 0.592,
+     "rhythm_power": 0.49,
+     "peak_hz": 8.9
+    }
+   },
+   "phase": {
+    "LF-RF": null,
+    "LM-RM": -180.0,
+    "LH-RH": null,
+    "LF-LM": null,
+    "LM-LH": null,
+    "RF-RM": null,
+    "RM-RH": 7.0,
+    "LF-LH": null,
+    "RF-RH": null
+   },
+   "wall_s": 41.2,
+   "legmn_active_total": 6,
+   "legmn_active": {
+    "LF": 0,
+    "LM": 0,
+    "LH": 0,
+    "RF": 0,
+    "RM": 0,
+    "RH": 6
+   },
+   "legmn_sum_freq": 9.034443817052512,
+   "legmn_sum_rhythm": 0.998,
+   "sensor_mean_hz": {}
+  },
+  "closed16_rep1": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.732,
+     "rhythm_power": 0.08,
+     "peak_hz": 6.8
+    },
+    "LM": {
+     "ap_span_mm": 0.851,
+     "rhythm_power": 0.35,
+     "peak_hz": 4.2
+    },
+    "LH": {
+     "ap_span_mm": 1.524,
+     "rhythm_power": 0.11,
+     "peak_hz": 5.3
+    },
+    "RF": {
+     "ap_span_mm": 0.863,
+     "rhythm_power": 0.06,
+     "peak_hz": 4.2
+    },
+    "RM": {
+     "ap_span_mm": 0.756,
+     "rhythm_power": 0.08,
+     "peak_hz": 5.3
+    },
+    "RH": {
+     "ap_span_mm": 1.257,
+     "rhythm_power": 0.19,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -59.6,
+    "LM-RM": 50.7,
+    "LH-RH": 117.8,
+    "LF-LM": -59.3,
+    "LM-LH": -12.3,
+    "RF-RM": 51.0,
+    "RM-RH": -22.5,
+    "LF-LH": -78.2,
+    "RF-RH": 28.5
+   },
+   "wall_s": 48.6,
+   "legmn_active_total": 257,
+   "legmn_active": {
+    "LF": 44,
+    "LM": 29,
+    "LH": 37,
+    "RF": 63,
+    "RM": 43,
+    "RH": 41
+   },
+   "legmn_sum_freq": 2.258610954263128,
+   "legmn_sum_rhythm": 0.212,
+   "sensor_mean_hz": {
+    "chordotonal organ": 8.04,
+    "campaniform sensilla": 1.83,
+    "hair plate": 5.08
+   }
+  },
+  "shuffled16_rep1": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.377,
+     "rhythm_power": 0.27,
+     "peak_hz": 4.2
+    },
+    "LM": {
+     "ap_span_mm": 0.866,
+     "rhythm_power": 0.34,
+     "peak_hz": 4.2
+    },
+    "LH": {
+     "ap_span_mm": 1.462,
+     "rhythm_power": 0.16,
+     "peak_hz": 4.2
+    },
+    "RF": {
+     "ap_span_mm": 0.543,
+     "rhythm_power": 0.05,
+     "peak_hz": 4.2
+    },
+    "RM": {
+     "ap_span_mm": 0.425,
+     "rhythm_power": 0.37,
+     "peak_hz": 5.3
+    },
+    "RH": {
+     "ap_span_mm": 1.159,
+     "rhythm_power": 0.2,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -85.6,
+    "LM-RM": -78.2,
+    "LH-RH": -171.4,
+    "LF-LM": -109.4,
+    "LM-LH": -101.9,
+    "RF-RM": -84.2,
+    "RM-RH": 170.2,
+    "LF-LH": 148.7,
+    "RF-RH": 62.9
+   },
+   "wall_s": 44.5,
+   "legmn_active_total": 244,
+   "legmn_active": {
+    "LF": 43,
+    "LM": 26,
+    "LH": 35,
+    "RF": 59,
+    "RM": 38,
+    "RH": 43
+   },
+   "legmn_sum_freq": 3.387916431394692,
+   "legmn_sum_rhythm": 0.267,
+   "sensor_mean_hz": {
+    "chordotonal organ": 8.03,
+    "campaniform sensilla": 1.98,
+    "hair plate": 4.97
+   }
+  },
+  "open_rep2": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.027,
+     "rhythm_power": 0.93,
+     "peak_hz": 10.0
+    },
+    "LM": {
+     "ap_span_mm": 0.053,
+     "rhythm_power": 0.93,
+     "peak_hz": 10.0
+    },
+    "LH": {
+     "ap_span_mm": 0.02,
+     "rhythm_power": 0.93,
+     "peak_hz": 10.0
+    },
+    "RF": {
+     "ap_span_mm": 0.027,
+     "rhythm_power": 0.93,
+     "peak_hz": 10.0
+    },
+    "RM": {
+     "ap_span_mm": 0.053,
+     "rhythm_power": 0.93,
+     "peak_hz": 10.0
+    },
+    "RH": {
+     "ap_span_mm": 0.592,
+     "rhythm_power": 0.86,
+     "peak_hz": 10.0
+    }
+   },
+   "phase": {
+    "LF-RF": null,
+    "LM-RM": 180.0,
+    "LH-RH": null,
+    "LF-LM": null,
+    "LM-LH": null,
+    "RF-RM": null,
+    "RM-RH": 80.5,
+    "LF-LH": null,
+    "RF-RH": null
+   },
+   "wall_s": 41.4,
+   "legmn_active_total": 8,
+   "legmn_active": {
+    "LF": 1,
+    "LM": 0,
+    "LH": 2,
+    "RF": 0,
+    "RM": 0,
+    "RH": 5
+   },
+   "legmn_sum_freq": 10.163749294184075,
+   "legmn_sum_rhythm": 0.991,
+   "sensor_mean_hz": {}
+  },
+  "closed16_rep2": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.662,
+     "rhythm_power": 0.15,
+     "peak_hz": 4.2
+    },
+    "LM": {
+     "ap_span_mm": 1.272,
+     "rhythm_power": 0.14,
+     "peak_hz": 4.2
+    },
+    "LH": {
+     "ap_span_mm": 1.414,
+     "rhythm_power": 0.1,
+     "peak_hz": 4.2
+    },
+    "RF": {
+     "ap_span_mm": 0.704,
+     "rhythm_power": 0.06,
+     "peak_hz": 4.2
+    },
+    "RM": {
+     "ap_span_mm": 0.767,
+     "rhythm_power": 0.05,
+     "peak_hz": 4.7
+    },
+    "RH": {
+     "ap_span_mm": 1.392,
+     "rhythm_power": 0.19,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -64.4,
+    "LM-RM": 170.7,
+    "LH-RH": 9.0,
+    "LF-LM": -36.2,
+    "LM-LH": -6.9,
+    "RF-RM": 115.9,
+    "RM-RH": -85.6,
+    "LF-LH": -43.1,
+    "RF-RH": 30.3
+   },
+   "wall_s": 43.8,
+   "legmn_active_total": 271,
+   "legmn_active": {
+    "LF": 55,
+    "LM": 35,
+    "LH": 46,
+    "RF": 57,
+    "RM": 38,
+    "RH": 40
+   },
+   "legmn_sum_freq": 2.82326369282891,
+   "legmn_sum_rhythm": 0.666,
+   "sensor_mean_hz": {
+    "chordotonal organ": 8.04,
+    "campaniform sensilla": 1.9,
+    "hair plate": 4.53
+   }
+  },
+  "shuffled16_rep2": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.658,
+     "rhythm_power": 0.15,
+     "peak_hz": 4.2
+    },
+    "LM": {
+     "ap_span_mm": 0.897,
+     "rhythm_power": 0.31,
+     "peak_hz": 4.2
+    },
+    "LH": {
+     "ap_span_mm": 1.53,
+     "rhythm_power": 0.07,
+     "peak_hz": 5.3
+    },
+    "RF": {
+     "ap_span_mm": 0.705,
+     "rhythm_power": 0.17,
+     "peak_hz": 4.2
+    },
+    "RM": {
+     "ap_span_mm": 0.475,
+     "rhythm_power": 0.33,
+     "peak_hz": 6.3
+    },
+    "RH": {
+     "ap_span_mm": 1.16,
+     "rhythm_power": 0.26,
+     "peak_hz": 4.2
+    }
+   },
+   "phase": {
+    "LF-RF": -30.3,
+    "LM-RM": -63.9,
+    "LH-RH": 174.9,
+    "LF-LM": -81.2,
+    "LM-LH": 109.0,
+    "RF-RM": -81.0,
+    "RM-RH": -150.1,
+    "LF-LH": -158.2,
+    "RF-RH": 47.0
+   },
+   "wall_s": 44.7,
+   "legmn_active_total": 274,
+   "legmn_active": {
+    "LF": 50,
+    "LM": 37,
+    "LH": 37,
+    "RF": 66,
+    "RM": 35,
+    "RH": 49
+   },
+   "legmn_sum_freq": 2.82326369282891,
+   "legmn_sum_rhythm": 0.449,
+   "sensor_mean_hz": {
+    "chordotonal organ": 8.01,
+    "campaniform sensilla": 2.05,
+    "hair plate": 4.54
+   }
+  },
+  "closed50_rep0": {
+   "legs": {
+    "LF": {
+     "ap_span_mm": 0.581,
+     "rhythm_power": 0.22,
+     "peak_hz": 4.2
+    },
+    "LM": {
+     "ap_span_mm": 1.203,
+     "rhythm_power": 0.1,
+     "peak_hz": 6.3
+    },
+    "LH": {
+     "ap_span_mm": 0.284,
+     "rhythm_power": 0.61,
+     "peak_hz": 5.3
+    },
+    "RF": {
+     "ap_span_mm": 0.247,
+     "rhythm_power": 0.61,
+     "peak_hz": 4.7
+    },
+    "RM": {
+     "ap_span_mm": 0.942,
+     "rhythm_power": 0.05,
+     "peak_hz": 4.7
+    },
+    "RH": {
+     "ap_span_mm": 1.55,
+     "rhythm_power": 0.35,
+     "peak_hz": 4.7
+    }
+   },
+   "phase": {
+    "LF-RF": -92.5,
+    "LM-RM": -168.1,
+    "LH-RH": -46.4,
+    "LF-LM": 61.5,
+    "LM-LH": -5.3,
+    "RF-RM": -34.0,
+    "RM-RH": -126.0,
+    "LF-LH": 75.2,
+    "RF-RH": -160.0
+   },
+   "wall_s": 56.5,
+   "legmn_active_total": 244,
+   "legmn_active": {
+    "LF": 40,
+    "LM": 43,
+    "LH": 47,
+    "RF": 31,
+    "RM": 35,
+    "RH": 48
+   },
+   "legmn_sum_freq": 2.82326369282891,
+   "legmn_sum_rhythm": 0.114,
+   "sensor_mean_hz": {
+    "chordotonal organ": 24.96,
+    "campaniform sensilla": 4.5,
+    "hair plate": 9.69
+   }
+  }
+ }
+}

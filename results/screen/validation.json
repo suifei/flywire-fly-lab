@@ -1,0 +1,20 @@
+{
+ "V1_repeat_identical": true,
+ "V2_silencing_silent_neuron_equals_baseline": true,
+ "V3_block_equals_zero_weights": [
+  true,
+  true,
+  true
+ ],
+ "silent_neuron": 720575940611015122,
+ "roundup_mn9_blocked": [
+  14,
+  7,
+  53
+ ],
+ "roundup_mn9_zero_weights": [
+  14,
+  7,
+  53
+ ]
+}

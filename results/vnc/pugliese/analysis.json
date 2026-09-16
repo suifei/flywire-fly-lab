@@ -1,0 +1,149 @@
+{
+ "none": {
+  "frac_oscillating": 0.0,
+  "median_score": 0.0,
+  "median_freq_hz": null,
+  "active_mn_counts": {},
+  "swing_vs_stance_corr_median": null,
+  "n_swing_stance": 0,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ },
+ "DNg100_L": {
+  "frac_oscillating": 1.0,
+  "median_score": 0.999,
+  "median_freq_hz": 10.64,
+  "active_mn_counts": {
+   "LHS coxa swing": 29,
+   "LHS coxa stance": 1
+  },
+  "swing_vs_stance_corr_median": 0.24,
+  "n_swing_stance": 8,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ },
+ "DNg100_LR": {
+  "frac_oscillating": 1.0,
+  "median_score": 0.887,
+  "median_freq_hz": 11.16,
+  "active_mn_counts": {
+   "LHS coxa swing": 27,
+   "RHS femur/tr flex": 12,
+   "LHS coxa stance": 5,
+   "RHS coxa swing": 3,
+   "RHS femur reductor": 2,
+   "RHS tibia extend": 1
+  },
+  "swing_vs_stance_corr_median": 0.73,
+  "n_swing_stance": 25,
+  "left_vs_right_corr_median": 0.06,
+  "n_left_right": 25
+ },
+ "MDN": {
+  "frac_oscillating": 0.0,
+  "median_score": 0.021,
+  "median_freq_hz": 1.96,
+  "active_mn_counts": {
+   "RHS tibia flex": 226,
+   "LHS tibia flex": 170,
+   "LHS femur/tr flex": 121,
+   "RHS tarsus control": 104,
+   "RHS coxa swing": 98,
+   "LHS femur reductor": 96,
+   "RHS femur reductor": 92,
+   "LHS tarsus control": 69,
+   "LHS coxa swing": 68,
+   "RHS substrate grip": 55,
+   "LHS coxa stance": 46,
+   "RHS coxa stance": 44,
+   "RHS femur/tr extend": 38,
+   "RHS femur/tr flex": 36,
+   "LHS substrate grip": 21,
+   "LHS femur/tr extend": 19,
+   "RHS NA": 17,
+   "RHS tibia extend": 9,
+   "LHS tibia extend": 5,
+   "LHS NA": 4
+  },
+  "swing_vs_stance_corr_median": null,
+  "n_swing_stance": 0,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ },
+ "DNa02_L": {
+  "frac_oscillating": 0.062,
+  "median_score": 0.0,
+  "median_freq_hz": 8.04,
+  "active_mn_counts": {
+   "LHS coxa stance": 41,
+   "LHS femur reductor": 39,
+   "LHS tibia flex": 15,
+   "LHS femur/tr extend": 1
+  },
+  "swing_vs_stance_corr_median": null,
+  "n_swing_stance": 0,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ },
+ "MDN_I100": {
+  "frac_oscillating": 0.0,
+  "median_score": 0.097,
+  "median_freq_hz": 1.06,
+  "active_mn_counts": {
+   "LHS tibia flex": 78,
+   "LHS femur/tr flex": 78,
+   "RHS tibia flex": 75,
+   "RHS femur/tr flex": 60,
+   "LHS coxa swing": 52,
+   "RHS coxa swing": 48,
+   "LHS femur reductor": 48,
+   "RHS femur reductor": 46,
+   "LHS substrate grip": 40,
+   "RHS tarsus control": 39,
+   "RHS coxa stance": 37,
+   "LHS tarsus control": 33,
+   "RHS femur/tr extend": 32,
+   "RHS tibia extend": 16,
+   "LHS coxa stance": 16,
+   "LHS femur/tr extend": 16,
+   "LHS tibia extend": 15,
+   "RHS substrate grip": 14,
+   "RHS NA": 9,
+   "LHS NA": 4
+  },
+  "swing_vs_stance_corr_median": null,
+  "n_swing_stance": 0,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ },
+ "MDN_I150": {
+  "frac_oscillating": 0.0,
+  "median_score": 0.042,
+  "median_freq_hz": 1.77,
+  "active_mn_counts": {
+   "RHS tibia flex": 89,
+   "LHS tibia flex": 76,
+   "LHS femur/tr flex": 74,
+   "RHS coxa swing": 49,
+   "LHS femur reductor": 48,
+   "RHS femur/tr flex": 48,
+   "LHS coxa swing": 47,
+   "RHS femur reductor": 46,
+   "RHS tarsus control": 42,
+   "RHS coxa stance": 36,
+   "LHS tarsus control": 33,
+   "RHS femur/tr extend": 31,
+   "LHS substrate grip": 29,
+   "LHS coxa stance": 18,
+   "RHS substrate grip": 17,
+   "RHS tibia extend": 12,
+   "LHS tibia extend": 11,
+   "RHS NA": 9,
+   "LHS femur/tr extend": 7
+  },
+  "swing_vs_stance_corr_median": null,
+  "n_swing_stance": 0,
+  "left_vs_right_corr_median": null,
+  "n_left_right": 0
+ }
+}

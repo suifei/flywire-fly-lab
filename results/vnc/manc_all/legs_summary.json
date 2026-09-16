@@ -1,0 +1,438 @@
+{
+ "_dof_choice": {
+  "LF-ThC": "Coxa",
+  "LF-CTr": "Femur_roll",
+  "LF-FTi": "Tibia",
+  "LM-ThC": "Coxa",
+  "LM-CTr": "Femur_roll",
+  "LM-FTi": "Tibia",
+  "LH-ThC": "Coxa",
+  "LH-CTr": "Femur",
+  "LH-FTi": "Tibia",
+  "RF-ThC": "Coxa",
+  "RF-CTr": "Femur_roll",
+  "RF-FTi": "Tibia",
+  "RM-ThC": "Coxa",
+  "RM-CTr": "Femur_roll",
+  "RM-FTi": "Tibia",
+  "RH-ThC": "Coxa",
+  "RH-CTr": "Femur",
+  "RH-FTi": "Tibia"
+ },
+ "CPG_control": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.826,
+    "rhythm_power": 0.98,
+    "peak_hz": 12.1
+   },
+   "LM": {
+    "ap_span_mm": 1.075,
+    "rhythm_power": 0.96,
+    "peak_hz": 12.1
+   },
+   "LH": {
+    "ap_span_mm": 1.027,
+    "rhythm_power": 0.98,
+    "peak_hz": 12.1
+   },
+   "RF": {
+    "ap_span_mm": 0.826,
+    "rhythm_power": 0.99,
+    "peak_hz": 12.1
+   },
+   "RM": {
+    "ap_span_mm": 1.075,
+    "rhythm_power": 0.97,
+    "peak_hz": 12.1
+   },
+   "RH": {
+    "ap_span_mm": 1.027,
+    "rhythm_power": 0.98,
+    "peak_hz": 12.1
+   }
+  },
+  "phase": {
+   "LF-RF": -179.3,
+   "LM-RM": -179.0,
+   "LH-RH": -179.8,
+   "LF-LM": -157.6,
+   "LM-LH": 152.5,
+   "RF-RM": -157.3,
+   "RM-RH": 151.8,
+   "LF-LH": -5.1,
+   "RF-RH": -5.5
+  }
+ },
+ "none_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "LM": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "LH": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RM": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RH": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   }
+  },
+  "phase": {
+   "LF-RF": null,
+   "LM-RM": null,
+   "LH-RH": null,
+   "LF-LM": null,
+   "LM-LH": null,
+   "RF-RM": null,
+   "RM-RH": null,
+   "LF-LH": null,
+   "RF-RH": null
+  },
+  "active_mn": {
+   "LF": 0,
+   "LM": 0,
+   "LH": 0,
+   "RF": 0,
+   "RM": 0,
+   "RH": 0
+  }
+ },
+ "DNg100_LR_360_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.038,
+    "rhythm_power": 0.97,
+    "peak_hz": 15.8
+   },
+   "LM": {
+    "ap_span_mm": 0.073,
+    "rhythm_power": 0.97,
+    "peak_hz": 15.8
+   },
+   "LH": {
+    "ap_span_mm": 0.028,
+    "rhythm_power": 0.97,
+    "peak_hz": 15.8
+   },
+   "RF": {
+    "ap_span_mm": 0.038,
+    "rhythm_power": 0.97,
+    "peak_hz": 15.8
+   },
+   "RM": {
+    "ap_span_mm": 0.073,
+    "rhythm_power": 0.97,
+    "peak_hz": 15.8
+   },
+   "RH": {
+    "ap_span_mm": 0.595,
+    "rhythm_power": 0.74,
+    "peak_hz": 10.5
+   }
+  },
+  "phase": {
+   "LF-RF": null,
+   "LM-RM": 180.0,
+   "LH-RH": null,
+   "LF-LM": null,
+   "LM-LH": null,
+   "RF-RM": null,
+   "RM-RH": 116.7,
+   "LF-LH": null,
+   "RF-RH": null
+  },
+  "active_mn": {
+   "LF": 1,
+   "LM": 0,
+   "LH": 0,
+   "RF": 0,
+   "RM": 0,
+   "RH": 8
+  }
+ },
+ "DNg100_LR_360_rep1": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.064,
+    "rhythm_power": 0.84,
+    "peak_hz": 10.5
+   },
+   "LM": {
+    "ap_span_mm": 0.122,
+    "rhythm_power": 0.83,
+    "peak_hz": 10.5
+   },
+   "LH": {
+    "ap_span_mm": 0.047,
+    "rhythm_power": 0.83,
+    "peak_hz": 10.5
+   },
+   "RF": {
+    "ap_span_mm": 0.063,
+    "rhythm_power": 0.83,
+    "peak_hz": 10.5
+   },
+   "RM": {
+    "ap_span_mm": 0.591,
+    "rhythm_power": 0.9,
+    "peak_hz": 10.5
+   },
+   "RH": {
+    "ap_span_mm": 0.796,
+    "rhythm_power": 0.74,
+    "peak_hz": 11.6
+   }
+  },
+  "phase": {
+   "LF-RF": 178.9,
+   "LM-RM": -131.4,
+   "LH-RH": null,
+   "LF-LM": -0.6,
+   "LM-LH": null,
+   "RF-RM": 49.1,
+   "RM-RH": 164.2,
+   "LF-LH": null,
+   "RF-RH": -162.4
+  },
+  "active_mn": {
+   "LF": 1,
+   "LM": 0,
+   "LH": 1,
+   "RF": 0,
+   "RM": 2,
+   "RH": 5
+  }
+ },
+ "DNg100_LR_360_rep2": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.463,
+    "rhythm_power": 0.22,
+    "peak_hz": 6.3
+   },
+   "LM": {
+    "ap_span_mm": 0.847,
+    "rhythm_power": 0.15,
+    "peak_hz": 4.2
+   },
+   "LH": {
+    "ap_span_mm": 1.498,
+    "rhythm_power": 0.23,
+    "peak_hz": 6.3
+   },
+   "RF": {
+    "ap_span_mm": 0.38,
+    "rhythm_power": 0.09,
+    "peak_hz": 4.2
+   },
+   "RM": {
+    "ap_span_mm": 1.007,
+    "rhythm_power": 0.18,
+    "peak_hz": 5.8
+   },
+   "RH": {
+    "ap_span_mm": 1.535,
+    "rhythm_power": 0.3,
+    "peak_hz": 5.8
+   }
+  },
+  "phase": {
+   "LF-RF": 88.5,
+   "LM-RM": -128.9,
+   "LH-RH": -13.4,
+   "LF-LM": 103.0,
+   "LM-LH": -111.7,
+   "RF-RM": -100.5,
+   "RM-RH": -34.2,
+   "LF-LH": -9.9,
+   "RF-RH": -111.2
+  },
+  "active_mn": {
+   "LF": 35,
+   "LM": 35,
+   "LH": 38,
+   "RF": 43,
+   "RM": 40,
+   "RH": 44
+  }
+ },
+ "DNg100_LR_360_rep3": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.073,
+    "rhythm_power": 0.92,
+    "peak_hz": 15.8
+   },
+   "LM": {
+    "ap_span_mm": 0.141,
+    "rhythm_power": 0.92,
+    "peak_hz": 15.8
+   },
+   "LH": {
+    "ap_span_mm": 0.054,
+    "rhythm_power": 0.92,
+    "peak_hz": 15.8
+   },
+   "RF": {
+    "ap_span_mm": 0.073,
+    "rhythm_power": 0.92,
+    "peak_hz": 15.8
+   },
+   "RM": {
+    "ap_span_mm": 0.625,
+    "rhythm_power": 0.75,
+    "peak_hz": 11.6
+   },
+   "RH": {
+    "ap_span_mm": 0.598,
+    "rhythm_power": 0.45,
+    "peak_hz": 21.6
+   }
+  },
+  "phase": {
+   "LF-RF": -179.9,
+   "LM-RM": 169.0,
+   "LH-RH": 145.1,
+   "LF-LM": 0.1,
+   "LM-LH": 0.1,
+   "RF-RM": -11.8,
+   "RM-RH": 62.4,
+   "LF-LH": 0.2,
+   "RF-RH": -35.5
+  },
+  "active_mn": {
+   "LF": 1,
+   "LM": 1,
+   "LH": 2,
+   "RF": 1,
+   "RM": 2,
+   "RH": 6
+  }
+ },
+ "DNg100_L_360_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "LM": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "LH": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RM": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   },
+   "RH": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.43,
+    "peak_hz": 13.7
+   }
+  },
+  "phase": {
+   "LF-RF": null,
+   "LM-RM": null,
+   "LH-RH": null,
+   "LF-LM": null,
+   "LM-LH": null,
+   "RF-RM": null,
+   "RM-RH": null,
+   "LF-LH": null,
+   "RF-RH": null
+  },
+  "active_mn": {
+   "LF": 1,
+   "LM": 0,
+   "LH": 0,
+   "RF": 0,
+   "RM": 0,
+   "RH": 0
+  }
+ },
+ "DNg100_LR_400_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.256,
+    "rhythm_power": 0.79,
+    "peak_hz": 9.5
+   },
+   "LM": {
+    "ap_span_mm": 0.128,
+    "rhythm_power": 0.92,
+    "peak_hz": 11.6
+   },
+   "LH": {
+    "ap_span_mm": 0.804,
+    "rhythm_power": 0.9,
+    "peak_hz": 6.3
+   },
+   "RF": {
+    "ap_span_mm": 0.066,
+    "rhythm_power": 0.93,
+    "peak_hz": 11.6
+   },
+   "RM": {
+    "ap_span_mm": 0.613,
+    "rhythm_power": 0.9,
+    "peak_hz": 11.6
+   },
+   "RH": {
+    "ap_span_mm": 0.679,
+    "rhythm_power": 0.72,
+    "peak_hz": 11.6
+   }
+  },
+  "phase": {
+   "LF-RF": 145.2,
+   "LM-RM": 171.2,
+   "LH-RH": -47.3,
+   "LF-LM": -34.8,
+   "LM-LH": 39.8,
+   "RF-RM": -9.6,
+   "RM-RH": -159.8,
+   "LF-LH": -176.2,
+   "RF-RH": -169.4
+  },
+  "active_mn": {
+   "LF": 2,
+   "LM": 1,
+   "LH": 5,
+   "RF": 1,
+   "RM": 2,
+   "RH": 15
+  }
+ }
+}

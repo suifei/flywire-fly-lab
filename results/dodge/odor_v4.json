@@ -1,0 +1,308 @@
+{
+ "design": {
+  "sigma_mm": 15,
+  "turn_deg_s": 120,
+  "dist_mm": 25,
+  "timeout_s": 20,
+  "seeds": 3,
+  "per_seed": 6
+ },
+ "conditions": [
+  {
+   "odorNav": false,
+   "n": 18,
+   "contact_rate": 0,
+   "contact_s_median": null,
+   "by_type": {
+    "sugar": {
+     "contacts": 0,
+     "eaten": 0
+    },
+    "bitter": {
+     "contacts": 0,
+     "eaten": 0
+    },
+    "mixed": {
+     "contacts": 0,
+     "eaten": 0
+    }
+   },
+   "trials": [
+    {
+     "seed": 1,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "sugar",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "bitter",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "mixed",
+     "contact": false,
+     "contact_s": null,
+     "eaten": false
+    }
+   ]
+  },
+  {
+   "odorNav": true,
+   "n": 18,
+   "contact_rate": 1,
+   "contact_s_median": 1.9149999999999812,
+   "by_type": {
+    "sugar": {
+     "contacts": 6,
+     "eaten": 6
+    },
+    "bitter": {
+     "contacts": 6,
+     "eaten": 0
+    },
+    "mixed": {
+     "contacts": 6,
+     "eaten": 0
+    }
+   },
+   "trials": [
+    {
+     "seed": 1,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 2.019999999999979,
+     "eaten": true
+    },
+    {
+     "seed": 1,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 2.1399999999999766,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 1.879999999999982,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 1.3899999999999924,
+     "eaten": true
+    },
+    {
+     "seed": 1,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 1.359999999999993,
+     "eaten": false
+    },
+    {
+     "seed": 1,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 1.2849999999999946,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 1.9149999999999812,
+     "eaten": true
+    },
+    {
+     "seed": 2,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 1.6949999999999859,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 2.6499999999999657,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 2.074999999999978,
+     "eaten": true
+    },
+    {
+     "seed": 2,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 1.309999999999994,
+     "eaten": false
+    },
+    {
+     "seed": 2,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 1.454999999999991,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 1.924999999999981,
+     "eaten": true
+    },
+    {
+     "seed": 3,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 2.7649999999999633,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 1.8899999999999817,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "sugar",
+     "contact": true,
+     "contact_s": 2.579999999999967,
+     "eaten": true
+    },
+    {
+     "seed": 3,
+     "type": "bitter",
+     "contact": true,
+     "contact_s": 2.7649999999999633,
+     "eaten": false
+    },
+    {
+     "seed": 3,
+     "type": "mixed",
+     "contact": true,
+     "contact_s": 1.2899999999999945,
+     "eaten": false
+    }
+   ]
+  }
+ ]
+}

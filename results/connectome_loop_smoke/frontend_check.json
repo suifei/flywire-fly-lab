@@ -1,0 +1,51 @@
+{
+ "label": "旧版前端（0.15 s 冒烟测试，对照）",
+ "n_windows": 10,
+ "duration_s": 0.135,
+ "criteria": [
+  {
+   "id": "C1",
+   "name": "假阳性：前 0.3s LC4 最大值 < 20 Hz",
+   "value": 200.0,
+   "unit": "Hz",
+   "passed": false
+  },
+  {
+   "id": "C2",
+   "name": "不饱和：打满占比 < 20% 且翻转 < 3",
+   "value": "40% / 3 次",
+   "passed": false
+  },
+  {
+   "id": "C3",
+   "name": "真信号还在：最后 0.2s 均值 > 前 0.3s 均值",
+   "value": "不适用（日志只有 0.135 s，远近窗口重叠）",
+   "passed": null
+  },
+  {
+   "id": "C4",
+   "name": "暗面积稳定：前 0.3s 变异系数 < 10%",
+   "value": "19.9%",
+   "passed": false
+  }
+ ],
+ "n_passed": 0,
+ "raw": {
+  "far_max_hz": 200.0,
+  "far_mean_hz": 60.0,
+  "near_mean_hz": 60.0,
+  "sat_frac": 0.4,
+  "flips": 3,
+  "dark_cv_far": 0.1987
+ },
+ "thresholds": {
+  "far_s": 0.3,
+  "near_s": 0.2,
+  "sat_hz": 200.0,
+  "fp_hz": 20.0,
+  "sat_frac_max": 0.2,
+  "flip_max": 3,
+  "dark_cv_max": 0.1,
+  "note": "阈值在跑新前端之前就写定，见 report.md 第 26 节；不得为凑结果改动"
+ }
+}

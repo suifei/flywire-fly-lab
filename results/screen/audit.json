@@ -1,0 +1,83 @@
+{
+ "total_missing": 0,
+ "audits": [
+  {
+   "name": "sugar_P_50Hz",
+   "n_required": 932,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "sugar_P_100Hz",
+   "n_required": 1095,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "sugar_E_50Hz",
+   "n_required": 1401,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "sugar_T_50Hz",
+   "n_required": 115,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "sugar_T_100Hz",
+   "n_required": 120,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "double6_A+B+C",
+   "n_required": 676,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "double12_all",
+   "n_required": 1636,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "double_hub",
+   "n_required": 426,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "hub_scan_stageA(6)",
+   "n_required": 3267,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "hub_scan_stageB(12)",
+   "n_required": 1191,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "water_P(6)",
+   "n_required": 805,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "water_T+null(12)",
+   "n_required": 915,
+   "n_missing": 0,
+   "missing": []
+  },
+  {
+   "name": "water_double(12)",
+   "n_required": 936,
+   "n_missing": 0,
+   "missing": []
+  }
+ ]
+}

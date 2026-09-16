@@ -1,0 +1,25 @@
+{
+ "note": "轨迹末帧（修复前的落地姿态）。机体顶点 = 85 个 mesh 按 static_pose 摆好 × FLY_SCALE(2)，再按末帧四元数旋转平移。below_ground_mm > 0 表示机体插进地面——这就是 25.1 节要修的 bug。修复后页面在降落进度上把姿态球面插值回水平，并按当前姿态的包围盒最低点抬升，所以实际渲染不会插进地面。",
+ "fly_scale": 2,
+ "n_body_verts": 16661,
+ "clips": [
+  {
+   "clip": "evasion_067_policy",
+   "n_frames": 845,
+   "final_pitch_deg": -0.0,
+   "final_roll_deg": 1.7,
+   "clip_end_root_z_mm": -8.479,
+   "body_min_z_mm": -2.564,
+   "below_ground_mm": 2.564
+  },
+  {
+   "clip": "evasion_044_policy",
+   "n_frames": 601,
+   "final_pitch_deg": 42.0,
+   "final_roll_deg": 14.5,
+   "clip_end_root_z_mm": 8.225,
+   "body_min_z_mm": -4.534,
+   "below_ground_mm": 4.534
+  }
+ ]
+}

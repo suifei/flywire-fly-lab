@@ -1,0 +1,43 @@
+{
+ "rows": [
+  {
+   "name": "糖主筛选（14 节）",
+   "segments": 2680,
+   "wall_h": 1.464
+  },
+  {
+   "name": "双敲除（16 节，6/12 实现 + 枢纽配对）",
+   "segments": 1808,
+   "wall_h": 1.009
+  },
+  {
+   "name": "枢纽全扫描（16.2 + 21.1 节，CB0883 与 CB0051）",
+   "segments": 4411,
+   "wall_h": 2.418
+  },
+  {
+   "name": "水通路（19 节）",
+   "segments": 2662,
+   "wall_h": 1.447
+  },
+  {
+   "name": "JON 全部 JO-（24 节，已作废）",
+   "segments": 3357,
+   "wall_h": 1.966
+  },
+  {
+   "name": "JON 弱刺激（24.1 节）",
+   "segments": 498,
+   "wall_h": 0.322
+  },
+  {
+   "name": "JON 论文名单（24.2 + 24.3 节）",
+   "segments": 2212,
+   "wall_h": 1.252
+  }
+ ],
+ "total_segments": 17628,
+ "total_wall_h": 9.88,
+ "fly_brain_time_h": 4.95,
+ "note": "从盘上全部 *.npz 逐块重数（段数 = chunk_keys 长度，机时 = 每块存的 wall 之和）"
+}

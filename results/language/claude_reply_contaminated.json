@@ -1,0 +1,119 @@
+{
+ "sentence_sent": "我闻到醋味。我尝到甜味。很热，很亮。我该怎么做？",
+ "model_requested": "claude-opus-5",
+ "system_prompt": "你是 Claude。",
+ "disallowed_tools": "Bash Edit Write Read Glob Grep WebFetch WebSearch NotebookEdit Task Agent",
+ "command": "claude -p <sentence> --model claude-opus-5 --output-format json --no-session-persistence --system-prompt \"你是 Claude。\" --disallowedTools \"Bash Edit Write Read Glob Grep WebFetch WebSearch NotebookEdit Task Agent\"",
+ "reply_text": "如果我是果蝇，我会这样做：**先吃几口，然后马上躲到凉快的阴影里。如果是雌蝇，就找附近背阴的地方产卵。**\n\n**1. 醋味加甜味，说明附近很可能有正在发酵的水果**\n- 【推测】这是果蝇最好的食物，也是雌蝇偏爱的产卵地点。醋味里的乙酸在浓度不高时会吸引果蝇。\n- 【推测】已经尝到甜味，说明食物就在脚下。该做的是停下来，伸出口器开始吃。\n- 【实测】在我们跑过的全脑模型里，刺激甜味神经元确实能驱动控制伸口器的 MN9。从\"尝到甜\"到\"伸口器\"这一步，模型能复现。\n\n**2. 又热又亮，说明很可能在直射阳光下，这才是最要紧的威胁**\n- 【推测】果蝇喜欢 25 °C 左右，超过约 30 °C 会主动躲开，接近 40 °C 时几分钟就可能死。\n- 【推测】果蝇个头小，身体里的水分很快会被晒干。\n- 【推测】所以不要在太阳底下久留。吃几口就爬或飞到水果背面、叶子下面这类阴影处。能找到有醋味、又凉又暗的一面最好，吃和躲可以同时做到。\n\n**3. 取舍顺序：怕热 > 吃东西 > 趋光**\n- 【推测】果蝇平时会朝亮处飞，但太热时躲热比趋光更重要。\n\n**但我们的模型还没法替你做完整个决定：**\n- 【实测】让模型闻醋味（DM1 嗅觉神经元）时，大脑会整片失控，约 8,000 个神经元同时放电。控制转向的下行神经元也不分左右。所以模型没法\"顺着气味找过去\"。\n- 【实测】多巴胺奖励神经元 PAM 在甜味刺激下完全不放电，模型里没有\"这里好吃\"的奖励信号。\n- 【实测】热和亮这两路感觉，我们的流程里根本没接入。之前试过直接刺激感光细胞，驱动不了任何下行神经元。\n\n所以上面\"先吃再躲\"的顺序，是根据果蝇的一般习性推出来的，不是模型算出来的。",
+ "raw": {
+  "duration_api_ms": 32494,
+  "stop_reason": "end_turn",
+  "session_id": "adb673b9-63db-47c1-8553-51786de001db",
+  "total_cost_usd": 0.270882,
+  "usage": {
+   "input_tokens": 2,
+   "cache_creation_input_tokens": 23597,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 1356,
+   "output_tokens_details": {
+    "thinking_tokens": 547
+   },
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 23597,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 1356,
+     "cache_read_input_tokens": 0,
+     "cache_creation_input_tokens": 23597,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 23597
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "modelUsage": {
+   "claude-haiku-4-5-20251001": {
+    "inputTokens": 922,
+    "outputTokens": 16,
+    "cacheReadInputTokens": 0,
+    "cacheCreationInputTokens": 0,
+    "webSearchRequests": 0,
+    "costUSD": 0.0010019999999999999,
+    "contextWindow": 200000,
+    "maxOutputTokens": 32000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-haiku-4-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   },
+   "claude-opus-5": {
+    "inputTokens": 2,
+    "outputTokens": 1356,
+    "cacheReadInputTokens": 0,
+    "cacheCreationInputTokens": 23597,
+    "webSearchRequests": 0,
+    "costUSD": 0.26988,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 547,
+    "canonicalModel": "claude-opus-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+   "spawned": 0,
+   "requested": {
+    "background": 0,
+    "foreground": 0,
+    "unset": 0
+   },
+   "started_in_background": 0,
+   "max_depth": 0,
+   "spawned_by_subagents": 0,
+   "completed": 0,
+   "failed": 0,
+   "killed": {
+    "parent": 0,
+    "user": 0,
+    "system": 0
+   },
+   "refused": {
+    "depth_limit": 0,
+    "concurrency_limit": 0,
+    "budget": 0
+   },
+   "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "如果我是果蝇，我会这样做：**先吃几口，然后马上躲到凉快的阴影里。如果是雌蝇，就找附近背阴的地方产卵。**\n\n**1. 醋味加甜味，说明附近很可能有正在发酵的水果**\n- 【推测】这是果蝇最好的食物，也是雌蝇偏爱的产卵地点。醋味里的乙酸在浓度不高时会吸引果蝇。\n- 【推测】已经尝到甜味，说明食物就在脚下。该做的是停下来，伸出口器开始吃。\n- 【实测】在我们跑过的全脑模型里，刺激甜味神经元确实能驱动控制伸口器的 MN9。从\"尝到甜\"到\"伸口器\"这一步，模型能复现。\n\n**2. 又热又亮，说明很可能在直射阳光下，这才是最要紧的威胁**\n- 【推测】果蝇喜欢 25 °C 左右，超过约 30 °C 会主动躲开，接近 40 °C 时几分钟就可能死。\n- 【推测】果蝇个头小，身体里的水分很快会被晒干。\n- 【推测】所以不要在太阳底下久留。吃几口就爬或飞到水果背面、叶子下面这类阴影处。能找到有醋味、又凉又暗的一面最好，吃和躲可以同时做到。\n\n**3. 取舍顺序：怕热 > 吃东西 > 趋光**\n- 【推测】果蝇平时会朝亮处飞，但太热时躲热比趋光更重要。\n\n**但我们的模型还没法替你做完整个决定：**\n- 【实测】让模型闻醋味（DM1 嗅觉神经元）时，大脑会整片失控，约 8,000 个神经元同时放电。控制转向的下行神经元也不分左右。所以模型没法\"顺着气味找过去\"。\n- 【实测】多巴胺奖励神经元 PAM 在甜味刺激下完全不放电，模型里没有\"这里好吃\"的奖励信号。\n- 【实测】热和亮这两路感觉，我们的流程里根本没接入。之前试过直接刺激感光细胞，驱动不了任何下行神经元。\n\n所以上面\"先吃再躲\"的顺序，是根据果蝇的一般习性推出来的，不是模型算出来的。",
+  "ttft_ms": 10792,
+  "type": "result",
+  "duration_ms": 31374,
+  "uuid": "93261ff4-8c67-4ca1-9615-da196cc0ad58",
+  "ttft_stream_ms": 1313,
+  "time_to_request_ms": 30,
+  "first_content_frame_ms": 2054,
+  "queued_turn_count": 0,
+  "result_index": 0
+ }
+}

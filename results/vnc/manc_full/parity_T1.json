@@ -1,0 +1,19 @@
+{
+ "sampling_identical": true,
+ "runs": [
+  {
+   "rep": 0,
+   "max_abs_diff_hz": 0.114,
+   "max_rate_hz": 4.5,
+   "steps": 776,
+   "sim_s": 4.5
+  },
+  {
+   "rep": 1,
+   "max_abs_diff_hz": 0.146,
+   "max_rate_hz": 6.36,
+   "steps": 895,
+   "sim_s": 4.7
+  }
+ ]
+}

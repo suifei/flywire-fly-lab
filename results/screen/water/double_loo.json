@@ -1,0 +1,664 @@
+{
+ "pairs": [
+  {
+   "a": "CB0553 = Roundup",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.028,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.001,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "CB0192 = Zorro",
+   "ra": 0.028,
+   "rb": 0.4299,
+   "rab": 0.0,
+   "delta": 0.0121,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "CB0051",
+   "ra": 0.028,
+   "rb": 0.486,
+   "rab": 0.0091,
+   "delta": 0.0045,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "CB0499 = Rattle",
+   "ra": 0.028,
+   "rb": 0.5888,
+   "rab": 0.0091,
+   "delta": 0.0074,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0553 = Roundup",
+   "ra": 0.6449,
+   "rb": 0.028,
+   "rab": 0.0,
+   "delta": 0.0181,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0553 = Roundup",
+   "ra": 0.6916,
+   "rb": 0.028,
+   "rab": 0.0183,
+   "delta": 0.0011,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0553 = Roundup",
+   "ra": 0.9533,
+   "rb": 0.028,
+   "rab": 0.0183,
+   "delta": 0.0085,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "LHPD1b1",
+   "ra": 0.028,
+   "rb": 0.9907,
+   "rab": 0.0091,
+   "delta": 0.0186,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "CB0360",
+   "ra": 0.028,
+   "rb": 0.9533,
+   "rab": 0.0,
+   "delta": 0.0267,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0553 = Roundup",
+   "ra": 0.8411,
+   "rb": 0.028,
+   "rab": 0.0091,
+   "delta": 0.0145,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0553 = Roundup",
+   "b": "CB0872",
+   "ra": 0.028,
+   "rb": 0.8318,
+   "rab": 0.0,
+   "delta": 0.0233,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.4299,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.0161,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0051",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.486,
+   "rb": 0.0374,
+   "rab": 0.0365,
+   "delta": -0.0184,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0499 = Rattle",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.5888,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.022,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0501",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.6449,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.0241,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.6916,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.0259,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.9533,
+   "rb": 0.0374,
+   "rab": 0.0365,
+   "delta": -0.0009,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "LHPD1b1",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.9907,
+   "rb": 0.0374,
+   "rab": 0.0365,
+   "delta": 0.0005,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0360",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.9533,
+   "rb": 0.0374,
+   "rab": 0.0091,
+   "delta": 0.0265,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.8411,
+   "rb": 0.0374,
+   "rab": 0.0,
+   "delta": 0.0314,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0872",
+   "b": "AN_GNG_30 = Clavicle",
+   "ra": 0.8318,
+   "rb": 0.0374,
+   "rab": 0.0365,
+   "delta": -0.0054,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "CB0051",
+   "ra": 0.4299,
+   "rb": 0.486,
+   "rab": 0.0365,
+   "delta": 0.1724,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "CB0499 = Rattle",
+   "ra": 0.4299,
+   "rb": 0.5888,
+   "rab": 0.3562,
+   "delta": -0.103,
+   "verdict": "亚可加",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0192 = Zorro",
+   "ra": 0.6449,
+   "rb": 0.4299,
+   "rab": 0.2922,
+   "delta": -0.015,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0192 = Zorro",
+   "ra": 0.6916,
+   "rb": 0.4299,
+   "rab": 0.3379,
+   "delta": -0.0406,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0192 = Zorro",
+   "ra": 0.9533,
+   "rb": 0.4299,
+   "rab": 0.4201,
+   "delta": -0.0103,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "LHPD1b1",
+   "ra": 0.4299,
+   "rb": 0.9907,
+   "rab": 0.4201,
+   "delta": 0.0058,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "CB0360",
+   "ra": 0.4299,
+   "rb": 0.9533,
+   "rab": 0.3836,
+   "delta": 0.0263,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0192 = Zorro",
+   "ra": 0.8411,
+   "rb": 0.4299,
+   "rab": 0.1918,
+   "delta": 0.1698,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0192 = Zorro",
+   "b": "CB0872",
+   "ra": 0.4299,
+   "rb": 0.8318,
+   "rab": 0.3196,
+   "delta": 0.038,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0051",
+   "b": "CB0499 = Rattle",
+   "ra": 0.486,
+   "rb": 0.5888,
+   "rab": 0.0091,
+   "delta": 0.277,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0051",
+   "ra": 0.6449,
+   "rb": 0.486,
+   "rab": 0.0091,
+   "delta": 0.3043,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0051",
+   "ra": 0.6916,
+   "rb": 0.486,
+   "rab": 0.0091,
+   "delta": 0.327,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0051",
+   "ra": 0.9533,
+   "rb": 0.486,
+   "rab": 0.3014,
+   "delta": 0.1619,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "LHPD1b1",
+   "b": "CB0051",
+   "ra": 0.9907,
+   "rb": 0.486,
+   "rab": 0.484,
+   "delta": -0.0026,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0051",
+   "b": "CB0360",
+   "ra": 0.486,
+   "rb": 0.9533,
+   "rab": 0.2922,
+   "delta": 0.171,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0051",
+   "ra": 0.8411,
+   "rb": 0.486,
+   "rab": 0.274,
+   "delta": 0.1348,
+   "verdict": "协同",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0872",
+   "b": "CB0051",
+   "ra": 0.8318,
+   "rb": 0.486,
+   "rab": 0.1553,
+   "delta": 0.249,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0499 = Rattle",
+   "ra": 0.6449,
+   "rb": 0.5888,
+   "rab": 0.5845,
+   "delta": -0.2048,
+   "verdict": "亚可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0499 = Rattle",
+   "ra": 0.6916,
+   "rb": 0.5888,
+   "rab": 0.5753,
+   "delta": -0.1681,
+   "verdict": "亚可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0499 = Rattle",
+   "ra": 0.9533,
+   "rb": 0.5888,
+   "rab": 0.5479,
+   "delta": 0.0133,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "LHPD1b1",
+   "b": "CB0499 = Rattle",
+   "ra": 0.9907,
+   "rb": 0.5888,
+   "rab": 0.7215,
+   "delta": -0.1382,
+   "verdict": "亚可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0360",
+   "b": "CB0499 = Rattle",
+   "ra": 0.9533,
+   "rb": 0.5888,
+   "rab": 0.5479,
+   "delta": 0.0133,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0499 = Rattle",
+   "ra": 0.8411,
+   "rb": 0.5888,
+   "rab": 0.5571,
+   "delta": -0.0618,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0872",
+   "b": "CB0499 = Rattle",
+   "ra": 0.8318,
+   "rb": 0.5888,
+   "rab": 0.6393,
+   "delta": -0.1495,
+   "verdict": "亚可加",
+   "loo_stable": false
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0501",
+   "ra": 0.6916,
+   "rb": 0.6449,
+   "rab": 0.6301,
+   "delta": -0.1842,
+   "verdict": "亚可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0501",
+   "ra": 0.9533,
+   "rb": 0.6449,
+   "rab": 0.5297,
+   "delta": 0.085,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0501",
+   "b": "LHPD1b1",
+   "ra": 0.6449,
+   "rb": 0.9907,
+   "rab": 0.6393,
+   "delta": -0.0004,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0360",
+   "ra": 0.6449,
+   "rb": 0.9533,
+   "rab": 0.5479,
+   "delta": 0.0668,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0616 = G2N-1",
+   "ra": 0.6449,
+   "rb": 0.8411,
+   "rab": 0.4749,
+   "delta": 0.0675,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0501",
+   "b": "CB0872",
+   "ra": 0.6449,
+   "rb": 0.8318,
+   "rab": 0.6301,
+   "delta": -0.0938,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0461",
+   "ra": 0.6916,
+   "rb": 0.9533,
+   "rab": 0.6667,
+   "delta": -0.0074,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "LHPD1b1",
+   "ra": 0.6916,
+   "rb": 0.9907,
+   "rab": 0.6849,
+   "delta": 0.0002,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0360",
+   "ra": 0.6916,
+   "rb": 0.9533,
+   "rab": 0.6301,
+   "delta": 0.0291,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0616 = G2N-1",
+   "ra": 0.6916,
+   "rb": 0.8411,
+   "rab": 0.6027,
+   "delta": -0.021,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "DNge173 = Bract",
+   "b": "CB0872",
+   "ra": 0.6916,
+   "rb": 0.8318,
+   "rab": 0.5936,
+   "delta": -0.0184,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "LHPD1b1",
+   "ra": 0.9533,
+   "rb": 0.9907,
+   "rab": 0.8128,
+   "delta": 0.1316,
+   "verdict": "协同",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0360",
+   "ra": 0.9533,
+   "rb": 0.9533,
+   "rab": 0.9315,
+   "delta": -0.0228,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0616 = G2N-1",
+   "ra": 0.9533,
+   "rb": 0.8411,
+   "rab": 0.621,
+   "delta": 0.1808,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0461",
+   "b": "CB0872",
+   "ra": 0.9533,
+   "rb": 0.8318,
+   "rab": 0.6484,
+   "delta": 0.1445,
+   "verdict": "协同",
+   "loo_stable": false
+  },
+  {
+   "a": "LHPD1b1",
+   "b": "CB0360",
+   "ra": 0.9907,
+   "rb": 0.9533,
+   "rab": 0.8128,
+   "delta": 0.1316,
+   "verdict": "协同",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "LHPD1b1",
+   "ra": 0.8411,
+   "rb": 0.9907,
+   "rab": 0.7945,
+   "delta": 0.0387,
+   "verdict": "可加",
+   "loo_stable": false
+  },
+  {
+   "a": "LHPD1b1",
+   "b": "CB0872",
+   "ra": 0.9907,
+   "rb": 0.8318,
+   "rab": 0.8402,
+   "delta": -0.0162,
+   "verdict": "可加",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0360",
+   "ra": 0.8411,
+   "rb": 0.9533,
+   "rab": 0.6027,
+   "delta": 0.1991,
+   "verdict": "协同",
+   "loo_stable": true
+  },
+  {
+   "a": "CB0872",
+   "b": "CB0360",
+   "ra": 0.8318,
+   "rb": 0.9533,
+   "rab": 0.6575,
+   "delta": 0.1354,
+   "verdict": "协同",
+   "loo_stable": false
+  },
+  {
+   "a": "CB0616 = G2N-1",
+   "b": "CB0872",
+   "ra": 0.8411,
+   "rb": 0.8318,
+   "rab": 0.6575,
+   "delta": 0.0421,
+   "verdict": "可加",
+   "loo_stable": false
+  }
+ ]
+}

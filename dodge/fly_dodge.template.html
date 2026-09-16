@@ -1,0 +1,1552 @@
+<title>果蝇闪避</title>
+<meta name="description" content="数字果蝇游乐场：4,599 个 FlyWire 连接组神经元在浏览器里实时决定躲球、起飞、进食、梳理与后退">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+QingKe+HuangYou&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --ground: #e7ebe8;
+  --panel: #f7f9f7;
+  --panel-2: #eef2ef;
+  --ink: #101614;
+  --ink-2: #34403c;
+  --muted: #56615d;
+  --rule: #cdd5d1;
+  --grid: #dde3e0;
+  --left: #2a78d6;
+  --right: #eb6834;
+  --gf: #1baf7a;
+  --inter: #7c8884;
+  --critical: #d03b3b;
+  --stage-top: #f4f6f4;
+  --stage-bottom: #d8dfdb;
+  --floor: #eef1ef;
+  --ball: #121714;
+  --body: #7a5a3a;
+  --eye: #a8352a;
+  --sugar: #c98a1f;
+  --bitter: #7a4bb0;
+  --water: #3f9fd6;
+  --display: "ZCOOL QingKe HuangYou", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e1211; --panel: #151b19; --panel-2: #1b2320; --ink: #e6ece9; --ink-2: #c1cbc7; --muted: #95a29e;
+    --rule: #28322f; --grid: #202926; --left: #3987e5; --right: #d95926; --gf: #199e70; --inter: #6f7b77;
+    --critical: #e05a5a; --stage-top: #18201d; --stage-bottom: #0b0f0e; --floor: #1a211e; --ball: #050706;
+    --body: #b08a60; --eye: #d0503f; --sugar: #e0a64a; --bitter: #a785d6; --water: #58b6ea;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e1211; --panel: #151b19; --panel-2: #1b2320; --ink: #e6ece9; --ink-2: #c1cbc7; --muted: #95a29e;
+  --rule: #28322f; --grid: #202926; --left: #3987e5; --right: #d95926; --gf: #199e70; --inter: #6f7b77;
+  --critical: #e05a5a; --stage-top: #18201d; --stage-bottom: #0b0f0e; --floor: #1a211e; --ball: #050706;
+  --body: #b08a60; --eye: #d0503f; --sugar: #e0a64a; --bitter: #a785d6; --water: #58b6ea;
+}
+
+* { box-sizing: border-box; }
+html, body { background: var(--ground); color: var(--ink); }
+body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw, 32px); padding-block: 18px 44px; }
+.wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 16px; }
+
+/* masthead: title + live score */
+.mast { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 28px; }
+.title { display: grid; gap: 4px; }
+.title h1 { margin: 0; font: 400 clamp(40px, 5.4vw, 64px)/0.95 var(--display); letter-spacing: .02em; }
+.title p { margin: 0; color: var(--muted); max-width: 60ch; text-wrap: pretty; }
+.score { display: flex; gap: 6px; flex-wrap: wrap; }
+.stat { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 12px 7px; display: grid; min-width: 86px; }
+.stat span { font: 500 11px/1.3 var(--sans); color: var(--muted); }
+.stat b { font: 600 26px/1.05 var(--mono); font-variant-numeric: tabular-nums; }
+.stat.hit b { color: var(--critical); }
+.stat.jump b { color: var(--gf); }
+
+/* main */
+.app { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 920px) { .app { grid-template-columns: minmax(0, 1fr); } }
+.stage-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: grid; }
+.stage { position: relative; aspect-ratio: 4 / 3; max-width: 100%; background: linear-gradient(var(--stage-top), var(--stage-bottom)); cursor: crosshair; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.overlay { position: absolute; inset: 10px 10px auto 10px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+.pill { background: color-mix(in oklab, var(--panel) 88%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 10px; font: 500 12px/1.3 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.pill.state-jump { border-color: var(--gf); color: var(--ink); }
+.pill.state-hit { border-color: var(--critical); color: var(--ink); }
+.says { position: absolute; pointer-events: none; font: 500 15px/1.4 var(--sans); background: var(--panel); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 7px 13px; max-width: 62%; transform: translate(-50%, -100%); box-shadow: 0 4px 14px rgba(0,0,0,.14);
+  transition: opacity .18s; white-space: nowrap; }
+.says::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: var(--panel);
+  border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); transform: translateX(-50%) rotate(45deg); }
+.windvane { position: absolute; right: 12px; bottom: 12px; display: grid; justify-items: center; gap: 2px; pointer-events: none;
+  background: color-mix(in oklab, var(--panel) 85%, transparent); border: 1px solid var(--rule); border-radius: 10px; padding: 6px 10px; }
+.windvane span { font: 22px/1 var(--mono); transition: transform .3s; display: block; }
+.windvane small { font: 10.5px var(--mono); color: var(--muted); }
+.coach { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); pointer-events: none; font: 500 13px/1.3 var(--sans);
+  background: color-mix(in oklab, var(--panel) 90%, transparent); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 12px; white-space: nowrap; }
+@media (max-width: 520px) { .coach { white-space: normal; width: calc(100% - 24px); text-align: center; } }
+
+.controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
+.row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
+.seg button { font: 500 12.5px/1 var(--sans); padding: 7px 10px; border: 0; background: var(--panel-2); color: var(--ink-2); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font: 13px/1.2 var(--sans); cursor: pointer; padding: 5px 9px; border: 1px solid var(--rule); border-radius: 7px; background: var(--panel-2); }
+.toggle input { accent-color: var(--critical); margin: 0; }
+.toggle small { color: var(--muted); font: 11px var(--mono); }
+.btn { font: 500 13px/1 var(--sans); padding: 8px 12px; border-radius: 7px; border: 1px solid var(--rule); background: var(--panel-2); color: var(--ink); cursor: pointer; }
+.btn:hover, .seg button:hover, .toggle:hover { border-color: var(--muted); }
+:focus-visible { outline: 2px solid var(--left); outline-offset: 2px; }
+
+/* brain rail */
+.rail { display: grid; gap: 12px; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 9px; }
+.panel h2 { margin: 0; font: 600 13px/1.3 var(--sans); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.panel h2 span { font: 400 11px/1.3 var(--mono); color: var(--muted); }
+.raster-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+.raster-labels { position: relative; width: 74px; font: 500 10.5px/1 var(--mono); color: var(--muted); }
+.raster-labels div { position: absolute; right: 0; transform: translateY(-50%); white-space: nowrap; }
+canvas#raster { width: 100%; height: 280px; display: block; background: var(--panel-2); border-radius: 6px; }
+.axis { display: flex; justify-content: space-between; font: 10.5px var(--mono); color: var(--muted); padding-left: 82px; }
+
+.meters { display: grid; gap: 8px; }
+.meter { display: grid; grid-template-columns: 7.2em minmax(0, 1fr) 4.6em; gap: 8px; align-items: center; font: 12.5px/1.2 var(--sans); }
+.meter b { font: 500 12px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.track { position: relative; height: 8px; border-radius: 4px; background: var(--grid); overflow: visible; }
+.track i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 4px; background: var(--c); }
+.track .thr { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); border-radius: 1px; }
+.sub { font: 12px/1.45 var(--sans); color: var(--muted); margin: 0; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 6px; vertical-align: 0; }
+.dot.mixed { background: linear-gradient(90deg, var(--sugar) 50%, var(--bitter) 50%); }
+.tbl { overflow-x: auto; }
+.tbl table { border-collapse: collapse; width: 100%; font: 12.5px/1.4 var(--sans); }
+.tbl th, .tbl td { padding: 5px 8px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font: 500 11px/1.3 var(--mono); color: var(--muted); }
+.tbl td.num { font-family: var(--mono); }
+.tbl tr.em td { font-weight: 600; color: var(--ink); }
+.turnbar { position: relative; height: 22px; border-radius: 6px; background: var(--grid); }
+.turnbar::after { content: ""; position: absolute; left: 50%; top: 3px; bottom: 3px; width: 1px; background: var(--muted); }
+.turnbar i { position: absolute; top: 4px; bottom: 4px; left: 50%; width: 0; border-radius: 3px; background: var(--ink-2); }
+.turnlabels { display: flex; justify-content: space-between; font: 11px var(--sans); color: var(--muted); }
+
+/* lower */
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 920px) { .lower { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.card h3 { margin: 0; font: 600 15px/1.3 var(--sans); text-wrap: balance; }
+.card p, .card li { color: var(--ink-2); max-width: 68ch; }
+.card p { margin: 0; }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
+.tag { display: inline-block; font: 500 10.5px/1 var(--mono); padding: 3px 5px; border-radius: 4px; border: 1px solid currentColor; margin-right: 6px; vertical-align: 1px; }
+.tag.c { color: var(--gf); } .tag.h { color: var(--muted); }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart text { font: 10.5px var(--mono); fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 12px var(--sans); color: var(--ink-2); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 12px; height: 10px; border-radius: 2px; background: var(--c); }
+.tip { position: fixed; z-index: 9; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 8px; font: 12px/1.35 var(--sans); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.tip b { font: 600 12px var(--mono); }
+code { font: 12px var(--mono); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="title">
+      <h1>果蝇闪避</h1>
+      <p>朝果蝇扔球、喂糖粒苦粒、往触角上撒灰。决定往哪转、何时起飞、吃不吃、要不要梳理的，是在你浏览器里实时运行的 <span id="nNeu">4,599</span> 个 FlyWire 连接组神经元；起飞后是真实果蝇的逃逸飞行轨迹。</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <div class="stat"><span>躲开</span><b id="sDodge">0</b></div>
+      <div class="stat hit"><span>被击中</span><b id="sHit">0</b></div>
+      <div class="stat jump"><span>起跳</span><b id="sJump">0</b></div>
+      <div class="stat"><span>吃掉</span><b id="sEat">0</b></div>
+      <div class="stat"><span>梳理</span><b id="sGroom">0</b></div>
+    </div>
+  </header>
+
+  <section class="app">
+    <div class="stage-card">
+      <div class="stage" id="stage">
+        <div class="overlay">
+          <span class="pill" id="pState">行走中</span>
+          <span class="pill" id="pClock">大脑 0.00 s · 1.00× 实时</span>
+        </div>
+        <div class="coach" id="coach">点击场地任意位置，从那里朝果蝇扔一个球</div>
+        <div class="says" id="says" hidden></div>
+        <div class="windvane" id="windvane" hidden><span id="windArrow">→</span><small id="windTxt"></small></div>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <label class="k" id="lblMode">发球</label>
+          <div class="seg" role="group" aria-labelledby="lblMode">
+            <button id="modeClick" aria-pressed="false">点击发球</button>
+            <button id="modeAuto" aria-pressed="true">自动发球</button>
+          </div>
+          <label class="k" id="lblSpeed">球速</label>
+          <div class="seg" role="group" aria-labelledby="lblSpeed">
+            <button data-speed="35" aria-pressed="false">慢 35</button>
+            <button data-speed="60" aria-pressed="true">中 60</button>
+            <button data-speed="95" aria-pressed="false">快 95 mm/s</button>
+          </div>
+          <button class="btn" id="pause">暂停</button>
+          <button class="btn" id="resetScore">清零</button>
+        </div>
+        <div class="row">
+          <label class="k">损毁</label>
+          <label class="toggle"><input type="checkbox" id="lesLC4"> LC4 <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesLPLC2"> LPLC2 <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesGF"> 巨纤维 <small>切输出</small></label>
+          <label class="toggle"><input type="checkbox" id="lesDNa"> DNa01/02 <small>切输出</small></label>
+          <label class="toggle"><input type="checkbox" id="lesLC16"> LC16 <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesMDN"> MDN <small>切输出</small></label>
+          <label class="toggle"><input type="checkbox" id="lesSUGAR"> 糖味 <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesBITTER"> 苦味 <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesMN9"> MN9 <small>切输出</small></label>
+          <label class="toggle"><input type="checkbox" id="lesJO"> 触角 JO <small>断突触</small></label>
+          <label class="toggle"><input type="checkbox" id="lesaDN1"> aDN1 <small>切输出</small></label>
+        </div>
+        <div class="row">
+          <label class="k">喂食</label>
+          <button class="btn" id="pSugar"><span class="dot" style="--c: var(--sugar)"></span>放糖粒</button>
+          <button class="btn" id="pBitter"><span class="dot" style="--c: var(--bitter)"></span>放苦粒</button>
+          <button class="btn" id="pMixed"><span class="dot mixed"></span>放混合粒</button>
+          <button class="btn" id="pWater"><span class="dot" style="--c: var(--water)"></span>放水滴</button>
+          <span class="pill" id="thirstPill" style="border:1px solid var(--rule)">口渴 0%</span>
+          <label class="toggle"><input type="checkbox" id="autoPel" checked> 每 4 s 自动放一颗</label>
+          <label class="toggle"><input type="checkbox" id="odorNav"> 闻着找 <small>手写规则，非连接组；颗粒改放 25 mm 外随机方位</small></label>
+        </div>
+        <div class="row">
+          <label class="k" title="用虚拟敲除筛选选出来的真实神经元；括号里是在这个子回路里实测的 MN9 比值">敲神经元</label>
+          <span id="neuronToggles" class="row" style="gap:6px 10px; flex:1"></span>
+        </div>
+        <div class="row">
+          <label class="k">环境</label>
+          <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
+          <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
+          <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
+        </div>
+        <div class="row">
+          <label class="k">梳理</label>
+          <button class="btn" id="dustL">左触角落灰</button>
+          <button class="btn" id="dustR">右触角落灰</button>
+          <label class="toggle"><input type="checkbox" id="autoDust" checked> 每 5 s 随机落灰</label>
+        </div>
+        <div class="row">
+          <label class="k" id="lblEnc">视觉编码</label>
+          <div class="seg" role="group" aria-labelledby="lblEnc">
+            <button id="encAche" aria-pressed="true">Ache 2019：LC4 角速度 · LPLC2 角尺寸</button>
+            <button id="encLegacy" aria-pressed="false">第一版：都用 dθ/dt</button>
+          </div>
+        </div>
+        <div class="row">
+          <label class="k" id="lblTake">起飞</label>
+          <div class="seg" role="group" aria-labelledby="lblTake">
+            <button id="takeClip" aria-pressed="true">真实逃逸飞行</button>
+            <button id="takeHop" aria-pressed="false">原地起跳</button>
+          </div>
+          <label class="toggle"><input type="checkbox" id="slowmo" checked> 飞行时慢放 <small>×0.04，看清拍翅；不慢放时翅膀按 218 Hz 显示为残影</small></label>
+        </div>
+        <div class="row">
+          <label class="k" id="lblMap">转向映射</label>
+          <div class="seg" role="group" aria-labelledby="lblMap">
+            <button id="mapLit" aria-pressed="true">文献：哪侧 DNa 活跃往哪侧转</button>
+            <button id="mapRev" aria-pressed="false">反转</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <div class="panel">
+        <h2>实时 spike <span>每行一个神经元 · 最近 1 秒</span></h2>
+        <div class="raster-wrap">
+          <div class="raster-labels" id="rasterLabels" style="height:280px"></div>
+          <canvas id="raster" height="280"></canvas>
+        </div>
+        <div class="axis"><span>−1.0 s</span><span>−0.5</span><span>现在</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>下行神经元 <span>Hz · DNa 80 ms / 巨纤维 20 ms 平滑</span></h2>
+        <div class="meters">
+          <div class="meter" style="--c: var(--left)"><span>左 DNa01+02</span><div class="track"><i id="mDL"></i></div><b id="vDL">0</b></div>
+          <div class="meter" style="--c: var(--right)"><span>右 DNa01+02</span><div class="track"><i id="mDR"></i></div><b id="vDR">0</b></div>
+          <div class="meter" style="--c: var(--gf)"><span>巨纤维 DNp01</span><div class="track"><i id="mGF"></i><span class="thr" id="thrGF"></span></div><b id="vGF">0</b></div>
+          <div class="meter" style="--c: var(--sugar)"><span>MN9 进食</span><div class="track"><i id="mMN9"></i><span class="thr" id="thrMN9"></span></div><b id="vMN9">0</b></div>
+          <div class="meter" style="--c: var(--inter)"><span>aDN1 梳理</span><div class="track"><i id="mADN"></i><span class="thr" id="thrADN"></span></div><b id="vADN">0</b></div>
+          <div class="meter" style="--c: var(--inter)"><span>MDN 后退</span><div class="track"><i id="mMDN"></i><span class="thr" id="thrMDN"></span></div><b id="vMDN">0</b></div>
+        </div>
+        <div class="turnlabels"><span>← 右转</span><span id="vTurn">转向 0°/s</span><span>左转 →</span></div>
+        <div class="turnbar" role="img" aria-label="当前转向角速度"><i id="mTurn"></i></div>
+        <p class="sub">竖线是手写阈值：巨纤维 &gt; <span id="thrTxt">90</span> Hz 起飞，MN9 &gt; 30 Hz 且嘴下有颗粒就进食，aDN1 &gt; 20 Hz 梳理，MDN &gt; 20 Hz 后退。</p>
+      </div>
+
+      <div class="panel">
+        <h2>感觉输入 <span>Hz · 手写前端</span></h2>
+        <div class="meters">
+          <div class="meter" style="--c: var(--left)"><span>LC4 左</span><div class="track"><i id="mIL"></i></div><b id="vIL">0</b></div>
+          <div class="meter" style="--c: var(--right)"><span>LC4 右</span><div class="track"><i id="mIR"></i></div><b id="vIR">0</b></div>
+          <div class="meter" style="--c: var(--left)"><span>LPLC2 左</span><div class="track"><i id="mPL"></i></div><b id="vPL">0</b></div>
+          <div class="meter" style="--c: var(--right)"><span>LPLC2 右</span><div class="track"><i id="mPR"></i></div><b id="vPR">0</b></div>
+        </div>
+        <p class="sub" id="encNote">LC4 ∝ 角速度，LPLC2 = 角尺寸的高斯（中心 45°）。</p>
+        <div class="meters">
+          <div class="meter" style="--c: var(--inter)"><span>LC16 左/右</span><div class="track"><i id="mL16"></i></div><b id="vL16">0</b></div>
+          <div class="meter" style="--c: var(--sugar)"><span>糖味 GRN</span><div class="track"><i id="mSUG"></i></div><b id="vSUG">0</b></div>
+          <div class="meter" style="--c: var(--bitter)"><span>苦味 GRN</span><div class="track"><i id="mBIT"></i></div><b id="vBIT">0</b></div>
+          <div class="meter" style="--c: var(--inter)"><span>JO 左/右</span><div class="track"><i id="mJO"></i></div><b id="vJO">0</b></div>
+          <div class="meter" style="--c: var(--sugar)"><span>气味 左/右 <small>手写</small></span><div class="track"><i id="mODR"></i></div><b id="vODR">关</b></div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="lower">
+    <div class="card">
+      <h3>进食与苦味</h3>
+      <p>每 4 s 在果蝇前方放一颗：糖 → 苦 → 混合 轮换（3 局 × 120 s，无球）。头部碰到颗粒 → 两侧糖/苦味觉神经元 200 Hz；MN9 平均 &gt; 30 Hz 就停下伸喙吃。</p>
+      <div class="tbl"><table id="tFeed"></table></div>
+      <p class="sub" id="nFeed"></p>
+    </div>
+    <div class="card">
+      <h3>梳理</h3>
+      <p>每 5 s 随机一侧触角落灰 → 该侧 JO 神经元 200 Hz，直到梳理完。aDN1 &gt; 20 Hz 就停下梳理 0.6 s。</p>
+      <div class="tbl"><table id="tGroom"></table></div>
+      <p class="sub" id="nGroom"></p>
+    </div>
+    <div class="card">
+      <h3>吃到糖，会分泌多巴胺吗</h3>
+      <p>真实果蝇里，糖的奖赏信号由 PAM 簇多巴胺神经元送到蘑菇体（Liu et al. 2012；Burke et al. 2012），惩罚信号主要走 PPL1 簇。这里直接在全脑模型（138,639 个神经元，0.5 s × 4 次独立试次）里数这两群神经元有没有放电。事先定的判据：只有不失控（活跃神经元 &lt; 2,000）时 PAM 放电才算数。</p>
+      <div class="tbl"><table id="tDop"></table></div>
+      <p class="sub" id="nDop"></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>正面威胁时后退（LC16 → MDN）：重做实验</h3>
+      <p>依据 Sen et al. 2017：LC16 对 looming 反应，经 MDN 引发后退。先在全脑模型里测 LC16 刺激强度与 MDN 的关系，再按事先写定的设计重做对局：正前方 ±10° 一次来一个威胁，3 档速度 × 2 种威胁 × 5 种切除 × 3 档 LC16 编码强度，每格 24 个威胁，原地起跳模式。</p>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>全脑：LC16 刺激 → 下行神经元（Hz）</b></p><div class="tbl"><table id="tLc16"></table></div></div>
+        <div><p class="sub"><b>对局：正面威胁的击中率</b>（括号内 = 出现后退的威胁比例）</p><div class="tbl"><table id="tBack4"></table></div></div>
+      </div>
+      <p class="sub" id="nBack4"></p>
+      <details><summary class="sub">第 3 轮的对局（自动发球，已被上表取代）</summary>
+        <div class="tbl"><table id="tBack"></table></div><p class="sub" id="nBack"></p>
+        <div class="tbl"><table id="tSweep"></table></div><p class="sub" id="nSweep"></p>
+      </details>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>嗅觉导航：连接组给不出转向信号，游戏里的“闻着找”是手写的</h3>
+      <p>全脑模型刺激一侧嗅觉受体神经元。降低刺激强度、只看全脑失控之前的窗口、找出失控的“点火”神经元并沉默它们，判据都事先写定：左右刺激的下行神经元侧化 LI =（左 − 右）/（左 + 右）符号相反且 |LI| ≥ 0.2。</p>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>降低强度：失控起点与失控前的脉冲</b>（每次试验的脉冲数，左/右）</p><div class="tbl"><table id="tOlf4"></table></div></div>
+        <div><p class="sub"><b>沉默点火神经元（探索性）</b></p><div class="tbl"><table id="tSil"></table></div></div>
+      </div>
+      <p class="sub" id="nOlf4"></p>
+      <p class="sub"><b>游戏里的“闻着找”</b>（手写：高斯气味场 σ = 15 mm，左右触角比浓度，以 120°/s 转向；吃不吃仍由连接组的糖/苦 → MN9 决定）</p>
+      <div class="tbl"><table id="tOdor"></table></div>
+      <p class="sub" id="nOdor"></p>
+      <details><summary class="sub">第 3 轮：150/50 Hz 刺激的侧化与 Fly-Brain-AI 复现</summary><div class="tbl"><table id="tOlf"></table></div><p class="sub" id="nOlf"></p></details>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3 id="hVnc4">腹神经索与腿</h3>
+      <p>换成 Pugliese et al. 2025 的腹神经索发放率模型（作者代码本机调用，仓库无许可证，未复制代码）：MANC 前足神经节 4,604 个神经元，含左右前腿运动神经元各 72 个；每个条件 16 组随机神经元参数，2 s。节律判据用作者的振荡得分（≥ 0.5）。再把运动模块的摆动/支撑发放率换成 NeuroMechFly 前腿关节角（方向取自 FlyGym 真实步态数据），和 CPG 步态对照。</p>
+      <div class="lower" style="gap:12px">
+        <div class="tbl"><table id="tVnc4"></table></div>
+        <div class="tbl"><table id="tLegs4"></table></div>
+      </div>
+      <p class="sub" id="nVnc4"></p>
+      <details><summary class="sub">第 3 轮：BANC 腹神经索 + 全脑同款 LIF 参数（没有节律）</summary>
+        <div class="lower" style="gap:12px">
+          <div class="tbl"><table id="tVnc"></table></div>
+          <div class="tbl"><table id="tLegs"></table></div>
+        </div>
+        <p class="sub" id="nVnc"></p>
+      </details>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3 id="hVnc6">全腹神经索：6 条腿、巨纤维电突触、本体感觉闭环</h3>
+      <p>同一个发放率模型换成完整的 MANC 腹神经索（23,532 个神经元，6 条腿）。作者代码是稠密矩阵、要约 9 GB，这里改成稀疏存储，方程、参数抽样和求解器不变；先在前足网络上和作者稠密版逐点对齐。刺激强度按“DNg100 发放率与前足网络默认实验相同”标定。</p>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>全腹神经索：刺激条件</b></p><div class="tbl"><table id="tVnc6"></table></div></div>
+        <div><p class="sub"><b>主条件（DNg100 双侧 I = 350）每条腿</b></p><div class="tbl"><table id="tLegOsc6"></table></div></div>
+      </div>
+      <p class="sub"><b>驱动 NeuroMechFly 6 条腿</b>（腿尖前后摆幅 · 4–30 Hz 节律占比；&lt; 0.1 mm 记为基本不动）</p>
+      <div class="tbl"><table id="tLegs6"></table></div>
+      <p class="sub" id="nVnc6"></p>
+      <p class="sub"><b>巨纤维 → TTMn（跳跃肌运动神经元）电突触</b>（4 个副本的中位数）</p>
+      <div class="tbl"><table id="tGap"></table></div>
+      <p class="sub" id="nGap"></p>
+      <p class="sub"><b>本体感觉闭环</b>（手写感受器编码；DNg100 双侧 I = 350）</p>
+      <div class="tbl"><table id="tProp"></table></div>
+      <p class="sub" id="nProp"></p>
+      <p class="sub"><b>用作者的全突触数据重跑</b>（W_20260522_allSynapses：多 393 万条弱连接，中位 1 个突触；原有连接权重完全相同）</p>
+      <div class="lower" style="gap:12px">
+        <div class="tbl"><table id="tAllCmp"></table></div>
+        <div class="tbl"><table id="tAllProp"></table></div>
+      </div>
+      <p class="sub" id="nAll"></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>除了玩游戏：虚拟敲除筛选与“脑机接口”压力测试</h3>
+      <p id="pScreen"></p>
+      <p class="sub"><b>和真实实验对照：10 个做过光遗传沉默的细胞类型</b>（比值 = 沉默后 MN9 放电 ÷ 不沉默；≤ 0.8 判为“伸喙必需”）</p>
+      <div class="tbl"><table id="tScreenTypes"></table></div>
+      <p class="sub" id="nScreenTypes"></p>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>穷举 50 Hz 下全部活跃神经元：效应最强的 12 个</b></p><div class="tbl"><table id="tScreenTop"></table></div></div>
+        <div><p class="sub"><b>沉默后 MN9 反而升高最多的 5 个</b></p><div class="tbl"><table id="tScreenInc"></table></div></div>
+      </div>
+      <p class="sub" id="nScreenTop"></p>
+      <p class="sub"><b>双敲除：有没有“单独敲都没事、一起敲就断”的备份通路</b></p>
+      <div class="lower" style="gap:12px">
+        <div class="tbl"><table id="tDouble"></table></div>
+        <div class="tbl"><table id="tGrn"></table></div>
+      </div>
+      <div class="tbl"><table id="tHubScan"></table></div>
+      <p class="sub" id="nDouble"></p>
+      <p class="sub"><b>换一条通路：水味觉（论文表 5 的实验全是这篇论文自己做的）</b></p>
+      <div class="lower" style="gap:12px">
+        <div class="tbl"><table id="tWater"></table></div>
+        <div class="tbl"><table id="tWaterDouble"></table></div>
+      </div>
+      <p class="sub" id="nWater"></p>
+      <p class="sub"><b>糖和水用的是同一批神经元吗</b>（同一个 MN9 读出，两条输入通路）</p>
+      <div class="lower" style="gap:12px">
+        <div class="tbl"><table id="tPathway"></table></div>
+        <div class="tbl"><table id="tScans"></table></div>
+      </div>
+      <p class="sub" id="nPathway"></p>
+      <p class="sub"><b>三条通路：味觉糖、味觉水、触角机械感觉</b>（同一套方法，不同输入与读出）</p>
+      <div class="tbl"><table id="tThree"></table></div>
+      <p class="sub" id="nThree"></p>
+      <p class="sub"><b>什么时候可以不跑模拟：只看连线能预测到什么程度</b></p>
+      <div class="tbl"><table id="tStruct"></table></div>
+      <p class="sub" id="nStruct"></p>
+      <p class="sub"><b>解码器压力测试：只看得到一部分神经元时，还能读出“果蝇在说哪些词”吗</b>（12 个词的平均平衡准确率，0.5 = 瞎猜）</p>
+      <div class="tbl"><table id="tStress"></table></div>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>记录有噪声</b></p><div class="tbl"><table id="tStressNoise"></table></div></div>
+        <div><p class="sub"><b>通道中途坏掉</b>（1,000 个有信号的通道）</p><div class="tbl"><table id="tStressDrop"></table></div></div>
+      </div>
+      <p class="sub" id="nStress"></p>
+    </div>
+    <div class="card">
+      <h3>自动对局：视觉编码与起飞方式 <span class="sub">（第一版 1,294 神经元子回路测得）</span></h3>
+      <p>同一批球（提前量瞄准：果蝇若毫无反应必被击中），每个条件 5 局 × 120 s、球速 60 mm/s，由本页同一套引擎无画面运行。</p>
+      <svg class="chart" id="playChart" viewBox="0 0 520 250" role="img" aria-label="不同视觉编码与起飞方式下的躲开率"></svg>
+      <p class="sub" id="playNote"></p>
+      <h3>主设定下的损毁（新编码 + 真实逃逸飞行，第一版子回路）</h3>
+      <svg class="chart" id="lesChart" viewBox="0 0 520 200" role="img" aria-label="主设定下各损毁条件的躲开率"></svg>
+      <p class="sub" id="lesNote"></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>真视觉接进连接组：LPLC2 能分辨逼近和平移吗</h3>
+      <p>固定的 NeuroMechFly 看一个黑球，FlyGym 复眼（200 Hz）逐帧驱动 Lappalainen et al. 2024 预训练视觉网络 flyvis。30 种柱状细胞在每个柱上的活动，按 Codex 柱坐标（Matsliah et al. 2024）注入 FlyWire 全脑 LIF 里对应的 44,252 个神经元，读出下游的 LPLC2 与 LC4。这一步不是游戏里的手写视觉前端，游戏也没有用到它（离线运行，1.2 s 刺激约 90 s）。每个条件后来重复跑了 3 次：“逼近强于远离”8/8/8、“强于远距平移”8/7/8、“弱于近距平移”0/0/1，方向都不变；条件之间真正的不确定性来自格子对齐方式（朝向间标准差是重复间的 3–4 倍）。</p>
+      <div class="lower" style="gap:12px">
+        <div>
+          <p class="sub"><b>事先声明的指标</b>：刺激后 0.5–0.95 s 平均发放率（Hz），左侧神经元，8 种格子朝向的中位数</p>
+          <svg class="chart" id="visPre" viewBox="0 0 520 200" role="img" aria-label="事先声明指标下 LPLC2 与 LC4 对四种刺激的反应"></svg>
+        </div>
+        <div>
+          <p class="sub"><b>探索性指标（看过曲线后才加）</b>：碰撞前最后 150 ms 的峰值（Hz）</p>
+          <svg class="chart" id="visPost" viewBox="0 0 520 200" role="img" aria-label="探索性指标下 LPLC2 与 LC4 对四种刺激的反应"></svg>
+        </div>
+      </div>
+      <p class="sub" id="visNote"></p>
+      <img id="visFig" alt="LPLC2、LC4、巨纤维在四种刺激下的发放率时间曲线（8 种格子朝向的中位数与范围）" style="width:100%;max-width:100%;border-radius:6px;background:#fff">
+    </div>
+    <div class="card">
+      <h3>裁出来的子回路，和全脑算得一样吗</h3>
+      <p>同样给 LC4 + LPLC2 注入 100 Hz、0.5 s × 4 次独立试次，对比子回路与 138,639 个神经元的全脑 Brian2 模型（全脑参考已按独立试次重跑）。左右转向与逃逸的模式一致；数值上子回路高估巨纤维、低估 DNa02。</p>
+      <div class="legend"><span style="--c: var(--ink-2)"><i></i>全脑（Brian2）</span><span style="--c: var(--inter)"><i style="opacity:.55"></i>子回路（本页引擎）</span></div>
+      <svg class="chart" id="valChart" viewBox="0 0 520 220" role="img" aria-label="全脑与子回路下行神经元发放率对比"></svg>
+      <p class="sub" id="valNote"></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>哪些是连接组，哪些是手写的</h3>
+      <ul>
+        <li><span class="tag c">连接组</span>当前子回路 4,599 个神经元、338,837 条连接：LC4/LPLC2/LC16/糖/苦/JO 到 DNa01、DNa02、巨纤维、MN9、aDN1、MDN 之间突触数 ≥ 3、最多 3 跳的所有路径（在 3 组候选里按“≤ 6 MB、≥ 3× 实时、平均偏差最小”事先规则选定）。神经元参数与 Shiu et al. 2024 全脑模型相同，dt = 0.1 ms，在你的浏览器里逐步计算。</li>
+        <li><span class="tag h">手写</span>进食/梳理/后退：颗粒在头下 → 糖/苦 200 Hz；灰尘在触角上 → 该侧 JO 200 Hz；LC16 = 0.5 Hz/(°/s) × 角速度；阈值 MN9 30 Hz、aDN1 20 Hz、MDN 20 Hz；优先级 起飞 &gt; 后退 &gt; 进食 &gt; 梳理 &gt; 行走。伸喙是喙部网格的纯视觉旋转；梳理姿态由逆运动学让前足尖触到触角生成（参照 flybody 梳理姿态数据集的前足梳理类型）。</li>
+        <li><span class="tag h">手写 · 非连接组</span>“闻着找”（默认关）：颗粒散发高斯气味场（σ = 15 mm），左右触角各采一次浓度，浓度 &gt; 0.01 时朝浓度高的一侧以 120°/s 转向，叠加在 DNa 转向上；尝过的颗粒不再吸引。全脑模型里单侧气味刺激给不出转向信号，所以这一步完全手写；碰到颗粒后吃不吃，仍由连接组的糖/苦 → MN9 决定。</li>
+        <li><span class="tag c">连接组</span>“左侧威胁 → 右侧 DNa 活跃、左侧巨纤维更强”这个模式，是连接权重自己算出来的，全脑模型里也一样。</li>
+        <li><span class="tag h">手写 · 有文献依据</span>视觉前端（默认）：按 Ache et al. 2019 Curr Biol，LC4 编码角速度、LPLC2 编码角尺寸。函数形式来自文献；参数为手选：LC4 = 0.5 Hz/(°/s)，LPLC2 = 200 Hz × 高斯（中心 45°、宽 15°）。原文参数未能获取。可切回第一版（两者都用 dθ/dt）。</li>
+        <li><span class="tag h">手写</span>运动映射：转向角速度 = 6°/s × (左 DNa − 右 DNa)，依据 Rayshubskiy et al. 对 DNa02 的描述（哪侧活跃往哪侧转），左右以 FlyWire 注释的胞体侧为准。巨纤维 20 ms 平滑发放率超过 90 Hz 即起飞。</li>
+        <li><span class="tag h">真实数据 · 训练好的控制器 · 手写过渡</span>飞行由 flybody 论文公开的<b>训练好的飞行控制器</b>（Vaxenburg et al. 2025 Nature，figshare trained-fly-policies/flight）在 MuJoCo 物理仿真里完成：控制器看着真实果蝇逃逸飞行的记录（Muijres et al. 2014 Science，只用原始轨迹）去跟飞，身体的位置和姿态是仿真结果，跟踪误差中位约 0.3 mm、机体朝向约 4–6°，左转那条在最后约 30 ms 偏离到 7 mm。<b>翅膀按控制器的实际输出扇动</b>：控制器设定拍翅频率（约 219–221 Hz），再给左右翅每个关节加一份修正力，翅膀真实角度由物理引擎算出，左右不再完全同步（翻滚角左右相关 0.52–0.59）。<b>起飞和降落仍是手写过渡</b>（起飞 20 ms 抬升 5 mm、结束后 50 ms 线性降落）：没有找到可公开下载的果蝇起跳动作数据，Card 实验室 FlyPEZ 的起跳跟踪数据需向作者申请。起飞方向按 Card &amp; Dickinson 2008 设为背离威胁，威胁在左就选右转轨迹。飞行不受连接组控制。</li>
+        <li><span class="tag c">连接组</span><b>敲真实神经元</b>：这一排开关是<b>虚拟敲除筛选</b>（报告 §14–24，17,628 段全脑仿真）选出来的真实神经元，不是功能分组。切断它们的传出突触与全脑筛选用的是同一套语义。
+        开关上标的两个数是<b>同一个神经元在糖通路和水通路里的比值</b>，在这个子回路里实测（<code>node dodge/measure_neurons.js</code>：颗粒钉在头前 1.3 mm 持续接触 → 味觉神经元 200 Hz，3 个种子，2.5 s 取后 1.25 s 平均）；悬停可以看到<b>全脑</b>的对应值（<code>python dodge/measure_neurons_fullbrain.py</code>，138,639 个神经元，同样一起敲 + 零参照归一化 + 6 个实现）。
+        <b>但必须说清楚</b>：这个子回路只有 4,599 个神经元（全脑的 3%），单个神经元上会有明显失真。差别最大的是 <b>CB0883</b>——全脑里它是“单独敲 0.76、配上 Clavicle/G2N-1 才塌到 0.24”的枢纽，子回路里完全没作用（糖 ×1.07、水 ×1.00），配对也只是可加，因为它依赖的旁路在裁剪时被切掉了。反过来，Clavicle + G2N-1 在子回路里仍是协同（各自 0.91 / 0.67，一起 0.50，独立预期 0.61）。
+        最值得看的是<b>糖和水的反差</b>：Clavicle 对糖几乎没影响（×0.91）、对水直接归零（×0.01）；CB0051 同样（×0.80 / ×0.02）；G2N-1 反过来只管糖（×0.67 / ×1.07）；Phantom 是抑制性的，敲掉它水通路的 MN9 反而翻倍（×2.06）。这正是报告 §21 那个结论在游戏里的样子——<b>同一个伸喙动作，背后是两套线路</b>。
+        把这 10 个神经元在全脑和子回路里的比值整体对照【探索性，n = 10】：糖 Pearson +0.75、水 +0.89，<b>子回路整体上重现了全脑的敲除模式，水那一侧更贴近一些</b>。最漂亮的一行还是 Phantom：敲掉它，全脑水通路的 MN9 变 3.02 倍、子回路 2.06 倍，方向和量级都对上了。
+        （这一格先前写的是“糖 +0.21、水 +0.92，子回路只重现水通路”，是错的：糖用了未归一化的值、又只取了 6 个有命名的类型；统一口径并补全 10 个后糖升到 +0.75。）</li>
+        <li><span class="tag c">连接组 · 半</span><b>起风</b>：游戏里的 JO 输入组正是 JO-C/E 亚型——风觉 / 重力觉神经元（Yorozu et al. 2009），也正是“果蝇说中文”实验里“风”对应的那群。所以“起风 → 这群神经元放电 → 下游读出”这条链是连接组算的；<b>风速到放电频率的换算、触角迎风几何、风把果蝇吹偏的力</b>都是手写的（没有该模型下的定标数据）。</li>
+        <li><span class="tag h">手写</span><b>阳光</b>：只按手写规则调节视觉前端增益（暗 → 对比度低 → 逼近检测弱，最低降到 35%）与画面明暗。直接刺激光感受器在这个 LIF 模型里驱动不了下行神经元（实测），所以没有假装亮度是连接组算出来的。</li>
+        <li><span class="tag c">连接组 · 半</span><b>“果蝇在想什么”气泡</b>：触发每个词的量是真实的——甜 / 苦 / 风 / 痒是当前注入那些感觉神经元的频率，吃 / 梳理 / 后退 / 飞是<b>读出神经元的平滑发放率</b>；但<b>词的阈值与中文句子模板是手写的</b>。这是报告第 13 节的简化版：那里用 121,706 个神经元 + 岭回归解码 12 个词，这里子回路只有 4,599 个神经元、也没有醋 / 霉味 / 温湿度那些通路，所以只能用游戏里真实存在的这几路输入，且用阈值而非回归。</li>
+        <li><span class="tag h">显示</span>行走腿部动作是 FlyGym 物理仿真录下的 25 Hz 步态周期循环；果蝇模型显示放大 2 倍，碰撞仍按真实尺寸（体半径 1.4 mm、球半径 2.5 mm）计算。</li>
+        <li><span class="tag h">许可</span>行走身体 NeuroMechFly/FlyGym（Apache-2.0）；飞行身体 flybody（Apache-2.0）；飞行轨迹、拍翅模式与训练好的飞行控制器来自 flybody 的 figshare 数据集（GPL-3.0+）；连接组与细胞类型为 FlyWire v783（按非商用处理）。</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script id="sub-data" type="application/json">/*__SUBCIRCUIT__*/</script>
+<script id="gait-data" type="application/json">/*__GAIT__*/</script>
+<script id="play-data" type="application/json">/*__RESULTS__*/</script>
+<script id="flight-data" type="application/json">/*__FLIGHT__*/</script>
+<script id="poses-data" type="application/json">/*__POSES__*/</script>
+<script id="v3-data" type="application/json">/*__V3__*/</script>
+<script id="v4-data" type="application/json">/*__V4__*/</script>
+<script id="v6-data" type="application/json">/*__V6__*/</script>
+<script>/*__BRAIN_JS__*/</script>
+<script>/*__GAME_CORE_JS__*/</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  const SUB = JSON.parse(document.getElementById("sub-data").textContent);
+  const GAIT = JSON.parse(document.getElementById("gait-data").textContent);
+  const PLAY = JSON.parse(document.getElementById("play-data").textContent);
+  const { ConnectomeBrain, decodeB64 } = window.FlyDodgeBrain;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const $ = id => document.getElementById(id);
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const FLY_SCALE = 2;
+
+  const FLIGHT = JSON.parse(document.getElementById("flight-data").textContent);
+  // 默认 = 第 1/3 步的主设定：Ache 2019 编码（μ45°）+ 巨纤维 20 ms 平滑 + 真实逃逸飞行轨迹
+  const ENC = { ache: { encoding: "ache2019", lplc2Mu: 45, gfTau: 0.02 }, legacy: { encoding: "legacy", gfTau: 0.08 } };
+  const game = window.FlyDodgeGame.createGame(SUB, ConnectomeBrain, { seed: (Date.now() % 100000) + 1, ballSpeed: 60, mode: "auto",
+    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
+  const POSES = JSON.parse(document.getElementById("poses-data").textContent);
+  const V3R = JSON.parse(document.getElementById("v3-data").textContent);
+  const V4R = JSON.parse(document.getElementById("v4-data").textContent);
+  const V6R = JSON.parse(document.getElementById("v6-data").textContent);
+  const V5_NOTES_ALL = "稍好但没有质变：标定强度下失控更少（1/16 对 3/16），更多腿出现节律，常有中右、右后两条同侧腿接近交替摆动（副本 1 相位差 164°）；但仍不是三足步态，同一条腿的摆动与支撑依旧同相，前左、前右、后左腿基本不动。相位性本体感觉反馈在不失控的副本里保持节律，但没有比开环更多的节律腿；错位对照一次反而多出两条腿、一次失控，没有一致证据说明反馈内容在起作用。巨纤维 → TTMn 结论不变：只有化学突触时 TTMn 基本不放电（0–1 Hz），手加等效 1,500 个突触的电突触后跟随 23/13 Hz（旧数据 30/25 Hz），巨纤维刺激 12/12 让全腹神经索失控。";
+  const V5_NOTES = {
+    all: V5_NOTES_ALL,
+    vnc: "对齐检验：在前足网络上，稀疏版参数与作者完全相同，运动神经元发放率最大差 0.11–0.15 Hz。全腹神经索里节律窗口很窄：I = 250 不动，I = 350 时 16 个副本 12 个振荡（8–11.5 Hz），I ≥ 400 大多失控；MDN 两档强度 16/16 全部失控。节律会出现在 6 条腿的运动神经元里（主条件下右后腿 75% 副本振荡），但腿间相位不是三足步态，同侧中–后腿几乎同相，每对样本只有 1–6 个；同一条腿的摆动与支撑模块同相（+0.94）。驱动身体后只有右后腿稳定地按 9–10 Hz 摆动（0.6–0.7 mm，约 CPG 的 60–70%），其余腿摆幅 ≤ 0.07 mm（身体振动）；失控时 6 条腿大幅乱动但没有节律。结论：比前足网络多出一条节律腿，仍然没有步态。",
+    gap: "只有化学突触（135/146 个）时，即使巨纤维 80 Hz，TTMn 也只在约 20 ms 出一个短峰，随后被抑制性中间神经元压到 0。加上约为化学突触 10 倍的电突触耦合（等效 1,500 个），TTMn 才持续跟随（25–30 Hz）——这个结果取决于手选的耦合强度，不代表真实电突触的强度。24 次模拟全部让全腹神经索失控，“标定 16 Hz”那档巨纤维自己也被网络压到 1–2 Hz。发放率模型时间常数 20 ms，看不了真实电突触的毫秒级速度；也没有接身体（表里 TTMn 没有模块标注）。",
+    prop: "闭环前先检验定步长积分器：与 Dopri5 主频完全相同、相关 0.993–0.999。经腿神经进入的弦音器 394 个、毛板 78 个、钟形感器 9 个。第一版“持续编码”（按关节角度放电）：弦音器平均 8 Hz 一直放电，把网络推进失控（活跃运动神经元 237–274 个），原来右后腿的节律没了，而且正确对应和错位对应结果一样。第二版“相位性编码”（只在关节转动时按方向放电，静止为 0）：感受器只在 1–6% 的时间里放电；16 Hz 时正确对应 3/3 保持节律（第一版 0/3），但仍然只有右后腿有节律，没有出现腿间协调；错位对应 1/3 失控、1/3 反而多出一条中右腿，和正确对应没有一致差别；50 Hz 时又失控。结论：相位性编码不再破坏节律，但也没有让反馈带出步态。机体固定、没有地面负载，其余腿几乎不动，是明显的局限。",
+    title: "全腹神经索：6 条腿有了节律但不协调；电突触要手加很强才驱动跳跃肌；本体感觉反馈没带出步态" };
+  const V4_NOTES = {
+    back: "全脑里 MDN 要双侧 LC16 ≥ 100 Hz 才放电，单侧不行；LC16 同时强烈驱动 DNa01/DNa02、DNa13 和前进指令 BDN2。对局结果：单靠后退（切巨纤维 + 切 DNa）在全部 18 格里都是 100% 被击中，即使每个威胁都触发了后退——果蝇发现威胁前一直在往前走，后退只抵消了前进，滚球还会继续滚。躲开靠的是 LC16 驱动的转向（只剩转向时，斜率 5 下击中率 17–79%）；在转向上再加后退，多数格子没改善、有的更差。断开 LC16 后滚球全部被击中。原地起跳期间不能转向，所以保留巨纤维常常更容易被击中。每格 24 个威胁，±20 个百分点以内的差异不可靠。页面默认仍用事先声明的斜率 0.5。",
+    olf: "刺激降到 10 Hz 照样在 30 ms 内失控，而且是全或无：每个试次要么只有被刺激的几十个神经元动，要么直接冲到 8,000 多个。阈值附近是概率性的——DA2 左 50 Hz 四个试次里 3 次几乎无反应、1 次失控（旧版只跑到其中一种，写成了“50 Hz 无反应”）。失控前下行神经元的脉冲最多也只有个位数。不同刺激引起的失控集合几乎相同（重叠 0.91–0.97）。右侧 DM1 受体到左侧投射神经元的突触反而更多（1,664 对 1,288），所以按“侧别”读出首先受重建数据左右差的影响。失控前最先放电的是触角叶局部神经元；沉默其中 120 个兴奋性局部神经元，失控从 8,519 个缩小到 3,414 个，但仍然失控，左侧刺激的下行 LI 只有 +0.14。结论：这个连接组模型给不出气味转向信号。",
+    odor: "结果符合构造：规则是手写的，找到颗粒是必然的，不是连接组能力的证据。分工很清楚：手写嗅觉把果蝇带到每一颗颗粒前，连接组只吃糖粒，苦粒和混合粒都不吃。在上面的“喂食”一栏打开“闻着找”就能看到。",
+    vnc: "作者模型在本机复现出节律：DNg100（前进指令）刺激下 16 个副本全部振荡，约 11 Hz。但每个副本只有 2–4 个运动神经元参与（共 144 个），主要是左腿 coxa swing；同一条腿的摆动与支撑模块同相（相关 +0.73），左右腿不相关。驱动 NeuroMechFly 后，左前腿按 10.5–12 Hz 节律摆动，但幅度 0.18–0.20 mm，只有 CPG 的约 1/4；右前腿基本不动，也没有左右交替。MDN（后退）在 3 档刺激强度下都不振荡，只是招募 80–95 个运动神经元持续放电。巨纤维 → TTMn 电突触、本体感觉闭环、全腹神经索 6 条腿后来都补做了，见下方“全腹神经索”卡片。",
+    vncTitle: "腹神经索与腿：换成发放率模型后有了约 11 Hz 节律，但还不是迈步",
+  };
+  $("nNeu").textContent = SUB.meta.n.toLocaleString("en-US");
+  game.setFlightClips(FLIGHT.clips);
+  const rawClips = Object.fromEntries(FLIGHT.clips.map(c => [c.name, c]));
+  const { CFG, S } = game;
+  $("thrTxt").textContent = CFG.gfThreshold;
+  let paused = false;
+
+  // ——— raster 布局：输入组 / 中间神经元（按离输入的跳数排序）/ 输出组 ———
+  const raster = $("raster"), rctx = raster.getContext("2d");
+  const RH = 280, N = SUB.meta.n;
+  const rowY = new Float32Array(N), rowH = new Float32Array(N), rowColor = new Array(N);
+  (function layout() {
+    const inGroups = [["LC4_left", "--left", "LC4"], ["LC4_right", "--right", ""], ["LPLC2_left", "--left", "LPLC2"], ["LPLC2_right", "--right", ""],
+      ["LC16_left", "--left", "LC16"], ["LC16_right", "--right", ""], ["SUGAR_left", "--sugar", "糖"], ["SUGAR_right", "--sugar", ""],
+      ["BITTER_left", "--bitter", "苦"], ["BITTER_right", "--bitter", ""], ["JO_left", "--left", "JO"], ["JO_right", "--right", ""]].filter(([g]) => SUB.groups[g]);
+    const outGroups = [["DNa01_left", "--left", "DNa01"], ["DNa01_right", "--right", ""], ["DNa02_left", "--left", "DNa02"], ["DNa02_right", "--right", ""],
+      ["DNp01_left", "--gf", "GF"], ["DNp01_right", "--gf", ""], ["MN9_left", "--sugar", "MN9"], ["MN9_right", "--sugar", ""],
+      ["aDN1_left", "--left", "aDN1"], ["aDN1_right", "--right", ""], ["MDN_left", "--left", "MDN"], ["MDN_right", "--right", ""]].filter(([g]) => SUB.groups[g]);
+    const used = new Set();
+    inGroups.concat(outGroups).forEach(([g]) => SUB.groups[g].forEach(i => used.add(i)));
+    const inter = [];
+    for (let i = 0; i < N; i++) if (!used.has(i)) inter.push(i);
+    inter.sort((a, b) => (SUB.hops_in[a] - SUB.hops_in[b]) || (SUB.hops_out[b] - SUB.hops_out[a]));
+    let y = 2; const bands = [];
+    const put = (idx, h, color, label, sep) => {
+      const y0 = y;
+      idx.forEach((i, k) => { rowY[i] = y + k * h; rowH[i] = h; rowColor[i] = color; });
+      y += idx.length * h; bands.push({ label, mid: (y0 + y) / 2 }); y += sep;
+    };
+    inGroups.forEach(([g, c, l]) => put(SUB.groups[g], 0.09, c, l, 1));
+    put(inter, 0.045, "--inter", "中间 " + inter.length, 3);
+    outGroups.forEach(([g, c, l]) => put(SUB.groups[g], Math.max(2.5, 10 / SUB.groups[g].length), c, l, 1));
+    const k = (RH - 2) / y;
+    for (let i = 0; i < N; i++) { rowY[i] *= k; rowH[i] = Math.max(1, rowH[i] * k); }
+    const lab = $("rasterLabels");
+    bands.forEach(b => { const d = document.createElement("div"); d.style.top = b.mid * k + "px"; d.textContent = b.label; lab.append(d); });
+  })();
+  let spikeBuf = [];
+  game.onSpike = i => { spikeBuf.push(i); };
+  let palette = {};
+  const readPalette = () => { palette = Object.fromEntries(["--left", "--right", "--gf", "--inter", "--panel-2", "--muted", "--sugar", "--bitter", "--water", "--rule", "--ink-2"].map(k => [k, css(k)])); };
+
+  // ——— three.js ———
+  const stage = $("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 4 / 3, 0.1, 800);
+  camera.up.set(0, 0, 1);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = !reduceMotion; controls.minDistance = 10; controls.maxDistance = 160;
+  controls.maxPolarAngle = Math.PI * 0.46;
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x88928e, 0.95); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-20, -30, 60); scene.add(sun);
+  const HEMI0 = hemi.intensity, SUN0 = sun.intensity;
+  function applyLight(v) {            // v: 0–1；只改画面亮度与阴影浓度，视觉前端的增益在 game_core 里按同一个值算
+    hemi.intensity = HEMI0 * (0.18 + 0.82 * v); sun.intensity = SUN0 * (0.1 + 0.9 * v);
+    renderer.toneMappingExposure = 0.55 + 0.45 * v;
+  }
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 64), new THREE.MeshBasicMaterial());
+  floor.position.z = -0.03; scene.add(floor);
+  const gridGroup = new THREE.Group(); scene.add(gridGroup);
+
+  const fly = new THREE.Group(); scene.add(fly);
+  const body = new THREE.Group(); body.scale.setScalar(FLY_SCALE); fly.add(body);
+  const parts = GAIT.meshes.map(m => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(decodeB64(m.verts, Float32Array), 3));
+    geo.setIndex(new THREE.BufferAttribute(decodeB64(m.faces, Uint32Array), 1));
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0.05, side: THREE.DoubleSide }));
+    mesh.name = m.name; body.add(mesh); return mesh;
+  });
+  const flyShadow = new THREE.Mesh(new THREE.CircleGeometry(1.5 * FLY_SCALE, 32), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18, depthWrite: false }));
+  flyShadow.scale.set(1.7, 1, 1); scene.add(flyShadow);
+  const GF = GAIT.frames.length, gq = new THREE.Quaternion();
+  const meshIdx = Object.fromEntries(GAIT.meshes.map((m, i) => [m.name, i]));
+  const groomDz = GAIT.frames[0][2] - POSES.groom[0][2];                 // 梳理姿态（固定模型）与步态帧的胸部高度对齐
+  const gq2 = new THREE.Quaternion(), pv = new THREE.Vector3(), pivot = new THREE.Vector3(), rotAxis = new THREE.Vector3(0, 1, 0), rotQ = new THREE.Quaternion();
+  let groomPhase = 0;
+  function poseFly() {
+    const fi = ((Math.floor(S.phase / GAIT.stride_mm * GF) % GF) + GF) % GF;   // 后退时步态倒放（phase 递减）
+    const f = GAIT.frames[fi];
+    const grooming = S.state === "groom";
+    let A = null, B = null, u = 0;
+    if (grooming) { groomPhase += 0.016 * 6; u = 0.5 - 0.5 * Math.cos(groomPhase * Math.PI * 2); A = POSES.groom[0]; B = POSES.groom[1]; }
+    parts.forEach((p, k) => {
+      const o = k * 7;
+      if (grooming) {
+        p.position.set(A[o] + (B[o] - A[o]) * u, A[o + 1] + (B[o + 1] - A[o + 1]) * u, A[o + 2] + (B[o + 2] - A[o + 2]) * u + groomDz);
+        gq.set(A[o + 4], A[o + 5], A[o + 6], A[o + 3]); gq2.set(B[o + 4], B[o + 5], B[o + 6], B[o + 3]); gq.slerp(gq2, u);
+      } else {
+        p.position.set(f[o], f[o + 1], f[o + 2]);
+        gq.set(f[o + 4], f[o + 5], f[o + 6], f[o + 3]);
+      }
+      p.quaternion.copy(gq);
+    });
+    // 伸喙（纯视觉手写动画：该模型喙部没有关节）：喙与唇瓣绕喙基部向下转
+    if (S.proboscis > 0.01 && meshIdx.Rostrum !== undefined) {
+      const r = parts[meshIdx.Rostrum]; pivot.copy(r.position);
+      rotQ.setFromAxisAngle(rotAxis, 0.9 * S.proboscis);
+      for (const nm of ["Rostrum", "Haustellum"]) {
+        const m = parts[meshIdx[nm]]; if (!m) continue;
+        pv.copy(m.position).sub(pivot).applyQuaternion(rotQ).add(pivot).addScaledVector(new THREE.Vector3(0.12, 0, -0.18), S.proboscis);
+        m.position.copy(pv); m.quaternion.premultiply(rotQ);
+      }
+    }
+  }
+
+  // 颗粒与灰尘
+  const pelletMeshes = new Map(), dustMeshes = new Map();
+  const pelletGeo = new THREE.CylinderGeometry(CFG.pelletR, CFG.pelletR, 0.35, 28), halfGeo = new THREE.CylinderGeometry(CFG.pelletR, CFG.pelletR, 0.35, 28, 1, false, 0, Math.PI);
+  const dustGeo = new THREE.SphereGeometry(0.09, 10, 8);
+  function makePellet(pl) {
+    const g = new THREE.Group();
+    if (pl.type === "mixed") {
+      const a = new THREE.Mesh(halfGeo, new THREE.MeshStandardMaterial({ color: css("--sugar"), roughness: 0.5, side: THREE.DoubleSide }));
+      const b = new THREE.Mesh(halfGeo, new THREE.MeshStandardMaterial({ color: css("--bitter"), roughness: 0.5, side: THREE.DoubleSide })); b.rotation.y = Math.PI;
+      g.add(a, b);
+    } else if (pl.type === "water") {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(CFG.pelletR * 0.95, 20, 14),
+        new THREE.MeshStandardMaterial({ color: css("--water"), roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.8 }));
+      m.scale.z = 0.55; g.add(m);
+    } else g.add(new THREE.Mesh(pelletGeo, new THREE.MeshStandardMaterial({ color: css(pl.type === "sugar" ? "--sugar" : "--bitter"), roughness: 0.5 })));
+    if (pl.type !== "water") g.rotation.x = Math.PI / 2;
+    g.position.set(pl.x, pl.y, pl.type === "water" ? 0.1 : 0.18); scene.add(g); pelletMeshes.set(pl.id, g);
+  }
+
+  // 飞行模型（flybody，飞行姿态腿收起，只含真正的果蝇模型，不含任务里的 ghost 参考模型）：根 = 胸部；翅膀网格挂在各自的翅膀组下，组位姿逐帧来自控制器驱动的物理仿真
+  const flyer = new THREE.Group(); flyer.visible = false; scene.add(flyer);
+  const flyerBody = new THREE.Group(); flyerBody.scale.setScalar(FLY_SCALE); flyer.add(flyerBody);
+  const wingGroups = { wing_left: new THREE.Group(), wing_right: new THREE.Group() };
+  flyerBody.add(wingGroups.wing_left, wingGroups.wing_right);
+  const setPose = (obj, a, o) => { obj.position.set(a[o], a[o + 1], a[o + 2]); obj.quaternion.set(a[o + 4], a[o + 5], a[o + 6], a[o + 3]); };
+  const flyerMeshes = [];
+  (function buildFlyer() {
+    const refIdx = {};
+    FLIGHT.meshes.forEach((m, i) => { if (m.part !== "static" && refIdx[m.part] === undefined) refIdx[m.part] = i; });
+    FLIGHT.meshes.forEach((m, i) => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(decodeB64(m.verts, Float32Array), 3));
+      geo.setIndex(new THREE.BufferAttribute(decodeB64(m.faces, Uint32Array), 1));
+      geo.computeVertexNormals();
+      const translucent = /membrane/.test(m.name);
+      const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(m.rgba[0], m.rgba[1], m.rgba[2]), roughness: 0.55, metalness: 0.05,
+        side: THREE.DoubleSide, transparent: translucent || m.rgba[3] < 1, opacity: translucent ? 0.35 : m.rgba[3] });
+      const mesh = new THREE.Mesh(geo, mat);
+      const sp = FLIGHT.static_pose[i];
+      if (m.part === "static") { setPose(mesh, sp, 0); flyerBody.add(mesh); }
+      else {
+        // 相对参考翅膀网格的固定变换 = inv(参考静态位姿) · 本网格静态位姿
+        const ref = FLIGHT.static_pose[refIdx[m.part]];
+        const Tref = new THREE.Matrix4().compose(new THREE.Vector3(ref[0], ref[1], ref[2]), new THREE.Quaternion(ref[4], ref[5], ref[6], ref[3]), new THREE.Vector3(1, 1, 1));
+        const Tm = new THREE.Matrix4().compose(new THREE.Vector3(sp[0], sp[1], sp[2]), new THREE.Quaternion(sp[4], sp[5], sp[6], sp[3]), new THREE.Vector3(1, 1, 1));
+        const rel = Tref.invert().multiply(Tm);
+        rel.decompose(mesh.position, mesh.quaternion, mesh.scale);
+        wingGroups[m.part].add(mesh);
+      }
+      flyerMeshes.push(mesh);
+    });
+  })();
+  // 慢放倍率：拍翅 218 Hz，×0.04 时屏幕上约 8.7 Hz、每拍约 7 个画面帧
+  const SLOWMO = 0.04;
+  // 正常速度下 60 fps 采样不了 218 Hz 拍翅（会出现频闪，翅膀像乱跳或倒着慢拍）：
+  // 额外画 3 组半透明翅膀，分别取当前帧后 3、6、9 帧（一个拍翅周期约 11.5 帧），近似肉眼看到的扇动残影
+  const GHOST_OFFSETS = [3, 6, 9];
+  const ghostWings = GHOST_OFFSETS.map(() => {
+    const g = { wing_left: wingGroups.wing_left.clone(true), wing_right: wingGroups.wing_right.clone(true) };
+    for (const grp of Object.values(g)) {
+      grp.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity *= 0.3; o.material.depthWrite = false; } });
+      flyerBody.add(grp);
+    }
+    return g;
+  });
+  const qTmp = new THREE.Quaternion(), qYaw = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1);
+  const qLevel = new THREE.Quaternion(), vCorner = new THREE.Vector3();
+  // 机体（不含翅膀）在自身坐标系里的包围盒：用来保证任何姿态下最低点都不穿过地面
+  const flyerBox = (() => {
+    const b = new THREE.Box3();
+    flyerBody.updateMatrixWorld(true);
+    flyerMeshes.forEach((m, i) => { if (FLIGHT.meshes[i].part === "static") b.expandByObject(m); });
+    return b;
+  })();
+  const boxCorners = [];
+  for (const x of [flyerBox.min.x, flyerBox.max.x]) for (const y of [flyerBox.min.y, flyerBox.max.y]) for (const z of [flyerBox.min.z, flyerBox.max.z]) boxCorners.push(new THREE.Vector3(x, y, z).multiplyScalar(FLY_SCALE));
+  // P：game_core 的 clipPose 在“最近一个游戏步 + 尚未结算的时间”处的结果，用来逐帧显示（游戏逻辑仍按 5 ms 一步）
+  function poseFlyer(P, ghosts) {
+    const c = S.clip, raw = c && rawClips[c.name];
+    if (!raw) return;
+    const f = Math.min(c.n - 1, P.frame);
+    qYaw.setFromAxisAngle(zAxis, S.jumpDir);
+    qTmp.set(raw.root[f * 7 + 4], raw.root[f * 7 + 5], raw.root[f * 7 + 6], raw.root[f * 7 + 3]);
+    if (P.landing) {                      // 落地过渡：把机体姿态从片段末帧插值回水平（行走姿态），只留偏航
+      const e = new THREE.Euler().setFromQuaternion(qTmp, "ZYX");
+      qLevel.setFromAxisAngle(zAxis, e.z);
+      qTmp.slerp(qLevel, Math.min(1, P.landU * 1.6));   // 落地进度过半时基本回正
+    }
+    flyer.quaternion.copy(qYaw).multiply(qTmp);
+    // 保证任何姿态下机体最低点都在地面之上（之前落地时尾部会插进地面）
+    let minZ = Infinity;
+    for (const c0 of boxCorners) { vCorner.copy(c0).applyQuaternion(flyer.quaternion); if (vCorner.z < minZ) minZ = vCorner.z; }
+    flyer.position.set(P.x, P.y, Math.max(P.z, -minZ + 0.05));
+    setPose(wingGroups.wing_left, raw.wing_left, f * 7);
+    setPose(wingGroups.wing_right, raw.wing_right, f * 7);
+    ghostWings.forEach((g, k) => {
+      const fg = Math.min(c.n - 1, f + GHOST_OFFSETS[k]);
+      g.wing_left.visible = g.wing_right.visible = ghosts;
+      if (ghosts) { setPose(g.wing_left, raw.wing_left, fg * 7); setPose(g.wing_right, raw.wing_right, fg * 7); }
+    });
+  }
+
+  // 风里的浮尘（纯显示）：沿风向飘，风越大越快越多
+  const MOTES = 90;
+  const moteGeo = new THREE.BufferGeometry();
+  const motePos = new Float32Array(MOTES * 3);
+  for (let i = 0; i < MOTES; i++) { motePos[i * 3] = (Math.random() - 0.5) * 160; motePos[i * 3 + 1] = (Math.random() - 0.5) * 160; motePos[i * 3 + 2] = 1 + Math.random() * 16; }
+  moteGeo.setAttribute("position", new THREE.BufferAttribute(motePos, 3));
+  const motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ color: 0xbfae86, size: 0.5, transparent: true, opacity: 0.55, depthWrite: false }));
+  motes.visible = false; scene.add(motes);
+  function stepMotes(dt, wind, cx, cy) {
+    if (!motes.visible) return;
+    const a = motePos, v = 45 * wind.speed * dt, ca = Math.cos(wind.dir) * v, sa = Math.sin(wind.dir) * v;
+    for (let i = 0; i < MOTES; i++) {
+      a[i * 3] += ca; a[i * 3 + 1] += sa;
+      if (Math.abs(a[i * 3] - cx) > 90 || Math.abs(a[i * 3 + 1] - cy) > 90) {   // 飘远了从上风处重新放
+        a[i * 3] = cx - Math.cos(wind.dir) * 80 + (Math.random() - 0.5) * 60;
+        a[i * 3 + 1] = cy - Math.sin(wind.dir) * 80 + (Math.random() - 0.5) * 60;
+        a[i * 3 + 2] = 1 + Math.random() * 16;
+      }
+    }
+    moteGeo.attributes.position.needsUpdate = true;
+  }
+
+  // 球：核心里是普通对象，这里按 id 维护网格
+  const ballMeshes = new Map();
+  const ballGeo = new THREE.SphereGeometry(CFG.ballR, 28, 18), ballShGeo = new THREE.CircleGeometry(CFG.ballR, 24);
+  game.onEvent = (type, b) => {
+    if (type === "launch") {
+      const m = new THREE.Mesh(ballGeo, new THREE.MeshStandardMaterial({ color: css("--ball"), roughness: 0.35 }));
+      const sh = new THREE.Mesh(ballShGeo, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16, depthWrite: false }));
+      scene.add(m, sh); ballMeshes.set(b.id, { m, sh });
+      $("coach").hidden = true;
+    } else if (type === "remove") {
+      const e = ballMeshes.get(b.id); if (e) { scene.remove(e.m, e.sh); e.m.material.dispose(); ballMeshes.delete(b.id); }
+    } else if (type === "pellet") { makePellet(b);
+    } else if (type === "eaten" || type === "removePellet") { const g = pelletMeshes.get(b.id); if (g) { scene.remove(g); pelletMeshes.delete(b.id); } if (type === "eaten") $("sEat").textContent = game.score.eaten;
+    } else if (type === "dust") { const m = new THREE.Mesh(dustGeo, new THREE.MeshStandardMaterial({ color: 0x8a8f8c, roughness: 1 })); scene.add(m); dustMeshes.set(b.id, { m, side: b.side });
+    } else if (type === "groomed") { for (const [, e] of dustMeshes) scene.remove(e.m); dustMeshes.clear(); $("sGroom").textContent = game.score.groom;
+    } else if (type === "state" && b.to === "groom") { $("sGroom").textContent = game.score.groom;
+    } else if (type === "hit" || type === "dodge" || type === "jump") {
+      $("sDodge").textContent = game.score.dodge; $("sHit").textContent = game.score.hit; $("sJump").textContent = game.score.jump;
+      if (type === "hit") { const e = ballMeshes.get(b.id); if (e) e.m.material.color.set(css("--critical")); }
+    }
+  };
+
+  function paintScene() {
+    readPalette();
+    floor.material.color.set(css("--floor"));
+    gridGroup.clear();
+    const minor = new THREE.GridHelper(600, 120, css("--grid"), css("--grid"));   // 5 mm
+    const major = new THREE.GridHelper(600, 24, css("--rule"), css("--rule"));    // 25 mm
+    for (const g of [minor, major]) { g.rotation.x = Math.PI / 2; gridGroup.add(g); }
+    for (const p of parts) {
+      const n = p.name, m = p.material; m.transparent = false; m.opacity = 1;
+      if (/Eye$/.test(n)) m.color.set(css("--eye"));
+      else if (/Wing$/.test(n)) { m.color.set(css("--muted")); m.transparent = true; m.opacity = 0.3; }
+      else m.color.set(css("--body"));
+    }
+    for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) e.m.material.color.set(css(b.outcome === "hit" ? "--critical" : "--ball")); }
+    rctx.fillStyle = palette["--panel-2"]; rctx.fillRect(0, 0, raster.width, raster.height);
+    drawValidation(); drawPlay(); drawVision(); drawV3(); drawV4(); drawV5(); drawV6();
+  }
+
+  // ——— panels ———
+  function updatePanels() {
+    const out = game.readout();
+    const bar = (id, v, max) => { $(id).style.width = Math.min(100, v / max * 100) + "%"; };
+    bar("mDL", out.dnaL, 120); $("vDL").textContent = out.dnaL.toFixed(0);
+    bar("mDR", out.dnaR, 120); $("vDR").textContent = out.dnaR.toFixed(0);
+    bar("mGF", out.gf, 250); $("vGF").textContent = out.gf.toFixed(0);
+    $("thrGF").style.left = (CFG.gfThreshold / 250 * 100) + "%";
+    const L = game.loom;
+    bar("mIL", L.lc4L || 0, 200); $("vIL").textContent = (L.lc4L || 0).toFixed(0);
+    bar("mIR", L.lc4R || 0, 200); $("vIR").textContent = (L.lc4R || 0).toFixed(0);
+    bar("mPL", L.lplc2L || 0, 200); $("vPL").textContent = (L.lplc2L || 0).toFixed(0);
+    bar("mPR", L.lplc2R || 0, 200); $("vPR").textContent = (L.lplc2R || 0).toFixed(0);
+    const deg = S.omega * 180 / Math.PI;
+    $("vTurn").textContent = `转向 ${deg >= 0 ? "+" : "−"}${Math.abs(deg).toFixed(0)}°/s`;
+    const w = Math.min(50, Math.abs(deg) / CFG.turnMax * 50), mt = $("mTurn");
+    mt.style.width = w + "%"; mt.style.left = deg >= 0 ? "50%" : (50 - w) + "%";
+    mt.style.background = deg >= 0 ? palette["--left"] : palette["--right"];
+    const st = $("pState");
+    if (S.hitFlash > 0) { st.textContent = "被击中"; st.className = "pill state-hit"; }
+    else if (S.jumpT >= 0) { st.textContent = "巨纤维触发 · 起跳"; st.className = "pill state-jump"; }
+    else if (S.state === "back") { st.textContent = "MDN 触发 · 后退"; st.className = "pill state-jump"; }
+    else if (S.state === "feed") {
+      const dw = game.onPellet && game.onPellet.type === "water";
+      st.textContent = dw ? "MN9 触发 · 伸喙喝水" : "MN9 触发 · 伸喙进食"; st.className = "pill state-jump";
+    }
+    else if (S.state === "groom") { st.textContent = "aDN1 触发 · 梳理触角"; st.className = "pill state-jump"; }
+    else { st.textContent = paused ? "已暂停" : "行走中"; st.className = "pill"; }
+    const tp = $("thirstPill");
+    if (tp) {
+      const th = S.thirst || 0;
+      tp.textContent = `口渴 ${(th * 100).toFixed(0)}%`;
+      tp.style.borderColor = th > 0.5 ? palette["--water"] : palette["--rule"];
+      tp.style.color = th > 0.5 ? palette["--water"] : palette["--ink-2"];
+    }
+    if (game.V3) {
+      bar("mMN9", out.mn9, 200); $("vMN9").textContent = out.mn9.toFixed(0); $("thrMN9").style.left = (CFG.feedThreshold / 200 * 100) + "%";
+      bar("mADN", out.adn1, 120); $("vADN").textContent = out.adn1.toFixed(0); $("thrADN").style.left = (CFG.groomThreshold / 120 * 100) + "%";
+      bar("mMDN", out.mdn, 120); $("vMDN").textContent = out.mdn.toFixed(0); $("thrMDN").style.left = (CFG.mdnThreshold / 120 * 100) + "%";
+      const l16 = Math.max(L.lc16L || 0, L.lc16R || 0);
+      bar("mL16", l16, 200); $("vL16").textContent = `${(L.lc16L || 0).toFixed(0)}/${(L.lc16R || 0).toFixed(0)}`;
+      bar("mSUG", game.gust.sugar, 200); $("vSUG").textContent = game.gust.sugar.toFixed(0);
+      bar("mBIT", game.gust.bitter, 200); $("vBIT").textContent = game.gust.bitter.toFixed(0);
+      const jo = game.joInput || { L: 0, R: 0 };
+      bar("mJO", Math.max(jo.L, jo.R), 200); $("vJO").textContent = `${jo.L.toFixed(0)}/${jo.R.toFixed(0)}`;
+      const od = game.odor;
+      bar("mODR", od ? Math.max(od.L, od.R) : 0, 1); $("vODR").textContent = od ? `${od.L.toFixed(2)}/${od.R.toFixed(2)}` : "关";
+    }
+  }
+
+  function drawRaster(dtReal) {
+    const W = raster.width, H = raster.height, shift = Math.max(1, Math.round(W * dtReal));
+    rctx.drawImage(raster, -shift, 0);
+    rctx.fillStyle = palette["--panel-2"]; rctx.fillRect(W - shift, 0, shift, H);
+    const sy = H / RH;
+    for (const i of spikeBuf) { rctx.fillStyle = palette[rowColor[i]]; rctx.fillRect(W - shift, rowY[i] * sy, shift, Math.max(1, rowH[i] * sy)); }
+    spikeBuf = [];
+  }
+
+  // ——— input ———
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit3 = new THREE.Vector3();
+  let down = null;
+  renderer.domElement.addEventListener("pointerdown", e => { down = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener("pointerup", e => {
+    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) { down = null; return; }
+    down = null;
+    const r = renderer.domElement.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    if (ray.ray.intersectPlane(plane, hit3)) game.launch(hit3.x, hit3.y);
+  });
+  const segSet = (btns, active) => btns.forEach(b => b.setAttribute("aria-pressed", String(b === active)));
+  $("modeClick").onclick = () => { game.mode = "click"; segSet([$("modeClick"), $("modeAuto")], $("modeClick")); $("coach").hidden = false; };
+  $("modeAuto").onclick = () => { game.mode = "auto"; game.autoTimer = 0.3; segSet([$("modeClick"), $("modeAuto")], $("modeAuto")); };
+  const speedBtns = [...document.querySelectorAll("[data-speed]")];
+  speedBtns.forEach(b => b.onclick = () => { game.ballSpeed = +b.dataset.speed; segSet(speedBtns, b); });
+  $("mapLit").onclick = () => { game.mapSign = 1; segSet([$("mapLit"), $("mapRev")], $("mapLit")); };
+  $("mapRev").onclick = () => { game.mapSign = -1; segSet([$("mapLit"), $("mapRev")], $("mapRev")); };
+  $("pause").onclick = () => { paused = !paused; $("pause").textContent = paused ? "继续" : "暂停"; };
+  $("resetScore").onclick = () => { game.score.dodge = game.score.hit = game.score.jump = 0; ["sDodge", "sHit", "sJump"].forEach(i => $(i).textContent = "0"); };
+  [["lesLC4", "LC4"], ["lesLPLC2", "LPLC2"], ["lesGF", "GF"], ["lesDNa", "DNa"], ["lesLC16", "LC16"], ["lesMDN", "MDN"], ["lesSUGAR", "SUGAR"],
+   ["lesBITTER", "BITTER"], ["lesMN9", "MN9"], ["lesJO", "JO"], ["lesaDN1", "aDN1"]].forEach(([id, name]) => { $(id).onchange = e => game.setLesion(name, e.target.checked); });
+  const placePellet = type => {
+    if (!CFG.odorNav) return game.addPelletAhead(type, 6);
+    const a = Math.random() * 2 * Math.PI;
+    return game.addPellet(S.x + Math.cos(a) * CFG.pelletAround, S.y + Math.sin(a) * CFG.pelletAround, type);
+  };
+  $("pSugar").onclick = () => placePellet("sugar");
+  $("pBitter").onclick = () => placePellet("bitter");
+  $("pMixed").onclick = () => placePellet("mixed");
+  $("pWater").onclick = () => placePellet("water");
+  $("odorNav").onchange = e => { CFG.odorNav = e.target.checked; };
+  $("dustL").onclick = () => game.addDust("left");
+  $("dustR").onclick = () => game.addDust("right");
+  $("autoPel").onchange = e => { CFG.autoPellets = e.target.checked; };
+  $("autoDust").onchange = e => { CFG.autoDust = e.target.checked; };
+  // 真实神经元损毁开关：名单与实测比值来自 game_core（虚拟敲除筛选的产物）
+  (function buildNeuronToggles() {
+    const box = $("neuronToggles");
+    game.NEURONS.forEach(n => {
+      const lab = document.createElement("label");
+      lab.className = "toggle";
+      lab.title = `${n.type}（全脑筛选糖通路 ×${n.full.toFixed(2)}）：${n.note.replace(/\*\*/g, "")}`;
+      const tag = n.key === "aBN1" ? `梳理 ×${n.adn1.toFixed(2)}`
+        : `糖 ×${n.game.toFixed(2)} · 水 ×${n.water.toFixed(2)}`;
+      lab.innerHTML = `<input type="checkbox" data-neuron="${n.key}"> ${n.key} <small>${tag}</small>`;
+      lab.querySelector("input").onchange = e => {
+        game.setNeuronLesion(n.key, e.target.checked);
+        const on = game.NEURONS.filter(x => game.neuronLesion[x.key]).map(x => x.key);
+        const pair = game.NEURON_PAIRS.find(p => p.keys.every(k => on.includes(k)));
+        $("coach").textContent = on.length === 0 ? "神经元都恢复了"
+          : pair ? `${pair.keys.join(" + ")} 一起敲：MN9 降到 ${(pair.game * 100).toFixed(0)}%（各自单敲的独立预期是 ${(pair.expect * 100).toFixed(0)}%）——${pair.note}`
+          : `已敲除 ${on.join("、")}`;
+      };
+      box.append(lab);
+    });
+  })();
+  $("windOn").onchange = e => { CFG.wind = e.target.checked; motes.visible = e.target.checked; $("windvane").hidden = !e.target.checked; };
+  $("lightSlider").oninput = e => { CFG.light = +e.target.value / 100; $("lightTxt").textContent = e.target.value + "%"; applyLight(CFG.light); };
+  $("saysOn").onchange = e => { if (!e.target.checked) $("says").hidden = true; };
+  $("encAche").onclick = () => { Object.assign(CFG, ENC.ache); segSet([$("encAche"), $("encLegacy")], $("encAche")); $("encNote").textContent = "LC4 ∝ 角速度，LPLC2 = 角尺寸的高斯（中心 45°）。"; };
+  $("encLegacy").onclick = () => { Object.assign(CFG, ENC.legacy); segSet([$("encAche"), $("encLegacy")], $("encLegacy")); $("encNote").textContent = "第一版：LC4 与 LPLC2 都 = 120 Hz ×（dθ/dt，rad/s）。"; };
+  $("takeClip").onclick = () => { if (S.jumpT < 0) CFG.takeoff = "clip"; segSet([$("takeClip"), $("takeHop")], $("takeClip")); pendingTakeoff = "clip"; };
+  $("takeHop").onclick = () => { if (S.jumpT < 0) CFG.takeoff = "hop"; segSet([$("takeClip"), $("takeHop")], $("takeHop")); pendingTakeoff = "hop"; };
+  let pendingTakeoff = "clip";   // 空中切换时等落地后生效
+
+  // ——— charts ———
+  const NS = "http://www.w3.org/2000/svg";
+  const mk = (svg) => (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); (p || svg).append(e); return e; };
+  const tip = $("tip");
+  function showTip(ev, lines) {
+    tip.replaceChildren();
+    lines.forEach(([label, value]) => { const d = document.createElement("div"); if (value !== undefined) { const b = document.createElement("b"); b.textContent = value; d.append(b, " " + label); } else d.textContent = label; tip.append(d); });
+    tip.hidden = false;
+    const r = ev.target.getBoundingClientRect(), px = ev.clientX || r.left + r.width / 2, py = ev.clientY || r.top;
+    tip.style.left = Math.min(window.innerWidth - 180, px + 12) + "px"; tip.style.top = py + 12 + "px";
+  }
+  const hideTip = () => { tip.hidden = true; };
+  const roundedBar = (x, y0, top, w) => (y0 - top > 4 ? `M${x},${y0}V${top + 3}Q${x},${top} ${x + 3},${top}H${x + w - 3}Q${x + w},${top} ${x + w},${top + 3}V${y0}Z` : `M${x},${y0}h${w}v${-(y0 - top)}h${-w}Z`);
+
+  // 横向条形图：每行一个条件；emphasis 为 true 的行用强调色，其余用中性色
+  function hbars(svgId, rows) {
+    const svg = $(svgId); svg.replaceChildren(); const el = mk(svg);
+    const W = 520, rowH = 30, padL = 176, padR = 56, top = 6;
+    rows.forEach((r, i) => {
+      const y = top + i * rowH, w = Math.max(0, (W - padL - padR) * r.rate);
+      el("text", { x: padL - 8, y: y + 17, "text-anchor": "end", fill: css("--ink-2"), style: "font:12.5px var(--sans)" }).textContent = r.label;
+      el("rect", { x: padL, y: y + 7, width: W - padL - padR, height: 14, rx: 3, fill: css("--grid") });
+      const bar = el("path", { d: w > 3 ? `M${padL},${y + 7}H${padL + w - 3}Q${padL + w},${y + 7} ${padL + w},${y + 10}V${y + 18}Q${padL + w},${y + 21} ${padL + w - 3},${y + 21}H${padL}Z` : `M${padL},${y + 7}h${w}v14h${-w}Z`,
+        fill: css(r.emphasis ? "--gf" : "--inter"), tabindex: 0 });
+      el("text", { x: padL + w + 6, y: y + 18, fill: css("--ink"), style: "font:600 12px var(--mono)" }).textContent = (r.rate * 100).toFixed(1) + "%";
+      bar.addEventListener("pointermove", e => showTip(e, r.tip)); bar.addEventListener("focus", e => showTip(e, r.tip));
+      bar.addEventListener("pointerleave", hideTip); bar.addEventListener("blur", hideTip);
+    });
+    svg.setAttribute("viewBox", `0 0 ${W} ${top + rows.length * rowH + 4}`);
+  }
+  const tipOf = r => [[r.label], ["个躲开", String(r.dodge)], ["次被击中", String(r.hit)], ["次起跳 / 分钟", r.jumps_per_min.toFixed(1)]];
+  function drawPlay() {
+    const P3 = PLAY.step3, P1 = PLAY.step1;
+    const prof = k => P3.profiles.find(r => r.key === k);
+    const rows = ["legacy_hop", "ache45_hop", "legacy_flyaway", "ache45_flyaway", "legacy_clip", "ache45_clip"].map(prof).filter(Boolean)
+      .map(r => ({ label: r.label, rate: r.dodge_rate, emphasis: r.key === "ache45_clip", tip: tipOf(r) }));
+    hbars("playChart", rows);
+    const s1 = k => P1.profiles.find(r => r.key === k);
+    $("playNote").textContent = `飞离类（直线或真实轨迹）几乎全躲开，主要反映起飞规则本身；编码的作用体现在起跳时机：原地起跳时，` +
+      `LPLC2 高斯中心 30° / 45° / 60° 的起跳距撞击中位数为 ${s1("ache30_hop").lead_median_s.toFixed(2)} / ${s1("ache45_hop").lead_median_s.toFixed(2)} / ${s1("ache60_hop").lead_median_s.toFixed(2)} s，` +
+      `躲开率 ${(s1("ache30_hop").dodge_rate * 100).toFixed(0)}% / ${(s1("ache45_hop").dodge_rate * 100).toFixed(0)}% / ${(s1("ache60_hop").dodge_rate * 100).toFixed(0)}%（μ 为手选参数，全部列出）。`;
+    const names = { intact: "完整大脑", no_gf: "切除巨纤维输出", no_lplc2: "LPLC2 断突触", no_lc4: "LC4 断突触", no_looming: "LC4 + LPLC2 断突触" };
+    hbars("lesChart", P3.lesions.map(r => ({ label: names[r.key] || r.label, rate: r.dodge_rate, emphasis: r.key === "intact", tip: tipOf({ ...r, label: names[r.key] || r.label }) })));
+    const les = k => P3.lesions.find(r => r.key === k);
+    $("lesNote").textContent = `（2026-09-14 起，“真实逃逸轨迹”换成训练好的飞行控制器在物理仿真里飞出的版本，重跑后躲开率与运动学回放版完全相同。）逃逸完全依赖巨纤维：切除后躲开率 ${(les("no_gf").dodge_rate * 100).toFixed(0)}%。` +
+      `只断 LPLC2 或只断 LC4 时仍能起飞（另一条输入单独能把巨纤维推过阈值），两者都断则 ${(les("no_looming").dodge_rate * 100).toFixed(0)}%。`;
+  }
+
+  function drawVision() {
+    const V = PLAY.step2; if (!V) return;
+    const names = { loom_L: "逼近", translate_near_L: "近距平移", translate_far_L: "远距平移", recede_L: "远离" };
+    const order = ["loom_L", "translate_near_L", "translate_far_L", "recede_L"];
+    const pre = [], post = [];
+    for (const [grp, lab] of [["LPLC2", "LPLC2（左侧 108 个）"], ["LC4", "LC4（左侧 54 个）"]]) {
+      pre.push({ header: lab }); post.push({ header: lab });
+      const maxPre = Math.max(...order.map(s => V.stimuli[s][`${grp}_left`].late_median)) * 1.15 || 1;
+      const ex = V.exploratory_end_window[`${grp}_left`];
+      const maxPost = Math.max(...order.map(s => ex[s].end_peak_median)) * 1.15 || 1;
+      order.forEach(s => {
+        const a = V.stimuli[s][`${grp}_left`];
+        pre.push({ label: names[s], value: a.late_median, max: maxPre, emphasis: s === "loom_L",
+          tip: [[`${lab} · ${names[s]}`], ["Hz 中位", a.late_median.toFixed(2)], ["Hz 最小", a.late_min.toFixed(2)], ["Hz 最大", a.late_max.toFixed(2)]] });
+        post.push({ label: names[s], value: ex[s].end_peak_median, max: maxPost, emphasis: s === "loom_L",
+          tip: [[`${lab} · ${names[s]}`], ["Hz 中位", ex[s].end_peak_median.toFixed(1)], ["Hz 最小", ex[s].end_peak_min.toFixed(1)], ["Hz 最大", ex[s].end_peak_max.toFixed(1)]] });
+      });
+    }
+    // 每组（LPLC2 / LC4）各自一个尺度
+    const draw = (id, rows) => {
+      const svg = $(id); svg.replaceChildren();
+      const groups = []; rows.forEach(r => { if (r.header) groups.push([r]); else groups[groups.length - 1].push(r); });
+      const el = mk(svg); let y = 4; const W = 520, padL = 150, padR = 64;
+      groups.forEach(g => {
+        const max = g[1].max;
+        g.forEach(r => {
+          if (r.header) { el("text", { x: 0, y: y + 14, fill: css("--ink"), style: "font:600 12px var(--sans)" }).textContent = r.header; y += 20; return; }
+          const w = Math.max(0, (W - padL - padR) * Math.min(1, r.value / max));
+          el("text", { x: padL - 8, y: y + 15, "text-anchor": "end", fill: css("--ink-2"), style: "font:12px var(--sans)" }).textContent = r.label;
+          el("rect", { x: padL, y: y + 6, width: W - padL - padR, height: 12, rx: 3, fill: css("--grid") });
+          const bar = el("rect", { x: padL, y: y + 6, width: w, height: 12, rx: 3, fill: css(r.emphasis ? "--ink-2" : "--inter"), tabindex: 0 });
+          el("text", { x: padL + w + 6, y: y + 16, fill: css("--ink"), style: "font:600 11.5px var(--mono)" }).textContent = r.value.toFixed(1) + " Hz";
+          bar.addEventListener("pointermove", e => showTip(e, r.tip)); bar.addEventListener("focus", e => showTip(e, r.tip));
+          bar.addEventListener("pointerleave", hideTip); bar.addEventListener("blur", hideTip);
+          y += 24;
+        });
+        y += 6;
+      });
+      svg.setAttribute("viewBox", `0 0 ${W} ${y}`);
+    };
+    draw("visPre", pre); draw("visPost", post);
+    const R = V.ratios, E = V.exploratory_end_window;
+    $("visNote").textContent =
+      `事先声明的指标：LPLC2 对逼近的反应强于远离（${R.LPLC2_loom_vs_recede_L.orient_wins}/8 个朝向）和远距平移（${R.LPLC2_loom_vs_translate_far_L.orient_wins}/8），` +
+      `但弱于近距平移（${R.LPLC2_loom_vs_translate_near_L.orient_wins}/8）——按这个指标，“逼近强于平移”只部分成立。左右侧化 ${V.lateralization.loom_L.same_side_wins}/8 与 ${V.lateralization.loom_R.same_side_wins}/8。` +
+      `探索性指标（碰撞前峰值）下逼近在 LPLC2 为 ${E.LPLC2_left.loom_end_peak_wins.translate_near_L}/${E.LPLC2_left.loom_end_peak_wins.translate_far_L}/${E.LPLC2_left.loom_end_peak_wins.recede_L}、` +
+      `LC4 为 ${E.LC4_left.loom_end_peak_wins.translate_near_L}/${E.LC4_left.loom_end_peak_wins.translate_far_L}/${E.LC4_left.loom_end_peak_wins.recede_L} 个朝向领先（对近距平移/远距平移/远离），但这是看过数据后选的窗口。` +
+      `巨纤维在刺激前基线期已有约 ${E.DNp01_left.loom_L.baseline_median.toFixed(0)} Hz（44,252 个注入神经元的整流噪声汇聚），这条管线里它的结果不可解读。` +
+      `未验证：flyvis 与 FlyWire 两套格子的真实朝向对应、活动到频率的换算；TmY3 等无柱坐标的输入未注入。`;
+    if (V.figure_png) $("visFig").src = "data:image/png;base64," + V.figure_png;
+  }
+
+  function tableHTML(id, head, rows, emRow) {
+    const t = $(id); t.replaceChildren();
+    const trh = document.createElement("tr"); head.forEach(h => { const th = document.createElement("th"); th.textContent = h; trh.append(th); }); t.append(trh);
+    rows.forEach((r, i) => { const tr = document.createElement("tr"); if (emRow && emRow(r, i)) tr.className = "em";
+      r.forEach((c, j) => { const td = document.createElement("td"); td.textContent = c; if (j) td.className = "num"; tr.append(td); }); t.append(tr); });
+  }
+  const pc = (a, b) => (b ? Math.round(100 * a / b) + "%" : "—");
+  function drawV3() {
+    const V = V3R.v3, FB = V3R.full_brain;
+    tableHTML("tFeed", ["条件", "糖粒 吃掉/接触", "苦粒", "混合粒"], V.feeding.map(r => [r.label,
+      `${r.eaten_sugar}/${r.contacts_sugar} · ${pc(r.eaten_sugar, r.contacts_sugar)}`, `${r.eaten_bitter}/${r.contacts_bitter} · ${pc(r.eaten_bitter, r.contacts_bitter)}`,
+      `${r.eaten_mixed}/${r.contacts_mixed} · ${pc(r.eaten_mixed, r.contacts_mixed)}`]), r => r[0] === "完整");
+    $("nFeed").textContent = `全脑参考：左侧糖味 → MN9 ${FB.SUGAR_L.MN9_L}/${FB.SUGAR_L.MN9_R} Hz；糖 + 苦 → ${FB.SUGAR_BITTER.MN9_L}/${FB.SUGAR_BITTER.MN9_R} Hz；单独苦味 → 所有下行神经元 0 Hz。` +
+      `所以“苦味回避”在这个连接组模型里只表现为“不吃”（切断苦味神经元后混合粒就被吃掉），没有让果蝇绕开的转向或后退输出。`;
+    tableHTML("tGroom", ["条件", "落灰 → 梳理", "比例", "延迟中位"], V.grooming.map(r => [r.label, `${r.dust} → ${r.groom}`, pc(r.groom, r.dust),
+      r.groom_latency_median_s === null ? "—" : r.groom_latency_median_s.toFixed(2) + " s"]), r => r[0] === "完整");
+    $("nGroom").textContent = `只有约六成落灰引发梳理：左侧 JO → aDN1 ${FB.JO_L.aDN1_R} Hz，而右侧 JO → aDN1 ${FB.JO_R.aDN1_L}/${FB.JO_R.aDN1_R} Hz——全脑模型里右侧触角就驱动不了 aDN1，子回路如实继承了这个左右不对称（真实果蝇两侧都会梳理，可能是注释/校对或 LIF 阈值造成的）。`;
+    tableHTML("tBack", ["条件", "躲开率", "正前方被击中", "后退累计"], V.backward.map(r => [r.label, pc(r.dodge, r.dodge + r.hit), `${pc(r.frontHit, r.frontN)}（${r.frontN} 球）`, r.back_s.toFixed(1) + " s"]),
+      r => /完整/.test(r[0]));
+    $("nBack").textContent = `事先设定下 MDN 通路几乎没被用上（全场后退约 ${V.backward[0].back_s.toFixed(1)} s），正前方来球仍全部被击中；正面威胁靠真实逃逸飞行躲开（被击中 ${pc(V.backward.find(r => r.key === "clip_intact").frontHit, V.backward.find(r => r.key === "clip_intact").frontN)}）。全脑参考：双侧 LC16 150 Hz → MDN ${FB.LC16_LR.MDN_L}/${FB.LC16_LR.MDN_R} Hz（同时 DNa02 ${FB.LC16_LR.DNa02_L}/${FB.LC16_LR.DNa02_R} Hz）；双侧 looming → MDN 只有 ${FB.FRONT_LOOM.MDN_L}/${FB.FRONT_LOOM.MDN_R} Hz、巨纤维 ${FB.FRONT_LOOM.GF_L}/${FB.FRONT_LOOM.GF_R} Hz。`;
+    const SW = V3R.backward_sweep.rows;
+    tableHTML("tSweep", ["巨纤维", "LC16 斜率 · MDN 阈值", "躲开率", "正前方被击中", "后退累计"], SW.map(r => [r.gf_lesion ? "切除" : "完整",
+      r.lc16_silenced ? `LC16 断突触（${r.lc16Slope} · ${r.mdnThreshold}）` : `${r.lc16Slope} · ${r.mdnThreshold} Hz`, pc(r.dodge, r.dodge + r.hit), `${pc(r.frontHit, r.frontN)}（${r.frontN}）`, r.back_s.toFixed(1) + " s"]));
+    $("nSweep").textContent = "加强 LC16 输入后整体躲开率明显上升、切断 LC16 就回落，但正前方来球仍几乎全被击中；提升可能来自 LC16 同时驱动的 DNa02 转向或速度变化打乱瞄准，不能说明是后退救了命。每格只有 2 局 × 90 s、正前方 8 球。";
+    const olf = V3R.olfaction.lateralization, fb = V3R.olfaction.fba_valence;
+    const nm = { DM1_L: "DM1 左 150 Hz", DM1_R: "DM1 右 150 Hz", DA2_L: "DA2 左 150 Hz", DA2_R: "DA2 右 150 Hz", DM1_L_50: "DM1 左 50 Hz", DM1_R_50: "DM1 右 50 Hz", DA2_L_50: "DA2 左 50 Hz", DA2_R_50: "DA2 右 50 Hz", SUGAR_L: "对照：糖味左侧", JO_L: "对照：JO 左侧" };
+    tableHTML("tOlf", ["刺激", "下行神经元 LI", "全脑活跃神经元"], olf.map(r => [nm[r.cond] || r.cond, (r.li >= 0 ? "+" : "−") + Math.abs(r.li).toFixed(2), r.active_neurons.toLocaleString("en-US")]),
+      r => /对照/.test(r[0]));
+    const tests = (fb.tests || []).filter(t => t.passed).length;
+    $("nOlf").textContent = `左右嗅觉刺激的侧化都在 ±0.05 以内（对照组 +0.31、+0.53），且 DM1 在 50 Hz 就引发约 8,300 个神经元的活动爆发。复现 neilt93/Fly-Brain-AI 的气味实验（DM1 吸引 / DM5 厌恶，3 seed + 打乱连接组对照）：${tests}/${(fb.tests || []).length} 项通过（README 宣称 6/6）；DM1 左/右转向 ${fb.real.DM1_left_turn.toFixed(3)} / ${fb.real.DM1_right_turn.toFixed(3)}、DM5 ${fb.real.DM5_left_turn.toFixed(3)} / ${fb.real.DM5_right_turn.toFixed(3)}，都被约 −0.11 的共同偏置主导。所以没有把嗅觉接进游戏。`;
+    const VN = V3R.vnc;
+    tableHTML("tVnc", ["刺激下行神经元", "活跃腿部运动神经元", "伸肌/屈肌 均值 Hz", "节律功率中位"], VN.conditions.map(r => [r.cond, `${r.legmn_active} / 391`,
+      `${r.mean_ext_hz.toFixed(1)} / ${r.mean_flex_hz.toFixed(1)}`, r.rhythm_power_median === null ? "—" : r.rhythm_power_median.toFixed(2)]));
+    const lg = { CPG_control: "对照：FlyGym CPG 步态", FWD: "运动神经元 · BDN2+oDN1+P9", BDN2: "运动神经元 · BDN2", MDN: "运动神经元 · MDN" };
+    tableHTML("tLegs", ["腿的驱动方式", "腿尖前后摆幅中位", "4–30 Hz 节律占比中位"], VN.legs.map(r => [lg[r.cond] || r.cond, r.span_mm_median.toFixed(2) + " mm", r.rhythm_median.toFixed(2)]),
+      r => /对照/.test(r[0]));
+    $("nVnc").textContent = `腹神经索子网络 ${VN.network.neurons.toLocaleString("en-US")} 神经元、${VN.network.connections.toLocaleString("en-US")} 条连接（抑制性 ${Math.round(VN.network.inhibitory_frac * 100)}%）。前进指令神经元 BDN2 招募了 81 个腿部运动神经元，但主要是持续的伸肌放电：节律功率 ≈ 噪声水平（运动神经元 4–20 Hz 约 0.33、腿尖 4–30 Hz 约 0.52），左右腿不相关。` +
+      `腿确实被运动神经元带动（摆幅与迈步相当），但只是不规则的姿势变化，没有 CPG 那样的 12 Hz 交替步态。巨纤维刺激下 0 个腿部运动神经元活跃——BANC 里巨纤维到跳跃肌运动神经元 TTMn 只有 5–8 个化学突触，真实动物里这条通路主要靠连接组里没有的电突触。关节映射增益是手选的，但“没有节律”这一点来自运动神经元发放本身，与映射无关。没有本体感觉反馈也是原因之一。`;
+  }
+
+  const sgn = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2);
+  const f0 = v => (+v).toFixed(0);
+  function drawV4() {
+    const V = V4R;
+    // —— 多巴胺 ——
+    const D = V.dopamine;
+    tableHTML("tDop", ["刺激", "全脑活跃神经元", "PAM（奖赏）", "PPL1（惩罚）"], D.rows.map(r => [r.label,
+      r.active.toLocaleString("en-US") + (r.runaway ? " · 失控" : ""),
+      r.PAM_n + (r.PAM_mean ? ` · ${f0(r.PAM_mean)} Hz` : ""), r.PPL1_n + (r.PPL1_mean ? ` · ${f0(r.PPL1_mean)} Hz` : "")]), r => /^糖味左/.test(r[0]));
+    const p1 = D.paths["sugar_LB3->PAM@w1"], p5 = D.paths["sugar_LB3->PAM@w5"];
+    $("nDop").textContent = `不失控时，糖味刺激下 PAM 一个都不放电。多巴胺神经元只在全脑失控时放电，惩罚性的 PPL1 反而比 PAM 强，气味引起的失控里也一样，所以不是“吃糖的奖赏”。` +
+      `更硬的证据来自同一个条件的不同试次：糖味双侧 100 Hz 有一次失控（8,805 个活跃）时 PAM 放电 123/307，另一次不失控（566 个活跃）时 PAM 0/307；气味 DA2 左 50 Hz 也是 3 次 0/307、失控那次 120/307。` +
+      `不是没有连线：糖味神经元到 PAM 最少 ${p1.min_hops} 跳、${p1.reachable} 可达（只算 ≥ 5 个突触的连接：${p5.reachable}），苦味神经元到 PAM 的跳数完全一样。` +
+      `推测原因：模型把多巴胺、章鱼胺都当作快速兴奋突触，没有神经调质、饥饿状态和可塑性。所以游戏里吃糖时没有多巴胺信号可显示。`;
+
+    // —— LC16 剂量 + 后退重做 ——
+    const lcName = { LC16_LR_25: "双侧 25 Hz", LC16_LR_50: "双侧 50 Hz", LC16_LR_100: "双侧 100 Hz", LC16_LR: "双侧 150 Hz", LC16_L_100: "只刺激左侧 100 Hz", LC16_R_100: "只刺激右侧 100 Hz" };
+    tableHTML("tLc16", ["LC16", "MDN 左/右", "DNa02 左/右", "DNa01 左/右", "巨纤维"], V.lc16.map(r => [lcName[r.cond] || r.cond,
+      `${f0(r.MDN_L)}/${f0(r.MDN_R)}`, `${f0(r.DNa02_L)}/${f0(r.DNa02_R)}`, `${f0(r.DNa01_L)}/${f0(r.DNa01_R)}`, f0(r.GF)]));
+    const B = V.backward_v4;
+    if (B) {
+      const LES = ["intact", "GF", "GF_MDN", "GF_DNa", "GF_LC16"], groups = new Map();
+      B.rows.forEach(r => { const k = `${r.type}|${r.speed}|${r.slope}`; if (!groups.has(k)) groups.set(k, {}); groups.get(k)[r.lesion] = r; });
+      tableHTML("tBack4", ["威胁", "速度", "LC16 斜率", "完整", "切巨纤维", "+ 切 MDN", "+ 切 DNa", "+ 断 LC16"], [...groups].map(([k, g]) => {
+        const [type, speed, slope] = k.split("|");
+        return [type === "roll" ? "滚球" : "扑击", speed + " mm/s", slope, ...LES.map(l => g[l] ? `${Math.round(g[l].hit_rate * 100)}%（${Math.round(g[l].backed_frac * 100)}%）` : "—")];
+      }));
+    }
+    $("nBack4").textContent = V4_NOTES.back;
+
+    // —— 嗅觉 ——
+    const O = V.olfaction;
+    const oName = { DM1_L_10: "DM1 左 10 Hz", DM1_L_20: "DM1 左 20 Hz", DM1_R_20: "DM1 右 20 Hz", DM1_L_50: "DM1 左 50 Hz", DM1_R_50: "DM1 右 50 Hz", DM1_L: "DM1 左 150 Hz", DM1_R: "DM1 右 150 Hz",
+      DA2_L_100: "DA2 左 100 Hz", DA2_L_50: "DA2 左 50 Hz", SUGAR_LR_100: "对照：糖味双侧 100 Hz", SUGAR_L_1s: "对照：糖味左 200 Hz" };
+    tableHTML("tOlf4", ["刺激", "活跃神经元", "失控起点", "投射神经元", "下行神经元"], O.rows.map(r => [oName[r.cond] || r.cond, r.active.toLocaleString("en-US"),
+      r.onset_ms === null ? "不失控（整段）" : f0(r.onset_ms) + " ms", `${f0(r.ALPN_L)}/${f0(r.ALPN_R)}`, `${f0(r.DN_L)}/${f0(r.DN_R)}`]), r => /对照/.test(r[0]));
+    const S4 = O.silencing;
+    if (S4) {
+      const sn = c => c.replace("DM1_L_20", "DM1 左 20 Hz").replace("DM1_R_20", "DM1 右 20 Hz").replace("_silA", " · 沉默 4 个核心").replace("_silB", " · 沉默兴奋性局部神经元");
+      tableHTML("tSil", ["条件", "活跃神经元", "下行 LI", "投射神经元 LI"], S4.rows.map(r => [sn(r.cond), r.active.toLocaleString("en-US") + (r.runaway ? " · 失控" : ""),
+        r.DN_LI === null ? "—" : sgn(r.DN_LI), r.ALPN_LI === null ? "—" : sgn(r.ALPN_LI)]));
+    }
+    $("nOlf4").textContent = V4_NOTES.olf;
+    const ON = O.odor_nav;
+    if (ON) {
+      tableHTML("tOdor", ["闻着找", "20 s 内碰到颗粒", "用时中位", "糖 吃掉/碰到", "苦", "混合"], ON.conditions.map(c => [c.odorNav ? "开（手写）" : "关", `${c.trials.filter(t => t.contact).length}/${c.n}`,
+        c.contact_s_median === null ? "—" : c.contact_s_median.toFixed(1) + " s", ...["sugar", "bitter", "mixed"].map(t => `${c.by_type[t].eaten}/${c.by_type[t].contacts}`)]), r => /开/.test(r[0]));
+    }
+    $("nOdor").textContent = V4_NOTES.odor;
+
+    // —— 腹神经索发放率模型 ——
+    const VR = V.vnc_rate, A = VR.analysis || {};
+    const vName = { none: "不刺激", DNg100_L: "左 DNg100（前进指令）", DNg100_LR: "双侧 DNg100", MDN: "4 个 MDN（后退），I = 250", MDN_I150: "MDN，I = 150", MDN_I100: "MDN，I = 100", DNa02_L: "左 DNa02（转向），I = 300" };
+    tableHTML("tVnc4", ["刺激", "振荡副本", "频率中位", "活跃运动神经元/副本", "摆动-支撑相关", "左-右相关"],
+      ["none", "DNg100_L", "DNg100_LR", "MDN", "MDN_I150", "MDN_I100", "DNa02_L"].filter(k => VR.summary[k]).map(k => {
+        const s = VR.summary[k], a = A[k] || {};
+        const act = a.active_mn_counts ? Object.values(a.active_mn_counts).reduce((x, y) => x + y, 0) / s.reps : null;
+        return [vName[k], `${Math.round(s.frac_oscillating * s.reps)}/${s.reps}`, s.frac_oscillating >= 0.5 && s.median_freq_hz ? s.median_freq_hz.toFixed(1) + " Hz" : "—",
+          act === null ? "—" : act.toFixed(1), a.swing_vs_stance_corr_median == null ? "—" : sgn(a.swing_vs_stance_corr_median), a.left_vs_right_corr_median == null ? "—" : sgn(a.left_vs_right_corr_median)];
+      }), r => /DNg100/.test(r[0]));
+    const LG = VR.legs;
+    if (LG) {
+      const ln = k => k === "CPG_control" ? "对照：CPG 三足步态" : (vName[k.replace(/_rep\d+$/, "")] || k) + " #" + k.match(/rep(\d+)$/)[1];
+      const leg = l => l.ap_span_mm < 0.05 ? "基本不动" : `${l.ap_span_mm.toFixed(2)} mm · ${l.rhythm_power.toFixed(2)} @ ${l.peak_hz} Hz`;
+      tableHTML("tLegs4", ["前腿驱动方式", "左前腿 摆幅 · 节律占比", "右前腿", "左右相位差"], Object.entries(LG).map(([k, v]) => [ln(k), leg(v.legs.LF), leg(v.legs.RF),
+        v.lf_rf_phase_deg === null || v.legs.LF.ap_span_mm < 0.05 || v.legs.RF.ap_span_mm < 0.05 ? "—" : (v.lf_rf_phase_deg < 0 ? "−" : "") + f0(Math.abs(v.lf_rf_phase_deg)) + "°"]), r => /对照/.test(r[0]));
+    }
+    $("nVnc4").textContent = V4_NOTES.vnc;
+    if (V4_NOTES.vncTitle) $("hVnc4").textContent = V4_NOTES.vncTitle;
+  }
+  function drawV6() {
+    const S = V6R && V6R.screen, ST = V6R && V6R.stress; if (!S || !ST) return;
+    const d = S.design, p50 = S.paper.hz50, p100 = S.paper.hz100, pc = S.paper.corrected["50Hz"];
+    const pct = x => Math.round(x * 100) + "%";
+    $("pScreen").textContent =
+      `把 Shiu et al. 2024 Nature 图 1F 的全脑沉默筛选在 FlyWire v783 上重做并扩展：刺激右侧糖味受体神经元，逐个沉默网络里的神经元，看伸喙运动神经元 MN9 的放电掉多少。` +
+      `共 ${d.n_segments} 段仿真（每段 1 s 试次，${d.R} 个固定输入实现，${d.minutes} 分钟跑完），覆盖 50 Hz 下放过电的全部 ${d.n_exhaustive} 个神经元；` +
+      `论文只筛了按 200 Hz 反应排前 200 的。和论文自己那份筛选（${d.n_paper} 个 ID 在 v783 没变）比：50 Hz 相关 ${p50.pearson.toFixed(2)}、判定一致率 ${pct(p50.call_agreement)}；100 Hz 一致率 ${pct(p100.call_agreement)}、κ = ${p100.kappa.toFixed(2)}。`;
+    const mark = (v, req) => v == null ? "—" : v.toFixed(2) + ((v <= d.call) === req ? " ✅" : " ❌");
+    tableHTML("tScreenTypes", ["细胞类型", "真实实验", "论文模型", "我们（单个）", "我们（两侧一起）", "我们（100 Hz）"],
+      S.types.map(t => { const req = t.experiment === "必需";
+        return [`${t.name}（${t.cell_type}${t.n_members > 2 ? "，" + t.n_members + " 个" : ""}）`, t.experiment, mark(t.paper, req), mark(t.ours, req), mark(t.ours_bilateral, req), mark(t.ours_100, req)]; }),
+      r => /Roundup/.test(r[0]));
+    const sc = S.score_corrected, sp = S.score;
+    $("nScreenTypes").textContent =
+      `论文模型对 ${sp.paper_single_50Hz.correct}/10，我们对 ${sc.ours_single_50Hz.correct}/10——换了连接组版本（v630 → v783）和试次方案，判“必需”的集合与论文几乎一样。` +
+      `真实实验沉默的是整个细胞类型，所以我们也做了两侧一起沉默：右侧糖刺激下大多数类型的对侧神经元根本不放电，沉默等于没做；唯一例外 Roundup 被压到 ${S.types.find(x => x.name === "Roundup").ours_bilateral.toFixed(2)}，反而更偏离实验。` +
+      `100 Hz 下 MN9 接近饱和，只剩 Roundup 一个被判必需（对 ${sc.ours_100Hz ? sc.ours_100Hz.correct : sp.ours_single_100Hz.correct}/10），所以论文选 50 Hz 是有道理的。模型答错的 4 个（Rattle、FMIn、Usnea、Roundup）正是论文自己指出的失败点。`;
+    const PAPER = { CB0192: "Zorro", CB0553: "Roundup", CB0616: "G2N-1", AN_GNG_30: "Clavicle", CB0008: "Usnea", CB0062: "Phantom",
+      CB0499: "Rattle", CB0366: "FMIn", CB0038: "Fdg", DNge173: "Bract", DNge174: "Bract", DNg67: "Fudog" };
+    const pn = c => c ? (PAPER[c] ? `${c} = ${PAPER[c]}` : c) : "?";
+    const nm6 = x => pn(x.cell_type) + "（…" + String(x.fid).slice(-4) + "）";
+    const nt = x => ({ acetylcholine: "乙酰胆碱", gaba: "GABA", glutamate: "谷氨酸", dopamine: "多巴胺", serotonin: "5-羟色胺", octopamine: "章胺" }[x] || x || "—");
+    tableHTML("tScreenTop", ["神经元", "递质", "自身放电", "沉默后 MN9 比值", "在论文名单里"],
+      S.top.map(x => [nm6(x), nt(x.nt), x.rate.toFixed(1) + " Hz", x.ratio.toFixed(2), x.in_paper ? "是" : "否"]));
+    tableHTML("tScreenInc", ["神经元", "递质", "自身放电", "沉默后 MN9 比值"],
+      S.increase.map(x => [nm6(x), nt(x.nt), x.rate.toFixed(1) + " Hz", x.ratio.toFixed(2)]));
+    const g = S.graph;
+    $("nScreenTop").textContent =
+      `修正后有 ${S.counts.required_corrected} 个神经元判为“伸喙必需”，其中绝大多数在论文名单里；穷举没有找出被论文忽略的关键节点。反方向（沉默后 MN9 升高 ≥ 20%）有 ${S.counts.increase_corrected} 个，几乎都是抑制性神经元。` +
+      `另外做了一个对照：不跑模拟、只看连线能不能预测敲除效应——直接连到 MN9 的带符号突触数几乎没用（Spearman ${g.G1_direct_syn_to_mn9.spearman_vs_effect}，前 20 名只命中 ${g.G1_direct_syn_to_mn9.top20_overlap} 个），` +
+      `加上活跃度与 1–3 跳通路也只有 ${g.G3_rate_x_paths123.spearman_vs_effect}（命中 ${g.G3_rate_x_paths123.top20_overlap} 个）。效应最强的几个神经元对 MN9 一条直接突触都没有，想知道敲掉谁会让伸喙失效，得跑模型。`;
+    const D = V6R.double;
+    if (D) {
+      const s2 = D.summary;
+      tableHTML("tDouble", ["两两组合（前 12 个最强神经元）", "对数"], [
+        ["协同（一起敲比各自叠加更狠 = 备份通路）", s2.n_synergy], ["可加（与独立叠加一致）", s2.n_additive],
+        ["亚可加（共用同一个瓶颈）", s2.n_subadditive],
+        ...D.synergy.map(x => [`协同（留一稳定）：${pn(x.a_type)} + ${pn(x.b_type)}（各自 ${x.ratio_a.toFixed(2)}、${x.ratio_b.toFixed(2)} → 一起 ${x.ratio_ab.toFixed(2)}）`, "+" + x.delta.toFixed(2)]),
+        ...D.reversal.slice(0, 3).map(x => [`多敲一个反而回升：${pn(x.a_type)} + ${pn(x.b_type)}（各自 ${x.ratio_a.toFixed(2)}、${x.ratio_b.toFixed(2)} → 一起 ${x.ratio_ab.toFixed(2)}）`, x.delta.toFixed(2)])],
+        r => /协同（留一稳定）/.test(r[0]));
+      tableHTML("tGrn", ["随机去掉几个糖味受体神经元（共 21 个）", "MN9 比值（中位）"],
+        Object.entries(s2.grn_dose_median).map(([k, v]) => [k + " 个", v.toFixed(2)]));
+      if (D.scan) {
+        const sc = D.scan, lb3 = {n: 0};
+        const nmScan = x => x.cell_type === "LB3" ? `糖味受体 LB3 #${++lb3.n}` : pn(x.cell_type);
+        tableHTML("tHubScan", [`全部 ${sc.n_candidates} 个活跃神经元 × CB0883（单独敲 ${sc.hub_ratio.toFixed(2)}）`, "单独敲", "加上 CB0883"],
+          [["协同 / 其中留一稳定 / 亚可加（共用瓶颈）", `${sc.n_synergy} / ${sc.n_stable} / ${sc.n_subadditive}`, ""],
+           ...sc.backup.map(x => [nmScan(x), x.single.toFixed(2), x.with_hub.toFixed(2)])],
+          r => /Zorro|CB0393/.test(r[0]));
+      }
+      if (D.hub) {
+        const hs = D.hub.synergy.filter(x => x.loo_stable);
+        tableHTML("tGrn", ["还有没有别的 CB0883？（排名 13–24 × 两个枢纽）", "一起敲后的 MN9 比值"],
+          [["协同 / 可加 / 亚可加", `${D.hub.summary.n_synergy} / ${D.hub.summary.n_pairs - D.hub.summary.n_synergy - D.hub.summary.n_subadditive} / ${D.hub.summary.n_subadditive}`],
+           ...hs.map(x => [`${pn(x.candidate_type)}（单独 ${x.ratio_candidate.toFixed(2)}）+ ${pn(x.hub)}（${x.ratio_hub.toFixed(2)}）`, x.ratio_pair.toFixed(2)]),
+           ["—— 输入端冗余：随机去掉几个糖味受体神经元（共 21 个）——", ""],
+           ...Object.entries(s2.grn_dose_median).map(([k, v]) => [`去掉 ${k} 个`, v.toFixed(2)])],
+          r => /Zorro|CB0192/.test(r[0]));
+      }
+      $("nDouble").textContent =
+        `在 50 Hz 效应最强的 12 个非感觉神经元里两两组合（${s2.n_pairs} 对，${D.design.R} 个输入实现），和“各自效应独立相乘”的预期比：协同 ${s2.n_synergy} 对、可加 ${s2.n_additive} 对、亚可加 ${s2.n_subadditive} 对；` +
+        `去掉任一个实现后判定不变的分别是 ${D.stable["协同"]}、${D.stable["可加"]}、${D.stable["亚可加"]} 对（先用 6 个实现时只有 4/21/13，加到 12 个后协同更多也更稳，“亚可加”则有一半是噪声）。这是模型内的预测，没有实验验证。` +
+        `最像“备份通路”的是 CB0883：单独敲只到 0.75（算不上必需，单个筛选不会注意它），但 7 对稳定协同里有 5 对含它，配对后 MN9 掉到 0.17–0.36；G2N-1 是第二个枢纽。也有反过来的：多敲一个反而让 MN9 回升，结构上看是这条通路同时带着兴奋和前馈抑制，双敲把抑制也一起拿掉了。` +
+        `右表上半部分是“还有没有别的 CB0883”：拿这两个枢纽去配效应排名 13–24 的神经元，又找到 4 个单独敲算不上必需、配对却把 MN9 压到 0.32–0.44 的——其中 Zorro 在真实实验里是必需的，而单个敲除（论文的和我们的）都判它不必需，这里它与 CB0883 冗余，可能正是那个不符的来源【推测】。下半部分是输入端冗余：21 个糖味受体神经元随机去掉 3 个，MN9 就掉掉三分之二，几乎没有冗余。`;
+    } else {
+      $("nDouble").textContent = "双敲除仿真还没跑完。";
+    }
+    const W = V6R.water;
+    if (W) {
+      const mk = (x, req) => x == null ? "—" : x.toFixed(2) + ((x <= 0.8) === req ? " ✅" : " ❌");
+      tableHTML("tWater", ["细胞类型", "真实实验", "论文模型", "我们单个", "我们两侧"],
+        Object.entries(W.types).map(([k, v]) => [pn(k) === k ? k : k, v.experiment_required ? "必需" : "不必需",
+          mk(v.paper_ratio, v.experiment_required), mk(v.ours_single, v.experiment_required), mk(v.ours_bilateral, v.experiment_required)]),
+        r => /Usnea/.test(r[0]));
+      tableHTML("tWaterDouble", ["水通路的双敲除（留一稳定的协同）", "各自单独敲", "一起敲"],
+        [["协同 / 可加 / 亚可加", `${W.double.n_synergy} / ${W.double.n_additive} / ${W.double.n_subadditive}`, ""],
+         ...W.double.synergy.map(x => [`${x.a} + ${x.b}`, `${x.ra.toFixed(2)} / ${x.rb.toFixed(2)}`, x.rab.toFixed(2)])],
+        r => /CB0051/.test(r[0]));
+      $("nWater").textContent =
+        `把同一套方法换到水味觉通路（18 个水味觉受体神经元 160 Hz，同一个 MN9 读出，12 个输入实现）。基线 MN9 平均 ${(W.baseline.reduce((a, b) => a + b, 0) / W.baseline.length).toFixed(1)} Hz，论文同频率 10.0 Hz。` +
+        `与论文自己的水筛选比：相关 ${W.paper.pearson.toFixed(2)}、判定一致率 ${Math.round(W.paper.call_agreement * 100)}%、κ ${W.paper.kappa.toFixed(2)}——都明显好于糖通路（0.83 / 91% / 0.59）。` +
+        `对论文自己做的沉默实验，论文模型 ${W.score.paper}/10，我们也 ${W.score.ours_single}/10，错的是同一个 Usnea（论文认为它靠神经肽起作用，模型里只有经典递质）。` +
+        `水通路也有自己的“枢纽”：CB0051 出现在 ${W.double.n_stable} 对稳定协同里的 7 对，和 Bract、Rattle、Zorro 任一个一起敲，MN9 直接归零；第二个枢纽 G2N-1 在真实实验里并不是水伸喙必需的，却是配对时的关键节点。`;
+    }
+    const P = V6R.pathway;
+    if (P) {
+      const c = P.compare, na = c.n_active, e = c.effects;
+      tableHTML("tPathway", ["", "糖 50 Hz", "水 160 Hz"],
+        [["活跃神经元", na.sugar, na.water], ["两条通路共同的", na.both, na.both],
+         ["各自独有的", na.only_sugar, na.only_water],
+         ["共同活跃神经元上效应的相关（Spearman）", e.spearman, ""],
+         ["“必需”判定的 Cohen κ", e.kappa, ""],
+         ["两条通路都必需的类型", e.required_both.join("、") || "—", ""],
+         ["CB0883（糖的枢纽）", `单独敲 ${c.hubs.CB0883.ratio_sugar[0]}`, "根本不放电"],
+         ["CB0051（水的枢纽）", `单独敲 ${c.hubs.CB0051.ratio_sugar[0]}（没影响）`, `单独敲 ${c.hubs.CB0051.ratio_water[0]}`]],
+        r => /枢纽/.test(r[0]));
+      const s = P.scans.sugar, w = P.scans.water;
+      tableHTML("tScans", ["枢纽全扫描", `糖：CB0883 × ${s.n_cand}`, `水：CB0051 × ${w.n_cand}`],
+        [["枢纽自己单独敲", s.hub_ratio.toFixed(2), w.hub_ratio.toFixed(2)],
+         ["协同 / 留一稳定", `${s.n_syn} / ${s.n_stable}`, `${w.n_syn} / ${w.n_stable}`],
+         ["其中可解释为备份", s.n_backup, w.n_backup],
+         ["单独敲反而升高（不算备份）", s.n_opposite, w.n_opposite],
+         ["亚可加（共用瓶颈）", s.n_sub, w.n_sub]],
+        r => /亚可加/.test(r[0]));
+      $("nPathway").textContent =
+        `同一个读出、两条输入通路，活跃神经元只重叠三分之一（Jaccard ${c.jaccard}）；共同的那批以下行和运动神经元为主，也就是靠近输出的一段。` +
+        `就算是同一个神经元，“敲掉它要不要紧”两边也对不上：效应相关只有 ${e.spearman}，判定的 κ 只有 ${e.kappa}（一致率看着有 ${Math.round(e.call_agreement * 100)}%，但那是因为绝大多数两边都不必需）。` +
+        `两条通路都必需的只有 ${e.required_both.join("、")}。` +
+        `“枢纽”也是通路私有的：糖的枢纽 CB0883 在水通路里连电都不放，水的枢纽 CB0051 在糖通路里放电却毫无影响（${c.hubs.CB0051.ratio_sugar[0]}）。` +
+        `右表还显示两条通路的组合结构不同：糖通路上多数神经元与枢纽共用瓶颈（${s.n_sub} 个亚可加），水通路几乎没有（${w.n_sub} 个），` +
+        `而是把枢纽和几乎任何仍有作用的神经元一起敲，MN9 就塌到 0——水通路本来就工作在阈值附近（基线 MN9 只有 8.8 Hz）。`;
+    }
+    const T3 = V6R.three_pathways;
+    if (T3) {
+      const c = T3.concentration, j = T3.jon, jf = T3.jon_full;   // jf = 24.3 节：用论文刺激名单重做，取代 j
+      const get = n => c.find(x => x.name.startsWith(n)) || {};
+      const s = get("糖"), wa = get("水"), jn = get("JON");
+      // JC = 22.2 节口径的 JON 集中度：优先用全部 596 个活跃神经元那一版（与糖 / 水完全同口径）
+      const D = jf ? jf.double : j.double, JC = T3.jon_concentration_full || (jf && jf.concentration);
+      const JCfull = !!T3.jon_concentration_full;
+      const tri = x => `${x.n_synergy} / ${x.n_additive} / ${x.n_subadditive}`;
+      tableHTML("tThree", ["", "糖 50 Hz → MN9", "水 160 Hz → MN9", "触角 JON 160 Hz → aDN1"],
+        [["活跃神经元", s.n_active, wa.n_active, JC ? JC.n_active : jn.n_active],
+         ["敲掉后读出掉 ≥ 20% 的个数", s.n_required, wa.n_required, JC ? JC.n_required : jn.n_required],
+         ["效应集中度（基尼）", s.gini, wa.gini, JC ? (JCfull ? JC.gini : JC.gini + "*") : jn.gini],
+         ["贡献 80% 效应需要几个神经元", s.n80, wa.n80, JC ? (JCfull ? JC.n80 : JC.n80 + "*") : jn.n80],
+         ["只看连线的预测力（G3）", s.g3_spearman, wa.g3_spearman, JCfull && JC.g3_spearman !== undefined ? JC.g3_spearman : "—"],
+         ["与论文筛选的 κ（去掉运气成分）", "0.59", "0.87", (jf ? jf.paper.kappa : j.paper.kappa).toFixed(2)],
+         // 三列都从数据读，不手写——曾经手写的 "2/2" 是个从没测过的结果（见下方说明）
+         ["66 对双敲除：协同 / 可加 / 亚可加", tri(V6R.double.summary), tri(V6R.water.double), tri(D)],
+         ["模型对真实沉默实验", `${V6R.screen.score.ours_single_50Hz.correct} / 10`,
+          `${V6R.water.score.ours_single} / 10`, jn.experiment ? jn.experiment.split("（")[0] + "*" : "—"]],
+        r => /双敲除|集中度|κ/.test(r[0]));
+      $("nThree").textContent =
+        `第三条通路换了模态也换了读出：刺激 Johnston 器（听觉 / 机械感觉）神经元，读出梳理指令 aDN1。` +
+        (jf
+          ? `第一次跑时我们取了注释表里全部 1,091 个 JO- 神经元，刺激比论文强得多（aDN1 基线 ${j.baseline.mean} Hz、论文 23.3 Hz），`
+            + `结果只判出 1 个必需、论文判 6 个。后来把论文的刺激名单从它自己的补充表里反推了出来——`
+            + `被刺激的神经元放电率会精确跟随刺激频率（20 Hz 列 ≈ 20、200 ≈ 200），据此筛出的 146 个与 notebook 里三个子集的并集完全一致。`
+            + `用这份名单重做整条通路（${jf.design.n_stim} 个在模型里，160 Hz）：基线 ${jf.baseline.mean} Hz（论文 23.3），`
+            + `Pearson ${jf.paper.pearson}，判出 ${jf.paper.calls_ours} / ${jf.paper.calls_paper} 个论文判必需的神经元，`
+            + `κ 从 ${j.paper.kappa} 升到 ${jf.paper.kappa}。`
+            + `κ 这个跳变值得单独看一眼：两种刺激下的“判定一致率”都在 98% 以上，只因为 280 个神经元里 274 个双方都判“不必需”；`
+            + `去掉这份运气，原来的模型其实几乎没复现论文的判定——在这种极度不平衡的判定问题上，一致率是骗人的，得看 κ。`
+            + `不过 κ 也有它自己的陷阱：糖通路在 100 Hz 下 κ = 1.00，看着完美，其实是因为 MN9 饱和、两边各自只判出 2 个必需神经元——`
+            + `正例太少时 κ 同样不可靠。糖通路真正有信息量的是 50 Hz，表里用的是它零参照归一化后的 0.59——与水、JON 两列同一口径（未归一化是 0.63）。`
+            + `结论不变而且更干净：${jf.design.n_active} 个活跃神经元里只有 aBN1 敲掉会让 aDN1 归零（我们 0.00、论文 0.00，也正是 Hampel et al. 2015 实验里梳理必需的那个），`
+            + `66 对双敲除协同 0 对，Δ 最大的一对只有 +0.07。`
+            + `把 596 个活跃神经元全部单敲一遍后（补跑 1,319 段），还得到一个与事先声明相反的结果：`
+            + `JON 是三条通路里最集中的（基尼 0.922，与水通路的 0.921 并列），却是只看连线最预测不了的（G3 0.288，比糖的 0.316 还低）。`
+            + `原先声明的方向是“越集中 → 连线越能预测”，在三条通路上并不成立——如实记在这里。`
+            + `三条通路各有各的样子：糖 = 分散且有备份网络（n80 = 62），水 = 少数几个各扛一部分、彼此大量协同（n80 = 15），JON = 一个绝对瓶颈 + 一大片几乎无关的神经元（必需只有 5 个，但扛住 80% 效应仍需 44 个）。`
+            + `（* JON 那一格原本写的是“2 / 2”，是错的：Hampel et al. 2015 验证的是 aBN1 和 aBN2 两个，`
+            + `但 aBN2 的 v630 编号在 v783 连接组里已经不存在，我们根本测不了；而且论文自己的表 7D 里同一个编号比值是 0.844，按 0.8 门槛也判不出必需。`
+            + `我们能测的只有 aBN1，判对了。）`
+            + `（JON 那一列已按论文刺激名单、全部 ${jf.design.n_active} 个活跃神经元重跑，与糖 / 水两列口径完全一致。）`
+          : `与论文表 7D 的效应大小对得很好（Pearson ${j.paper.pearson}），但我们只判 1 个必需、论文判 6 个。`);
+    }
+    const SF = V6R.structure;
+    if (SF) {
+      const s = SF.sugar, w = SF.water;
+      tableHTML("tStruct", ["只用连线的指标（与模拟结果的 Spearman）", "糖 50 Hz", "水 160 Hz"],
+        [["对 MN9 的带符号直接突触数", s.singles.G1.spearman, w.singles.G1.spearman],
+         ["放电率 × 直接突触数", s.singles.G2.spearman, w.singles.G2.spearman],
+         ["放电率 × 1–3 跳带符号通路和", s.singles.G3.spearman, w.singles.G3.spearman],
+         ["（模拟前 20 名命中几个）", `${s.singles.G3.top20_overlap} / 20`, `${w.singles.G3.top20_overlap} / 20`],
+         ["两个一起敲会不会塌：图上路径重叠度", s.pairs.spearman_overlap_vs_delta, w.pairs.spearman_overlap_vs_delta],
+         ...(V6R.fingerprint ? (() => { const f = Object.values(V6R.fingerprint);
+           return [["同上：改用动力学指纹（敲掉后全脑哪些神经元变了）", f[0].spearman_overlap_vs_delta, f[1].spearman_overlap_vs_delta],
+                   ["（对照：只看扰动幅度）", f[0].spearman_magnitude_vs_delta, f[1].spearman_magnitude_vs_delta],
+                   ["（控制幅度后的偏相关）", f[0].partial_overlap_vs_delta_controlling_magnitude, f[1].partial_overlap_vs_delta_controlling_magnitude]]; })() : [])],
+        r => /一起敲|1–3 跳|动力学指纹/.test(r[0]));
+      $("nStruct").textContent =
+        `两个假设都在看结果之前写定。成立的那个：通路越集中，连线越能预测单敲除效应——“放电率 × 1–3 跳通路”在水通路上 ${w.singles.G3.spearman}、糖通路上 ${s.singles.G3.spearman}；` +
+        `但对 MN9 的直接突触数在两条通路上都没用（效应最强的几个神经元对 MN9 一条直接突触都没有）。` +
+        `被证伪的那个：“互为备份 = 各走各的路”。路径重叠度与配对结果的相关只有 ${s.pairs.spearman_overlap_vs_delta} 和 ${w.pairs.spearman_overlap_vs_delta}，` +
+        `而且不是指标退化（最大重叠度到 0.59 / 0.70，一半以上的配对有非零重叠）。` +
+        `换成“动力学指纹”（敲掉它之后全脑哪些神经元变了，这张图已经在盘上）好一个量级，方向也与事先声明一致，但控制“扰动幅度”后只剩一点点——而指纹本身就是每个神经元单独敲的全脑仿真结果。` +
+        `结论：单敲除效应能用连线粗筛，但“两个一起敲会不会塌”——恰恰是单敲除看不见的那部分——省不掉那次配对仿真。`;
+    }
+    const order = ["random_all", "random_active", "output_only", "local_probe", "top_variance"];
+    const name = { random_all: "随机抽（全部 121,706 个非感觉神经元）", random_active: "只抽训练时放过电的（12,609 个）",
+      output_only: "只看下行 + 运动神经元（1,409 个）", local_probe: "局部探针：离随机一点最近的 n 个", top_variance: "按训练集方差挑（参考上限）" };
+    const cols = [10, 100, 1000, 3000, 10000];
+    tableHTML("tStress", ["能看到哪些神经元", ...cols.map(c => c + " 个"), "该类全部 / 最大规模"],
+      order.map(k => { const c = ST.sampling[k], keys = Object.keys(c).map(Number).sort((a, b) => a - b), last = keys[keys.length - 1];
+        return [name[k], ...cols.map(n => c[n] ? c[n].bal.toFixed(2) : "—"), (k === "top_variance" || last > 30000) ? (c[last] ? c[last].bal.toFixed(2) + `（${last}）` : "—") : (c[last] ? c[last].bal.toFixed(2) + `（${last}）` : "—")]; }));
+    const th = ST.noise.all.thin, th2 = ST.noise.active_1000.thin, fs = ST.noise.all.false_spikes, fs2 = ST.noise.active_1000.false_spikes;
+    const lv = ["1.0", "0.5", "0.2", "0.1", "0.02"], hz = ["0", "1", "4", "16", "64"];
+    tableHTML("tStressNoise", ["条件", ...lv.map(x => "p = " + x)], [
+      ["漏检（全部神经元）", ...lv.map(x => (th[x] ?? th[+x]).toFixed(2))],
+      ["漏检（1,000 个有信号的）", ...lv.map(x => (th2[x] ?? th2[+x]).toFixed(2))]]);
+    const t2 = $("tStressNoise");
+    const row = (label, vals) => { const tr = document.createElement("tr"); [label, ...vals].forEach((c, j) => { const td = document.createElement("td"); td.textContent = c; if (j) td.className = "num"; tr.append(td); }); t2.append(tr); };
+    row("每秒假脉冲（全部神经元）", hz.map(x => (fs[x] ?? fs[+x]).toFixed(2) + " @" + x + "Hz"));
+    row("每秒假脉冲（1,000 个有信号的）", hz.map(x => (fs2[x] ?? fs2[+x]).toFixed(2) + " @" + x + "Hz"));
+    const qs = ["0", "0.1", "0.25", "0.5", "0.75", "0.9"];
+    const dp = ST.dropout, ip = ST.dropout_impute;
+    tableHTML("tStressDrop", ["坏掉比例", ...qs.map(q => Math.round(+q * 100) + "%")], [
+      ["读数变 0、不重新训练", ...qs.map(q => dp.no_retrain[q].toFixed(2))],
+      ["只用剩下的通道重新训练", ...qs.map(q => dp.retrain_survivors[q].toFixed(2))],
+      ["坏通道填训练均值（探索性）", ...qs.map(q => ip[q].toFixed(2))]]);
+    $("nStress").textContent =
+      `用第 13 节“果蝇说中文”的数据离线重算：全部神经元时平衡准确率 ${ST.full.bal.toFixed(2)}、整句全对 ${pct(ST.full.exact)}；把训练标签打乱后是 ${ST.chance.bal_median.toFixed(2)}，这是瞎猜水平。` +
+      `结论是覆盖面比通道数重要：随机插“电极”要 ${ST.min_n.random_all["0.9"]} 个才到 0.9，只留有信号的通道 ${ST.min_n.random_active["0.9"]} 个就够；而 3,000 个相邻神经元（半径约 ${ST.sampling.local_probe["3000"].radius} µm）只有 ${ST.sampling.local_probe["3000"].bal.toFixed(2)}，接近瞎猜。` +
+      `通道多也不一定好：给全部 12 万个通道每秒各加 1 个假脉冲就掉到 ${(fs["1"] ?? fs[1]).toFixed(2)}，只记 1,000 个有信号的通道时还有 ${(fs2["1"] ?? fs2[1]).toFixed(2)}。通道坏掉不重新校准最危险：坏 10% 就从 ${dp.no_retrain["0"].toFixed(2)} 掉到 ${dp.no_retrain["0.1"].toFixed(2)}。`;
+  }
+  function drawV5() {
+    const F = V4R.vnc_full; if (!F || !F.analysis) return;
+    const nm = { none: "不刺激", DNg100_LR_250: "DNg100 双侧 I = 250", DNg100_LR_350: "DNg100 双侧 I = 350（主条件）", DNg100_LR_400: "DNg100 双侧 I = 400",
+      DNg100_LR_600: "DNg100 双侧 I = 600", DNg100_L_350: "DNg100 左侧 I = 350", MDN_250: "MDN I = 250", MDN_400: "MDN I = 400" };
+    tableHTML("tVnc6", ["条件", "振荡副本", "失控副本", "振荡时频率", "腿部运动神经元活跃中位"], Object.keys(nm).filter(k => F.analysis[k]).map(k => {
+      const a = F.analysis[k], o = F.osc_ranges[k];
+      return [nm[k], `${o.n_osc}/${o.reps}`, `${o.n_runaway}/${o.reps}`, o.freq ? `${o.freq[0].toFixed(1)}–${o.freq[1].toFixed(1)} Hz` : "—", a.active_legmn_median];
+    }), r => /主条件/.test(r[0]));
+    const P = F.analysis.DNg100_LR_350;
+    if (P) {
+      const L = ["LF", "RF", "LM", "RM", "LH", "RH"], ln = { LF: "前左", RF: "前右", LM: "中左", RM: "中右", LH: "后左", RH: "后右" };
+      tableHTML("tLegOsc6", ["", ...L.map(l => ln[l])], [["振荡副本比例", ...L.map(l => Math.round(P.legs[l].frac_leg_oscillating * 100) + "%")],
+        ["频率中位", ...L.map(l => P.legs[l].freq_median && P.legs[l].frac_leg_oscillating > 0.2 ? P.legs[l].freq_median.toFixed(1) + " Hz" : "—")]]);
+    }
+    const LG = F.legs;
+    if (LG) {
+      const order = ["LF", "LM", "LH", "RF", "RM", "RH"], cn = { LF: "前左", LM: "中左", LH: "后左", RF: "前右", RM: "中右", RH: "后右" };
+      const cell = l => l.ap_span_mm < 0.1 ? "不动" : `${l.ap_span_mm.toFixed(2)} · ${l.rhythm_power.toFixed(2)}`;
+      const rn = k => k === "CPG_control" ? "对照：CPG 三足步态" : (nm[k.replace(/_rep\d+$/, "")] || k).replace("（主条件）", "") + " #" + k.match(/rep(\d+)$/)[1];
+      tableHTML("tLegs6", ["驱动方式", ...order.map(l => cn[l])], Object.entries(LG).filter(([k]) => !k.startsWith("_")).map(([k, v]) => [rn(k), ...order.map(l => cell(v.legs[l]))]),
+        r => /对照/.test(r[0]));
+    }
+    $("nVnc6").textContent = V5_NOTES.vnc;
+    const G = F.gap;
+    if (G) {
+      const med = a => { const b = a.filter(x => x !== null).sort((x, y) => x - y), n = b.length; return n ? (n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2) : null; };
+      const keys = [...new Set(G.map(r => `${r.stim}|${r.n_eq}`))].sort((x, y) => { const [sx, nx] = x.split("|"), [sy, ny] = y.split("|"); return sx === sy ? nx - ny : (sx === "GF16" ? -1 : 1); });
+      tableHTML("tGap", ["巨纤维刺激", "电突触（等效突触数）", "巨纤维 右/左 Hz", "TTMn 右/左 Hz", "TTMn 峰值 右/左", "中足运动神经元", "失控副本"], keys.map(k => {
+        const [stim, n] = k.split("|"), rs = G.filter(r => `${r.stim}|${r.n_eq}` === k);
+        const f = x => x === null ? "—" : (+x).toFixed(1);
+        return [stim === "GF16" ? "标定 16 Hz" : "标定 100 Hz", n === "0" ? "无（只有化学突触）" : n, `${f(med(rs.map(r => r.GF_R)))}/${f(med(rs.map(r => r.GF_L)))}`,
+          `${f(med(rs.map(r => r.TTMn_R)))}/${f(med(rs.map(r => r.TTMn_L)))}`, `${f(med(rs.map(r => r.TTMn_R_peak)))}/${f(med(rs.map(r => r.TTMn_L_peak)))}`,
+          med(rs.map(r => r.t2_mn_active)), `${rs.filter(r => r.active_all >= 2000).length}/${rs.length}`];
+      }));
+    }
+    $("nGap").textContent = V5_NOTES.gap;
+    const PR = F.proprio;
+    if (PR && PR.runs) {
+      const mode = { open: "开环", closed16: "持续编码 16 Hz", shuffled16: "持续编码 16 Hz，信号错位", closed50: "持续编码 50 Hz",
+        phasic16: "相位性编码 16 Hz", phasic_shuffled16: "相位性编码 16 Hz，信号错位", phasic50: "相位性编码 50 Hz" };
+      const allRuns = { ...PR.runs, ...((F.proprio_phasic && F.proprio_phasic.runs) || {}) };
+      const rank = k => { const [m, r] = k.split("_rep"); return +r * 10 + ["open", "closed16", "shuffled16", "phasic16", "phasic_shuffled16", "closed50", "phasic50"].indexOf(m); };
+      const order = ["LF", "LM", "LH", "RF", "RM", "RH"];
+      tableHTML("tProp", ["条件", "腿部运动神经元活跃", "总活动主频 · 节律占比", "摆动 ≥ 0.1 mm 的腿", "感受器平均发放率"], Object.entries(allRuns).sort((x, y) => rank(x[0]) - rank(y[0])).map(([k, v]) => {
+        const [m, rep] = k.split("_rep");
+        const cn = { LF: "前左", LM: "中左", LH: "后左", RF: "前右", RM: "中右", RH: "后右" };
+        const moving = order.filter(l => v.legs[l].ap_span_mm >= 0.1).map(l => `${cn[l]} ${v.legs[l].ap_span_mm.toFixed(2)}·${v.legs[l].rhythm_power.toFixed(2)}`);
+        return [`${mode[m] || m} #${rep}`, v.legmn_active_total, `${v.legmn_sum_freq == null ? "—" : v.legmn_sum_freq.toFixed(1)} Hz · ${v.legmn_sum_rhythm.toFixed(2)}`, moving.length ? moving.join("，") : "无",
+          Object.entries(v.sensor_mean_hz || {}).map(([t, x]) => `${t === "chordotonal organ" ? "弦音器" : t === "hair plate" ? "毛板" : "钟形感器"} ${(+x).toFixed(1)}`).join("，") || "—"];
+      }), r => /相位性编码 16 Hz #/.test(r[0]));
+    }
+    $("nProp").textContent = V5_NOTES.prop;
+    const A2 = V4R.vnc_all;
+    if (A2 && A2.analysis && F.analysis) {
+      const o1 = F.osc_ranges.DNg100_LR_350, o2 = A2.osc_ranges.DNg100_LR_360, a1 = F.analysis.DNg100_LR_350, a2 = A2.analysis.DNg100_LR_360;
+      const legPct = a => ["LF", "RF", "LM", "RM", "LH", "RH"].map(l => Math.round(a.legs[l].frac_leg_oscillating * 100)).join("/") + "%";
+      const rhythmLegs = LGx => { if (!LGx) return "—"; const ks = Object.keys(LGx).filter(k => /_LR_3[56]0_rep[0-3]$/.test(k));
+        return ks.map(k => ["LF", "LM", "LH", "RF", "RM", "RH"].filter(l => LGx[k].legs[l].ap_span_mm >= 0.1 && LGx[k].legs[l].rhythm_power >= 0.5).length).join(" / "); };
+      tableHTML("tAllCmp", ["主条件指标", "旧数据（I = 350）", "全突触（I = 360）"], [
+        ["振荡副本", `${o1.n_osc}/${o1.reps}`, `${o2.n_osc}/${o2.reps}`],
+        ["失控副本", `${o1.n_runaway}/${o1.reps}`, `${o2.n_runaway}/${o2.reps}`],
+        ["各腿振荡比例（前左/前右/中左/中右/后左/后右）", legPct(a1), legPct(a2)],
+        ["摆动与支撑模块相关", sgn(a1.swing_stance_corr_median), sgn(a2.swing_stance_corr_median)],
+        ["驱动身体后节律腿数（副本 0–3）", rhythmLegs(F.legs), rhythmLegs(A2.legs)]]);
+      const PP = A2.proprio_phasic;
+      if (PP && PP.runs) {
+        const cn = { LF: "前左", LM: "中左", LH: "后左", RF: "前右", RM: "中右", RH: "后右" }, order = ["LF", "LM", "LH", "RF", "RM", "RH"];
+        const mode = { open: "开环", phasic16: "相位性 16 Hz", phasic_shuffled16: "相位性 16 Hz，错位", phasic50: "相位性 50 Hz" };
+        tableHTML("tAllProp", ["全突触闭环", "腿部运动神经元活跃", "节律腿（摆幅 mm · 节律占比）"], Object.entries(PP.runs).map(([k, v]) => {
+          const [m, rep] = k.split("_rep");
+          const rl = order.filter(l => v.legs[l].ap_span_mm >= 0.1 && v.legs[l].rhythm_power >= 0.5).map(l => `${cn[l]} ${v.legs[l].ap_span_mm.toFixed(2)}·${v.legs[l].rhythm_power.toFixed(2)}`);
+          return [`${mode[m] || m} #${rep}`, v.legmn_active_total + (v.legmn_active_total >= 150 ? "（失控）" : ""), rl.length ? rl.join("，") : "无"];
+        }), r => /相位性 16 Hz #/.test(r[0]));
+      }
+      $("nAll").textContent = V5_NOTES.all;
+    }
+    if (V5_NOTES.title) $("hVnc6").textContent = V5_NOTES.title;
+  }
+
+  function drawValidation() {
+    const svg = $("valChart"); svg.replaceChildren(); const el = mk(svg);
+    const rows = Object.fromEntries(SUB.validation.map(r => [r.cond, r]));
+    const conds = [["LOOM_L_100", "左侧 looming"], ["LOOM_R_100", "右侧 looming"]];
+    const keys = [["DNa01_left", "a01左"], ["DNa01_right", "a01右"], ["DNa02_left", "a02左"], ["DNa02_right", "a02右"], ["DNp01_left", "GF左"], ["DNp01_right", "GF右"]];
+    const W = 520, H = 220, padL = 34, padB = 44, padT = 14, gapC = 26, max = 250;
+    const sy = v => padT + (1 - v / max) * (H - padT - padB);
+    [0, 50, 100, 150, 200, 250].forEach(v => {
+      el("line", { x1: padL, x2: W - 4, y1: sy(v), y2: sy(v), stroke: css(v ? "--grid" : "--muted"), "stroke-width": 1 });
+      el("text", { x: padL - 6, y: sy(v) + 3.5, "text-anchor": "end" }).textContent = v;
+    });
+    const groupW = (W - padL - 4 - gapC) / 2, slot = groupW / keys.length, bw = (slot - 8) / 2;
+    conds.forEach(([c, label], ci) => {
+      const gx = padL + ci * (groupW + gapC);
+      el("text", { x: gx + groupW / 2, y: H - 6, "text-anchor": "middle", fill: css("--ink-2") }).textContent = label + "（Hz）";
+      keys.forEach(([k, kl], ki) => {
+        const x = gx + ki * slot + 4;
+        [[rows[c]["ref_" + k], css("--ink-2"), 1], [rows[c]["sub_" + k], css("--inter"), 0.55]].forEach(([v, color, op], vi) => {
+          const bx = x + vi * (bw + 2);
+          const r = el("path", { d: roundedBar(bx, sy(0), sy(v), bw), fill: color, "fill-opacity": op, tabindex: 0 });
+          const lines = [[`${label} · ${kl}`], ["Hz 全脑", rows[c]["ref_" + k].toFixed(1)], ["Hz 子回路", rows[c]["sub_" + k].toFixed(1)]];
+          r.addEventListener("pointermove", e => showTip(e, lines)); r.addEventListener("focus", e => showTip(e, lines));
+          r.addEventListener("pointerleave", hideTip); r.addEventListener("blur", hideTip);
+        });
+        el("text", { x: x + slot / 2 - 4, y: H - padB + 14, "text-anchor": "middle" }).textContent = kl;
+      });
+    });
+    const mae = SUB.validation.reduce((s, r) => s + r.mae_hz, 0) / SUB.validation.length;
+    $("valNote").textContent = `${SUB.validation.length} 个刺激条件的平均绝对偏差 ${mae.toFixed(1)} Hz（每个条件 0.5 s × 4 次，单个神经元发放率本身有噪声）。a01/a02 = DNa01/DNa02，GF = 巨纤维。`;
+  }
+
+  // ——— loop ———
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
+    const rr = raster.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio);
+    raster.width = Math.max(100, Math.round(rr.width * dpr)); raster.height = Math.round(RH * dpr);
+    rctx.fillStyle = palette["--panel-2"] || "#eee"; rctx.fillRect(0, 0, raster.width, raster.height);
+  }
+  new ResizeObserver(resize).observe(stage);
+  new ResizeObserver(resize).observe(raster);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paintScene);
+  new MutationObserver(paintScene).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  camera.position.set(-4, -40, 36); controls.target.set(0, 0, 0); controls.update();
+  let camPrev = [0, 0], prev = performance.now(), carry = 0, rt = [0, 0];
+  function frame(now) {
+    const dtReal = Math.min(0.05, Math.max(0, (now - prev) / 1000)); prev = now;
+    if (S.jumpT < 0 && CFG.takeoff !== pendingTakeoff) CFG.takeoff = pendingTakeoff;
+    const inFlight = !!(S.clip && S.jumpT >= 0);
+    if (!paused) {
+      carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
+      let n = 0;
+      while (carry >= game.chunkDt && n < 12) { game.step(); carry -= game.chunkDt; n++; }
+      if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
+      rt[0] += n * game.chunkDt; rt[1] += dtReal;
+      if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
+      drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
+    }
+    const flying = !!(S.clip && S.jumpT >= 0);
+    fly.visible = !flying; flyer.visible = flying;
+    let vx = S.x, vy = S.y, vz = S.z;
+    if (flying) {
+      const P = window.FlyDodgeGame.clipPose(S.clip, CFG, S.clipOrigin, S.jumpDir, S.jumpT + (paused ? 0 : carry));
+      poseFlyer(P, !$("slowmo").checked);
+      vx = P.x; vy = P.y; vz = P.z;
+    }
+    poseFly();
+    fly.position.set(S.x, S.y, S.z); fly.rotation.z = S.h;
+    flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = S.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8));
+    for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) { e.m.position.set(b.x, b.y, CFG.ballR); e.sh.position.set(b.x, b.y, 0.01); } }
+    let di = 0;
+    for (const [, e] of dustMeshes) {
+      const ant = parts[meshIdx[e.side === "left" ? "LPedicel" : "RPedicel"]];
+      if (!ant) continue;
+      pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), S.h);
+      e.m.position.set(S.x + pv.x, S.y + pv.y, S.z + pv.z); e.m.visible = fly.visible; di++;
+    }
+    // 说话气泡：把果蝇的世界坐标投影到屏幕上
+    if ($("saysOn").checked) {
+      if (!window._sayT || S.t - window._sayT > CFG.speechEvery) {
+        window._sayT = S.t; window._say = game.speech();
+      }
+      const say = window._say;
+      const el = $("says");
+      if (say && say.sentence) {
+        pv.set(vx, vy, vz + 4).project(camera);
+        const r = stage.getBoundingClientRect();
+        el.hidden = false; el.textContent = say.sentence;
+        el.style.left = ((pv.x * 0.5 + 0.5) * r.width) + "px";
+        el.style.top = ((-pv.y * 0.5 + 0.5) * r.height) + "px";
+        el.style.opacity = pv.z > 1 ? 0 : 1;
+      } else el.hidden = true;
+    }
+    if (CFG.wind) {
+      stepMotes(dtReal, game.wind, vx, vy);
+      $("windArrow").style.transform = `rotate(${(-game.wind.dir * 180 / Math.PI).toFixed(0)}deg)`;
+      $("windTxt").textContent = `风 ${(game.wind.speed * 100).toFixed(0)}% · JO ${((game.wind.joL + game.wind.joR) / 2).toFixed(0)} Hz`;
+    }
+    const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
+    camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
+    controls.update();
+    renderer.render(scene, camera);
+    updatePanels();
+    requestAnimationFrame(frame);
+  }
+  if (reduceMotion) { paused = true; $("pause").textContent = "继续"; }
+  readPalette(); resize(); paintScene(); poseFly();
+  requestAnimationFrame(frame);
+})();
+</script>

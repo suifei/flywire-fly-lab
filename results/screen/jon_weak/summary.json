@@ -1,0 +1,313 @@
+{
+ "design": {
+  "freqs": [
+   80,
+   100,
+   120,
+   140
+  ],
+  "chosen": 140,
+  "baseline_stats": {
+   "80": {
+    "per_rep": [
+     1,
+     3,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     2,
+     1,
+     3,
+     0
+    ],
+    "mean": 1.3
+   },
+   "100": {
+    "per_rep": [
+     9,
+     7,
+     5,
+     9,
+     4,
+     6,
+     6,
+     5,
+     8,
+     9,
+     5,
+     10
+    ],
+    "mean": 6.9
+   },
+   "120": {
+    "per_rep": [
+     22,
+     14,
+     15,
+     19,
+     17,
+     13,
+     17,
+     18,
+     17,
+     16,
+     18,
+     21
+    ],
+    "mean": 17.2
+   },
+   "140": {
+    "per_rep": [
+     24,
+     23,
+     26,
+     27,
+     26,
+     24,
+     26,
+     26,
+     22,
+     25,
+     26,
+     27
+    ],
+    "mean": 25.2
+   }
+  },
+  "R": 6,
+  "call": 0.8,
+  "n_top_paper": 30,
+  "n_null": 50
+ },
+ "null_median": [
+  25.0,
+  24.5,
+  26.0,
+  26.0,
+  25.0,
+  24.0
+ ],
+ "items": [
+  {
+   "fid": "720575940630907434",
+   "name": "aBN1",
+   "cell_type": "SAD093",
+   "paper": 0.0,
+   "ours_weak": 0.0
+  },
+  {
+   "fid": "720575940629806974",
+   "name": "aDN2_l",
+   "cell_type": "DNge078",
+   "paper": 0.7053,
+   "ours_weak": 0.7508
+  },
+  {
+   "fid": "720575940609530653",
+   "name": "JO_FDP_5",
+   "cell_type": "JO-FD2",
+   "paper": 0.6838,
+   "ours_weak": 0.7708
+  },
+  {
+   "fid": "720575940633153375",
+   "name": "JO_EVL_1",
+   "cell_type": "JO-EV1",
+   "paper": 0.7182,
+   "ours_weak": 0.8106
+  },
+  {
+   "fid": "720575940635968745",
+   "name": "JO_FDP_6",
+   "cell_type": "JO-FD2",
+   "paper": 0.8054,
+   "ours_weak": 0.8439
+  },
+  {
+   "fid": "720575940609541917",
+   "name": "JO_EDM_7",
+   "cell_type": "JO-ED2_b",
+   "paper": 0.7382,
+   "ours_weak": 0.8505
+  },
+  {
+   "fid": "720575940618888368",
+   "name": "JO_FDP_1",
+   "cell_type": "JO-FD2",
+   "paper": 0.867,
+   "ours_weak": 0.8638
+  },
+  {
+   "fid": "720575940638664437",
+   "name": "JO_EDM_14",
+   "cell_type": "JO-CM",
+   "paper": 0.7368,
+   "ours_weak": 0.8904
+  },
+  {
+   "fid": "720575940627941431",
+   "name": "JO_EDC_3",
+   "cell_type": "JO-ED2_b",
+   "paper": 0.8484,
+   "ours_weak": 0.897
+  },
+  {
+   "fid": "720575940644072483",
+   "name": "",
+   "cell_type": "CB3533",
+   "paper": 0.9227,
+   "ours_weak": 0.9236
+  },
+  {
+   "fid": "720575940628100614",
+   "name": "JO_FDA_2",
+   "cell_type": "JO-FD2",
+   "paper": 0.8913,
+   "ours_weak": 0.9302
+  },
+  {
+   "fid": "720575940628444667",
+   "name": "JO_EDP_1",
+   "cell_type": "JO-ED2_a",
+   "paper": 0.8784,
+   "ours_weak": 0.9369
+  },
+  {
+   "fid": "720575940629063418",
+   "name": "",
+   "cell_type": "CB3533",
+   "paper": 0.9313,
+   "ours_weak": 0.9369
+  },
+  {
+   "fid": "720575940641921421",
+   "name": "JO_EDC_4",
+   "cell_type": "JO-ED2_b",
+   "paper": 0.8856,
+   "ours_weak": 0.9435
+  },
+  {
+   "fid": "720575940639696755",
+   "name": "",
+   "cell_type": "CB2558",
+   "paper": 0.9084,
+   "ours_weak": 0.9502
+  },
+  {
+   "fid": "720575940630080071",
+   "name": "JO_EV_1",
+   "cell_type": "JO-EV6",
+   "paper": 0.9342,
+   "ours_weak": 0.9502
+  },
+  {
+   "fid": "720575940622449388",
+   "name": "JO_EVM_6",
+   "cell_type": "JO-EV5",
+   "paper": 0.9113,
+   "ours_weak": 0.9568
+  },
+  {
+   "fid": "720575940618599872",
+   "name": "JO_EDM_5",
+   "cell_type": "JO-ED2_c",
+   "paper": 0.9041,
+   "ours_weak": 0.9635
+  },
+  {
+   "fid": "720575940622217992",
+   "name": "JO_FDP_2",
+   "cell_type": "JO-FD2",
+   "paper": 0.9056,
+   "ours_weak": 0.9635
+  },
+  {
+   "fid": "720575940621442224",
+   "name": "JO_EVP_4",
+   "cell_type": "JO-EV3",
+   "paper": 0.9399,
+   "ours_weak": 0.9635
+  },
+  {
+   "fid": "720575940625962568",
+   "name": "JO_EDM_1",
+   "cell_type": "JO-ED2_b",
+   "paper": 0.8813,
+   "ours_weak": 0.9701
+  },
+  {
+   "fid": "720575940614188149",
+   "name": "JO_EVM_7",
+   "cell_type": "JO-EV5",
+   "paper": 0.9256,
+   "ours_weak": 0.9701
+  },
+  {
+   "fid": "720575940620304110",
+   "name": "",
+   "cell_type": "CB0533",
+   "paper": 0.9313,
+   "ours_weak": 0.9701
+  },
+  {
+   "fid": "720575940638681845",
+   "name": "JO_EVL_2",
+   "cell_type": "JO-EV1",
+   "paper": 0.9328,
+   "ours_weak": 0.9701
+  },
+  {
+   "fid": "720575940602506208",
+   "name": "JO_EVM_14",
+   "cell_type": "JO-EV2",
+   "paper": 0.9313,
+   "ours_weak": 0.9767
+  },
+  {
+   "fid": "720575940630059847",
+   "name": "JO_EVM_5",
+   "cell_type": "JO-EV5",
+   "paper": 0.9113,
+   "ours_weak": 0.99
+  },
+  {
+   "fid": "720575940637366335",
+   "name": "JO_FVA_7",
+   "cell_type": "JO-FV",
+   "paper": 0.9413,
+   "ours_weak": 0.9967
+  },
+  {
+   "fid": "720575940625087546",
+   "name": "JO_FDA_7",
+   "cell_type": "JO-FV",
+   "paper": 0.9285,
+   "ours_weak": 1.01
+  },
+  {
+   "fid": "720575940616064546",
+   "name": "JO_mz_7",
+   "cell_type": "JO-mz",
+   "paper": 0.9471,
+   "ours_weak": 1.0166
+  },
+  {
+   "fid": "720575940602720940",
+   "name": "JO_CA_3",
+   "cell_type": "JO-CA1",
+   "paper": 0.9442,
+   "ours_weak": 1.0498
+  }
+ ],
+ "comparison": {
+  "pearson": 0.981,
+  "spearman": 0.841,
+  "calls_ours": 3,
+  "calls_paper": 6,
+  "paper_required_we_also_call": 3,
+  "call_agreement": 0.9
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "name": "JON 160 Hz（论文名单）",
+ "n_active": 596,
+ "n_scored": 596,
+ "n_skipped": 0,
+ "g3_spearman": 0.288,
+ "frac_required": 0.0084,
+ "n_required": 5,
+ "gini": 0.9224,
+ "n80": 44,
+ "max_effect": 1.0,
+ "median_effect": 0.0
+}

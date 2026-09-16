@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>提要 · 笔记本里的果蝇大脑</title>
+<meta name="description" content="把果蝇全脑连接组跑在笔记本上的完整记录——提要与核心数据。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light;--paper:#faf7f2;--panel:#f2ece3;--ink:#17130f;--ink-2:#453b33;--muted:#7c6f64;
+  --rule:#e0d7ca;--amber:#9c5c07;--teal:#145f53;--critical:#9c2f24;
+  --sans:"Noto Sans SC","PingFang SC",system-ui,sans-serif;--serif:"Noto Serif SC","Songti SC",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --paper:#141110;--panel:#1d1917;--ink:#f2ebe3;--ink-2:#d2c7bc;--muted:#978a7f;
+  --rule:#2f2926;--amber:#dc9a44;--teal:#4fb09d;--critical:#dd6e5f}}
+:root[data-theme="dark"]{color-scheme:dark;--paper:#141110;--panel:#1d1917;--ink:#f2ebe3;--ink-2:#d2c7bc;
+  --muted:#978a7f;--rule:#2f2926;--amber:#dc9a44;--teal:#4fb09d;--critical:#dd6e5f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.9 var(--serif);
+  padding-inline:clamp(18px,5vw,40px);padding-block:0 64px}
+.wrap{max-width:42rem;margin:0 auto}
+header{padding-block:clamp(40px,8vw,70px) 28px;border-bottom:3px double var(--rule);margin-bottom:30px}
+.eyebrow{font:700 12px/1.4 var(--sans);letter-spacing:.17em;color:var(--amber);margin-bottom:14px}
+h1{margin:0 0 16px;font:900 clamp(27px,5.6vw,40px)/1.22 var(--sans);text-wrap:balance}
+.deck{margin:0;font:400 clamp(15px,2.5vw,17.5px)/1.8 var(--serif);color:var(--ink-2);text-wrap:pretty}
+h2{margin:44px 0 10px;font:700 clamp(19px,3.2vw,23px)/1.4 var(--sans)}
+p{margin:0 0 1em}
+.quote{margin:26px 0;padding:19px 21px;border-left:3px solid var(--amber);background:var(--panel);
+  border-radius:0 8px 8px 0;font:500 clamp(16px,2.7vw,18.5px)/1.85 var(--serif)}
+.quote .who{display:block;margin-top:9px;font:500 12.5px/1.5 var(--sans);color:var(--muted)}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:9px;overflow:hidden;margin:26px 0}
+.stat div{background:var(--paper);padding:15px 16px 13px}
+.stat b{display:block;font:600 24px/1.1 var(--mono);font-variant-numeric:tabular-nums;color:var(--amber)}
+.stat span{display:block;margin-top:4px;font:400 12.5px/1.5 var(--sans);color:var(--muted)}
+.tbl{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:9px}
+table{border-collapse:collapse;width:100%;font:400 14.5px/1.6 var(--sans)}
+th,td{padding:9px 13px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{font:600 12.5px/1.4 var(--sans);color:var(--muted);background:var(--panel)}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);font-weight:500}td.good{color:var(--teal)}td.bad{color:var(--critical)}
+ul{margin:0 0 1em;padding-left:1.25em}li{margin-bottom:.45em}
+.cta{display:flex;flex-wrap:wrap;gap:11px;margin:34px 0 8px}
+.cta a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font:600 14.5px/1 var(--sans);
+  padding:13px 18px;border-radius:9px;border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+.cta a.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cta a:hover{border-color:var(--amber)}
+.cta small{font:400 12px/1 var(--sans);color:var(--muted)}
+.cta a.primary small{color:color-mix(in oklab,var(--paper) 70%,transparent)}
+a{color:var(--teal);text-underline-offset:3px}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);font:400 13px/1.8 var(--sans);color:var(--muted)}
+.theme{position:fixed;top:14px;right:14px;font:500 12.5px/1 var(--sans);padding:8px 12px;border-radius:999px;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer;z-index:10}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+</style>
+</head>
+<body>
+<button class="theme" id="th">深色</button>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">提要 · 完整报告见仓库</div>
+  <h1>我把一只果蝇的大脑装进了笔记本电脑</h1>
+  <p class="deck">13 万个神经元、1,500 万条突触，全部连线图在 2024 年被画了出来并开源。我在一台 16 GB 的 MacBook 上把它跑了起来，接上身体、做成游戏、让它开口说中文，又对它做了 17,628 次虚拟手术。这是提要；完整的技术报告在仓库的 <code>report.md</code> 里，约 6.5 万字。</p>
+</header>
+
+<h2>它说的第一句话</h2>
+<p>给模型同时施加"醋 + 甜 + 热 + 亮"四种刺激，从 121,706 个神经元的放电模式里线性解码，再套进句子模板：</p>
+<div class="quote">我闻到醋味。我尝到甜味。很热，很亮。我该怎么做？<span class="who">— 解码自全脑放电模式，交叉验证准确率 0.958</span></div>
+<p>我把这句话原封不动发给了 Claude，没有任何上下文。它回答："<strong>醋味加甜味，很可能是陷阱。</strong>人类常用苹果醋、糖和一滴洗洁精做果蝇陷阱……"——只从四个词，就认出了说话的是一只果蝇，并识别出这是人类设的捕蝇器配方。</p>
+<p><strong>必须说清楚</strong>：说话的是解码器，不是果蝇。中文模板是我手写的。真实的部分只有一个：<em>不同的感觉刺激确实在全脑放电里留下了可被线性区分的痕迹。</em></p>
+
+<h2>核心数据</h2>
+<div class="stat">
+  <div><b>138,639</b><span>神经元（全脑模型）</span></div>
+  <div><b>17,628</b><span>段虚拟敲除仿真</span></div>
+  <div><b>4,599</b><span>浏览器里实时跑的神经元</span></div>
+  <div><b>28</b><span>作者自查出的错误</span></div>
+</div>
+
+<h2>模型准不准，要看你问哪条通路</h2>
+<div class="tbl"><table>
+<thead><tr><th>通路</th><th>与论文的 κ</th><th>对真实光遗传实验</th></tr></thead>
+<tbody>
+<tr><td>糖味觉 → 伸喙</td><td class="n">0.59</td><td class="n">6 / 10</td></tr>
+<tr><td>水味觉 → 伸喙</td><td class="n good">0.87</td><td class="n good">9 / 10</td></tr>
+<tr><td>触角机械感觉 → 梳理</td><td class="n good">0.91</td><td class="n">1 / 1（可测）</td></tr>
+</tbody></table></div>
+<p>同一套参数、同一个门槛，差别大到不能忽略。所以"这个数字大脑准不准"这个问法本身是错的——<strong>它的可信度是局部的</strong>。</p>
+
+<h2>它做不到的事</h2>
+<ul>
+<li>从感光细胞驱动行为：下行神经元<strong>全部 0 Hz</strong>，信号传不过去</li>
+<li>吃到糖产生奖赏：307 个 PAM 多巴胺神经元<strong>一个都不放电</strong></li>
+<li>走路节律：凑不出三角步态，六条腿只有一条在动</li>
+<li>嗅觉转向：给不出左右差异；稍强就约 8,300 个神经元失控</li>
+<li>学习 / 记忆 / 可塑性：模型里根本没有</li>
+</ul>
+<p>还有一件事同样重要：我自查出 28 处错误，全部记在公开的"错误账本"里——包括一处<strong>我报告了一个自己从来没做过的实验</strong>。约 300 个由脚本产出的数字全部无误，错误几乎全集中在手写汇总上。</p>
+
+<div class="cta">
+  <a class="primary" href="game.html">▶ 在线试玩 <small>4,599 个神经元实时放电</small></a>
+  <a href="https://github.com/suifei/flywire-fly-lab">GitHub 仓库 <small>代码 + 完整报告</small></a>
+  <a href="./">项目首页</a>
+</div>
+<p style="font:400 14px/1.8 var(--sans);color:var(--muted);margin-top:6px">完整技术报告（含全部实验细节、事先声明的判据、阴性结果与错误账本）是仓库里的 <code>report.md</code>，约 6.5 万字，26 节。</p>
+
+<footer>
+<p><strong>许可</strong>：代码 GPL-3.0-or-later；<code>results/</code> 下的数据含 FlyWire 连接组派生内容，按 CC BY-NC 4.0 处理，不得商用。</p>
+<p><strong>引用</strong>请引原始论文：Dorkenwald et al. 2024、Shiu &amp; Sterne et al. 2024、Vaxenburg et al. 2025、Lappalainen et al. 2024、Wang-Chen et al. 2024。</p>
+<p>本页所有数字均来自一台 16 GB MacBook Pro 上的实际运行。</p>
+</footer>
+</div>
+<script>
+  let dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  try { const s = localStorage.getItem("ffl-theme"); if (s) dark = s === "dark"; } catch (e) {}
+  const apply = () => { document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    document.getElementById("th").textContent = dark ? "浅色" : "深色"; };
+  apply();
+  document.getElementById("th").onclick = () => { dark = !dark; apply();
+    try { localStorage.setItem("ffl-theme", dark ? "dark" : "light"); } catch (e) {} };
+</script>
+</body>
+</html>

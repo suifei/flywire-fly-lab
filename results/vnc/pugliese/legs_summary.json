@@ -1,0 +1,321 @@
+{
+ "CPG_control": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.826,
+    "rhythm_power": 0.98,
+    "peak_hz": 12.1
+   },
+   "RF": {
+    "ap_span_mm": 0.826,
+    "rhythm_power": 0.99,
+    "peak_hz": 12.1
+   }
+  },
+  "lf_rf_phase_deg": -179.3
+ },
+ "none_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.46,
+    "peak_hz": 13.7
+   },
+   "RF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.46,
+    "peak_hz": 13.7
+   }
+  },
+  "lf_rf_phase_deg": 180.0,
+  "active_mn": [],
+  "u_std": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "DNg100_L_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.197,
+    "rhythm_power": 0.84,
+    "peak_hz": 11.6
+   },
+   "RF": {
+    "ap_span_mm": 0.018,
+    "rhythm_power": 0.98,
+    "peak_hz": 11.6
+   }
+  },
+  "lf_rf_phase_deg": 19.0,
+  "active_mn": [
+   "LHS coxa swing 3.7Hz",
+   "LHS coxa swing 2.3Hz"
+  ],
+  "u_std": [
+   0.217,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "DNg100_LR_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.193,
+    "rhythm_power": 0.8,
+    "peak_hz": 11.6
+   },
+   "RF": {
+    "ap_span_mm": 0.013,
+    "rhythm_power": 0.96,
+    "peak_hz": 11.6
+   }
+  },
+  "lf_rf_phase_deg": 3.7,
+  "active_mn": [
+   "LHS coxa stance 1.2Hz",
+   "LHS coxa swing 2.8Hz",
+   "RHS femur/tr flex 1.5Hz",
+   "LHS coxa swing 2.1Hz"
+  ],
+  "u_std": [
+   0.165,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "DNg100_LR_rep1": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.193,
+    "rhythm_power": 0.89,
+    "peak_hz": 10.5
+   },
+   "RF": {
+    "ap_span_mm": 0.014,
+    "rhythm_power": 0.98,
+    "peak_hz": 10.5
+   }
+  },
+  "lf_rf_phase_deg": 2.2,
+  "active_mn": [
+   "LHS coxa swing 5.0Hz",
+   "RHS femur/tr flex 1.8Hz",
+   "LHS coxa swing 1.7Hz"
+  ],
+  "u_std": [
+   0.188,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "DNg100_LR_rep2": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.201,
+    "rhythm_power": 0.75,
+    "peak_hz": 5.8
+   },
+   "RF": {
+    "ap_span_mm": 0.307,
+    "rhythm_power": 0.25,
+    "peak_hz": 22.6
+   }
+  },
+  "lf_rf_phase_deg": 120.8,
+  "active_mn": [
+   "RHS femur reductor 1.7Hz",
+   "RHS coxa swing 1.8Hz",
+   "LHS coxa swing 2.2Hz",
+   "RHS femur/tr flex 5.9Hz"
+  ],
+  "u_std": [
+   0.056,
+   0.0,
+   0.0,
+   0.0,
+   0.089,
+   0.0
+  ]
+ },
+ "DNg100_LR_rep3": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.176,
+    "rhythm_power": 0.92,
+    "peak_hz": 12.1
+   },
+   "RF": {
+    "ap_span_mm": 0.013,
+    "rhythm_power": 0.93,
+    "peak_hz": 12.1
+   }
+  },
+  "lf_rf_phase_deg": -173.1,
+  "active_mn": [
+   "LHS coxa stance 1.2Hz",
+   "LHS coxa swing 3.6Hz",
+   "RHS femur/tr flex 1.1Hz"
+  ],
+  "u_std": [
+   0.167,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "MDN_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.942,
+    "rhythm_power": 0.06,
+    "peak_hz": 5.3
+   },
+   "RF": {
+    "ap_span_mm": 0.259,
+    "rhythm_power": 0.22,
+    "peak_hz": 8.4
+   }
+  },
+  "lf_rf_phase_deg": 16.3,
+  "active_mn": [
+   "RHS femur reductor 163.9Hz",
+   "RHS tibia extend 3.2Hz",
+   "RHS substrate grip 115.6Hz",
+   "LHS coxa stance 95.4Hz",
+   "LHS tibia flex 193.6Hz",
+   "LHS coxa swing 198.0Hz",
+   "RHS tibia flex 65.6Hz",
+   "RHS femur reductor 111.7Hz",
+   "LHS substrate grip 20.9Hz",
+   "RHS tibia flex 204.6Hz",
+   "RHS tibia flex 211.2Hz",
+   "RHS coxa swing 191.8Hz",
+   "LHS tibia flex 26.7Hz",
+   "RHS tibia flex 192.0Hz",
+   "RHS coxa swing 113.0Hz",
+   "RHS tibia flex 179.4Hz",
+   "LHS coxa stance 71.9Hz",
+   "RHS tibia flex 210.6Hz",
+   "LHS femur reductor 35.8Hz",
+   "RHS coxa stance 51.0Hz",
+   "RHS femur/tr extend 81.4Hz",
+   "LHS tibia flex 116.9Hz",
+   "RHS tibia flex 194.2Hz",
+   "RHS tibia flex 225.0Hz",
+   "LHS femur reductor 212.8Hz",
+   "LHS tibia flex 145.5Hz",
+   "RHS substrate grip 126.8Hz",
+   "LHS tibia flex 173.6Hz",
+   "RHS tibia flex 208.1Hz",
+   "RHS tarsus control 186.9Hz",
+   "RHS tarsus control 18.8Hz",
+   "RHS substrate grip 2.5Hz",
+   "RHS coxa swing 17.1Hz",
+   "RHS tarsus control 94.0Hz",
+   "LHS tibia flex 148.6Hz",
+   "RHS tarsus control 138.1Hz",
+   "LHS femur/tr flex 126.6Hz",
+   "LHS tibia flex 176.0Hz",
+   "LHS coxa swing 144.9Hz",
+   "LHS femur/tr flex 35.5Hz",
+   "LHS tibia flex 28.7Hz",
+   "RHS nan 30.2Hz",
+   "LHS tibia flex 89.9Hz",
+   "RHS tibia flex 183.4Hz",
+   "RHS femur reductor 140.5Hz",
+   "RHS tibia flex 118.5Hz",
+   "LHS tarsus control 132.8Hz",
+   "LHS femur/tr extend 25.5Hz",
+   "RHS tarsus control 125.6Hz",
+   "LHS femur/tr flex 166.5Hz",
+   "RHS tibia flex 126.4Hz",
+   "RHS coxa swing 160.4Hz",
+   "RHS tibia flex 186.1Hz",
+   "RHS coxa stance 5.1Hz",
+   "RHS coxa swing 182.0Hz",
+   "LHS tarsus control 183.9Hz",
+   "LHS femur reductor 132.6Hz",
+   "RHS coxa swing 184.0Hz",
+   "LHS femur/tr flex 15.2Hz",
+   "LHS femur/tr flex 121.6Hz",
+   "LHS tibia flex 36.4Hz",
+   "RHS femur reductor 160.6Hz",
+   "LHS femur/tr flex 35.3Hz",
+   "LHS tarsus control 18.0Hz",
+   "RHS coxa stance 12.4Hz",
+   "LHS coxa swing 176.8Hz",
+   "LHS femur/tr flex 27.6Hz",
+   "RHS tibia flex 16.2Hz",
+   "RHS tibia flex 52.7Hz",
+   "RHS femur/tr extend 43.5Hz",
+   "RHS femur reductor 121.4Hz",
+   "LHS tarsus control 200.8Hz",
+   "LHS tibia flex 188.8Hz",
+   "LHS femur/tr flex 57.2Hz",
+   "RHS tarsus control 148.9Hz",
+   "LHS coxa swing 27.2Hz",
+   "LHS femur reductor 125.8Hz",
+   "LHS tarsus control 43.7Hz",
+   "LHS femur/tr flex 53.2Hz",
+   "LHS coxa stance 34.2Hz",
+   "LHS femur/tr extend 37.0Hz",
+   "RHS substrate grip 96.2Hz",
+   "LHS femur reductor 191.5Hz",
+   "LHS femur reductor 190.4Hz"
+  ],
+  "u_std": [
+   0.36,
+   0.252,
+   0.108,
+   0.254,
+   0.191,
+   0.122
+  ]
+ },
+ "DNa02_L_rep0": {
+  "legs": {
+   "LF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.83,
+    "peak_hz": 6.8
+   },
+   "RF": {
+    "ap_span_mm": 0.0,
+    "rhythm_power": 0.83,
+    "peak_hz": 6.8
+   }
+  },
+  "lf_rf_phase_deg": -180.0,
+  "active_mn": [
+   "LHS tibia flex 3.3Hz",
+   "LHS coxa stance 6.5Hz",
+   "LHS femur reductor 30.1Hz",
+   "LHS femur reductor 7.6Hz",
+   "LHS coxa stance 5.4Hz"
+  ],
+  "u_std": [
+   0.078,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ }
+}

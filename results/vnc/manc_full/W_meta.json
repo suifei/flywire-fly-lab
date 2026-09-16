@@ -1,0 +1,9 @@
+{
+ "n": 23532,
+ "nnz": 1372404,
+ "exc_nnz": 735914,
+ "inh_nnz": 636490,
+ "abs_synapses": 24149548.0,
+ "build_s": 3.1,
+ "source": "W_20251006.feather"
+}

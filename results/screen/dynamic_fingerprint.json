@@ -1,0 +1,3264 @@
+{
+ "糖 50 Hz × CB0883": {
+  "label": "糖 50 Hz × CB0883",
+  "n": 280,
+  "n_active": 313,
+  "spearman_overlap_vs_delta": -0.206,
+  "spearman_magnitude_vs_delta": -0.191,
+  "partial_overlap_vs_delta_controlling_magnitude": -0.13,
+  "median_overlap_synergy": 0.379,
+  "median_overlap_subadditive": 0.4644,
+  "n_synergy": 50,
+  "n_subadditive": 108,
+  "rows": [
+   {
+    "fid": 720575940614763666,
+    "overlap": 0.1506,
+    "magnitude": 31.57,
+    "delta": 0.3118,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632425919,
+    "overlap": 0.5601,
+    "magnitude": 43.763,
+    "delta": 0.3056,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631349335,
+    "overlap": 0.1902,
+    "magnitude": 12.724,
+    "delta": 0.3055,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628972048,
+    "overlap": 0.5148,
+    "magnitude": 34.135,
+    "delta": 0.2448,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940641366517,
+    "overlap": -0.4213,
+    "magnitude": 9.23,
+    "delta": 0.2297,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628853239,
+    "overlap": 0.6571,
+    "magnitude": 27.722,
+    "delta": 0.2234,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940635179871,
+    "overlap": 0.2473,
+    "magnitude": 8.573,
+    "delta": 0.2154,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630579574,
+    "overlap": 0.5314,
+    "magnitude": 33.431,
+    "delta": 0.2101,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621586854,
+    "overlap": -0.0041,
+    "magnitude": 6.892,
+    "delta": 0.2076,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633277209,
+    "overlap": 0.495,
+    "magnitude": 17.291,
+    "delta": 0.2031,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620031366,
+    "overlap": -0.1407,
+    "magnitude": 20.626,
+    "delta": 0.2021,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632047890,
+    "overlap": 0.3711,
+    "magnitude": 52.486,
+    "delta": 0.1853,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940639285949,
+    "overlap": -0.4113,
+    "magnitude": 56.683,
+    "delta": 0.1636,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629888530,
+    "overlap": 0.4609,
+    "magnitude": 34.398,
+    "delta": 0.1619,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625047484,
+    "overlap": 0.0344,
+    "magnitude": 22.68,
+    "delta": 0.1554,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629744599,
+    "overlap": 0.1294,
+    "magnitude": 6.737,
+    "delta": 0.138,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628802069,
+    "overlap": 0.5712,
+    "magnitude": 11.446,
+    "delta": 0.1355,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633143833,
+    "overlap": 0.561,
+    "magnitude": 50.527,
+    "delta": 0.1306,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940611875570,
+    "overlap": 0.5024,
+    "magnitude": 24.484,
+    "delta": 0.1285,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940609407939,
+    "overlap": 0.4968,
+    "magnitude": 18.956,
+    "delta": 0.128,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620874757,
+    "overlap": 0.5498,
+    "magnitude": 45.21,
+    "delta": 0.126,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620481240,
+    "overlap": -0.1991,
+    "magnitude": 12.972,
+    "delta": 0.125,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631406411,
+    "overlap": -0.2022,
+    "magnitude": 10.079,
+    "delta": 0.1242,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619973712,
+    "overlap": 0.4453,
+    "magnitude": 14.558,
+    "delta": 0.1232,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622027222,
+    "overlap": 0.2655,
+    "magnitude": 6.878,
+    "delta": 0.1192,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940618238523,
+    "overlap": 0.2417,
+    "magnitude": 10.673,
+    "delta": 0.1077,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940624966840,
+    "overlap": 0.4064,
+    "magnitude": 6.349,
+    "delta": 0.1049,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617937543,
+    "overlap": 0.5052,
+    "magnitude": 36.615,
+    "delta": 0.1022,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940655014049,
+    "overlap": 0.518,
+    "magnitude": 36.42,
+    "delta": 0.1012,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940655013025,
+    "overlap": 0.5783,
+    "magnitude": 11.464,
+    "delta": 0.1011,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627847752,
+    "overlap": 0.3869,
+    "magnitude": 18.327,
+    "delta": 0.0931,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632889389,
+    "overlap": 0.7373,
+    "magnitude": 30.614,
+    "delta": 0.0931,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616864086,
+    "overlap": 0.3483,
+    "magnitude": 8.016,
+    "delta": 0.0901,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617593233,
+    "overlap": 0.6066,
+    "magnitude": 19.486,
+    "delta": 0.0871,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940623211725,
+    "overlap": 0.467,
+    "magnitude": 29.92,
+    "delta": 0.0801,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625705930,
+    "overlap": -0.508,
+    "magnitude": 11.407,
+    "delta": 0.0788,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620335269,
+    "overlap": -0.0069,
+    "magnitude": 6.936,
+    "delta": 0.0775,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940636828334,
+    "overlap": -0.1108,
+    "magnitude": 11.142,
+    "delta": 0.0758,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631703608,
+    "overlap": 0.5895,
+    "magnitude": 23.786,
+    "delta": 0.074,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940644653348,
+    "overlap": 0.0481,
+    "magnitude": 10.66,
+    "delta": 0.0652,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627099338,
+    "overlap": 0.4159,
+    "magnitude": 8.1,
+    "delta": 0.065,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625867056,
+    "overlap": 0.4463,
+    "magnitude": 11.8,
+    "delta": 0.0635,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940623210445,
+    "overlap": 0.5877,
+    "magnitude": 35.259,
+    "delta": 0.0625,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630868793,
+    "overlap": -0.4574,
+    "magnitude": 7.134,
+    "delta": 0.062,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629561347,
+    "overlap": -0.3865,
+    "magnitude": 3.884,
+    "delta": 0.0607,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940606866377,
+    "overlap": 0.3634,
+    "magnitude": 15.541,
+    "delta": 0.0577,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612423922,
+    "overlap": -0.3148,
+    "magnitude": 8.727,
+    "delta": 0.0542,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940626094350,
+    "overlap": -0.4335,
+    "magnitude": 5.302,
+    "delta": 0.0542,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940643867296,
+    "overlap": -0.4735,
+    "magnitude": 201.372,
+    "delta": 0.0542,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612603289,
+    "overlap": 0.5348,
+    "magnitude": 5.888,
+    "delta": 0.0537,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619877396,
+    "overlap": 0.5662,
+    "magnitude": 23.521,
+    "delta": 0.0477,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639198653,
+    "overlap": 0.5971,
+    "magnitude": 57.838,
+    "delta": 0.0457,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940632365905,
+    "overlap": 0.4352,
+    "magnitude": 12.594,
+    "delta": 0.0434,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940644542880,
+    "overlap": 0.439,
+    "magnitude": 9.186,
+    "delta": 0.0434,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940616885538,
+    "overlap": 0.7643,
+    "magnitude": 28.933,
+    "delta": 0.0424,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940636165624,
+    "overlap": 0.1308,
+    "magnitude": 6.351,
+    "delta": 0.0386,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940616466260,
+    "overlap": 0.5095,
+    "magnitude": 9.832,
+    "delta": 0.0336,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621754367,
+    "overlap": 0.8109,
+    "magnitude": 22.433,
+    "delta": 0.0318,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639332736,
+    "overlap": 0.5956,
+    "magnitude": 17.557,
+    "delta": 0.0318,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940609939780,
+    "overlap": -0.4142,
+    "magnitude": 3.304,
+    "delta": 0.0308,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630865724,
+    "overlap": 0.2273,
+    "magnitude": 4.729,
+    "delta": 0.0303,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621835174,
+    "overlap": 0.563,
+    "magnitude": 9.412,
+    "delta": 0.0271,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628114684,
+    "overlap": 0.543,
+    "magnitude": 13.598,
+    "delta": 0.0245,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940609993284,
+    "overlap": 0.448,
+    "magnitude": 7.634,
+    "delta": 0.023,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620374693,
+    "overlap": 0.1673,
+    "magnitude": 6.894,
+    "delta": 0.023,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628446010,
+    "overlap": 0.2507,
+    "magnitude": 2.656,
+    "delta": 0.023,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639786915,
+    "overlap": 0.0499,
+    "magnitude": 4.403,
+    "delta": 0.023,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633218444,
+    "overlap": 0.4783,
+    "magnitude": 14.068,
+    "delta": 0.0225,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940649829241,
+    "overlap": 0.3851,
+    "magnitude": 9.761,
+    "delta": 0.0225,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620346673,
+    "overlap": -0.0166,
+    "magnitude": 0.236,
+    "delta": 0.0218,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940631283267,
+    "overlap": -0.0134,
+    "magnitude": 0.333,
+    "delta": 0.0218,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621538142,
+    "overlap": 0.4797,
+    "magnitude": 7.742,
+    "delta": 0.0205,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633185567,
+    "overlap": 0.5246,
+    "magnitude": 8.898,
+    "delta": 0.0205,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940614128691,
+    "overlap": 0.4063,
+    "magnitude": 10.407,
+    "delta": 0.0188,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639198397,
+    "overlap": 0.3242,
+    "magnitude": 2.404,
+    "delta": 0.016,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940609405635,
+    "overlap": 0.4677,
+    "magnitude": 5.172,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940614909506,
+    "overlap": -0.3376,
+    "magnitude": 6.2,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940615153494,
+    "overlap": -0.3938,
+    "magnitude": 3.346,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623192781,
+    "overlap": -0.4533,
+    "magnitude": 6.774,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629812346,
+    "overlap": -0.3192,
+    "magnitude": 2.217,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940634210155,
+    "overlap": -0.4697,
+    "magnitude": 4.494,
+    "delta": 0.0152,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940607193986,
+    "overlap": 0.2024,
+    "magnitude": 1.9,
+    "delta": 0.014,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940605513649,
+    "overlap": -0.0302,
+    "magnitude": 0.167,
+    "delta": 0.0107,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940625641402,
+    "overlap": 0.0057,
+    "magnitude": 0.687,
+    "delta": 0.0107,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940626191306,
+    "overlap": 0.1906,
+    "magnitude": 17.839,
+    "delta": 0.0105,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940615671106,
+    "overlap": 0.5427,
+    "magnitude": 19.255,
+    "delta": 0.0097,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940626279742,
+    "overlap": 0.2891,
+    "magnitude": 7.215,
+    "delta": 0.0082,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940644758308,
+    "overlap": 0.4967,
+    "magnitude": 7.345,
+    "delta": 0.0082,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613670893,
+    "overlap": 0.5747,
+    "magnitude": 5.664,
+    "delta": 0.0075,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621667693,
+    "overlap": -0.0324,
+    "magnitude": 4.419,
+    "delta": 0.0075,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940634825623,
+    "overlap": 0.4819,
+    "magnitude": 9.236,
+    "delta": 0.0075,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629810748,
+    "overlap": 0.5331,
+    "magnitude": 6.494,
+    "delta": 0.0062,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620274085,
+    "overlap": 0.0561,
+    "magnitude": 7.659,
+    "delta": 0.005,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940626993694,
+    "overlap": -0.0383,
+    "magnitude": 0.408,
+    "delta": 0.0029,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940660229505,
+    "overlap": 0.5596,
+    "magnitude": 6.654,
+    "delta": 0.0004,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620873793,
+    "overlap": -0.0203,
+    "magnitude": 0.687,
+    "delta": -0.0003,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940631629160,
+    "overlap": -0.1499,
+    "magnitude": 1.641,
+    "delta": -0.0003,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940634301852,
+    "overlap": 0.4832,
+    "magnitude": 5.732,
+    "delta": -0.0003,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940643112333,
+    "overlap": -0.0097,
+    "magnitude": 0.577,
+    "delta": -0.0003,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940647033396,
+    "overlap": -0.1702,
+    "magnitude": 3.032,
+    "delta": -0.0003,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623352063,
+    "overlap": 0.52,
+    "magnitude": 9.809,
+    "delta": -0.0016,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940612558061,
+    "overlap": 0.5714,
+    "magnitude": 11.822,
+    "delta": -0.0036,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940605658033,
+    "overlap": 0.0993,
+    "magnitude": 1.633,
+    "delta": -0.0048,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613929391,
+    "overlap": 0.4856,
+    "magnitude": 4.907,
+    "delta": -0.0069,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940608735241,
+    "overlap": 0.0213,
+    "magnitude": 0.236,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940609133269,
+    "overlap": -0.1845,
+    "magnitude": 0.167,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940611160930,
+    "overlap": -0.0843,
+    "magnitude": 2.5,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940614352278,
+    "overlap": -0.0805,
+    "magnitude": 0.167,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940615623867,
+    "overlap": 0.0738,
+    "magnitude": 0.333,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940617488477,
+    "overlap": 0.0576,
+    "magnitude": 1.748,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620025620,
+    "overlap": 0.2338,
+    "magnitude": 4.123,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621468404,
+    "overlap": 0.0201,
+    "magnitude": 0.333,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940624897516,
+    "overlap": -0.0805,
+    "magnitude": 0.167,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628815381,
+    "overlap": 0.1007,
+    "magnitude": 0.289,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629207963,
+    "overlap": -0.2735,
+    "magnitude": 3.902,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630771449,
+    "overlap": 0.1928,
+    "magnitude": 7.356,
+    "delta": -0.0081,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630233916,
+    "overlap": 0.8285,
+    "magnitude": 32.193,
+    "delta": -0.0083,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940626626597,
+    "overlap": 0.1414,
+    "magnitude": 7.697,
+    "delta": -0.0099,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940610258552,
+    "overlap": 0.2091,
+    "magnitude": 11.478,
+    "delta": -0.0106,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628826128,
+    "overlap": 0.5445,
+    "magnitude": 7.748,
+    "delta": -0.0106,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940637568838,
+    "overlap": 0.8554,
+    "magnitude": 20.379,
+    "delta": -0.0131,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940647228468,
+    "overlap": 0.5592,
+    "magnitude": 9.632,
+    "delta": -0.0139,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940605682790,
+    "overlap": 0.5316,
+    "magnitude": 6.131,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613004402,
+    "overlap": 0.3,
+    "magnitude": 0.85,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621573030,
+    "overlap": 0.3226,
+    "magnitude": 1.106,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940622810153,
+    "overlap": 0.1331,
+    "magnitude": 0.5,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629778554,
+    "overlap": 0.4335,
+    "magnitude": 7.0,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630667372,
+    "overlap": -0.5088,
+    "magnitude": 8.536,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940636809646,
+    "overlap": 0.479,
+    "magnitude": 5.826,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639972816,
+    "overlap": 0.0249,
+    "magnitude": 3.21,
+    "delta": -0.0159,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940619898526,
+    "overlap": 0.2743,
+    "magnitude": 3.055,
+    "delta": -0.0171,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639259967,
+    "overlap": 0.5438,
+    "magnitude": 46.687,
+    "delta": -0.0184,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940635839077,
+    "overlap": 0.519,
+    "magnitude": 9.994,
+    "delta": -0.0229,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940610054980,
+    "overlap": 0.3617,
+    "magnitude": 6.766,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613687789,
+    "overlap": 0.3244,
+    "magnitude": 6.196,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620170887,
+    "overlap": 0.5043,
+    "magnitude": 8.365,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628743752,
+    "overlap": 0.184,
+    "magnitude": 3.379,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629421415,
+    "overlap": 0.326,
+    "magnitude": 1.667,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940635239672,
+    "overlap": 0.5585,
+    "magnitude": 5.593,
+    "delta": -0.0237,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630664556,
+    "overlap": 0.4438,
+    "magnitude": 9.049,
+    "delta": -0.0242,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940617552057,
+    "overlap": 0.4973,
+    "magnitude": 10.294,
+    "delta": -0.0249,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940607451081,
+    "overlap": 0.3237,
+    "magnitude": 9.856,
+    "delta": -0.0262,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940607272649,
+    "overlap": 0.4949,
+    "magnitude": 39.769,
+    "delta": -0.0266,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940612208858,
+    "overlap": 0.4189,
+    "magnitude": 7.846,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623209165,
+    "overlap": 0.4871,
+    "magnitude": 6.103,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940627107271,
+    "overlap": 0.0351,
+    "magnitude": 5.947,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940629000783,
+    "overlap": 0.4337,
+    "magnitude": 6.856,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630665210,
+    "overlap": 0.49,
+    "magnitude": 7.87,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630674038,
+    "overlap": 0.416,
+    "magnitude": 6.124,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630683385,
+    "overlap": 0.3883,
+    "magnitude": 4.086,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940631108303,
+    "overlap": -0.4923,
+    "magnitude": 6.137,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940636895406,
+    "overlap": 0.5464,
+    "magnitude": 5.6,
+    "delta": -0.0315,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940625861660,
+    "overlap": -0.2114,
+    "magnitude": 7.893,
+    "delta": -0.0322,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940619588568,
+    "overlap": 0.1454,
+    "magnitude": 3.941,
+    "delta": -0.0335,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940636053678,
+    "overlap": 0.3631,
+    "magnitude": 12.229,
+    "delta": -0.038,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940610611246,
+    "overlap": 0.0613,
+    "magnitude": 2.555,
+    "delta": -0.0392,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633293025,
+    "overlap": 0.3392,
+    "magnitude": 2.068,
+    "delta": -0.0392,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633316563,
+    "overlap": 0.1728,
+    "magnitude": 3.488,
+    "delta": -0.0392,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940635360924,
+    "overlap": 0.4271,
+    "magnitude": 8.086,
+    "delta": -0.0392,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940607386290,
+    "overlap": 0.5275,
+    "magnitude": 9.595,
+    "delta": -0.0405,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633612698,
+    "overlap": -0.1871,
+    "magnitude": 6.009,
+    "delta": -0.0413,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940631918649,
+    "overlap": 0.5111,
+    "magnitude": 10.216,
+    "delta": -0.043,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940612357618,
+    "overlap": 0.3267,
+    "magnitude": 8.425,
+    "delta": -0.0438,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940610000964,
+    "overlap": 0.4288,
+    "magnitude": 6.037,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613943215,
+    "overlap": 0.3122,
+    "magnitude": 2.068,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620805046,
+    "overlap": 0.2778,
+    "magnitude": 2.375,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940627410451,
+    "overlap": 0.2151,
+    "magnitude": 4.81,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940631997032,
+    "overlap": 0.7228,
+    "magnitude": 25.227,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940642449909,
+    "overlap": 0.5842,
+    "magnitude": 7.004,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940647030324,
+    "overlap": 0.4284,
+    "magnitude": 7.322,
+    "delta": -0.047,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940612670570,
+    "overlap": 0.6755,
+    "magnitude": 31.194,
+    "delta": -0.0473,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940645352814,
+    "overlap": 0.1471,
+    "magnitude": 12.16,
+    "delta": -0.0483,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940611436408,
+    "overlap": 0.2726,
+    "magnitude": 5.89,
+    "delta": -0.0528,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940619671616,
+    "overlap": 0.3278,
+    "magnitude": 5.37,
+    "delta": -0.0548,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940621422518,
+    "overlap": 0.3732,
+    "magnitude": 6.976,
+    "delta": -0.0548,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940626826288,
+    "overlap": 0.3183,
+    "magnitude": 5.968,
+    "delta": -0.0548,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940634645600,
+    "overlap": 0.4575,
+    "magnitude": 9.715,
+    "delta": -0.0548,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940618696989,
+    "overlap": 0.3438,
+    "magnitude": 11.549,
+    "delta": -0.0553,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940612036837,
+    "overlap": 0.3054,
+    "magnitude": 9.765,
+    "delta": -0.0593,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632722771,
+    "overlap": 0.2715,
+    "magnitude": 9.845,
+    "delta": -0.0606,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940612888178,
+    "overlap": 0.2875,
+    "magnitude": 5.703,
+    "delta": -0.0626,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940615715003,
+    "overlap": 0.2703,
+    "magnitude": 6.574,
+    "delta": -0.0626,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940622624214,
+    "overlap": 0.4287,
+    "magnitude": 7.608,
+    "delta": -0.0626,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632118156,
+    "overlap": 0.4784,
+    "magnitude": 9.878,
+    "delta": -0.0626,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940645045527,
+    "overlap": 0.3965,
+    "magnitude": 6.446,
+    "delta": -0.0626,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625178768,
+    "overlap": 0.7324,
+    "magnitude": 21.128,
+    "delta": -0.0631,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940620673985,
+    "overlap": 0.0475,
+    "magnitude": 9.43,
+    "delta": -0.0659,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632252743,
+    "overlap": 0.467,
+    "magnitude": 21.16,
+    "delta": -0.0691,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624484796,
+    "overlap": 0.3832,
+    "magnitude": 13.992,
+    "delta": -0.0696,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940618726171,
+    "overlap": 0.5775,
+    "magnitude": 7.863,
+    "delta": -0.0704,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940616864217,
+    "overlap": 0.2132,
+    "magnitude": 13.147,
+    "delta": -0.0709,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940640978048,
+    "overlap": -0.0195,
+    "magnitude": 0.833,
+    "delta": -0.0777,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940618165019,
+    "overlap": 0.0243,
+    "magnitude": 8.223,
+    "delta": -0.0782,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940630806267,
+    "overlap": 0.5188,
+    "magnitude": 7.703,
+    "delta": -0.0782,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632304711,
+    "overlap": 0.5755,
+    "magnitude": 9.61,
+    "delta": -0.0782,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624023188,
+    "overlap": 0.5067,
+    "magnitude": 19.86,
+    "delta": -0.0807,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940628997123,
+    "overlap": 0.5114,
+    "magnitude": 12.71,
+    "delta": -0.0827,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940629176663,
+    "overlap": 0.635,
+    "magnitude": 19.273,
+    "delta": -0.0847,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940606607234,
+    "overlap": 0.4964,
+    "magnitude": 12.023,
+    "delta": -0.0852,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940611548878,
+    "overlap": 0.366,
+    "magnitude": 7.478,
+    "delta": -0.086,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940631999080,
+    "overlap": 0.2345,
+    "magnitude": 10.65,
+    "delta": -0.086,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940660223873,
+    "overlap": 0.2926,
+    "magnitude": 14.774,
+    "delta": -0.086,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624906483,
+    "overlap": 0.5274,
+    "magnitude": 13.912,
+    "delta": -0.0905,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940620714150,
+    "overlap": 0.5106,
+    "magnitude": 17.258,
+    "delta": -0.093,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940638103349,
+    "overlap": 0.3575,
+    "magnitude": 45.46,
+    "delta": -0.093,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625175054,
+    "overlap": 0.4865,
+    "magnitude": 10.794,
+    "delta": -0.0937,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940631168057,
+    "overlap": 0.3676,
+    "magnitude": 7.652,
+    "delta": -0.0937,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940610677828,
+    "overlap": 0.5317,
+    "magnitude": 15.351,
+    "delta": -0.0983,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940615023535,
+    "overlap": 0.4987,
+    "magnitude": 14.302,
+    "delta": -0.0983,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940613347299,
+    "overlap": 0.3918,
+    "magnitude": 15.603,
+    "delta": -0.0995,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625045180,
+    "overlap": 0.5575,
+    "magnitude": 24.667,
+    "delta": -0.1015,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940628676457,
+    "overlap": 0.4648,
+    "magnitude": 9.215,
+    "delta": -0.1015,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940626495746,
+    "overlap": 0.5419,
+    "magnitude": 13.086,
+    "delta": -0.1023,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940630797113,
+    "overlap": 0.6967,
+    "magnitude": 16.47,
+    "delta": -0.1023,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940642428045,
+    "overlap": 0.6236,
+    "magnitude": 11.21,
+    "delta": -0.1023,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940635578303,
+    "overlap": 0.3248,
+    "magnitude": 16.651,
+    "delta": -0.1033,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940639425112,
+    "overlap": 0.3078,
+    "magnitude": 6.708,
+    "delta": -0.1035,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940631714119,
+    "overlap": 0.4993,
+    "magnitude": 12.757,
+    "delta": -0.1048,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940637578853,
+    "overlap": 0.4867,
+    "magnitude": 9.547,
+    "delta": -0.1068,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940630291767,
+    "overlap": 0.4279,
+    "magnitude": 13.332,
+    "delta": -0.1073,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632159519,
+    "overlap": 0.4045,
+    "magnitude": 14.509,
+    "delta": -0.108,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940626835146,
+    "overlap": 0.4698,
+    "magnitude": 42.91,
+    "delta": -0.1085,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940621777390,
+    "overlap": 0.3884,
+    "magnitude": 9.568,
+    "delta": -0.1093,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940622348156,
+    "overlap": 0.6462,
+    "magnitude": 19.409,
+    "delta": -0.1093,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940619114048,
+    "overlap": 0.3724,
+    "magnitude": 11.37,
+    "delta": -0.1101,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624623287,
+    "overlap": 0.4802,
+    "magnitude": 14.472,
+    "delta": -0.1106,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940610482883,
+    "overlap": 0.2715,
+    "magnitude": 13.439,
+    "delta": -0.1113,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940628648809,
+    "overlap": 0.4525,
+    "magnitude": 11.78,
+    "delta": -0.1126,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940617629841,
+    "overlap": 0.4782,
+    "magnitude": 9.002,
+    "delta": -0.1146,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940640649691,
+    "overlap": 0.6152,
+    "magnitude": 28.744,
+    "delta": -0.1161,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940615296818,
+    "overlap": 0.6285,
+    "magnitude": 9.271,
+    "delta": -0.1171,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940622116705,
+    "overlap": 0.6196,
+    "magnitude": 13.642,
+    "delta": -0.1171,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940627812168,
+    "overlap": 0.3213,
+    "magnitude": 9.684,
+    "delta": -0.1171,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940619173534,
+    "overlap": 0.4775,
+    "magnitude": 16.4,
+    "delta": -0.1196,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940621502051,
+    "overlap": 0.7801,
+    "magnitude": 36.388,
+    "delta": -0.1231,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940612906518,
+    "overlap": -0.3613,
+    "magnitude": 75.791,
+    "delta": -0.1247,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940626278974,
+    "overlap": 0.3384,
+    "magnitude": 10.335,
+    "delta": -0.1249,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940614730914,
+    "overlap": 0.4372,
+    "magnitude": 13.89,
+    "delta": -0.1314,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940647518340,
+    "overlap": 0.4105,
+    "magnitude": 13.512,
+    "delta": -0.1314,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940610803554,
+    "overlap": 0.464,
+    "magnitude": 14.122,
+    "delta": -0.1327,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940644968215,
+    "overlap": 0.5077,
+    "magnitude": 13.952,
+    "delta": -0.1327,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940616018956,
+    "overlap": 0.4064,
+    "magnitude": 8.699,
+    "delta": -0.1399,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940618472261,
+    "overlap": 0.5899,
+    "magnitude": 18.106,
+    "delta": -0.1404,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940620780272,
+    "overlap": 0.6102,
+    "magnitude": 16.294,
+    "delta": -0.1404,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625875504,
+    "overlap": 0.3656,
+    "magnitude": 12.727,
+    "delta": -0.1404,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632602532,
+    "overlap": 0.6484,
+    "magnitude": 25.052,
+    "delta": -0.1404,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940608498780,
+    "overlap": 0.5581,
+    "magnitude": 15.1,
+    "delta": -0.1437,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940623453959,
+    "overlap": 0.4322,
+    "magnitude": 20.962,
+    "delta": -0.1455,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940627086594,
+    "overlap": 0.5118,
+    "magnitude": 10.603,
+    "delta": -0.1457,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940609915204,
+    "overlap": 0.5501,
+    "magnitude": 10.134,
+    "delta": -0.147,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940637144944,
+    "overlap": 0.4168,
+    "magnitude": 23.507,
+    "delta": -0.15,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625737776,
+    "overlap": 0.2419,
+    "magnitude": 13.65,
+    "delta": -0.1548,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940610001220,
+    "overlap": 0.5241,
+    "magnitude": 16.831,
+    "delta": -0.156,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624963786,
+    "overlap": 0.8734,
+    "magnitude": 36.017,
+    "delta": -0.1593,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940638202345,
+    "overlap": 0.7719,
+    "magnitude": 27.255,
+    "delta": -0.1598,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632936332,
+    "overlap": 0.5077,
+    "magnitude": 13.577,
+    "delta": -0.16,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625580988,
+    "overlap": 0.3861,
+    "magnitude": 10.561,
+    "delta": -0.1633,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940628755815,
+    "overlap": 0.5614,
+    "magnitude": 17.513,
+    "delta": -0.1638,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940627779983,
+    "overlap": 0.3486,
+    "magnitude": 13.726,
+    "delta": -0.1658,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940645047831,
+    "overlap": 0.432,
+    "magnitude": 14.224,
+    "delta": -0.1691,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940624600840,
+    "overlap": 0.5041,
+    "magnitude": 9.344,
+    "delta": -0.1711,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940625874992,
+    "overlap": 0.589,
+    "magnitude": 20.308,
+    "delta": -0.1716,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940631959097,
+    "overlap": 0.469,
+    "magnitude": 24.264,
+    "delta": -0.1781,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940618574749,
+    "overlap": 0.2118,
+    "magnitude": 12.562,
+    "delta": -0.1846,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940628598121,
+    "overlap": 0.6207,
+    "magnitude": 19.736,
+    "delta": -0.1871,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940635055039,
+    "overlap": 0.4202,
+    "magnitude": 16.428,
+    "delta": -0.1957,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940617000768,
+    "overlap": 0.9063,
+    "magnitude": 40.023,
+    "delta": -0.1974,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940632648612,
+    "overlap": -0.2483,
+    "magnitude": 25.201,
+    "delta": -0.1985,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940630820919,
+    "overlap": 0.4107,
+    "magnitude": 16.379,
+    "delta": -0.201,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940641480949,
+    "overlap": 0.3523,
+    "magnitude": 15.168,
+    "delta": -0.2042,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940622235425,
+    "overlap": 0.4989,
+    "magnitude": 12.267,
+    "delta": -0.2088,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940612692633,
+    "overlap": 0.8838,
+    "magnitude": 32.997,
+    "delta": -0.2105,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940616103218,
+    "overlap": 0.5354,
+    "magnitude": 11.098,
+    "delta": -0.2165,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940621261296,
+    "overlap": 0.4985,
+    "magnitude": 15.649,
+    "delta": -0.2178,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940619473624,
+    "overlap": 0.7202,
+    "magnitude": 31.879,
+    "delta": -0.2339,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940621399899,
+    "overlap": 0.5287,
+    "magnitude": 12.403,
+    "delta": -0.2791,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940622695448,
+    "overlap": -0.3807,
+    "magnitude": 45.537,
+    "delta": -0.2977,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940652580086,
+    "overlap": -0.3519,
+    "magnitude": 29.486,
+    "delta": -0.3409,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940640589171,
+    "overlap": -0.3471,
+    "magnitude": 181.858,
+    "delta": -0.4292,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940627383685,
+    "overlap": -0.4315,
+    "magnitude": 29.073,
+    "delta": -0.5825,
+    "verdict": "亚可加"
+   }
+  ]
+ },
+ "水 160 Hz × CB0051": {
+  "label": "水 160 Hz × CB0051",
+  "n": 182,
+  "n_active": 216,
+  "spearman_overlap_vs_delta": -0.142,
+  "spearman_magnitude_vs_delta": 0.474,
+  "partial_overlap_vs_delta_controlling_magnitude": -0.205,
+  "median_overlap_synergy": -0.1959,
+  "median_overlap_subadditive": -0.3469,
+  "n_synergy": 139,
+  "n_subadditive": 6,
+  "rows": [
+   {
+    "fid": 720575940616103218,
+    "overlap": -0.5776,
+    "magnitude": 32.499,
+    "delta": 1.0429,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632648612,
+    "overlap": -0.3715,
+    "magnitude": 28.224,
+    "delta": 0.5086,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940640589171,
+    "overlap": -0.5259,
+    "magnitude": 31.882,
+    "delta": 0.4075,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620445062,
+    "overlap": 0.1967,
+    "magnitude": 149.6,
+    "delta": 0.3953,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940610001220,
+    "overlap": 0.579,
+    "magnitude": 10.022,
+    "delta": 0.3436,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621771041,
+    "overlap": -0.3704,
+    "magnitude": 21.036,
+    "delta": 0.3253,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940652580086,
+    "overlap": -0.3583,
+    "magnitude": 25.525,
+    "delta": 0.3203,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940611858906,
+    "overlap": -0.0761,
+    "magnitude": 11.359,
+    "delta": 0.3193,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940638103349,
+    "overlap": -0.024,
+    "magnitude": 34.304,
+    "delta": 0.3124,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619588568,
+    "overlap": -0.384,
+    "magnitude": 29.953,
+    "delta": 0.3097,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612950568,
+    "overlap": 0.0755,
+    "magnitude": 34.073,
+    "delta": 0.304,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617593233,
+    "overlap": 0.3704,
+    "magnitude": 24.494,
+    "delta": 0.303,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619973712,
+    "overlap": -0.0904,
+    "magnitude": 7.322,
+    "delta": 0.286,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620481240,
+    "overlap": -0.438,
+    "magnitude": 14.699,
+    "delta": 0.2838,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630579574,
+    "overlap": -0.3241,
+    "magnitude": 9.994,
+    "delta": 0.2713,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631703608,
+    "overlap": 0.3312,
+    "magnitude": 18.372,
+    "delta": 0.2705,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940607386290,
+    "overlap": -0.258,
+    "magnitude": 7.812,
+    "delta": 0.2703,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940611549902,
+    "overlap": -0.2386,
+    "magnitude": 11.775,
+    "delta": 0.2703,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940605162924,
+    "overlap": -0.0036,
+    "magnitude": 6.466,
+    "delta": 0.2662,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619877396,
+    "overlap": -0.496,
+    "magnitude": 8.849,
+    "delta": 0.2609,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627847752,
+    "overlap": -0.4351,
+    "magnitude": 8.597,
+    "delta": 0.2609,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633612698,
+    "overlap": -0.2104,
+    "magnitude": 7.585,
+    "delta": 0.2558,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617857694,
+    "overlap": 0.0762,
+    "magnitude": 21.163,
+    "delta": 0.2548,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940635839077,
+    "overlap": -0.0877,
+    "magnitude": 9.365,
+    "delta": 0.2495,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620633070,
+    "overlap": -0.1057,
+    "magnitude": 7.8,
+    "delta": 0.2485,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612579053,
+    "overlap": 0.0564,
+    "magnitude": 25.994,
+    "delta": 0.2456,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627383685,
+    "overlap": -0.2783,
+    "magnitude": 13.87,
+    "delta": 0.2442,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940626191306,
+    "overlap": -0.1458,
+    "magnitude": 11.811,
+    "delta": 0.2391,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940637763135,
+    "overlap": -0.3618,
+    "magnitude": 10.412,
+    "delta": 0.2391,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621761729,
+    "overlap": -0.1321,
+    "magnitude": 7.878,
+    "delta": 0.2381,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628784066,
+    "overlap": -0.0749,
+    "magnitude": 7.1,
+    "delta": 0.2381,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940626476305,
+    "overlap": -0.3878,
+    "magnitude": 10.847,
+    "delta": 0.2338,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630553415,
+    "overlap": 0.103,
+    "magnitude": 36.496,
+    "delta": 0.2238,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940636346487,
+    "overlap": -0.3656,
+    "magnitude": 10.522,
+    "delta": 0.2234,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631349335,
+    "overlap": 0.0071,
+    "magnitude": 5.583,
+    "delta": 0.2225,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940624247787,
+    "overlap": 0.2578,
+    "magnitude": 6.229,
+    "delta": 0.2162,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620874757,
+    "overlap": -0.0767,
+    "magnitude": 6.938,
+    "delta": 0.2111,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622541005,
+    "overlap": -0.3105,
+    "magnitude": 9.372,
+    "delta": 0.2099,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940614467751,
+    "overlap": -0.1611,
+    "magnitude": 12.652,
+    "delta": 0.2068,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629888530,
+    "overlap": -0.0792,
+    "magnitude": 45.538,
+    "delta": 0.1999,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622869799,
+    "overlap": -0.4816,
+    "magnitude": 5.897,
+    "delta": 0.1995,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622486922,
+    "overlap": 0.1147,
+    "magnitude": 33.219,
+    "delta": 0.1935,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940641366517,
+    "overlap": -0.2518,
+    "magnitude": 23.648,
+    "delta": 0.1889,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627679765,
+    "overlap": -0.1881,
+    "magnitude": 17.126,
+    "delta": 0.1881,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940635172191,
+    "overlap": 0.0393,
+    "magnitude": 32.613,
+    "delta": 0.1821,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940613996959,
+    "overlap": 0.0269,
+    "magnitude": 30.32,
+    "delta": 0.1787,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616167730,
+    "overlap": -0.1338,
+    "magnitude": 11.109,
+    "delta": 0.1776,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940615671106,
+    "overlap": -0.0777,
+    "magnitude": 4.239,
+    "delta": 0.1766,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630799042,
+    "overlap": -0.4923,
+    "magnitude": 20.771,
+    "delta": 0.1764,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940644965399,
+    "overlap": 0.0608,
+    "magnitude": 37.739,
+    "delta": 0.1758,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628972048,
+    "overlap": 0.1646,
+    "magnitude": 6.223,
+    "delta": 0.1746,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630689644,
+    "overlap": -0.3043,
+    "magnitude": 9.846,
+    "delta": 0.1693,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940630820919,
+    "overlap": -0.0187,
+    "magnitude": 5.878,
+    "delta": 0.1693,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628114684,
+    "overlap": -0.1911,
+    "magnitude": 8.615,
+    "delta": 0.1682,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940614128691,
+    "overlap": -0.1315,
+    "magnitude": 11.304,
+    "delta": 0.1599,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619898526,
+    "overlap": -0.5275,
+    "magnitude": 7.608,
+    "delta": 0.1589,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628648809,
+    "overlap": -0.4665,
+    "magnitude": 4.862,
+    "delta": 0.1589,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621261296,
+    "overlap": -0.1226,
+    "magnitude": 6.212,
+    "delta": 0.1578,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631959097,
+    "overlap": -0.0496,
+    "magnitude": 10.792,
+    "delta": 0.1568,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940660292225,
+    "overlap": 0.0889,
+    "magnitude": 18.818,
+    "delta": 0.1497,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940613786774,
+    "overlap": 0.1418,
+    "magnitude": 15.243,
+    "delta": 0.1486,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621399899,
+    "overlap": -0.2422,
+    "magnitude": 4.778,
+    "delta": 0.1484,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627404858,
+    "overlap": -0.2754,
+    "magnitude": 6.604,
+    "delta": 0.1484,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632030008,
+    "overlap": -0.3122,
+    "magnitude": 5.091,
+    "delta": 0.1484,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940618936710,
+    "overlap": 0.2234,
+    "magnitude": 6.727,
+    "delta": 0.1454,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940606002609,
+    "overlap": 0.1581,
+    "magnitude": 19.875,
+    "delta": 0.1435,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617494877,
+    "overlap": -0.2684,
+    "magnitude": 6.331,
+    "delta": 0.1391,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625861660,
+    "overlap": -0.4524,
+    "magnitude": 6.623,
+    "delta": 0.1391,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940609407939,
+    "overlap": -0.359,
+    "magnitude": 3.27,
+    "delta": 0.137,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616673366,
+    "overlap": -0.0479,
+    "magnitude": 11.724,
+    "delta": 0.137,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940618726171,
+    "overlap": -0.3288,
+    "magnitude": 5.805,
+    "delta": 0.137,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627099338,
+    "overlap": -0.4519,
+    "magnitude": 5.608,
+    "delta": 0.137,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940628478736,
+    "overlap": -0.405,
+    "magnitude": 15.213,
+    "delta": 0.1348,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612648106,
+    "overlap": -0.1917,
+    "magnitude": 82.816,
+    "delta": 0.1327,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621329328,
+    "overlap": -0.2365,
+    "magnitude": 9.519,
+    "delta": 0.1297,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620673985,
+    "overlap": -0.4844,
+    "magnitude": 4.868,
+    "delta": 0.1276,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940626278974,
+    "overlap": -0.4773,
+    "magnitude": 3.902,
+    "delta": 0.1276,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619696731,
+    "overlap": -0.5863,
+    "magnitude": 4.702,
+    "delta": 0.1266,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940607451081,
+    "overlap": -0.414,
+    "magnitude": 3.1,
+    "delta": 0.1256,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631309866,
+    "overlap": -0.3286,
+    "magnitude": 8.723,
+    "delta": 0.1203,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633518176,
+    "overlap": -0.1764,
+    "magnitude": 12.081,
+    "delta": 0.1203,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940614660519,
+    "overlap": 0.4682,
+    "magnitude": 7.23,
+    "delta": 0.1194,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940639191017,
+    "overlap": -0.1571,
+    "magnitude": 35.551,
+    "delta": 0.1182,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940649829241,
+    "overlap": -0.4408,
+    "magnitude": 3.644,
+    "delta": 0.1172,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940639285949,
+    "overlap": -0.3255,
+    "magnitude": 11.114,
+    "delta": 0.117,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940607272649,
+    "overlap": -0.1998,
+    "magnitude": 4.028,
+    "delta": 0.1162,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629744599,
+    "overlap": -0.0412,
+    "magnitude": 5.482,
+    "delta": 0.1162,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612036837,
+    "overlap": -0.3505,
+    "magnitude": 2.23,
+    "delta": 0.1141,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940636828334,
+    "overlap": 0.2817,
+    "magnitude": 13.589,
+    "delta": 0.1141,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632877869,
+    "overlap": -0.011,
+    "magnitude": 42.778,
+    "delta": 0.1129,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940634093337,
+    "overlap": 0.0593,
+    "magnitude": 16.665,
+    "delta": 0.1121,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629852866,
+    "overlap": 0.0242,
+    "magnitude": 22.581,
+    "delta": 0.107,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940613347299,
+    "overlap": -0.1478,
+    "magnitude": 3.532,
+    "delta": 0.1068,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632159519,
+    "overlap": -0.2465,
+    "magnitude": 3.399,
+    "delta": 0.1068,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940647518340,
+    "overlap": -0.5595,
+    "magnitude": 3.317,
+    "delta": 0.1068,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940639198653,
+    "overlap": 0.0933,
+    "magnitude": 7.697,
+    "delta": 0.1048,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940631898285,
+    "overlap": 0.0626,
+    "magnitude": 25.223,
+    "delta": 0.1009,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940637578853,
+    "overlap": -0.1616,
+    "magnitude": 3.848,
+    "delta": 0.0974,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940624966840,
+    "overlap": -0.2914,
+    "magnitude": 3.812,
+    "delta": 0.0964,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633277209,
+    "overlap": 0.2108,
+    "magnitude": 5.963,
+    "delta": 0.0964,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617629841,
+    "overlap": 0.1428,
+    "magnitude": 3.866,
+    "delta": 0.0954,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940633356883,
+    "overlap": -0.244,
+    "magnitude": 9.909,
+    "delta": 0.0954,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940618238523,
+    "overlap": -0.064,
+    "magnitude": 4.052,
+    "delta": 0.088,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940644542880,
+    "overlap": -0.0582,
+    "magnitude": 5.829,
+    "delta": 0.088,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940621777390,
+    "overlap": -0.3142,
+    "magnitude": 2.995,
+    "delta": 0.086,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940644653348,
+    "overlap": -0.4111,
+    "magnitude": 3.082,
+    "delta": 0.086,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616177458,
+    "overlap": 0.0919,
+    "magnitude": 23.748,
+    "delta": 0.0829,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940626835146,
+    "overlap": 0.594,
+    "magnitude": 4.764,
+    "delta": 0.0829,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940634796536,
+    "overlap": -0.0232,
+    "magnitude": 21.8,
+    "delta": 0.0829,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940640032600,
+    "overlap": -0.4599,
+    "magnitude": 23.016,
+    "delta": 0.0815,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620441024,
+    "overlap": 0.1511,
+    "magnitude": 5.457,
+    "delta": 0.0776,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940606607234,
+    "overlap": -0.5112,
+    "magnitude": 2.082,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940610677828,
+    "overlap": -0.5157,
+    "magnitude": 2.173,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612558061,
+    "overlap": -0.4962,
+    "magnitude": 2.205,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940617552057,
+    "overlap": -0.5032,
+    "magnitude": 2.102,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619114048,
+    "overlap": -0.2357,
+    "magnitude": 3.965,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620274085,
+    "overlap": -0.5112,
+    "magnitude": 2.082,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622235425,
+    "overlap": -0.5016,
+    "magnitude": 2.088,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625705930,
+    "overlap": -0.3873,
+    "magnitude": 2.309,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940655013025,
+    "overlap": -0.468,
+    "magnitude": 2.16,
+    "delta": 0.0756,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940622695448,
+    "overlap": -0.1959,
+    "magnitude": 9.947,
+    "delta": 0.0733,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627582724,
+    "overlap": 0.0159,
+    "magnitude": 25.737,
+    "delta": 0.0682,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940620031366,
+    "overlap": -0.2193,
+    "magnitude": 5.08,
+    "delta": 0.0672,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940614763666,
+    "overlap": 0.0083,
+    "magnitude": 3.189,
+    "delta": 0.0652,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940623453959,
+    "overlap": -0.4302,
+    "magnitude": 1.716,
+    "delta": 0.0652,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940632252743,
+    "overlap": -0.1816,
+    "magnitude": 3.826,
+    "delta": 0.0652,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940641480949,
+    "overlap": -0.3094,
+    "magnitude": 2.472,
+    "delta": 0.0652,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625861168,
+    "overlap": 0.1065,
+    "magnitude": 25.856,
+    "delta": 0.0643,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616466260,
+    "overlap": -0.4165,
+    "magnitude": 1.333,
+    "delta": 0.0641,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940612888178,
+    "overlap": -0.3904,
+    "magnitude": 1.848,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940616864217,
+    "overlap": -0.3897,
+    "magnitude": 1.434,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940619173534,
+    "overlap": -0.3984,
+    "magnitude": 1.878,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627410451,
+    "overlap": -0.3411,
+    "magnitude": 1.384,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940629810748,
+    "overlap": -0.3389,
+    "magnitude": 1.472,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940645047831,
+    "overlap": -0.1409,
+    "magnitude": 1.841,
+    "delta": 0.0547,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940624484796,
+    "overlap": 0.1411,
+    "magnitude": 0.236,
+    "delta": 0.0537,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940625580988,
+    "overlap": 0.0998,
+    "magnitude": 0.333,
+    "delta": 0.0537,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940627812168,
+    "overlap": -0.0599,
+    "magnitude": 0.167,
+    "delta": 0.0537,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940636053678,
+    "overlap": -0.2083,
+    "magnitude": 12.996,
+    "delta": 0.0505,
+    "verdict": "协同"
+   },
+   {
+    "fid": 720575940624014483,
+    "overlap": 0.0321,
+    "magnitude": 16.069,
+    "delta": 0.0494,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940627083294,
+    "overlap": 0.1028,
+    "magnitude": 3.073,
+    "delta": 0.0454,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940609915204,
+    "overlap": -0.0488,
+    "magnitude": 2.179,
+    "delta": 0.0443,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940615715003,
+    "overlap": -0.077,
+    "magnitude": 1.641,
+    "delta": 0.0443,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940625737776,
+    "overlap": -0.3502,
+    "magnitude": 1.491,
+    "delta": 0.0443,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940636809646,
+    "overlap": -0.0958,
+    "magnitude": 1.667,
+    "delta": 0.0443,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639425112,
+    "overlap": -0.077,
+    "magnitude": 1.641,
+    "delta": 0.0443,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940618696989,
+    "overlap": -0.1615,
+    "magnitude": 19.358,
+    "delta": 0.0441,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940608498780,
+    "overlap": -0.1548,
+    "magnitude": 0.408,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940610482883,
+    "overlap": 0.0643,
+    "magnitude": 2.121,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940612603289,
+    "overlap": -0.0141,
+    "magnitude": 0.471,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940614730914,
+    "overlap": 0.0,
+    "magnitude": 0.707,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940618165019,
+    "overlap": -0.1995,
+    "magnitude": 0.167,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620096171,
+    "overlap": 0.031,
+    "magnitude": 2.255,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940620805046,
+    "overlap": -0.0244,
+    "magnitude": 0.408,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940626919144,
+    "overlap": 0.0832,
+    "magnitude": 0.799,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940627779983,
+    "overlap": 0.301,
+    "magnitude": 3.005,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628826128,
+    "overlap": -0.2063,
+    "magnitude": 1.08,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940628997123,
+    "overlap": -0.1693,
+    "magnitude": 0.236,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630865724,
+    "overlap": 0.0599,
+    "magnitude": 0.167,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940633185567,
+    "overlap": 0.0599,
+    "magnitude": 0.167,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940639259967,
+    "overlap": 0.2715,
+    "magnitude": 1.225,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940640978048,
+    "overlap": 0.02,
+    "magnitude": 0.167,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940644968215,
+    "overlap": 0.1263,
+    "magnitude": 1.106,
+    "delta": 0.0339,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940611436408,
+    "overlap": 0.0299,
+    "magnitude": 1.225,
+    "delta": 0.0235,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623352063,
+    "overlap": 0.3864,
+    "magnitude": 2.409,
+    "delta": 0.0235,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940630347628,
+    "overlap": 0.2658,
+    "magnitude": 5.467,
+    "delta": 0.0225,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623617973,
+    "overlap": -0.0395,
+    "magnitude": 44.312,
+    "delta": 0.0151,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940624532408,
+    "overlap": 0.0427,
+    "magnitude": 2.415,
+    "delta": 0.0141,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940623211725,
+    "overlap": 0.6655,
+    "magnitude": 9.919,
+    "delta": 0.0,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940621835174,
+    "overlap": 0.0266,
+    "magnitude": 0.5,
+    "delta": -0.0057,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940622335197,
+    "overlap": -0.2516,
+    "magnitude": 55.215,
+    "delta": -0.0059,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940655014049,
+    "overlap": 0.1606,
+    "magnitude": 53.243,
+    "delta": -0.0094,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940614483879,
+    "overlap": -0.2846,
+    "magnitude": 3.073,
+    "delta": -0.0141,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940613898449,
+    "overlap": -0.1089,
+    "magnitude": 2.198,
+    "delta": -0.0245,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940611015122,
+    "overlap": 0.3064,
+    "magnitude": 3.028,
+    "delta": -0.0255,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940625203504,
+    "overlap": 0.1667,
+    "magnitude": 18.67,
+    "delta": -0.04,
+    "verdict": "中间"
+   },
+   {
+    "fid": 720575940622902535,
+    "overlap": 0.0124,
+    "magnitude": 25.398,
+    "delta": -0.0712,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940612906518,
+    "overlap": -0.4311,
+    "magnitude": 12.311,
+    "delta": -0.1226,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940639274147,
+    "overlap": -0.0296,
+    "magnitude": 158.415,
+    "delta": -0.1577,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940620061793,
+    "overlap": -0.3997,
+    "magnitude": 96.413,
+    "delta": -0.5062,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940617755220,
+    "overlap": -0.2942,
+    "magnitude": 53.311,
+    "delta": -0.5148,
+    "verdict": "亚可加"
+   },
+   {
+    "fid": 720575940633170969,
+    "overlap": -0.5066,
+    "magnitude": 139.345,
+    "delta": -1.5575,
+    "verdict": "亚可加"
+   }
+  ]
+ }
+}
