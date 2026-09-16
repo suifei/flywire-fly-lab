@@ -197,7 +197,10 @@ def main():
     ap.add_argument("--window_ms", type=float, default=15.0, help="脑-身同步周期")
     ap.add_argument("--no-looming", action="store_true")
     ap.add_argument("--device", default="auto")
-    ap.add_argument("--lc4_gain", type=float, default=4000.0, help="Hz / (暗面积比例/秒)")
+    ap.add_argument("--lc4_gain", type=float, default=19.8,
+                    help="Hz / (暗面积比例/秒)。19.8 = 200 Hz ÷ p95(expansion)，"
+                         "按报告 §27 事先写定的规则 A 标定。旧默认值 4000 高了 202 倍，"
+                         "导致 LC4 全程饱和、只有 0 和 200 两个值。")
     ap.add_argument("--turn_gain", type=float, default=0.02, help="每 Hz 的 DNa 左右差 → 驱动差")
     ap.add_argument("--frontend-only", action="store_true",
                     help="不加载大脑（省内存、快），恒定直行驱动，只检验视觉前端给 LC4 的输入")
@@ -281,7 +284,11 @@ def main():
             apply_locomotion_action(sim, fly.name, ctrl.step(drive, obs))
             sim.step(); sim.render_as_needed()
         t_body += time.perf_counter() - tb
-        log.append(dict(t=t, x=pos[0], y=pos[1], dark_L=dark[0], dark_R=dark[1], LC4_L_hz=lc4[0],
+        # exp_L/R = 前端算出的暗面积增长率（低通 + 死区之后），单位「暗面积比 / 秒」。
+        # 必须单独记：LC4 = clip(gain × expansion, 0, 200)，一旦饱和就再也反推不出 expansion，
+        # 也就无从标定 gain（2026-09-16 补记，见报告 §26–27）。
+        log.append(dict(t=t, x=pos[0], y=pos[1], dark_L=dark[0], dark_R=dark[1],
+                        exp_L=expansion[0], exp_R=expansion[1], LC4_L_hz=lc4[0],
                         LC4_R_hz=lc4[1], drive_L=drive[0], drive_R=drive[1], **{k + "_hz": v for k, v in r.items()}))
         if w % 10 == 0:
             print(f"t={t:.3f}s LC4={lc4.round(0)} GF={r['GF']:.0f}Hz DNa L/R={dna_l:.0f}/{dna_r:.0f} "

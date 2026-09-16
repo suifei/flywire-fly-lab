@@ -1,5 +1,5 @@
 {
- "label": "新版前端（1.0 s，--frontend-only）",
+ "label": "标定后 gain=19.8",
  "n_windows": 66,
  "duration_s": 0.975,
  "criteria": [
@@ -13,13 +13,13 @@
   {
    "id": "C2",
    "name": "不饱和：打满占比 < 20% 且翻转 < 3",
-   "value": "23% / 6 次",
-   "passed": false
+   "value": "2% / 1 次",
+   "passed": true
   },
   {
    "id": "C3",
    "name": "真信号还在：最后 0.2s 均值 > 前 0.3s 均值",
-   "value": "21.4 vs 0.0 Hz",
+   "value": "16.2 vs 0.0 Hz",
    "passed": true
   },
   {
@@ -29,13 +29,13 @@
    "passed": null
   }
  ],
- "n_passed": 2,
+ "n_passed": 3,
  "raw": {
   "far_max_hz": 0.0,
   "far_mean_hz": 0.0,
-  "near_mean_hz": 21.43,
-  "sat_frac": 0.2273,
-  "flips": 6,
+  "near_mean_hz": 16.17,
+  "sat_frac": 0.0152,
+  "flips": 1,
   "dark_cv_far": null,
   "dark_far_sd": 0.0,
   "dark_far_mean": 0.0
