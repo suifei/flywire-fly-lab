@@ -77,6 +77,7 @@ SEED = 20260914
 RUNAWAY_ACTIVE = 2000
 CALL = 0.8
 PARTIAL = False             # analyze --partial：跑完之前调试分析代码用
+RFC_GATE = False            # True：不应期也逐段门控（见下方 Screen.__init__ 的注释）
 
 # 论文表 2 的 10 个类型 → v783 注释 cell_type（名字与 ID 的对应取自补充表 1A/1C/4 的 “xxx_l / xxx_r”，再查注释表）
 TYPES = {"Bract": ["DNge173", "DNge174"], "Clavicle": ["AN_GNG_30"], "Fdg": ["CB0038"], "FMIn": ["CB0366"], "G2N-1": ["CB0616"],
@@ -169,19 +170,38 @@ class Screen:
         self.gate = TimedArray(np.zeros((K, N_SLOTS)), dt=seg_dt, name="gate")
         self.ingate = TimedArray(np.zeros((K, self.n_src)), dt=seg_dt, name="ingate")
         params["gate"] = self.gate
+        # 官方 poi() 只把**本次实验真正被刺激**的神经元的不应期设为 0。本框架把全部候选刺激
+        # 神经元一次性编译进来，如果照旧一律置 0，那些本段没被刺激的候选（若是中间神经元）
+        # 就会以 rfc=0 参与全脑动力学——是个偏离。RFC_GATE=True 时不应期也逐段门控：
+        # 只有本段真的被刺激的那些置 0，其余保持 t_rfc。糖/水/JON 的筛选里候选全是感觉神经元
+        # 且每段都全体受刺激，两种写法等价，所以保持默认 False，不动既有结果。
+        if RFC_GATE:
+            self.rfcon = TimedArray(np.zeros((K, len(self.sugar) + 1)), dt=seg_dt, name="rfcon")
+            params["rfcon"] = self.rfcon
         params["eqs"] = default_params["eqs"] + "slot : integer (constant)\nblocked : 1\nnspk : 1\n"
+        if RFC_GATE:
+            params["eqs"] += "sslot : integer (constant)\n"
         params["eq_th"] = f"v > v_th and blocked < 0.5 and (t_in_timesteps % {SEG_STEPS}) < {TRIAL_STEPS}"
         params["eq_rst"] = default_params["eq_rst"] + "; nspk += 1"
         self.params = params
         t0 = time.time()
         neu, syn, self._unused_spk_mon = create_model(str(PATH_COMP), str(PATH_CON), params)   # 不放进网络，但要留住引用，否则 device.run 遇到已回收的弱引用会报错
         rfc = np.full(self.N, float(params["t_rfc"] / ms))
-        rfc[self.sugar] = 0.0                                              # 与官方 poi() 相同：受刺激神经元无不应期
+        if not RFC_GATE:
+            rfc[self.sugar] = 0.0                                          # 与官方 poi() 相同：受刺激神经元无不应期
         neu.rfc = rfc * ms
+        self.t_rfc_ms = float(params["t_rfc"] / ms)
+        if RFC_GATE:
+            sslot = np.zeros(self.N, np.int32)
+            sslot[self.sugar] = np.arange(1, len(self.sugar) + 1)
+            neu.sslot = sslot
         neu.slot = np.zeros(self.N, dtype=np.int32)
         neu.blocked = 0
         neu.nspk = 0
-        neu.run_regularly(f"v = v_0\ng = 0*mV\nblocked = gate(t + {GUARD_MS}*ms, slot)", dt=seg_dt, when="start", name="segment_reset")
+        reset_code = f"v = v_0\ng = 0*mV\nblocked = gate(t + {GUARD_MS}*ms, slot)"
+        if RFC_GATE:
+            reset_code += f"\nrfc = (1 - rfcon(t + {GUARD_MS}*ms, sslot)) * {self.t_rfc_ms}*ms"
+        neu.run_regularly(reset_code, dt=seg_dt, when="start", name="segment_reset")
         sgg = SpikeGeneratorGroup(self.n_src, src_idx, src_steps * DT_MS * ms, period=seg_dt, name="sugar_patterns")
         ps = Synapses(sgg, neu, "w_in : volt (constant)\non : 1", on_pre="v_post += w_in * on", namespace={"ingate": self.ingate}, name="sugar_input")
         ps.connect(i=np.arange(self.n_src), j=np.tile(self.sugar, self.n_src // len(self.sugar)))

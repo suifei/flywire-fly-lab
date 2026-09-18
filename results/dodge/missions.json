@@ -1,0 +1,276 @@
+{
+ "seconds_per_seed": 20,
+ "seeds": 1,
+ "ball_speed": 60,
+ "note": "每关两种情况各跑 1 个种子；pass 由 missions.js 的判据算出，判据本身是照这份实测定的",
+ "missions": [
+  {
+   "id": "silence_alarm",
+   "title": "关掉警报",
+   "basis": "连接组",
+   "goal": "起跳 = 0 且 吃到 ≥ 2 颗",
+   "refKeys": [
+    "les:LC4",
+    "les:LPLC2"
+   ],
+   "calibrated": false,
+   "none": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "jump": 11,
+     "eaten": 0,
+     "dodgeRate": 1
+    },
+    "runs": [
+     {
+      "jump": 11,
+      "eaten": 0,
+      "dodgeRate": 1
+     }
+    ]
+   },
+   "ref": {
+    "pass": 1,
+    "of": 1,
+    "mean": {
+     "jump": 0,
+     "eaten": 2,
+     "dodgeRate": 0.571
+    },
+    "runs": [
+     {
+      "jump": 0,
+      "eaten": 2,
+      "dodgeRate": 0.5714285714285714
+     }
+    ]
+   },
+   "discriminating": true
+  },
+  {
+   "id": "stop_itch",
+   "title": "一刀止痒",
+   "basis": "连接组",
+   "goal": "梳理 = 0 且 吃到 ≥ 1 颗 且 闪避率 ≥ 40%",
+   "refKeys": [
+    "neu:aBN1"
+   ],
+   "calibrated": false,
+   "none": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "groom": 3,
+     "dust": 6,
+     "eaten": 0,
+     "dodgeRate": 1
+    },
+    "runs": [
+     {
+      "groom": 3,
+      "dust": 6,
+      "eaten": 0,
+      "dodgeRate": 1
+     }
+    ]
+   },
+   "ref": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "groom": 0,
+     "dust": 6,
+     "eaten": 0,
+     "dodgeRate": 1
+    },
+    "runs": [
+     {
+      "groom": 0,
+      "dust": 6,
+      "eaten": 0,
+      "dodgeRate": 1
+     }
+    ]
+   },
+   "discriminating": false
+  },
+  {
+   "id": "starve",
+   "title": "饿死它",
+   "basis": "连接组",
+   "goal": "吃到 = 0（且确实碰到过糖粒 ≥ 3 次）且 闪避率 ≥ 40%",
+   "refKeys": [
+    "neu:Roundup"
+   ],
+   "calibrated": false,
+   "none": {
+    "pass": 1,
+    "of": 1,
+    "mean": {
+     "eaten": 0,
+     "contacts": 3,
+     "dodgeRate": 1
+    },
+    "runs": [
+     {
+      "eaten": 0,
+      "contacts": 3,
+      "dodgeRate": 1
+     }
+    ]
+   },
+   "ref": {
+    "pass": 1,
+    "of": 1,
+    "mean": {
+     "eaten": 0,
+     "contacts": 3,
+     "dodgeRate": 1
+    },
+    "runs": [
+     {
+      "eaten": 0,
+      "contacts": 3,
+      "dodgeRate": 1
+     }
+    ]
+   },
+   "discriminating": false
+  },
+  {
+   "id": "thirsty_boost",
+   "title": "让它更贪水",
+   "basis": "连接组",
+   "goal": "伸喙喝水的累计时长 ≥ 通过线（按实测定；用时长而不是「喝完几滴」，因为水只驱动 17 个受体、往往够不到喝完一整滴）",
+   "refKeys": [
+    "neu:Phantom"
+   ],
+   "calibrated": true,
+   "none": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "feedS": 1.45,
+     "eaten": 0,
+     "contacts": 3,
+     "thirst": 0.96
+    },
+    "runs": [
+     {
+      "feedS": 1.45,
+      "eaten": 0,
+      "contacts": 3,
+      "thirst": 0.96
+     }
+    ]
+   },
+   "ref": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "feedS": 1.63,
+     "eaten": 0,
+     "contacts": 3,
+     "thirst": 1
+    },
+    "runs": [
+     {
+      "feedS": 1.63,
+      "eaten": 0,
+      "contacts": 3,
+      "thirst": 1
+     }
+    ]
+   },
+   "discriminating": false
+  },
+  {
+   "id": "shuffle_control",
+   "title": "证明连接组真的在起作用",
+   "basis": "连接组",
+   "goal": "闪避率跌破通过线（按实测定，见下方）",
+   "refKeys": [
+    "pert:shuffle"
+   ],
+   "calibrated": true,
+   "none": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "dodgeRate": 1,
+     "jump": 11,
+     "launched": 11
+    },
+    "runs": [
+     {
+      "dodgeRate": 1,
+      "jump": 11,
+      "launched": 11
+     }
+    ]
+   },
+   "ref": {
+    "pass": 0,
+    "of": 1,
+    "mean": {
+     "dodgeRate": 0.545,
+     "jump": 6,
+     "launched": 11
+    },
+    "runs": [
+     {
+      "dodgeRate": 0.5454545454545454,
+      "jump": 6,
+      "launched": 11
+     }
+    ]
+   },
+   "discriminating": false
+  },
+  {
+   "id": "two_channels",
+   "title": "两条视觉通路的分工",
+   "basis": "连接组 + 手写编码",
+   "goal": "仍能起飞（起跳 ≥ 1），说明 LPLC2 单独也能推过阈值",
+   "refKeys": [
+    "les:LC4"
+   ],
+   "calibrated": false,
+   "none": {
+    "pass": 1,
+    "of": 1,
+    "mean": {
+     "jump": 11,
+     "dodgeRate": 1,
+     "jumpsPerMin": 33
+    },
+    "runs": [
+     {
+      "jump": 11,
+      "dodgeRate": 1,
+      "jumpsPerMin": 33
+     }
+    ]
+   },
+   "ref": {
+    "pass": 1,
+    "of": 1,
+    "mean": {
+     "jump": 11,
+     "dodgeRate": 1,
+     "jumpsPerMin": 33
+    },
+    "runs": [
+     {
+      "jump": 11,
+      "dodgeRate": 1,
+      "jumpsPerMin": 33
+     }
+    ]
+   },
+   "discriminating": false
+  }
+ ],
+ "all_discriminating": false
+}

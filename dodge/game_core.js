@@ -63,6 +63,7 @@
     // 口渴：论文的水味觉实验用的是脱水处理过（pseudodessicated）的果蝇，渴时才会对水伸喙。
     // 这里用一个手写的口渴度：随时间上升，喝水下降；口渴时喝水的阈值按比例降低（阈值形式是手写的，依据是论文的实验条件）。
     thirstRise: 0.06, thirstDrop: 0.5, waterThreshRatio: 0.12,
+    optoHz: 150, optoDur: 0.4,      // 光遗传脉冲：强度与时长（手选；论文的单神经元激活扫频用 25–200 Hz）
     speechEvery: 1.2,        // 每隔多久更新一次“果蝇在说什么”
     speechWind: 25,          // JO 里风的贡献 > 这个频率才算“感觉到风”
     autoDust: false, dustEvery: 5,
@@ -120,7 +121,8 @@
       S: { x: 0, y: 0, h: 0, z: 0, phase: 0, jumpT: -1, cooldown: 0, jumpDir: 0, t: 0, hitFlash: 0, omega: 0, thirst: 0,
            state: "walk", groomT: 0, speed: 0, proboscis: 0 },
       score: { dodge: 0, hit: 0, jump: 0, launched: 0, eaten: 0, eaten_sugar: 0, eaten_bitter: 0, eaten_mixed: 0,
-               contacts_sugar: 0, contacts_bitter: 0, contacts_mixed: 0, groom: 0, dust: 0, back_s: 0 },
+               eaten_water: 0, contacts_sugar: 0, contacts_bitter: 0, contacts_mixed: 0, contacts_water: 0,
+               groom: 0, dust: 0, back_s: 0, feed_s: 0, groom_s: 0 },
       balls: [], loom: { L: 0, R: 0 },
       pellets: [], dust: [], V3, gust: { sugar: 0, bitter: 0 },
       mode: opts.mode || "auto", ballSpeed: opts.ballSpeed || 60, mapSign: 1,
@@ -197,6 +199,19 @@
       const pos = new Map(SUB.fids.map((f, i) => [String(f), i]));
       G.waterIdx = G.WATER_IDS.map(f => pos.get(f)).filter(i => i !== undefined);
     }
+
+    // —— 光遗传手指（v7）：点一下，给指定神经元 optoDur 秒的泊松驱动 ——
+    // 真实成分：驱动的是这个子回路里**真实的** FlyWire 神经元，用的也是和感觉输入同一套泊松机制
+    //（与论文 poi() 相同：被驱动神经元不应期置 0）。手写成分：强度、时长、以及"点哪个"由页面决定。
+    G.opto = null;
+    G.optoPulse = (idx, hz = CFG.optoHz, dur = CFG.optoDur, label = "") => {
+      if (!idx || !idx.length) return null;
+      G.opto = { idx: Array.from(idx), hz, t: dur, dur, label };
+      brain.setOpto(G.opto.idx, hz);
+      G.onEvent && G.onEvent("opto", G.opto);
+      return G.opto;
+    };
+    G.optoStop = () => { if (G.opto) { brain.setOpto([], 0); G.opto = null; } };
 
     G.setNeuronLesion = (key, on) => {
       const rec = G.NEURONS.find(n => n.key === key);
@@ -374,7 +389,7 @@
         for (const p of G.pellets) {
           if (Math.hypot(p.x - hx, p.y - hy) < CFG.pelletR + 0.3) {
             G.onPellet = p;
-            if (!p.touched) { p.touched = true; G.score["contacts_" + p.type]++; }
+            if (!p.touched) { p.touched = true; G.score["contacts_" + p.type] = (G.score["contacts_" + p.type] || 0) + 1; }
             if (p.type === "water") water = CFG.gustRate;
             else {
               if (p.type !== "bitter") sugar = CFG.gustRate;
@@ -404,6 +419,7 @@
 
     G.step = () => {
       const S = G.S, dt = chunkDt;
+      if (G.opto) { G.opto.t -= dt; if (G.opto.t <= 0) G.optoStop(); }     // 光遗传脉冲到时自动关掉
       counts.fill(0);
       counts2.fill(0);
       brain.run(CFG.chunkSteps, (i, s) => {
@@ -493,11 +509,13 @@
         S.y += Math.sin(S.h) * speed * dt;
         S.phase += speed * dt;                                         // 以 mm 计的步态进度（后退时倒放）
         if (state === "back") G.score.back_s += dt;
+        if (state === "feed") G.score.feed_s += dt;                    // 伸喙进食的累计秒数（比"吃完几颗"灵敏：水的驱动弱，常常够不到吃完一颗）
+        if (state === "groom") G.score.groom_s += dt;
         S.proboscis += ((state === "feed" ? 1 : 0) - S.proboscis) * Math.min(1, dt / 0.06);   // 伸喙动画进度
         if (state === "feed" && G.onPellet) {
           const p = G.onPellet; p.amount -= CFG.eatRate * dt;
           if (p.amount <= 0) {
-            G.pellets.splice(G.pellets.indexOf(p), 1); G.score.eaten++; G.score["eaten_" + p.type]++;
+            G.pellets.splice(G.pellets.indexOf(p), 1); G.score.eaten++; G.score["eaten_" + p.type] = (G.score["eaten_" + p.type] || 0) + 1;
             G.onEvent && G.onEvent("eaten", p); G.onPellet = null;
           }
         }

@@ -6,7 +6,11 @@
   Sugar_only / Water_only / Bitter_only / Ir94e_only /
   Sugar_Bitter / Sugar_Ir94e / Water_Bitter / Water_Ir94e
 
-**刺激名单是反推的**（论文 notebook 没公开）。用 §24.2 对 JON 用过的同一招：
+**刺激名单有两版**。第一版是反推的（当时误以为论文 notebook 没公开——**其实公开了**：
+`external/fly-brain/code/paper-phil-drosophila/figures.ipynb` 的 Figure 3 单元格里有 neu_bitter(21) 与
+neu_ir94e(18)，已抄到 results/screen/taste/notebook_lists.json）。`TASTE_LIST=notebook` 用官方名单
+（苦 20 个在 v783 里、Ir94e 18 个），输出到 results/screen/taste/notebook/；不设则是反推版（留档）。
+反推版比官方名单**多刺激了 3 个 LB2d**（Ir94e）和 1 个 LB1c（苦）。反推用的是 §24.2 对 JON 用过的同一招：
 看表 4 里发放 > 60 Hz 的神经元是哪些类型——
   苦 → LB1c / LB1a,LB1d / LB1b；Ir94e → LB1e / LB2a-b / LB2c / LB2d。
 糖用论文 Fig 1 的 21 个，水用 §19 的 18 个，两者在 v783 里**完全不重叠**。
@@ -23,6 +27,7 @@
 """
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -40,7 +45,10 @@ FREQS = (10, 20, 40, 60, 80, 120, 160, 220)
 R_CAL, R_RUN, R_MAX = 3, 6, 6
 TARGET_MN9 = 40.0
 TARGET_SUPPRESS = 1.0      # 论文抬头：抑制型模态的频率选成把 40 Hz 的 MN9 压到 1 Hz
-WDIR = S.OUT / "taste"
+LIST = os.environ.get("TASTE_LIST", "inferred")
+assert LIST in ("inferred", "notebook")
+TDIR = S.OUT / "taste"
+WDIR = TDIR if LIST == "inferred" else TDIR / "notebook"
 BITTER_T = ["LB1a,LB1d", "LB1b", "LB1c"]
 IR94E_T = ["LB1e", "LB2a-b", "LB2c", "LB2d"]
 CONDS = [("Sugar_only", ["sugar"]), ("Water_only", ["water"]), ("Bitter_only", ["bitter"]),
@@ -57,10 +65,18 @@ def grn_sets():
                        if t in ts and sd == "left"]
     g = dict(sugar=list(S.sugar_ids()), water=list(W.WATER), bitter=left(BITTER_T), ir94e=left(IR94E_T))
     g = {k: [f for f in v if f in fid2i] for k, v in g.items()}
+    # 源的顺序永远按反推版的 81 个排（这样两版共用同一次编译，糖/水两版逐位相同）；
+    # span[k] 是该模态**实际被刺激**的源下标——官方名单版只是把多出来的那几个源关掉。
     order, span = [], {}
     for k in ("sugar", "water", "bitter", "ir94e"):
-        span[k] = (len(order), len(order) + len(g[k]))
+        span[k] = list(range(len(order), len(order) + len(g[k])))
         order += g[k]
+    if LIST == "notebook":
+        nb = json.loads((TDIR / "notebook_lists.json").read_text())
+        for k, nk in (("bitter", "neu_bitter"), ("ir94e", "neu_ir94e")):
+            keep = {int(x) for x in nb[nk]}
+            span[k] = [i for i in span[k] if order[i] in keep]
+            g[k] = [order[i] for i in span[k]]
     return g, order, span
 
 
@@ -82,9 +98,8 @@ def ingate_for(sc, segs, span, plan):
     ing = np.zeros((S.K, sc.n_src))
     for k, ((_, r, _), mods) in enumerate(zip(segs, plan)):
         for mod, fi in mods:
-            a, b = span[mod]
             base = (fi * R_MAX + r) * G
-            ing[k, base + a:base + b] = 1.0
+            ing[k, base + np.array(span[mod])] = 1.0
     return ing
 
 
@@ -194,10 +209,14 @@ def cmd_analyze():
     print(f"论文表 4：{len(rows)} 行带 ID；模型里 {sum(1 for r in rows if r['fid'] in fid2i)} 个\n")
     print(f"{'条件':14s}{'我们 MN9':>10s}{'论文 MN9':>10s}{'活跃数':>8s}{'与论文 Pearson':>15s}{'都响应':>10s}")
     pm = {r["fid"]: r for r in rows}
+    stim_all = set(order)          # 两版都剔除同一批 81 个 GRN，口径才可比
     mn9_paper = pm.get(S.MN9)
-    out = dict(design=dict(target_mn9=TARGET_MN9, freqs=list(FREQS), R=R_RUN,
+    out = dict(design=dict(target_mn9=TARGET_MN9, freqs=list(FREQS), R=R_RUN, stim_list=LIST,
                            grn_counts={k: len(v) for k, v in g.items()},
-                           note="刺激名单是从表 4 反推的类型（苦 LB1a/b/c、Ir94e LB1e+LB2），不是论文原始名单"),
+                           note=("刺激名单是从表 4 反推的类型（苦 LB1a/b/c、Ir94e LB1e+LB2），不是论文原始名单"
+                                 if LIST == "inferred" else
+                                 "苦 / Ir94e 用官方 notebook（figures.ipynb Figure 3）的名单中在 v783 里的那些；"
+                                 "糖 21 个与水 18 个沿用 §14 / §19")),
                calibration=cal, conditions={})
     for name, mods in CONDS:
         c = cnt[name]
@@ -207,12 +226,23 @@ def cmd_analyze():
         p_, o_ = np.array([a for a, _ in pair]), np.array([b for _, b in pair])
         both = int(((p_ > 0) & (o_ > 0)).sum())
         r_ = round(float(np.corrcoef(p_, o_)[0, 1]), 3) if len(pair) > 2 else None
-        out["conditions"][name] = dict(ours_mn9=round(ours_mn9, 2),
+        # 被刺激的 GRN 两边都按刺激频率放电，会把 Pearson 撑高——另给一个剔除全部 81 个 GRN 的口径
+        keep = np.array([f not in stim_all for f in pm if f in fid2i])
+        pn, on = p_[keep], o_[keep]
+        r_ns = round(float(np.corrcoef(pn, on)[0, 1]), 3) if keep.sum() > 2 and pn.std() > 0 and on.std() > 0 else None
+        rk = lambda x: np.argsort(np.argsort(x)).astype(float)
+        rho_ns = round(float(np.corrcoef(rk(pn), rk(on))[0, 1]), 3) if keep.sum() > 2 else None
+        resp_p, resp_o = pn > 0, on > 0
+        jac = round(float((resp_p & resp_o).sum() / max((resp_p | resp_o).sum(), 1)), 3)
+        extra = dict(n_nonstim=int(keep.sum()), pearson_nonstim=r_ns, spearman_nonstim=rho_ns,
+                     respond_jaccard_nonstim=jac)
+        out["conditions"][name] = dict(**extra, ours_mn9=round(ours_mn9, 2),
                                        paper_mn9=round(mn9_paper[name], 2) if mn9_paper else None,
                                        n_active=act, n_compared=len(pair), both_respond=both, pearson=r_)
         print(f"{name:14s}{ours_mn9:10.1f}"
               f"{(mn9_paper[name] if mn9_paper else float('nan')):10.1f}{act:8,d}{r_ if r_ is not None else 0:15.3f}"
               f"{both:6d}/{len(pair)}")
+        print(f"    剔除 GRN（n={extra['n_nonstim']}）：Pearson {r_ns}  Spearman {rho_ns}  响应集 Jaccard {jac}")
     # 论文的核心问题：组合 ≈ 更强的那个单独？还是有抑制？
     print("\n组合 vs 单独（论文表 4 的核心问题：苦 / Ir94e 会不会压住糖 / 水）")
     print(f"{'组合':14s}{'我们：组合/较强单独':>22s}{'论文：组合/较强单独':>22s}")
