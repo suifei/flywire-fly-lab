@@ -541,11 +541,39 @@ function initFlyEye(assets) {
     // 保证画面最多晚 1 帧）、提交新的渲染（按 EYE_FPS 节流）。
     // 没有结果（GPU 还没画完）时 r 是 null，直接跳过这一帧的成像。
     const EYE_FPS = 30;
+
+    // ── 连接组视觉前端（报告 §28.19）：真实像素 → flyvis → LPLC2/LC4 → 接管 LC4/LPLC2 ──
+    // 默认关。打开后果蝇不再"知道球在哪"，只能靠复眼看。实测它在 45 mm 外完全瞎，
+    // 25 mm 以内才把球从自体运动的噪声里分出来 —— 而走路本身就能造出 126 Hz 的假"逼近"。
+    // 开着会掉帧（每次约 12 ms：双眼 flyvis 6.8 ms + LPLC2 汇集 1.9 ms + 成像 2.9 ms）。
+    const ceSw = $("ceOn"), ceTxt = $("ceTxt");
+    let ce = null, ceLast = performance.now();
+    const ceOff = () => { if (window.__game) window.__game.setVisionOverride(null);
+                          if (ceTxt) ceTxt.textContent = ""; };
+    if (ceSw) ceSw.addEventListener("change", () => { if (!ceSw.checked) ceOff(); });
+
     window.__eyeTick = (x, y, z, h) => {
       const head = pickHead();
       if (!head) return;
       try {
         const r = cam.updateAsync(head, [cvL, cvR], EYE_FPS);
+        if (r && ceSw && ceSw.checked && window.__game) {
+          if (!ce) {
+            try {
+              const t4 = JSON.parse(document.getElementById("t4t5-data").textContent).定标;
+              ce = ConnectomeFrontEnd.create(FlyVis, LPLC2, assets.net, t4, { stride: 8 });
+            } catch (e) { ceSw.checked = false; ceOff(); }
+          }
+          if (ce) {
+            const now = performance.now(), dt = Math.min(0.2, (now - ceLast) / 1000);
+            ceLast = now;
+            const o = ce.step(r.r16, dt);
+            window.__game.setVisionOverride(o);
+            if (ceTxt) ceTxt.textContent = o.warm
+              ? `LPLC2 左 ${o.lplc2L.toFixed(0)} / 右 ${o.lplc2R.toFixed(0)} Hz`
+              : "预热中…";
+          }
+        }
         if (!r) { if (window.__eyeField) window.__eyeField(head); return; }
         if (cvB) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);

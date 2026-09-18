@@ -55,6 +55,17 @@ def normalize(P):
 
 
 ORIENTS = [(swap, sx, sy) for swap in (False, True) for sx in (1, -1) for sy in (1, -1)]
+# 第 9 种：**解剖锚定**（k=8）。前 8 种都建立在 normalize() 的 PCA + 各轴除以标准差之上，
+# 而那一步会把六边形点阵拉变形 —— 实测 Codex 的 +p/+q 基矢夹角从 60.0° 变成 122.6°
+# （报告 §28.20），映射到的已经不是同一种点阵，符号怎么翻都救不回来。
+# 这一种改用**保持点阵几何**的变换 u = −p, v = −q：方向由解剖锚点定
+# （vision/lattice_anchor.py：+p 在解剖 113°、+q 在 171°；flyvis 的 −u 在 97°、−v 在 157°），
+# 不做 PCA、不做各向异性缩放，超出 flyvis 半径 15 的柱夹到最近的点阵柱。
+# 两种变体用来把「锚定有没有用」和「夹边缘有没有害」分开：
+#   anchor1.0：u=−p, v=−q 原尺度，中心 62% 精确落到格点，外围 38% 被夹到六边形边缘
+#   anchor0.6：整体缩放 0.6（各向同性，**不改基矢角**），只剩 5.8% 被夹，
+#              代价是 785 个真实柱挤进 282 个 flyvis 柱（采样变粗，不是几何变形）
+ORIENTS = ORIENTS + [("anchor", 1.0, 0), ("anchor", 0.6, 0)]
 
 
 def build_inputs(fids_model):
@@ -69,8 +80,14 @@ def build_inputs(fids_model):
         cols = ca[ca.hemisphere == side].drop_duplicates("column_id")
         Z = normalize(cart(cols.p.to_numpy(float), cols.q.to_numpy(float)))
         for k, (swap, sx, sy) in enumerate(ORIENTS):
-            Zo = Z[:, ::-1] if swap else Z
-            Zo = Zo * [sx, sy] * uv_std
+            if swap == "anchor":
+                # 保持点阵几何：(p,q) 中心化后取 u=−p, v=−q，按 sx 各向同性缩放（不改基矢角）
+                pp = cols.p.to_numpy(float) - np.median(cols.p.to_numpy(float))
+                qq = cols.q.to_numpy(float) - np.median(cols.q.to_numpy(float))
+                Zo = cart(-pp, -qq) * sx
+            else:
+                Zo = Z[:, ::-1] if swap else Z
+                Zo = Zo * [sx, sy] * uv_std
             _, idx = tree.query(Zo)
             col_idx[(k, side)] = dict(zip(cols.column_id, idx))
     # flyvis 的柱序号 → 各类型数组里的位置（各类型节点顺序一致时为恒等；逐类型核对）
@@ -151,7 +168,7 @@ def main():
                 b2.device.run(directory=str(build_dir), with_output=False, run_args={ta: R * Hz})
                 st, si = np.asarray(mon.t / b2.second), np.asarray(mon.i[:])
                 curves = {}
-                row = dict(stim=s, orient=k, rep=rep, swap=ORIENTS[k][0], sx=ORIENTS[k][1], sy=ORIENTS[k][2],
+                row = dict(stim=s, orient=k, rep=rep, swap=str(ORIENTS[k][0]), sx=ORIENTS[k][1], sy=ORIENTS[k][2],
                            input_hz_mean=float(R[t >= 0].mean()), run_s=round(time.time() - t1, 1))
                 for g, idx in groups.items():
                     m = np.isin(si, idx)

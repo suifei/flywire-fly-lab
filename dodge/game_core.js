@@ -294,9 +294,34 @@
       return b;
     };
 
+    // 连接组视觉前端的接管口（报告 §28.19）。置 null 时走下面手写的那套。
+    // 传入 {lc4L,lc4R,lplc2L,lplc2R,lc16L,lc16R,bearing}，单位 Hz，bearing 是眼内方位（弧度，+ 为左）。
+    G.visionOverride = null;
+    G.setVisionOverride = o => { G.visionOverride = o; };
+
     // 视觉前端（手写）：每个球在左右眼中的张角增长率 → LC4/LPLC2 频率
     function visualInput(dt) {
       const S = G.S;
+      const ov = G.visionOverride;
+      if (ov) {
+        // 连接组前端接管：这些频率来自**真实像素**，不知道球在哪。
+        // 不再乘光照增益 —— 光照已经体现在渲染出的像素里了（手写版才需要补这一项）。
+        const m2 = CFG.loomMax;
+        const c = v => Math.min(m2, Math.max(0, v || 0));
+        G.loom = { L: c(Math.max(ov.lc4L, ov.lplc2L)), R: c(Math.max(ov.lc4R, ov.lplc2R)),
+                   lc4L: c(ov.lc4L), lc4R: c(ov.lc4R), lplc2L: c(ov.lplc2L), lplc2R: c(ov.lplc2R),
+                   lc16L: c(ov.lc16L), lc16R: c(ov.lc16R) };
+        G.threatDir = ov.bearing == null ? null : S.h + ov.bearing;   // 眼内方位 → 世界方位
+        brain.setRate("LC4_left", G.loom.lc4L); brain.setRate("LPLC2_left", G.loom.lplc2L);
+        brain.setRate("LC4_right", G.loom.lc4R); brain.setRate("LPLC2_right", G.loom.lplc2R);
+        if (V3) { brain.setRate("LC16_left", G.loom.lc16L); brain.setRate("LC16_right", G.loom.lc16R); }
+        for (const b of G.balls) {                 // 仍要维护 prevTheta，切回手写时才不会跳变
+          const rx = b.x - S.x, ry = b.y - S.y;
+          const d = Math.max(Math.hypot(rx, ry), CFG.ballR + 0.01);
+          b.prevTheta = 2 * Math.atan(CFG.ballR / d);
+        }
+        return;
+      }
       let lc4L = 0, lc4R = 0, lpL = 0, lpR = 0, l16L = 0, l16R = 0, threat = null, threatDrive = 0;
       const ch = Math.cos(-S.h), sh = Math.sin(-S.h);
       for (const b of G.balls) {

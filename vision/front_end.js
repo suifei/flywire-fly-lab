@@ -38,8 +38,15 @@
     const base = [{ lp: null, e: null }, { lp: null, e: null }];
     const lat = netDoc.lattice;
 
-    // 每根柱在点阵平面上的方位角（用于把 LPLC2 的扩张焦点转成方位）
-    const colAz = lat.map(([u, v]) => Math.atan2(v * Math.sqrt(3) / 2, u + v / 2));
+    // 每根柱相对**本眼光轴**的方位角偏移（0 = 光轴方向，+ = 果蝇左侧）。
+    // 用和 eyecam 一样的方位等距投影：偏离角 θ = |h|·Δφ，方向 φ = atan2(hy,hx)，
+    // 视线 = F·cosθ + (R·cosφ + U·sinφ)·sinθ，方位偏移 = atan2(沿R分量, 沿F分量)。
+    const DPHI = 5.7 * Math.PI / 180;
+    const colAz = lat.map(([u, v]) => {
+      const hx = u + v / 2, hy = v * Math.sqrt(3) / 2;
+      const th = Math.hypot(hx, hy) * DPHI, ph = Math.atan2(hy, hx);
+      return Math.atan2(Math.sin(th) * Math.cos(ph), Math.cos(th));
+    });
 
     return {
       types: pool.types, centers: pool.centers,
@@ -77,8 +84,10 @@
         const stronger = o.lplc2L >= o.lplc2R ? 0 : 1;
         const col = o.raw[stronger].argmax;
         o.threatCol = col;
-        o.threatOffset = col >= 0 ? colAz[col] : null;      // 相对该眼光轴的方位（弧度）
-        o.eye = stronger;
+        o.threatOffset = col >= 0 ? colAz[col] : null;      // 相对该眼光轴的方位（弧度，+ = 左）
+        o.eye = stronger;                                   // 0 = 左眼，1 = 右眼
+        // 眼内方位 = 光轴方位 ± 63.1° + 柱偏移；左眼光轴在 +63.1°（果蝇左侧）
+        o.bearing = col >= 0 ? (stronger === 0 ? 1 : -1) * (63.1 * Math.PI / 180) + o.threatOffset : null;
         return o;
       },
     };
