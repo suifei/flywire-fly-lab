@@ -34,6 +34,7 @@ lint(html)
 for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.json").read_text()),
                   ("/*__SUB_NT__*/", (ROOT / "results/dodge/subcircuit_nt.json").read_text()),
                   ("/*__PERTURB__*/", (ROOT / "results/dodge/perturb.json").read_text()),
+                  ("/*__REPRO__*/", (ROOT / "results/reproduction.json").read_text()),
                   ("/*__GAIT__*/", (ROOT / "results/dodge/gait.json").read_text()),
                   ("/*__RESULTS__*/", json.dumps({**{k: json.loads((ROOT / f"results/dodge/{k}_{n}.json").read_text()) for k, n in [("step1", "encoding"), ("step3", "flight")]},
                                                  "step2": {**json.loads((ROOT / "results/vision/summary.json").read_text()),

@@ -385,6 +385,15 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1" id="cRepro">
+      <h3>复现台账：我们对着论文验了什么</h3>
+      <p>这个项目不是"跑通了一个模型"，是<b>拿已发表的论文逐条对答案</b>。下表是全部结果，
+        包括<b>做不到的</b>和<b>结果是阴性的</b>——那两类同样是结果。
+        每条都能追到产出它的脚本与结果文件；完整过程日志在仓库的 <code>docs/log/report.md</code>。</p>
+      <div id="reproCounts" class="lower" style="gap:10px"></div>
+      <div class="tbl" style="margin-top:10px"><table id="tRepro"></table></div>
+      <p class="sub" id="nRepro"></p>
+    </div>
     <div class="card" style="grid-column: 1 / -1">
       <h3>让果蝇看你的图</h3>
       <p>上传一张图，果蝇用它<b>真实的视觉系统</b>看一遍，再画出来。链路上没有示意图：你的图先变成 450&times;512 的相机画面，按 FlyGym 的真实复眼采样表（含鱼眼畸变）归并到 <b>721 个小眼</b>，再喂进 flyvis 的预训练连接组视觉网络（65 类细胞 &times; 721 柱，2355 个卷积抽头），最后由六边形卷积解码器还原。</p>
@@ -635,6 +644,7 @@ code { font: 12px var(--mono); }
 <script id="sub-data" type="application/json">/*__SUBCIRCUIT__*/</script>
 <script id="sub-nt" type="application/json">/*__SUB_NT__*/</script>
 <script id="perturb-data" type="application/json">/*__PERTURB__*/</script>
+<script id="repro-data" type="application/json">/*__REPRO__*/</script>
 <script id="gait-data" type="application/json">/*__GAIT__*/</script>
 <script id="play-data" type="application/json">/*__RESULTS__*/</script>
 <script id="flight-data" type="application/json">/*__FLIGHT__*/</script>
@@ -682,6 +692,33 @@ code { font: 12px var(--mono); }
   const V3R = JSON.parse(document.getElementById("v3-data").textContent);
   const V4R = JSON.parse(document.getElementById("v4-data").textContent);
   const V6R = JSON.parse(document.getElementById("v6-data").textContent);
+  // 复现台账：唯一事实源是 scripts/reproduction_data.py，经 scripts/reproduction.py 渲染成
+  // results/reproduction.json。这里只负责显示，**不写任何字面量**。
+  (() => {
+    const R = JSON.parse(document.getElementById("repro-data").textContent);
+    const ICON = { reproduced: ["✅", "已复现"], partial: ["🟡", "部分复现"],
+                   negative: ["⬛", "阴性结果"], not_done: ["⬜", "未做"], blocked: ["🚫", "做不了"] };
+    const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const md = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>");
+    document.getElementById("reproCounts").innerHTML =
+      Object.entries(R.counts).filter(([, v]) => v > 0)
+        .map(([k, v]) => `<div class="stat"><span>${ICON[k][0]} ${ICON[k][1]}</span><b>${v}</b></div>`).join("");
+    let h = "<tr><th>来源</th><th></th><th>主张</th><th>我们的结果</th><th>脚本</th></tr>";
+    for (const p of R.papers) {
+      const short = p.cite.split("（")[0].split(",")[0];
+      p.claims.forEach((c, i) => {
+        h += `<tr><td>${i === 0 ? md(short) : ""}</td><td>${ICON[c.status][0]}</td>`
+           + `<td>${md(c.what)}</td><td>${md(c.result)}</td>`
+           + `<td>${c.script ? "<code>" + esc(c.script) + "</code>" : "—"}</td></tr>`;
+      });
+    }
+    document.getElementById("tRepro").innerHTML = h;
+    const np = R.papers.length, nc = R.total_claims;
+    document.getElementById("nRepro").innerHTML =
+      `${np} 篇来源、${nc} 条主张、${R.parameters.length} 个关键参数。`
+      + `凡是<b>我们自己标定</b>或<b>手选</b>的参数都在台账里标了出来——不标就等于冒充论文值。`
+      + `渲染时会校验每条引用的脚本与结果文件是否存在，死链接就是台账开始腐烂的信号。`;
+  })();
   // 「动脑子」那一排的实测结果（node dodge/measure_perturb.js 写的，页面不写字面量）
   (() => {
     const P = JSON.parse(document.getElementById("perturb-data").textContent);

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """机械判定报告第 26 节那 4 条**事先写定**的判据，不靠肉眼看曲线。
 
-判据原文写在 report.md 第 26 节，在跑新前端之前就定好了：
+判据原文写在 docs/log/report.md 第 26 节，在跑新前端之前就定好了：
   C1 假阳性   ：球还远的阶段（前 FAR_S 秒）LC4 两侧最大值 < 20 Hz。旧版 0.045 s 就打满 200 Hz。
   C2 不饱和   ：全程 LC4 打满（≥ SAT_HZ）的窗口占比 < 20%，且相邻窗口“饱和↔归零”的翻转 < 3 次。
   C3 真信号还在：最后 NEAR_S 秒的 LC4 均值 > 前 FAR_S 秒的均值。
@@ -89,7 +89,7 @@ def main():
     res = check(d, a.label)
     res["thresholds"] = dict(far_s=FAR_S, near_s=NEAR_S, sat_hz=SAT_HZ, fp_hz=FP_HZ,
                              sat_frac_max=SAT_FRAC_MAX, flip_max=FLIP_MAX, dark_cv_max=DARK_CV_MAX,
-                             note="阈值在跑新前端之前就写定，见 report.md 第 26 节；不得为凑结果改动")
+                             note="阈值在跑新前端之前就写定，见 docs/log/report.md 第 26 节；不得为凑结果改动")
     dst = Path(a.csv).parent / "frontend_check.json"
     dst.write_text(json.dumps(res, ensure_ascii=False, indent=1))
     print("写入", dst)

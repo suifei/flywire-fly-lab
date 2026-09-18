@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""逐条核对 report.md §28.16–28.20 里的数字与 results/vision/*.json 是否一致。
+"""逐条核对 docs/log/report.md §28.16–28.20 里的数字与 results/vision/*.json 是否一致。
 
 为什么要有这个：本项目记录在案的头号错误源就是**手抄数字**
 （2026-09-16 的一次人工审计在 §14–25 里找出 16 处缺陷，全部集中在手写小结，
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-R = (ROOT / "report.md").read_text()
+R = (ROOT / "docs/log/report.md").read_text()
 V = ROOT / "results/vision"
 
 
@@ -135,4 +135,4 @@ if bad:
     for b in bad:
         print("   " + b)
     sys.exit(1)
-print("✓ report.md §28.16–28.20 的数字全部来自结果文件，没有手抄错")
+print("✓ docs/log/report.md §28.16–28.20 的数字全部来自结果文件，没有手抄错")

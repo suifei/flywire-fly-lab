@@ -1,5 +1,9 @@
 # flywire-fly-lab
 
+
+> **先看 [`REPRODUCTION.md`](REPRODUCTION.md)**：对着论文逐条验了什么、结果如何、哪些做不到。
+> 完整过程日志在 [`docs/log/report.md`](docs/log/report.md)。
+
 **把果蝇全脑连接组跑在一台 16 GB 笔记本上，接上身体，做成游戏，再对它做 17,628 次虚拟手术。**
 完整记录能做到什么、**做不到什么**，以及作者自查出的每一处错误。
 
@@ -8,7 +12,7 @@
 > screen across three sensory pathways. Every negative result and every self-caught mistake is
 > documented. Docs are in Chinese; code comments are in Chinese; issues in English are welcome.
 
-[**▶ 在线试玩（浏览器里 4,599 个真实神经元实时放电）**](https://suifei.github.io/flywire-fly-lab/game.html) · [**完整报告 report.md**](report.md) · [**数据许可 ⚠**](DATA_LICENSE.md)
+[**▶ 在线试玩（浏览器里 4,599 个真实神经元实时放电）**](https://suifei.github.io/flywire-fly-lab/game.html) · [**完整报告 docs/log/report.md**](docs/log/report.md) · [**数据许可 ⚠**](DATA_LICENSE.md)
 
 ---
 
@@ -43,7 +47,7 @@
 糖和水都通过同一个运动神经元 MN9 引发伸喙，但活跃神经元只重叠三分之一，枢纽各自私有：`CB0883` 在水通路里根本不放电，`CB0051` 在糖通路里敲了毫无影响。抑制性神经元 `Phantom` 敲掉后水通路输出**翻 3 倍**。
 
 **4. 事先声明的"集中度 → 可预测性"假设，被自己的数据推翻。**
-JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的（G3 0.288 < 糖的 0.316）。详见 [report.md §22.2](report.md)。
+JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的（G3 0.288 < 糖的 0.316）。详见 [docs/log/report.md §22.2](docs/log/report.md)。
 
 ## 它做不到什么（同样重要）
 
@@ -54,11 +58,11 @@ JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的
 | 腹神经索产生走路节律 | 有节律，但凑不出三角步态；六条腿里实际只有一条在动 |
 | 闻到气味往哪边转 | 单侧刺激给不出左右差异；刺激稍强，约 8,300 个神经元一起失控放电 |
 | 学习 / 记忆 / 可塑性 | 模型里根本没有，突触权重固定 |
-| 闭环行为（大脑 + 身体） | **仍未验证**。视觉前端已单独验证（[§26](report.md)），但加载大脑后的行为没有结论 |
+| 闭环行为（大脑 + 身体） | **仍未验证**。视觉前端已单独验证（[§26](docs/log/report.md)），但加载大脑后的行为没有结论 |
 
 ## 作者自查出的错误
 
-[report.md §23](report.md) 里有一份**错误账本**，记录所有自己发现、又自己改掉的错误，不删。两轮逐数字核对（对照结果文件）共查出 **28 处**问题，其中：
+[docs/log/report.md §23](docs/log/report.md) 里有一份**错误账本**，记录所有自己发现、又自己改掉的错误，不删。两轮逐数字核对（对照结果文件）共查出 **28 处**问题，其中：
 
 - 仿真软件把随机种子编译进程序，导致"跑了 4 次"其实是同一次的 4 份拷贝 → 34 个实验重跑；
 - 一张表里的 "2/2 准确率" 是**手写的字符串**，其中一个神经元**从来没有被测过** → 改为 "1/1 可测"；
@@ -99,7 +103,7 @@ python3 dodge/build.py && open results/dodge/fly_dodge.html
 | `vision/` | 复眼 → flyvis → 全脑连接组的离线视觉管线 |
 | `language/` | "果蝇说中文"：12 个词的解码器 + 脑机接口压力测试 |
 | `flight/` | flybody 飞行控制器回放，导出真实逃逸飞行轨迹 |
-| `report.md` | **完整报告**，约 6.5 万字，含全部结果、阴性结果与错误账本 |
+| `docs/log/report.md` | **完整报告**，约 6.5 万字，含全部结果、阴性结果与错误账本 |
 | `CLAUDE.md` | 工程笔记：环境、命令、内存安全规则、领域陷阱 |
 
 ## 许可

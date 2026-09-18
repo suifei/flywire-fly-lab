@@ -76,6 +76,14 @@ jobs:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: node dodge/eyecam_geom_test.js
 
+      - name: 复现台账校验（每条主张引用的脚本与结果文件必须存在）
+        # 台账是「复现了什么」的唯一事实源，REPRODUCTION.md 与游戏页都从它渲染。
+        # 死链接就是台账开始腐烂的信号，所以在 CI 里挡住。
+        run: python3 scripts/reproduction.py --check
+
+      - name: 报告数字与结果文件一致（防手抄）
+        run: python3 vision/check_report_numbers.py
+
       - name: 视野扇区在地板上的对比度（防「和地板同色 = 等于没画」）
         # 右眼扇区曾是金黄 0xe8b339，和地板 #b8763a 同色相；阳光 100% 时地板
         # 红通道削顶在 255，暖色叠加抬不动 R，扇区内外只差 Δ=8.4，等于没画。

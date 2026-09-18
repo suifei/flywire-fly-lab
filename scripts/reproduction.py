@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""从 scripts/reproduction_data.py 渲染复现台账。
+
+产出：
+  REPRODUCTION.md            人读的台账（仓库根目录，**每次迭代先读这个**）
+  results/reproduction.json  机器读的（游戏页从它渲染，不许手抄）
+
+同时**校验**：每条主张引用的 script 与 result_file 必须真的存在，
+否则退出码 1。台账里的死链接就是台账开始腐烂的信号。
+
+用法：python3 scripts/reproduction.py [--check]
+  --check 只校验不写文件（CI 用）
+"""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from reproduction_data import PAPERS, PARAMETERS  # noqa: E402
+
+LABEL = {"reproduced": ("✅", "已复现"), "partial": ("🟡", "部分复现"),
+         "negative": ("⬛", "阴性结果"), "not_done": ("⬜", "未做"), "blocked": ("🚫", "做不了")}
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--check", action="store_true")
+a = ap.parse_args()
+
+# ── 校验 ──────────────────────────────────────────────
+bad = []
+for p in PAPERS:
+    for c in p["claims"]:
+        if c["status"] not in LABEL:
+            bad.append(f"{p['key']}/{c['id']}：status 非法 {c['status']}")
+        for f in ("script", "result_file"):
+            v = c.get(f)
+            if v and not (ROOT / v).exists():
+                bad.append(f"{p['key']}/{c['id']}：{f} 不存在 → {v}")
+        if c["status"] in ("reproduced", "partial", "negative") and not c.get("script"):
+            bad.append(f"{p['key']}/{c['id']}：声称做过却没有 script")
+for q in PARAMETERS:
+    if q.get("script") and not (ROOT / q["script"]).exists():
+        bad.append(f"参数 {q['name']}：script 不存在 → {q['script']}")
+if bad:
+    print("✗ 台账校验不通过：")
+    for b in bad:
+        print("   " + b)
+    sys.exit(1)
+
+n = {k: 0 for k in LABEL}
+for p in PAPERS:
+    for c in p["claims"]:
+        n[c["status"]] += 1
+tot = sum(n.values())
+print(f"✓ 台账校验通过：{len(PAPERS)} 篇来源、{tot} 条主张、{len(PARAMETERS)} 个关键参数")
+print("  " + "　".join(f"{LABEL[k][1]} {v}" for k, v in n.items() if v))
+if a.check:
+    sys.exit(0)
+
+# ── 渲染 Markdown ────────────────────────────────────
+L = ["# 复现台账",
+     "",
+     "**这是本项目的「复现了什么」的唯一事实源。** 每次迭代先读这里；要看怎么一步步做的、"
+     "中途错在哪、改过几版，去 [`docs/log/report.md`](docs/log/report.md)（过程日志，约 6.5 万字）。",
+     "",
+     "本文件由 `python3 scripts/reproduction.py` 从 `scripts/reproduction_data.py` 渲染，**不要手改**。",
+     "渲染时会校验每条主张引用的脚本与结果文件是否存在。",
+     "",
+     "| 状态 | 条数 |", "|---|---|"]
+for k, (icon, name) in LABEL.items():
+    if n[k]:
+        L.append(f"| {icon} {name} | {n[k]} |")
+L += ["", "---", ""]
+
+for p in PAPERS:
+    L.append(f"## {p['cite']}")
+    L.append("")
+    if p.get("url"):
+        L.append(f"<{p['url']}>")
+        L.append("")
+    if p.get("note"):
+        L.append(f"> {p['note']}")
+        L.append("")
+    L.append("| 状态 | 主张 | 我们的结果 | 脚本 |")
+    L.append("|---|---|---|---|")
+    for c in p["claims"]:
+        icon = LABEL[c["status"]][0]
+        sc = f"`{c['script']}`" if c.get("script") else "—"
+        L.append(f"| {icon} | {c['what']} | {c['result']} | {sc} |")
+    L.append("")
+    for c in p["claims"]:
+        if c.get("caveat"):
+            L.append(f"- **{c['what']}** — {c['caveat']}" + (f"（日志 {c['log']}）" if c.get("log") else ""))
+    L.append("")
+
+L += ["---", "", "## 关键参数", "",
+      "凡是**我们自己标定**或**手选**的参数都标出来了——不标就等于冒充论文值。", "",
+      "| 参数 | 取值 | 来源 | 说明 |", "|---|---|---|---|"]
+for q in PARAMETERS:
+    L.append(f"| `{q['name']}` | **{q['value']}** | {q['source']} | {q['note']} |")
+L += ["", "---", "",
+      "## 还没做的（按可行性排序）", ""]
+todo = [(p, c) for p in PAPERS for c in p["claims"] if c["status"] in ("not_done", "blocked")]
+for p, c in todo:
+    icon = LABEL[c["status"]][0]
+    L.append(f"- {icon} **{c['what']}**（{p['cite'].split(',')[0]}）：{c.get('caveat') or '—'}")
+L.append("")
+
+(ROOT / "REPRODUCTION.md").write_text("\n".join(L))
+doc = dict(说明="复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
+           counts=n, total_claims=tot, papers=PAPERS, parameters=PARAMETERS)
+(ROOT / "results/reproduction.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1))
+print(f"\n→ REPRODUCTION.md（{len('\n'.join(L))/1024:.1f} KB）")
+print("→ results/reproduction.json")
