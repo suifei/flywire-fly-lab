@@ -1,0 +1,519 @@
+{
+ "seconds_per_seed": 60,
+ "seeds": 3,
+ "metrics": [
+  "sugarFeedS",
+  "waterFeedS",
+  "waterMn9Peak",
+  "groom",
+  "jump",
+  "dodgeRate"
+ ],
+ "note": "判「可诊断」= 该指标三次的区间与不敲的三次区间完全不重叠（保守，n=3，不做统计检验）",
+ "intact": {
+  "runs": [
+   {
+    "sugarFeedS": 6.7,
+    "waterFeedS": 2.09,
+    "waterMn9Peak": 32.7,
+    "groom": 8,
+    "jump": 34,
+    "dodgeRate": 1
+   },
+   {
+    "sugarFeedS": 5.76,
+    "waterFeedS": 1.65,
+    "waterMn9Peak": 29.5,
+    "groom": 9,
+    "jump": 32,
+    "dodgeRate": 1
+   },
+   {
+    "sugarFeedS": 3.28,
+    "waterFeedS": 3.4,
+    "waterMn9Peak": 32.6,
+    "groom": 8,
+    "jump": 33,
+    "dodgeRate": 1
+   }
+  ],
+  "range": {
+   "sugarFeedS": [
+    3.28,
+    6.7
+   ],
+   "waterFeedS": [
+    1.65,
+    3.4
+   ],
+   "waterMn9Peak": [
+    29.5,
+    32.7
+   ],
+   "groom": [
+    8,
+    9
+   ],
+   "jump": [
+    32,
+    34
+   ],
+   "dodgeRate": [
+    1,
+    1
+   ]
+  }
+ },
+ "mutants": [
+  {
+   "key": "Roundup",
+   "runs": [
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0.05,
+     "waterMn9Peak": 9.1,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0.1,
+     "waterMn9Peak": 9.1,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "sugarFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      3.28,
+      6.7
+     ]
+    },
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0.1
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      9.1
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "G2N-1",
+   "runs": [
+    {
+     "sugarFeedS": 4.91,
+     "waterFeedS": 2.42,
+     "waterMn9Peak": 33.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 7.04,
+     "waterFeedS": 1.06,
+     "waterMn9Peak": 32.2,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 4.25,
+     "waterFeedS": 2.72,
+     "waterMn9Peak": 31.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "Clavicle",
+   "runs": [
+    {
+     "sugarFeedS": 5.92,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 6.45,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.09,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0277",
+   "runs": [
+    {
+     "sugarFeedS": 7.83,
+     "waterFeedS": 2.98,
+     "waterMn9Peak": 34.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.73,
+     "waterFeedS": 1.27,
+     "waterMn9Peak": 34.1,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.3,
+     "waterFeedS": 2.19,
+     "waterMn9Peak": 38.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      34.1,
+      38.3
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0051",
+   "runs": [
+    {
+     "sugarFeedS": 6.17,
+     "waterFeedS": 0.05,
+     "waterMn9Peak": 9.1,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.4,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.65,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0.05
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      9.1
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "Zorro",
+   "runs": [
+    {
+     "sugarFeedS": 7.92,
+     "waterFeedS": 2.14,
+     "waterMn9Peak": 31.7,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.53,
+     "waterFeedS": 1.13,
+     "waterMn9Peak": 30.3,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 3.9,
+     "waterFeedS": 2.21,
+     "waterMn9Peak": 30.4,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "Phantom",
+   "runs": [
+    {
+     "sugarFeedS": 6.38,
+     "waterFeedS": 2.14,
+     "waterMn9Peak": 57.5,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.42,
+     "waterFeedS": 1.73,
+     "waterMn9Peak": 71.7,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 4.45,
+     "waterFeedS": 3.66,
+     "waterMn9Peak": 43.4,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      43.4,
+      71.7
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "Rattle",
+   "runs": [
+    {
+     "sugarFeedS": 6.5,
+     "waterFeedS": 2.55,
+     "waterMn9Peak": 36.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.62,
+     "waterFeedS": 1.2,
+     "waterMn9Peak": 34.5,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.7,
+     "waterFeedS": 3.11,
+     "waterMn9Peak": 34,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      34,
+      36.6
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0883",
+   "runs": [
+    {
+     "sugarFeedS": 6.17,
+     "waterFeedS": 3.98,
+     "waterMn9Peak": 87,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.49,
+     "waterFeedS": 1.22,
+     "waterMn9Peak": 24.8,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.46,
+     "waterFeedS": 1.92,
+     "waterMn9Peak": 33.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "aBN1",
+   "runs": [
+    {
+     "sugarFeedS": 7.02,
+     "waterFeedS": 3.2,
+     "waterMn9Peak": 26.1,
+     "groom": 0,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.09,
+     "waterFeedS": 1.65,
+     "waterMn9Peak": 29.6,
+     "groom": 0,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 6.38,
+     "waterFeedS": 2.9,
+     "waterMn9Peak": 25.7,
+     "groom": 0,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "groom",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      8,
+      9
+     ]
+    }
+   ],
+   "diagnosable": true
+  }
+ ],
+ "n_diagnosable": 7
+}

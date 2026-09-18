@@ -298,6 +298,14 @@ code { font: 12px var(--mono); }
           <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
           <span class="pill" id="optoPill" hidden></span>
         </div>
+        <div class="row" id="mutRow">
+          <label class="k" title="随机敲掉一个真实神经元但不告诉你是哪个；靠行为把它诊断出来">盲盒突变体</label>
+          <button class="btn" id="mutNew">抽一只突变体</button>
+          <select id="mutGuess" class="btn"><option value="">诊断是哪一个…</option></select>
+          <button class="btn" id="mutSubmit">提交诊断</button>
+          <button class="btn" id="mutCure">治好它</button>
+          <span class="pill" id="mutPill">未抽取</span>
+        </div>
         <div class="row">
           <label class="k" id="lblMode">发球</label>
           <div class="seg" role="group" aria-labelledby="lblMode">
@@ -447,6 +455,19 @@ code { font: 12px var(--mono); }
         ②「证明连接组真的在起作用」原本判闪避率，但打乱之后逐次是 0.07/0.79/0.43——<b>波动大到有一次跟没打乱差不多</b>，
         所以判据换成起跳次数（打乱后 18/5/0 次 vs 不干预 33/32/33，完全不重叠），这也更贴近机制：
         打乱先打断的是 looming → 巨纤维那一路。</p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1" id="cMutants">
+      <h3>盲盒突变体：十个敲除里，只有七个能从行为上看出来</h3>
+      <p>「抽一只突变体」会随机敲掉十个真实神经元中的一个而不告诉你是哪个，你靠喂糖、喂水、落灰、扔球把它诊断出来。
+        但在把这个玩法做出来之前得先回答一个问题：<b>这些敲除，行为上真的看得见吗？</b>
+        <code>node dodge/mutant_test.js</code> 把每一个都跑了 60 秒 × 3 个种子，六个指标全测，
+        判「可诊断」用的是最保守的口径——该指标三次的区间与不敲的三次<b>完全不重叠</b>。</p>
+      <div class="tbl"><table id="tMutants"></table></div>
+      <p class="sub" id="mutNote"></p>
+      <p class="sub"><b>看不出来的那三个才是重点</b>：G2N-1、Zorro、CB0883 敲掉之后，六个行为指标全都落在正常范围里。
+        这不是游戏做得不好——<b>这正是全脑筛选反复得到的那条结论的行为版</b>：单敲除常常什么也看不见。
+        CB0883 在全脑里是枢纽（单独敲 0.76，配上 Clavicle/G2N-1 塌到 0.24），Zorro 是真实实验证实「伸喙必需」的类型，
+        可它们单独被敲掉时，果蝇看起来完全正常。要发现它们，必须<b>成对</b>地敲——那就是「一个不够，两个才行」那一关。</p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cPeers">
       <h3>别人拿数字果蝇做了什么，我们差在哪</h3>
@@ -975,13 +996,13 @@ code { font: 12px var(--mono); }
 <script id="repro-data" type="application/json">{
  "说明": "复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
  "counts": {
-  "reproduced": 19,
-  "partial": 6,
+  "reproduced": 22,
+  "partial": 5,
   "negative": 0,
   "not_done": 1,
   "blocked": 1
  },
- "total_claims": 27,
+ "total_claims": 29,
  "papers": [
   {
    "key": "shiu2024",
@@ -1127,27 +1148,42 @@ code { font: 12px var(--mono); }
     {
      "id": "shuffle",
      "what": "打乱接线对照（补充表 1D）",
-     "status": "partial",
-     "result": "糖 → MN9 从 **82.9 Hz 掉到 3.5 ± 4.2 Hz**（比值 0.043），与论文同量级（Zorro_l 102.2 → 2.75 ± 7.17）",
-     "caveat": "只在 4,599 个神经元的**子回路**上做，不是全脑；论文未公开打乱做法，我们用的是「保出度与权重、只重排靶点」。定性方向可比，定量不可比",
-     "script": "dodge/measure_perturb.js",
-     "result_file": "results/dodge/perturb.json",
-     "log": "§30.1",
+     "status": "reproduced",
+     "result": "**全脑**做的：不打乱时表 1D 那 13 个神经元与论文的 **Pearson 0.992**（MN9_r 我们 62.7 Hz、论文 68.0）；10 个打乱版本下**这 13 个全部归零**，活跃神经元从 348 掉到 60–95。两条事先判据都成立（A：MN9_r 打乱后 < 不打乱的 10%；B：≥12/13 下降）",
+     "caveat": "论文**没有公开打乱的具体做法**，我们用的是「保每个神经元的出度与权重、只把靶点列整体重排」。论文跑 100 次、我们跑 10 次，而且论文的打乱均值不是 0 而是 2.7–5.4 Hz（SD 7–11），也就是说**少数打乱版本会出现强响应**——10 次抽不到这种罕见事件很正常，所以「我们恒为 0」比论文更干净，不能当成复现得更好。表 1D 的 15 个 ID 里只有 13 个在 v783 模型中，判据 B 的分母按论文 14/15 的比例折算成 12/13。子回路版（4,599 神经元）另见 `dodge/measure_perturb.js`：糖 → MN9 从 82.9 掉到 3.5 Hz",
+     "script": "screen/shuffle_full.py",
+     "result_file": "results/screen/shuffle_full/summary.json",
+     "log": "§30.1 + §37.7",
      "verify": [
       [
-       "baseline_hz.sugar",
-       82.9,
-       0.05
+       "pearson_intact_vs_paper",
+       0.992,
+       0.0005
       ],
       [
-       "shuffle.sugar.均值Hz",
-       3.5,
-       0.1
+       "n_down",
+       12,
+       0
       ],
       [
-       "shuffle.sugar.比值",
-       0.043,
-       0.002
+       "n_total",
+       13,
+       0
+      ],
+      [
+       "mn9_r.ours_intact",
+       62.667,
+       0.02
+      ],
+      [
+       "mn9_r.ours_shuf_mean",
+       0.0,
+       0.001
+      ],
+      [
+       "design.n_shuffles",
+       10,
+       0
       ]
      ]
     },
@@ -1299,6 +1335,95 @@ code { font: 12px var(--mono); }
        "grid.220.none",
        93.0,
        0.02
+      ]
+     ]
+    },
+    {
+     "id": "jon_ce_f",
+     "what": "aBN1 只对 JO-CE 响应、对 JO-F 几乎不响应（Fig 5G / 补充表 8）",
+     "status": "reproduced",
+     "result": "**两条事先写死的判据都成立**：aBN1 在 JO-CE 150 Hz 下 **52.00 Hz**（论文 50.77）、JO-F 150 Hz 下 **1.67 Hz**（论文 1.23）。表 8 全向量（剔除被刺激的 JON 后 277 个神经元）两列 Pearson 都是 **0.999**，Spearman 0.98 / 0.99",
+     "caveat": "刺激名单用官方 notebook Figure 5b 的 neu_JON_CE(70) / neu_JON_F(60)——三者并集与 §24.3 反推的 146 个**完全相同**，是一次独立印证。判据阈值（CE > 10 Hz、F < 5 Hz）是照论文表 8 里 aBN1 那一行的数量级定的，跑之前写死",
+     "script": "screen/jon_ce_f.py",
+     "result_file": "results/screen/jon_ce_f/summary.json",
+     "log": "§37",
+     "verify": [
+      [
+       "abn1.ours_ce",
+       52.0,
+       0.02
+      ],
+      [
+       "abn1.ours_f",
+       1.67,
+       0.02
+      ],
+      [
+       "abn1.paper_ce",
+       50.77,
+       0.02
+      ],
+      [
+       "abn1.paper_f",
+       1.23,
+       0.02
+      ],
+      [
+       "vector.CE.pearson_nonstim",
+       0.999,
+       0.0005
+      ],
+      [
+       "vector.F.pearson_nonstim",
+       0.999,
+       0.0005
+      ]
+     ]
+    },
+    {
+     "id": "sufficiency",
+     "what": "106 个 SEZ 类型「足以引发伸喙」（Fig 2A / 补充表 3，论文自报 101/106）",
+     "status": "reproduced",
+     "result": "模型里有神经元的 **101** 个类型全跑（50 与 200 Hz 各 3 个实现）。与论文 MN9 发放率的 **Pearson 0.993（50 Hz）/ 0.998（200 Hz）**，Spearman 0.99 / 1.00；判定与论文**逐条一致 100/101**；对光遗传实验 **95/101**，而论文自己在同一批 101 个上是 **96/101**",
+     "caveat": "**判据口径是从论文表 3 自身反查出来的**：只看 50 Hz、MN9_Left、>0 Hz，在论文自己的数字上恰好给出它所报的 101/106；换成左右取大是 99、换成 200 Hz 是 96 / 92——所以这个口径是唯一能对上的那个，反查完才跑的我们这一版。106 个类型里有 5 个（TH_VUM、Salivary_MN13、bamboo、gallinule、meteor）在 v783 模型里没有神经元，所以分母是 101 而不是 106。唯一比论文多错的是 **FMIn**（我们 0.00，论文 0.37，判据线就在 0）——它的效应本来就贴着线。这一轮**必须**把不应期逐段门控（RFC_GATE）：这些 SEZ 神经元是中间神经元，本段没被刺激时若照旧把 rfc 置 0，全脑动力学会被污染",
+     "script": "screen/sufficiency.py",
+     "result_file": "results/screen/sufficiency/summary.json",
+     "log": "§37",
+     "verify": [
+      [
+       "ours_vs_opto.correct",
+       95,
+       0
+      ],
+      [
+       "paper_vs_opto.correct",
+       96,
+       0
+      ],
+      [
+       "ours_vs_paper_calls.same",
+       100,
+       0
+      ],
+      [
+       "n_compared",
+       101,
+       0
+      ],
+      [
+       "pearson_50",
+       0.993,
+       0.0005
+      ],
+      [
+       "pearson_200",
+       0.998,
+       0.0005
+      ],
+      [
+       "spearman_200",
+       1.0,
+       0.0005
       ]
      ]
     },
@@ -6580,6 +6705,525 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
  ],
  "all_discriminating": true
 }</script>
+<script id="mutants-data" type="application/json">{
+ "seconds_per_seed": 60,
+ "seeds": 3,
+ "metrics": [
+  "sugarFeedS",
+  "waterFeedS",
+  "waterMn9Peak",
+  "groom",
+  "jump",
+  "dodgeRate"
+ ],
+ "note": "判「可诊断」= 该指标三次的区间与不敲的三次区间完全不重叠（保守，n=3，不做统计检验）",
+ "intact": {
+  "runs": [
+   {
+    "sugarFeedS": 6.7,
+    "waterFeedS": 2.09,
+    "waterMn9Peak": 32.7,
+    "groom": 8,
+    "jump": 34,
+    "dodgeRate": 1
+   },
+   {
+    "sugarFeedS": 5.76,
+    "waterFeedS": 1.65,
+    "waterMn9Peak": 29.5,
+    "groom": 9,
+    "jump": 32,
+    "dodgeRate": 1
+   },
+   {
+    "sugarFeedS": 3.28,
+    "waterFeedS": 3.4,
+    "waterMn9Peak": 32.6,
+    "groom": 8,
+    "jump": 33,
+    "dodgeRate": 1
+   }
+  ],
+  "range": {
+   "sugarFeedS": [
+    3.28,
+    6.7
+   ],
+   "waterFeedS": [
+    1.65,
+    3.4
+   ],
+   "waterMn9Peak": [
+    29.5,
+    32.7
+   ],
+   "groom": [
+    8,
+    9
+   ],
+   "jump": [
+    32,
+    34
+   ],
+   "dodgeRate": [
+    1,
+    1
+   ]
+  }
+ },
+ "mutants": [
+  {
+   "key": "Roundup",
+   "runs": [
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0.05,
+     "waterMn9Peak": 9.1,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 0,
+     "waterFeedS": 0.1,
+     "waterMn9Peak": 9.1,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "sugarFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      3.28,
+      6.7
+     ]
+    },
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0.1
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      9.1
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "G2N-1",
+   "runs": [
+    {
+     "sugarFeedS": 4.91,
+     "waterFeedS": 2.42,
+     "waterMn9Peak": 33.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 7.04,
+     "waterFeedS": 1.06,
+     "waterMn9Peak": 32.2,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 4.25,
+     "waterFeedS": 2.72,
+     "waterMn9Peak": 31.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "Clavicle",
+   "runs": [
+    {
+     "sugarFeedS": 5.92,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 6.45,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.09,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0277",
+   "runs": [
+    {
+     "sugarFeedS": 7.83,
+     "waterFeedS": 2.98,
+     "waterMn9Peak": 34.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.73,
+     "waterFeedS": 1.27,
+     "waterMn9Peak": 34.1,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.3,
+     "waterFeedS": 2.19,
+     "waterMn9Peak": 38.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      34.1,
+      38.3
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0051",
+   "runs": [
+    {
+     "sugarFeedS": 6.17,
+     "waterFeedS": 0.05,
+     "waterMn9Peak": 9.1,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.4,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.65,
+     "waterFeedS": 0,
+     "waterMn9Peak": 0,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterFeedS",
+     "dir": "低",
+     "ours": [
+      0,
+      0.05
+     ],
+     "intact": [
+      1.65,
+      3.4
+     ]
+    },
+    {
+     "metric": "waterMn9Peak",
+     "dir": "低",
+     "ours": [
+      0,
+      9.1
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "Zorro",
+   "runs": [
+    {
+     "sugarFeedS": 7.92,
+     "waterFeedS": 2.14,
+     "waterMn9Peak": 31.7,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.53,
+     "waterFeedS": 1.13,
+     "waterMn9Peak": 30.3,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 3.9,
+     "waterFeedS": 2.21,
+     "waterMn9Peak": 30.4,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "Phantom",
+   "runs": [
+    {
+     "sugarFeedS": 6.38,
+     "waterFeedS": 2.14,
+     "waterMn9Peak": 57.5,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.42,
+     "waterFeedS": 1.73,
+     "waterMn9Peak": 71.7,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 4.45,
+     "waterFeedS": 3.66,
+     "waterMn9Peak": 43.4,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      43.4,
+      71.7
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "Rattle",
+   "runs": [
+    {
+     "sugarFeedS": 6.5,
+     "waterFeedS": 2.55,
+     "waterMn9Peak": 36.6,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.62,
+     "waterFeedS": 1.2,
+     "waterMn9Peak": 34.5,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.7,
+     "waterFeedS": 3.11,
+     "waterMn9Peak": 34,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "waterMn9Peak",
+     "dir": "高",
+     "ours": [
+      34,
+      36.6
+     ],
+     "intact": [
+      29.5,
+      32.7
+     ]
+    }
+   ],
+   "diagnosable": true
+  },
+  {
+   "key": "CB0883",
+   "runs": [
+    {
+     "sugarFeedS": 6.17,
+     "waterFeedS": 3.98,
+     "waterMn9Peak": 87,
+     "groom": 8,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.49,
+     "waterFeedS": 1.22,
+     "waterMn9Peak": 24.8,
+     "groom": 9,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 2.46,
+     "waterFeedS": 1.92,
+     "waterMn9Peak": 33.3,
+     "groom": 8,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [],
+   "diagnosable": false
+  },
+  {
+   "key": "aBN1",
+   "runs": [
+    {
+     "sugarFeedS": 7.02,
+     "waterFeedS": 3.2,
+     "waterMn9Peak": 26.1,
+     "groom": 0,
+     "jump": 34,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 5.09,
+     "waterFeedS": 1.65,
+     "waterMn9Peak": 29.6,
+     "groom": 0,
+     "jump": 32,
+     "dodgeRate": 1
+    },
+    {
+     "sugarFeedS": 6.38,
+     "waterFeedS": 2.9,
+     "waterMn9Peak": 25.7,
+     "groom": 0,
+     "jump": 33,
+     "dodgeRate": 1
+    }
+   ],
+   "tells": [
+    {
+     "metric": "groom",
+     "dir": "低",
+     "ours": [
+      0,
+      0
+     ],
+     "intact": [
+      8,
+      9
+     ]
+    }
+   ],
+   "diagnosable": true
+  }
+ ],
+ "n_diagnosable": 7
+}</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -7215,6 +7859,72 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   };
   $("mQuit").onclick = mQuit;
   mBuildList();
+
+  // ── v7 盲盒突变体：随机敲一个真实神经元，靠行为诊断 ───────────────────
+  // 可诊断性是**实测**的（node dodge/mutant_test.js，60 s × 3 种子）：10 个里只有 7 个
+  // 能从行为上看出来。这不是玩法缺陷，正是本项目反复强调的那条结论的行为版——
+  // 单敲除常常什么也看不见。所以答案揭晓时会把该突变体的"可见破绽"一起给出。
+  const MUT = JSON.parse(document.getElementById("mutants-data").textContent);
+  const MSTATE = { key: null, guessed: false };
+  (function initMutant() {
+    const sel = $("mutGuess");
+    for (const m of MUT.mutants) {
+      const o = document.createElement("option");
+      o.value = m.key; o.textContent = m.key + (m.diagnosable ? "" : "（实测：行为上看不出来）");
+      sel.append(o);
+    }
+    const setPill = (txt, cls) => { $("mutPill").textContent = txt; $("mutPill").className = "pill" + (cls ? " " + cls : ""); };
+    $("mutNew").onclick = () => {
+      if (MSTATE.key) game.setNeuronLesion(MSTATE.key, false);
+      const pool = MUT.mutants;
+      MSTATE.key = pool[Math.floor(Math.random() * pool.length)].key;
+      MSTATE.guessed = false;
+      game.setNeuronLesion(MSTATE.key, true);
+      mSyncUI();
+      setPill("已抽取，未诊断");
+      $("coach").textContent = "抽到一只突变体：某一个真实神经元被敲掉了。喂糖、喂水、落灰、扔球，看它哪里不对劲。"
+        + "实测只有 7/10 能从行为看出来——诊断不出来也是一种结果。";
+    };
+    $("mutSubmit").onclick = () => {
+      if (!MSTATE.key) { setPill("先抽一只"); return; }
+      const g = $("mutGuess").value;
+      if (!g) { setPill("先选一个"); return; }
+      const rec = MUT.mutants.find(m => m.key === MSTATE.key);
+      const ok = g === MSTATE.key;
+      MSTATE.guessed = true;
+      setPill(ok ? "诊断正确：" + MSTATE.key : "不对，是 " + MSTATE.key, ok ? "pass" : "fail");
+      const tells = rec.tells.length
+        ? "实测可见的破绽：" + rec.tells.map(t => ({ sugarFeedS: "吃糖时长", waterFeedS: "喝水时长",
+            waterMn9Peak: "喝水时 MN9 峰值", groom: "梳理次数", jump: "起跳次数", dodgeRate: "闪避率" }[t.metric]
+            + " 偏" + t.dir + "（" + t.ours.join("–") + " vs 不敲 " + t.intact.join("–") + "）")).join("；")
+        : "实测：这一个在行为上看不出来——60 s × 3 种子里六个指标都与不敲重叠。单敲除常常什么也看不见，这正是要点。";
+      $("coach").textContent = (ok ? "诊断正确。" : "答案是 " + MSTATE.key + "。") + tells.replace(/\*\*/g, "");
+    };
+    $("mutCure").onclick = () => {
+      if (MSTATE.key) game.setNeuronLesion(MSTATE.key, false);
+      MSTATE.key = null; mSyncUI(); setPill("未抽取");
+      $("coach").textContent = "突变体已治好。";
+    };
+  })();
+
+  // 突变体实测表：数字来自 results/dodge/mutants.json
+  (function buildMutantTable() {
+    const t = document.getElementById("tMutants"); if (!t) return;
+    const LBL = { sugarFeedS: "吃糖时长", waterFeedS: "喝水时长", waterMn9Peak: "喝水时 MN9 峰值",
+                  groom: "梳理次数", jump: "起跳次数", dodgeRate: "闪避率" };
+    const mean = (rs, m) => { const v = rs.map(x => x[m]).filter(x => typeof x === "number");
+      return v.length ? (Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) / 100) : "—"; };
+    const cols = MUT.metrics;
+    const head = "<tr><th>敲掉谁</th>" + cols.map(c => "<th>" + LBL[c] + "</th>").join("") + "<th>能不能诊断</th></tr>";
+    const rowOf = (name, rs, tell) => "<tr><td>" + name + "</td>" +
+      cols.map(c => "<td>" + mean(rs, c) + "</td>").join("") + "<td>" + tell + "</td></tr>";
+    t.innerHTML = head + "<tr class=\"em\">" + rowOf("不敲（对照）", MUT.intact.runs, "—").slice(4) +
+      MUT.mutants.map(m => rowOf(m.key, m.runs,
+        m.tells.length ? "可诊断：" + m.tells.map(x => LBL[x.metric] + "偏" + x.dir).join("、") : "行为上看不出来")).join("");
+    const n = document.getElementById("mutNote");
+    if (n) n.textContent = "每格 " + MUT.seeds + " 个种子 × " + MUT.seconds_per_seed +
+      " 秒的均值。" + MUT.n_diagnosable + "/" + MUT.mutants.length + " 个能从行为看出来。" + MUT.note;
+  })();
 
   // 任务实测表：只显示，数字全部来自 results/dodge/missions.json
   (function buildMissionTable() {

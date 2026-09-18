@@ -53,12 +53,21 @@ PAPERS = [
                   script="screen/jon_adn2.py", result_file="results/screen/jon_paper/adn2_summary.json", log="§29",
          verify=[("aBN1.ratio_aDN1", 0.0, 1e-9), ("aBN1.ratio_aDN2", 0.0, 1e-9),
                           ("aBN1.paper_7e", 0.0, 1e-9)]),
-             dict(id="shuffle", what="打乱接线对照（补充表 1D）", status="partial",
-                  result="糖 → MN9 从 **82.9 Hz 掉到 3.5 ± 4.2 Hz**（比值 0.043），与论文同量级（Zorro_l 102.2 → 2.75 ± 7.17）",
-                  caveat="只在 4,599 个神经元的**子回路**上做，不是全脑；论文未公开打乱做法，我们用的是「保出度与权重、只重排靶点」。定性方向可比，定量不可比",
-                  script="dodge/measure_perturb.js", result_file="results/dodge/perturb.json", log="§30.1",
-                  verify=[("baseline_hz.sugar", 82.9, 0.05), ("shuffle.sugar.均值Hz", 3.5, 0.1),
-                          ("shuffle.sugar.比值", 0.043, 0.002)]),
+             dict(id="shuffle", what="打乱接线对照（补充表 1D）", status="reproduced",
+                  result="**全脑**做的：不打乱时表 1D 那 13 个神经元与论文的 **Pearson 0.992**"
+                         "（MN9_r 我们 62.7 Hz、论文 68.0）；10 个打乱版本下**这 13 个全部归零**，"
+                         "活跃神经元从 348 掉到 60–95。两条事先判据都成立"
+                         "（A：MN9_r 打乱后 < 不打乱的 10%；B：≥12/13 下降）",
+                  caveat="论文**没有公开打乱的具体做法**，我们用的是「保每个神经元的出度与权重、只把靶点列整体重排」。"
+                         "论文跑 100 次、我们跑 10 次，而且论文的打乱均值不是 0 而是 2.7–5.4 Hz（SD 7–11），"
+                         "也就是说**少数打乱版本会出现强响应**——10 次抽不到这种罕见事件很正常，"
+                         "所以「我们恒为 0」比论文更干净，不能当成复现得更好。"
+                         "表 1D 的 15 个 ID 里只有 13 个在 v783 模型中，判据 B 的分母按论文 14/15 的比例折算成 12/13。"
+                         "子回路版（4,599 神经元）另见 `dodge/measure_perturb.js`：糖 → MN9 从 82.9 掉到 3.5 Hz",
+                  script="screen/shuffle_full.py", result_file="results/screen/shuffle_full/summary.json", log="§30.1 + §37.7",
+                  verify=[("pearson_intact_vs_paper", 0.992, 0.0005), ("n_down", 12, 0), ("n_total", 13, 0),
+                          ("mn9_r.ours_intact", 62.667, 0.02), ("mn9_r.ours_shuf_mean", 0.0, 0.001),
+                          ("design.n_shuffles", 10, 0)]),
              dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**）", status="partial",
                   result="w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；"
                          "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 "

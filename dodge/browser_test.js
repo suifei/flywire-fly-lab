@@ -158,6 +158,23 @@ function chromePath() {
     const on = await page.evaluate(() => Object.entries(window.__game.lesion).filter(([, v]) => v).map(([k]) => k));
     return on.length === 0 ? true : "残留：" + on.join("+");
   });
+  await step("盲盒突变体：抽取会真的敲掉一个神经元", async () => {
+    await page.click("#mutNew");
+    const on = await page.evaluate(() => Object.entries(window.__game.neuronLesion).filter(([, v]) => v).map(([k]) => k));
+    return on.length === 1 ? "敲掉了 " + on[0] : "敲掉了 " + on.length + " 个";
+  });
+  await step("提交诊断会给出答案与实测破绽", async () => {
+    await page.select("#mutGuess", "Roundup");
+    await page.click("#mutSubmit");
+    const pill = await page.$eval("#mutPill", e => e.textContent.trim());
+    const coach = await page.$eval("#coach", e => e.textContent.trim());
+    return (pill && coach.length > 20) ? pill : "没有给出结果";
+  });
+  await step("治好它会把神经元恢复", async () => {
+    await page.click("#mutCure");
+    const on = await page.evaluate(() => Object.entries(window.__game.neuronLesion).filter(([, v]) => v).map(([k]) => k));
+    return on.length === 0 ? true : "残留：" + on.join("+");
+  });
   let uiBad = 0;
   for (const [name, v] of ui) {
     const ok = v === true || (typeof v === "string" && !v.startsWith("异常") && !v.startsWith("只") && !v.startsWith("没有") && !v.startsWith("残留") && !v.startsWith("文本"));
