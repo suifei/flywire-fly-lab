@@ -893,10 +893,10 @@ code { font: 12px var(--mono); }
 <script id="repro-data" type="application/json">{
  "说明": "复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
  "counts": {
-  "reproduced": 15,
+  "reproduced": 16,
   "partial": 6,
   "negative": 0,
-  "not_done": 3,
+  "not_done": 2,
   "blocked": 1
  },
  "total_claims": 25,
@@ -1020,13 +1020,25 @@ code { font: 12px var(--mono); }
     },
     {
      "id": "robustness",
-     "what": "参数稳健性（补充表 11B–F）",
+     "what": "参数稳健性（补充表 11A–F，**全脑**）",
      "status": "partial",
-     "result": "按论文判据（判定是否翻转）：突触权重 ±30% → **9/10 与 10/10 不变**；抑制 ±30% → 7/10 与 9/10；谷氨酸改兴奋性 → 7/10",
-     "caveat": "同上，子回路而非全脑；翻转的全是贴着 0.8 判据的边缘情况",
-     "script": "dodge/measure_perturb.js",
-     "result_file": "results/dodge/perturb.json",
-     "log": "§30.2"
+     "result": "w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；「同侧 MN9 比对侧弱」**6/6 种条件都成立**；除 w_syn −30%（保住 58%）外，其余四种扰动都保住 **≥99.7%** 的基线响应神经元",
+     "caveat": "**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自多强」对不太上，原因未分辨。表 11B–F 的 182 行里只有 38–48 行带 flyid（其余是类型级汇总块）。第三条预测「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），**没有做**。另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475）",
+     "script": "screen/robustness.py",
+     "result_file": "results/screen/robustness/summary.json",
+     "log": "§35",
+     "verify": [
+      [
+       "perturbations.w-30.mn9_right",
+       34.5,
+       0.1
+      ],
+      [
+       "perturbations.glut_exc.n_active",
+       30475,
+       0
+      ]
+     ]
     },
     {
      "id": "taste_interaction",
@@ -1309,12 +1321,24 @@ code { font: 12px var(--mono); }
     {
      "id": "turn_sign",
      "what": "turn_drive 的符号（文档说正值向右，代码却是向左）",
-     "status": "not_done",
-     "result": "1 个种子的初测支持「代码对、文档错」（左 LPLC2 → turn_drive +0.35、侧移 y ≈ +4 mm）",
-     "caveat": "**按项目规矩，多种子 + 打乱对照确认之前不算定论**。脚本已就绪：fba_turn_sign.py",
+     "status": "reproduced",
+     "result": "**代码对、文档错**：`turn_drive > 0` 让身体转**左**。3 个种子全部一致——左注入 +0.352、右注入 −0.533；相对对照的净侧移 +4.82 mm（偏左）vs −1.60 mm（偏右）。打乱连接组后左右差从 **+6.42 mm 塌到 −0.02 mm**",
+     "caveat": "而且左 LPLC2 注入让果蝇转向**被刺激的同侧**，与作者报告的「对侧逃逸」相反。三点限制：①绝对侧移读不出方向（不注入的对照也漂 −15.56 mm，是步态偏置）；②打乱同时改变了整个运动（打乱后基线漂移只有 −3.47 mm），能干净比较的只有左右差；③n=3 种子",
      "script": "fba_turn_sign.py",
-     "result_file": null,
-     "log": "§4.1 gotcha"
+     "result_file": "results/fba_turn_sign.json",
+     "log": "§34",
+     "verify": [
+      [
+       "result.lateral_diff_real_mm",
+       6.419,
+       0.01
+      ],
+      [
+       "result.lateral_diff_shuffled_mm",
+       -0.018,
+       0.01
+      ]
+     ]
     }
    ]
   }
