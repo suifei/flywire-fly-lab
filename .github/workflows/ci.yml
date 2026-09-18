@@ -76,6 +76,14 @@ jobs:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: node dodge/eyecam_geom_test.js
 
+      - name: 视野扇区在地板上的对比度（防「和地板同色 = 等于没画」）
+        # 右眼扇区曾是金黄 0xe8b339，和地板 #b8763a 同色相；阳光 100% 时地板
+        # 红通道削顶在 255，暖色叠加抬不动 R，扇区内外只差 Δ=8.4，等于没画。
+        # 肉眼截图看不出这种问题，只能量。
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: node dodge/field_contrast.js
+
       - name: 总审计（把每个功能当一道题，核对数值不看有没有内容）
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
