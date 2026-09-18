@@ -76,6 +76,17 @@
       this._updateStim();
     }
 
+    // 直接驱动**任意**神经元（"光遗传手指"）。必须单独有个接口，是因为 _updateStim 只会把
+    // **输入组**里的神经元放进 stimList —— 2026-09-19 实测：对中间神经元调 setRateNeurons
+    // 只会写 stimProb，永远不会真的放电。传 hz = 0 关掉。
+    // 与官方 poi() 一致：被驱动的神经元不应期置 0。
+    setOpto(idx, hz) {
+      this.optoIdx = Int32Array.from(idx || []);
+      this.optoProb = (Math.max(0, hz) * this.dt) / 1000;
+      for (const i of this.optoIdx) this.stimProb[i] = this.optoProb;
+      this._updateStim();
+    }
+
     _updateStim() {
       const list = [];
       for (let i = 0; i < this.n; i++) {
@@ -87,6 +98,16 @@
       for (const g of Object.keys(this.groups)) {
         if (!inputPrefixes.some(p => g.startsWith(p + "_"))) continue;
         for (const i of this.groups[g]) { this.rfc[i] = 0; if (this.stimProb[i] > 0) list.push(i); }
+      }
+      if (this.optoIdx && this.optoProb > 0) {          // 光遗传驱动的神经元不一定在输入组里
+        const seen = new Set(list);
+        for (const i of this.optoIdx) {
+          // 光遗传优先：游戏每一步都会用 setRate 重写输入组的 stimProb（没球时写 0），
+          // 不在这里盖回去的话，点在 LC4/LPLC2 上的脉冲会被立刻抹掉。
+          this.stimProb[i] = Math.max(this.stimProb[i], this.optoProb);
+          this.rfc[i] = 0;
+          if (!seen.has(i)) { seen.add(i); list.push(i); }
+        }
       }
       this.stimList = Int32Array.from(list);
     }

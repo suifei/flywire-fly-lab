@@ -77,9 +77,28 @@ PAPERS = [
                           ("perturbations.inh-30.frac_baseline_kept", 0.998, 0.002),
                           ("perturbations.inh+30.frac_baseline_kept", 0.869, 0.002),
                           ("perturbations.glut_exc.frac_baseline_kept", 0.990, 0.002)]),
-             dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="not_done",
-                  result="—", caveat="需要先把每种刺激标定到 MN9 = 40 Hz（论文口径），工期未估",
-                  script=None, result_file=None, log="§附录·空白清单"),
+             dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="reproduced",
+                  result="8 个条件全跑（全脑，各 6 个实现），刺激名单用**官方 notebook 的**。"
+                         "剔除全部被刺激 GRN 后的 466 个神经元上，与论文发放率的 Pearson **0.963–0.999**；"
+                         "四个组合的抑制方向全部一致：糖+苦 MN9 **0.2 Hz**（论文 1.3）、糖+Ir94e **0.8**（1.1）、"
+                         "水+苦 **18.8**（10.1）、水+Ir94e **10.7**（2.3）",
+                  caveat="表头有**两套标定规则**：糖/水是驱动型（单独标到 MN9≈40 Hz：糖 60 Hz→35.7、水 220 Hz→38.3），"
+                         "苦/Ir94e 是抑制型（垫在糖上把 MN9 压到 1 Hz：苦 80 Hz、Ir94e 60 Hz）——只读前半句会让苦「无法标定」。"
+                         "频率网格只有 8 档，标定值是最近档而非精确 40/1 Hz。**对水的抑制比论文弱**："
+                         "组合÷单独 水+苦 0.49（论文 0.25）、水+Ir94e **0.28（论文 0.06）**；"
+                         "Ir94e 单独的响应集与论文重叠最差（Jaccard 0.22，其余条件 0.68–0.93）。"
+                         "**一开始以为论文没公开刺激名单，按表 4 的高发放类型反推了一版**（苦 21 / Ir94e 21）；"
+                         "后来发现 figures.ipynb 的 Figure 3 单元格里就有原始名单（苦 21 / Ir94e 18）。"
+                         "两版都留着（反推版在 results/screen/taste/），官方名单版在糖的两个组合上更接近论文（0.005/0.023 vs 0.000/0.042）",
+                  script="screen/taste_interaction.py", result_file="results/screen/taste/notebook/summary.json", log="§37",
+                  verify=[("conditions.Sugar_Bitter.ours_mn9", 0.17, 0.02), ("conditions.Sugar_Ir94e.ours_mn9", 0.83, 0.02),
+                          ("conditions.Water_Bitter.ours_mn9", 18.83, 0.02), ("conditions.Water_Ir94e.ours_mn9", 10.67, 0.02),
+                          ("conditions.Sugar_Ir94e.pearson_nonstim", 0.963, 0.0005),
+                          ("conditions.Water_only.pearson_nonstim", 0.999, 0.0005),
+                          ("conditions.Ir94e_only.respond_jaccard_nonstim", 0.217, 0.001),
+                          ("interaction.Water_Ir94e.ours_ratio", 0.278, 0.001),
+                          ("interaction.Water_Ir94e.paper_ratio", 0.056, 0.001),
+                          ("calibration.sugar.chosen_mn9", 35.67, 0.01), ("calibration.water.chosen_mn9", 38.33, 0.01)]),
              dict(id="baseline_rates", what="基线发放率：糖 → MN9、LC4 → 巨纤维", status="reproduced",
                   result="糖 100 Hz → MN9 **98/69 Hz**；左侧 54 个 LC4 100 Hz → 巨纤维 **85/40 Hz**",
                   caveat="PyTorch 后端在 DNa02 上与 Brian2 有 20 vs 10 Hz 的差异（各自独立抽泊松输入，在噪声量级）",
