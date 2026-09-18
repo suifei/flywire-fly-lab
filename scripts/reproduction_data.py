@@ -165,10 +165,15 @@ PAPERS = [
              dict(id="odor_valence", what="气味效价实验", status="partial",
                   result="6 条里复现 **4 条**", caveat=None,
                   script="external/Fly-Brain-AI/plastic-fly/experiments/odor_valence.py", result_file=None, log="§10.5"),
-             dict(id="turn_sign", what="turn_drive 的符号（文档说正值向右，代码却是向左）", status="not_done",
-                  result="1 个种子的初测支持「代码对、文档错」（左 LPLC2 → turn_drive +0.35、侧移 y ≈ +4 mm）",
-                  caveat="**按项目规矩，多种子 + 打乱对照确认之前不算定论**。脚本已就绪：fba_turn_sign.py",
-                  script="fba_turn_sign.py", result_file=None, log="§4.1 gotcha"),
+             dict(id="turn_sign", what="turn_drive 的符号（文档说正值向右，代码却是向左）", status="reproduced",
+                  result="**代码对、文档错**：`turn_drive > 0` 让身体转**左**。3 个种子全部一致——"
+                         "左注入 +0.352、右注入 −0.533；相对对照的净侧移 +4.82 mm（偏左）vs −1.60 mm（偏右）。"
+                         "打乱连接组后左右差从 **+6.42 mm 塌到 −0.02 mm**",
+                  caveat="而且左 LPLC2 注入让果蝇转向**被刺激的同侧**，与作者报告的「对侧逃逸」相反。"
+                         "三点限制：①绝对侧移读不出方向（不注入的对照也漂 −15.56 mm，是步态偏置）；"
+                         "②打乱同时改变了整个运动（打乱后基线漂移只有 −3.47 mm），能干净比较的只有左右差；③n=3 种子",
+                  script="fba_turn_sign.py", result_file="results/fba_turn_sign.json", log="§34",
+                  verify=[("result.lateral_diff_real_mm", 6.419, 0.01), ("result.lateral_diff_shuffled_mm", -0.018, 0.01)]),
          ]),
 ]
 
