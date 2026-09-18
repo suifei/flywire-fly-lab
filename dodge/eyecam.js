@@ -139,9 +139,15 @@ const FlyEyeCam = (() => {
       // 两只眼几乎同位（FlyGym 里相距 0.76 mm，在本场景可忽略），
       // 所以**一张立方体贴图两只眼共用**，各自按自己的方向表采样。
       this.cube = new THREE.CubeCamera(0.05, 900, this.rt);
-      this.buf = new Uint8Array(this.size * this.size * 4);
-      this.faces = [];                                     // 6 面的 RGB
-      for (let f = 0; f < 6; f++) this.faces.push(new Uint8Array(this.size * this.size * 3));
+      // 6 面装在**一块**连续 RGBA 缓冲里：
+      //   · 原来是「读到 buf(1 面 RGBA) → 逐像素重排进 faces[f](RGB)」，
+      //     221,184 个像素全部搬一遍，而真正采样的只有 1,442 个 —— 纯浪费（实测 0.52 ms）。
+      //   · 合并之后异步读回（PBO）也能一次 getBufferSubData 取全部 6 面。
+      this.FACE = this.size * this.size * 4;
+      this.px = new Uint8Array(this.FACE * 6);
+      this.faceView = [];                                  // 同步读回时按面写入
+      for (let f = 0; f < 6; f++)
+        this.faceView.push(new Uint8Array(this.px.buffer, f * this.FACE, this.FACE));
       this.dirs = [1, -1].map(sg => latticeDirs(lattice, sg));
       this.pale = retina.paleByColumn();
       this.permArr = retina.perm;
@@ -182,6 +188,100 @@ const FlyEyeCam = (() => {
       this.lastMs = nowMs; return true;
     }
 
+    /** 同步读回 6 个面到 this.px（会等 GPU 往返，实测整趟 ~10.6 ms）。 */
+    _readSync() {
+      const { renderer, rt, size } = this;
+      for (let f = 0; f < 6; f++)
+        renderer.readRenderTargetPixels(rt, 0, 0, size, size, this.faceView[f], f);
+    }
+
+    // ── 异步读回（WebGL2 PBO）────────────────────────────────────────
+    // 实测（M1 Pro / ANGLE Metal）：同步「渲染 + 读回」10.6 ms，其中约 4–5 ms
+    // 是一次**固定的 GPU 往返同步** —— 和读几个面、读多少像素、贴图多大都无关：
+    //   读 1 面 6.27 ms ≈ 读 6 面 6.76 ms；读 16×16 一角 7.45 ms ≈ 读整个 192² 6.27 ms；
+    //   每面边长 192→48（像素少 16 倍）耗时不降。
+    // 所以降分辨率 / 减面数 / 合成一张图集全都没用，唯一的解法是不要同步往返：
+    // 把 readPixels 写进 PIXEL_PACK_BUFFER（立即返回），插一个 fence，下一帧再取。
+    // 代价是数据晚一帧；收益 10.6 → 2.9 ms。已验证与同步读回**逐字节相同**（1,327,104 字节全等）。
+    _pbo() {
+      if (this._pboState !== undefined) return this._pboState;
+      const gl = this.renderer.getContext();
+      const ok = typeof WebGL2RenderingContext !== "undefined" &&
+                 gl instanceof WebGL2RenderingContext &&
+                 typeof gl.fenceSync === "function" && typeof gl.getBufferSubData === "function";
+      if (!ok) return (this._pboState = null);            // WebGL1 等 → 退回同步
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
+      gl.bufferData(gl.PIXEL_PACK_BUFFER, this.px.byteLength, gl.STREAM_READ);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+      return (this._pboState = { gl, buf, sync: null });
+    }
+
+    /** 发起异步读回（不等）。必须在 _renderCube 之后调用。 */
+    _submitAsync() {
+      const P = this._pbo(); if (!P) return false;
+      const { gl, buf } = P, { renderer, rt, size } = this;
+      const prev = renderer.getRenderTarget();
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
+      for (let f = 0; f < 6; f++) {
+        renderer.setRenderTarget(rt, f);                  // 让 three.js 绑好这一面的 framebuffer
+        gl.readPixels(0, 0, size, size, gl.RGBA, gl.UNSIGNED_BYTE, f * this.FACE);
+      }
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+      renderer.setRenderTarget(prev);
+      if (P.sync) gl.deleteSync(P.sync);
+      P.sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      return true;
+    }
+
+    /** 若 GPU 已画完就把像素取进 this.px；没画完立刻返回 false，**不阻塞**。 */
+    _tryCollect() {
+      const P = this._pbo(); if (!P || !P.sync) return false;
+      const gl = P.gl;
+      // SYNC_FLUSH_COMMANDS_BIT 不能省：少了它 fence 可能一直不触发（踩过）。
+      const st = gl.clientWaitSync(P.sync, gl.SYNC_FLUSH_COMMANDS_BIT, 0);
+      if (st !== gl.ALREADY_SIGNALED && st !== gl.CONDITION_SATISFIED) return false;
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, P.buf);
+      gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, this.px);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+      gl.deleteSync(P.sync); P.sync = null;
+      return true;
+    }
+
+    /**
+     * 异步版：先取**上一次**提交的像素并成像，再提交这一次的渲染。
+     * 首次调用（还没有上一帧）返回 null。不支持 WebGL2 时自动退回同步 update()。
+     * 成像用的是**提交那一刻**的头部姿态，不是现在的 —— 图和方向表必须同一时刻，
+     * 否则画面晚一帧、视线却是最新的，几何上就错位了。
+     */
+    updateAsync(headObj, canvases, submitFps = 12) {
+      if (!this._pbo())                                   // 不支持 → 退回同步，自己节流
+        return this.shouldUpdate(performance.now(), submitFps) ? this.update(headObj, canvases) : null;
+      let out = null;
+      // **每帧都试着取**：这样画面最多晚 1 帧（~16 ms）。
+      // 如果跟着提交频率一起节流，12 fps 下就会晚 83 ms —— 那才是真的"卡"。
+      if (this._pendQ && this._tryCollect()) {
+        this._wq.copy(this._pendQ);                       // 用提交那一刻的姿态成像
+        out = this._resample(canvases);
+        this._pendQ = null;
+      }
+      // 提交按固定频率：渲染立方体贴图 2.1 ms，不必每帧做。
+      if (!this._pendQ && this.shouldUpdate(performance.now(), submitFps)) {
+        this._renderCube(headObj);
+        if (this._submitAsync())
+          this._pendQ = (this._pendQ0 || (this._pendQ0 = new this.THREE.Quaternion())).copy(this._wq);
+      }
+      return out;
+    }
+
+    /** 同步版（测试和几何自检用）：渲染 → 等 GPU → 成像，当场拿到结果。 */
+    update(headObj, canvases) {
+      this._renderCube(headObj);
+      this._readSync();
+      return this._resample(canvases);
+    }
+
     /**
      * @param {number} x,y,z 果蝇身体位置（世界坐标）
      * @param {number} h 朝向（弧度，和 fly.rotation.z 一致）
@@ -200,9 +300,9 @@ const FlyEyeCam = (() => {
      * @param {HTMLCanvasElement[]} canvases [左眼, 右眼]
      * @returns {{color:Float64Array[], uv:Float64Array[]}}
      */
-    update(headObj, canvases) {
-      const { THREE, renderer, scene, rt, cube, buf, faces, size, retina } = this;
-      if (!this.geom) this.geom = this.draw.hexGeom(this.lattice, canvases[0].width, canvases[0].height);
+    /** 只渲染立方体贴图（不读回）。读回单独一步，因为同步读回要等 GPU 往返。 */
+    _renderCube(headObj) {
+      const { THREE, renderer, scene, cube } = this;
       const prevTarget = renderer.getRenderTarget();
       const prevClear = renderer.getClearColor(new THREE.Color());
       const prevAlpha = renderer.getClearAlpha();
@@ -233,18 +333,20 @@ const FlyEyeCam = (() => {
       cube.position.copy(wp);
       cube.update(renderer, scene);
 
-      for (let f = 0; f < 6; f++) {
-        renderer.readRenderTargetPixels(rt, 0, 0, size, size, buf, f);
-        const dst = faces[f];
-        for (let i = 0, j = 0; i < buf.length; i += 4, j += 3) {
-          dst[j] = buf[i]; dst[j + 1] = buf[i + 1]; dst[j + 2] = buf[i + 2];
-        }
-      }
       this._uvMats.forEach(([m], i) => { m.color.r = savedR[i]; });
       for (const [m, v] of self) m.visible = v;
+      renderer.setRenderTarget(prevTarget);
+      renderer.setClearColor(prevClear, prevAlpha);
+    }
+
+    /** 把 this.px 里的像素按每个小眼的视线方向采出来、去马赛克、画到画布上。 */
+    _resample(canvases) {
+      const { size } = this;
+      const wq = this._wq;
+      if (!this.geom) this.geom = this.draw.hexGeom(this.lattice, canvases[0].width, canvases[0].height);
 
       // 按每个小眼的方向去采样：不需要鱼眼，任意方向都能精确取到
-      const q = wq, n = this.n, pale = this.pale;
+      const q = wq, n = this.n, pale = this.pale, px = this.px;
       const vTmp = this._v || (this._v = new THREE.Vector3());
       for (let e = 0; e < 2; e++) {
         const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e];
@@ -257,9 +359,7 @@ const FlyEyeCam = (() => {
           // 3 fps 下每帧 1442 次向量运算可以忽略，而手写展开是整条链路里
           // 唯一没被独立验证过的一环（方向表、cubeLookup 都单独验过）。
           vTmp.set(d[j * 3], d[j * 3 + 1], d[j * 3 + 2]).applyQuaternion(q);
-          const idx = cubeLookup(vTmp.x, vTmp.y, vTmp.z, size);
-          const face = (idx / (size * size)) | 0, off = (idx % (size * size)) * 3;
-          const px = faces[face];
+          const off = cubeLookup(vTmp.x, vTmp.y, vTmp.z, size) * 4;   // 合并缓冲里的字节偏移
           uvv[j] = px[off] / 255;                            // R = 紫外
           col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
         }
@@ -277,8 +377,6 @@ const FlyEyeCam = (() => {
                           this.demosaic ? "fly" : "mosaic", pale, dm);
       }
 
-      renderer.setRenderTarget(prevTarget);
-      renderer.setClearColor(prevClear, prevAlpha);
       // 返回**副本**：this.out/this.uv 是复用缓冲区，直接返回引用的话
       // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
       return { color: this.out.map(a => Float64Array.from(a)),

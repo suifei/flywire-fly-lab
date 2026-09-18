@@ -141,6 +141,14 @@ python vision/draw_eye.py loom_L       # render existing flyvis data as a compou
 node vision/flyvis_parity.js && node vision/retina_parity.js && node vision/eye_e2e.js
 node dodge/browser_test.js             # real Chrome; CI=1 makes a missing Chrome an error, not a skip
 node dodge/field_contrast.js           # are the visual-field sectors actually visible on the court floor?
+#   Eye-window frame rate: a synchronous readRenderTargetPixels costs ONE FIXED ~4-5 ms GPU round trip on this
+#   machine (M1 Pro / ANGLE Metal) - measured to be independent of face count (1 face 6.3 ms vs 6 faces 6.8),
+#   of pixels read (16x16 corner 7.5 vs full 192^2 6.3) and of cube size (192->48 does not get cheaper). So
+#   lowering resolution / reading fewer faces / packing an atlas all do NOTHING. eyecam.js implements WebGL2 PBO
+#   async readback instead (_submitAsync/_tryCollect, fence + getBufferSubData next frame): 10.6 -> 2.9 ms,
+#   verified byte-identical to the sync path. clientWaitSync needs SYNC_FLUSH_COMMANDS_BIT or the fence may never
+#   signal. Collect is tried EVERY frame (<=1 frame stale); only the submit is throttled to EYE_FPS. Any test that
+#   polls the fence must first set window.__eyeTick = null, or the page's own loop consumes it.
 #   The right-eye sector used to be gold 0xe8b339 over a #b8763a floor; at 100% sunlight the floor renders
 #   (255,161,76) with RED ALREADY CLIPPED, so a warm translucent tint cannot move R and the sector was
 #   invisible (delta 8.4 RGB). Cool hues + an OPAQUE LineLoop outline fixed it. Field sectors must stay in
