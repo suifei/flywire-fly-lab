@@ -24,7 +24,7 @@ const lat = net.lattice || JSON.parse(fs.readFileSync(path.join(ROOT, "results/v
 const N = lat.length;
 const pos = lat.map(([u, v]) => [u + v / 2, v * Math.sqrt(3) / 2]);
 
-const DT = 0.005;            // 5 ms，远小于 T4/T5 的 τ≈19.8 ms
+const DT = +(process.env.DT || 0.005);       // 积分步长 s（默认 5 ms，远小于 T4/T5 的 τ≈19.8 ms）
 const T_TOTAL = 1.2, T_SCORE = 0.6;          // 后 0.6 s 计分
 const PERIOD_COL = 4;        // 空间周期 ≈ 4 个小眼 ≈ 22.8°
 const TFS = (process.env.TF || "2,5,10,20").split(",").map(Number);  // 时间频率扫描 Hz
