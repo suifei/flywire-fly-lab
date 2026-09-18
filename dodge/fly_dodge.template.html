@@ -165,6 +165,17 @@ code { font: 12px var(--mono); }
 .eyegrid figcaption { font-size:12px; opacity:.72; margin-top:4px; line-height:1.35; }
 .eyegrid figcaption.hi { opacity:1; }
 .eyegrid figcaption span { opacity:.6; font-size:11px; }
+
+/* 果蝇第一人称复眼视窗（舞台右上角） */
+.eyecam { position:absolute; top:46px; right:10px; z-index:4; padding:6px 7px 4px;
+  background:rgba(10,12,16,.72); border:1px solid rgba(255,255,255,.14); border-radius:9px;
+  backdrop-filter:blur(6px); pointer-events:none; }
+.eyecam .ec-row { display:flex; gap:6px; }
+.eyecam figure { margin:0; text-align:center; }
+.eyecam canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
+.eyecam figcaption { font-size:9px; opacity:.6; margin-top:1px; }
+.eyecam small { display:block; font-size:9px; opacity:.55; margin-top:2px; text-align:center; }
+@media (max-width: 720px) { .eyecam canvas { width:56px; height:56px; } }
 </style>
 
 <div class="wrap">
@@ -192,6 +203,13 @@ code { font: 12px var(--mono); }
         <div class="coach" id="coach">点击场地任意位置，从那里朝果蝇扔一个球</div>
         <div class="says" id="says" hidden></div>
         <div class="windvane" id="windvane" hidden><span id="windArrow">→</span><small id="windTxt"></small></div>
+        <div class="eyecam" id="eyecam">
+          <div class="ec-row">
+            <figure><canvas id="ecL" width="150" height="150"></canvas><figcaption>左眼</figcaption></figure>
+            <figure><canvas id="ecR" width="150" height="150"></canvas><figcaption>右眼</figcaption></figure>
+          </div>
+          <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
+        </div>
       </div>
       <div class="controls">
         <div class="row">
@@ -359,6 +377,8 @@ code { font: 12px var(--mono); }
         <figure><canvas id="eMotion" width="190" height="190"></canvas><figcaption>解码自 T4/T5</figcaption></figure>
       </div>
       <p class="sub"><b>后四栏是解码重建，会「补」出神经活动里其实没有的细节</b>——解码器学的是训练图像的统计规律。第三栏是未经解码的原始活动，两者的差距本身就是要看的东西（同 &sect;15 解码器压力测试）。越往右的层，画面丢得越多：到 T4/T5 只剩大形状，细条纹没了。</p>
+      <p class="sub"><b>舞台右上角那个小窗</b>是同一套东西的实时版：把 3D 世界从果蝇眼睛的位置再渲一遍（左右眼各偏前方 50&deg;），走同一张采样表成像。为了实时<b>跳过了 flyvis 和解码器</b>，只到「视网膜接收到什么」为止，每秒刷 3 次（读回 GPU 像素会打断渲染流水线）。渲染时会把果蝇自己的网格藏起来——摄像机在身体前方，不藏的话它自己的头会糊满半个视野。<br>
+      诚实标注：<b>小眼排布、采样表、pale/yellow 分型是真实的</b>；<b>视野角度和镜头畸变是近似的</b>（FlyGym 的鱼眼参数没有照搬，用的是 130&deg; 透视投影；真果蝇单眼视野接近 180&deg;，透视投影到不了）；天空是游戏的 CSS 渐变、不在 3D 场景里，所以离屏渲染时用舞台天空色补了个底。</p>
       <p class="sub" id="eNote"></p>
     </div>
 
@@ -562,6 +582,7 @@ code { font: 12px var(--mono); }
 <script>/*__FLYVIS_JS__*/</script>
 <script>/*__RETINA_JS__*/</script>
 <script>/*__DECODER_JS__*/</script>
+<script>/*__EYECAM_JS__*/</script>
 <script>/*__EYE_JS__*/</script>
 <script>/*__BRAIN_JS__*/</script>
 <script>/*__GAME_CORE_JS__*/</script>
@@ -654,6 +675,9 @@ code { font: 12px var(--mono); }
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = !reduceMotion; controls.minDistance = 10; controls.maxDistance = 160;
   controls.maxPolarAngle = Math.PI * 0.46;
+  // 复眼视窗要从果蝇眼位再渲一遍同一个场景，所以把这几个对象露出来。
+  // （视窗的装配在 bootFlyEye 里，那边等采样表 PNG 解码完才就绪。）
+  window.__flyScene = { THREE, renderer, scene, selfMeshes: [] };
   const hemi = new THREE.HemisphereLight(0xffffff, 0x88928e, 0.95); scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-20, -30, 60); scene.add(sun);
   const HEMI0 = hemi.intensity, SUN0 = sun.intensity;
@@ -1558,6 +1582,8 @@ code { font: 12px var(--mono); }
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
     }
+    if (window.__flyScene && !window.__flyScene.selfMeshes.length)
+      window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);
     const flying = !!(S.clip && S.jumpT >= 0);
     fly.visible = !flying; flyer.visible = flying;
     let vx = S.x, vy = S.y, vz = S.z;
@@ -1602,6 +1628,8 @@ code { font: 12px var(--mono); }
     camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
     controls.update();
     renderer.render(scene, camera);
+    // 果蝇第一人称复眼视窗：每秒只刷几次（读回 GPU 像素会打断流水线）
+    if (window.__eyeTick) window.__eyeTick(vx, vy, vz, S.h);
     updatePanels();
     requestAnimationFrame(frame);
   }
