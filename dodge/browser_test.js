@@ -76,13 +76,13 @@ function chromePath() {
   await page.click("#ePre_shapes");
   await page.click("#eRun");
   await page.waitForFunction(
-    () => (document.getElementById("eStatus") || {}).textContent?.includes("看完了"),
+    () => (document.getElementById("eStatus") || {}).textContent?.startsWith("完成："),
     { timeout: 120000 });
   console.log("  " + await page.$eval("#eStatus", e => e.textContent.trim()));
 
   // 每个画布都必须画出东西：全黑/全白（方差≈0）算失败
   const stats = await page.evaluate(() => {
-    const ids = ["eSrc", "eOmm", "eAct", "eRetina", "eLamina", "eMedulla", "eMotion"];
+    const ids = ["eSrc", "eOmm", "eAcc", "eAct", "eRetina", "eLamina", "eMedulla", "eMotion"];
     return ids.map(id => {
       const c = document.getElementById(id);
       if (!c) return { id, ok: false, why: "没有这个画布" };
@@ -111,5 +111,5 @@ function chromePath() {
   if (errs.length) { console.log(`✗ 页面报了 ${errs.length} 个错：`); errs.slice(0, 6).forEach(e => console.log("   " + e)); }
   if (bad) console.log(`✗ ${bad} 个画布没画出东西`);
   if (errs.length || bad) process.exit(1);
-  console.log("✓ 浏览器里跑通：无报错，7 个画布都画出了内容");
+  console.log("✓ 浏览器里跑通：无报错，8 个画布都画出了内容");
 })().catch(e => { console.error("FAIL", e); process.exit(1); });

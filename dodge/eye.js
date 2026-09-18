@@ -19,20 +19,166 @@
 const FlyEye = (() => {
   const S = { net: null, retina: null, dec: null, lat: null, running: false, raf: 0 };
   const W = 450, H = 512;                    // FlyGym 相机画面尺寸
-  const STEPS = 72, DT = 1 / 100, AMP = 16;  // 扫视步数 / 积分步长 / 幅度（像素）
+  const STEPS = 96, DT = 1 / 100, AMP = 22;  // 扫视步数 / 积分步长 / 大扫视幅度（像素）
+  let SPACING = 16.4;                        // 相邻小眼间距，由 retina.json 覆盖
 
-  // 扫视轨迹：快转 + 停顿，不是匀速平移。停顿时 T4/T5 会衰减，这是真的。
+  // 扫视轨迹：大扫视 + 细漂移。
+  // 大扫视让 T4/T5 工作（它们是运动检测器，盯着不动几乎不响应）；
+  // 细漂移是**分辨率的关键**：相邻小眼间距 16.4 像素，如果每次都落在同一个
+  // 相位上，采到的永远是同一批点，结果就是 721 块马赛克。漂移用两个非公度
+  // 频率，让落点铺满一个小眼的内部，多帧合起来才能超过静态采样极限。
+  // （真果蝇也这么干——微扫视超敏锐度，见 report.md §28.6。轨迹本身是手写的。）
   const KEYS = [[0,0,0],[.18,1,.45],[.30,1,.45],[.52,-1,-.5],[.64,-1,-.5],[.86,.9,-.55],[1,.9,-.55]];
   function gaze(k) {
     const t = k / (STEPS - 1);
+    let bx = KEYS[KEYS.length - 1][1], by = KEYS[KEYS.length - 1][2];
     for (let i = 1; i < KEYS.length; i++) {
       if (t <= KEYS[i][0]) {
         const [t0, x0, y0] = KEYS[i - 1], [t1, x1, y1] = KEYS[i];
         const f = (t - t0) / Math.max(t1 - t0, 1e-9);
-        return [(x0 + (x1 - x0) * f) * AMP, (y0 + (y1 - y0) * f) * AMP];
+        bx = x0 + (x1 - x0) * f; by = y0 + (y1 - y0) * f;
+        break;
       }
     }
-    return [KEYS[KEYS.length - 1][1] * AMP, KEYS[KEYS.length - 1][2] * AMP];
+    // 细漂移：幅度约一个小眼间距，频率不成简单比例 → 相位不重复
+    const d = SPACING * 0.62;
+    return [bx * AMP + d * Math.sin(k * 0.9137), by * AMP + d * Math.cos(k * 0.5413)];
+  }
+
+  // ── 超分辨累积 ─────────────────────────────────────────────
+  // 每个小眼在相机里有固定的中心；果蝇一动，同一个小眼就落到世界的不同位置。
+  // 把每步的采样值按"它当时看的是世界哪一点"投回一张高分辨率画布，
+  // 多帧合起来的信息量**真的**高于任何单帧 —— 这不是补细节，是真的多采了。
+  //
+  // 上限不是采样点数，而是小眼的**接受角**（每个小眼本身就是个模糊的探头）。
+  // 所以累积能去掉马赛克、逼近真实轮廓，但不会变成一张照片。
+  class Accum {
+    constructor(cx, cy, spacing, w, h) {
+      this.cx = cx; this.cy = cy; this.w = w; this.h = h;
+      this.sig = spacing * 0.5;                 // 落点核 ≈ 接受角
+      this.rad = Math.ceil(this.sig * 2.2);
+      this.num = new Float64Array(w * h);
+      this.den = new Float64Array(w * h);
+      const R = this.rad, K = new Float64Array((2 * R + 1) * (2 * R + 1));
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++)
+        K[(dy + R) * (2 * R + 1) + (dx + R)] = Math.exp(-(dx * dx + dy * dy) / (2 * this.sig * this.sig));
+      this.K = K;
+      this.samples = [];        // 反投影迭代要用原始测量值 + 落点
+    }
+    clear() { this.num.fill(0); this.den.fill(0); this.samples = []; }
+    /** vals 按 flyvis 柱序；perm 把它换回 flygym 序好对上中心坐标 */
+    add(vals, perm, ox, oy) {
+      const { cx, cy, w, h, rad: R, K, num, den } = this;
+      const S = 2 * R + 1;
+      const sx = new Float32Array(vals.length), sy = new Float32Array(vals.length);
+      const sv = Float64Array.from(vals);
+      for (let j = 0; j < vals.length; j++) {
+        const v = vals[j], g = perm[j];
+        const px = cx[g] + ox, py = cy[g] + oy;
+        sx[j] = px; sy[j] = py;
+        const ix = Math.round(px), iy = Math.round(py);
+        for (let dy = -R; dy <= R; dy++) {
+          const y = iy + dy; if (y < 0 || y >= h) continue;
+          for (let dx = -R; dx <= R; dx++) {
+            const x = ix + dx; if (x < 0 || x >= w) continue;
+            const kk = K[(dy + R) * S + (dx + R)];
+            num[y * w + x] += kk * v; den[y * w + x] += kk;
+          }
+        }
+      }
+      this.samples.push({ x: sx, y: sy, v: sv });
+    }
+
+    /**
+     * 反投影迭代（Landweber）：真正的超分辨。
+     *
+     * 简单平均**不会**提高分辨率 —— 每次测量本来就是小眼 footprint 的平均，
+     * 再用一个宽核摊开、多帧叠加，只是把更多张模糊图平均起来（实测提升 -0.2%）。
+     * 要提分辨率必须解反问题：找一张高分辨图 X，使得"用小眼去测 X"能复现全部测量值。
+     *
+     *   预测 = footprint 平均(X)   →   残差 = 实测 − 预测   →   把残差投回去
+     *
+     * 用的全是实测值和已知几何，不引入训练数据的统计 —— 和解码器不同，
+     * 这里不会"补"出没测到的东西，只会把已经测到的信息解开。
+     */
+    refineInit() {
+      const { w, h, num, den } = this;
+      const X = new Float64Array(w * h);
+      for (let i = 0; i < X.length; i++) X[i] = den[i] > 1e-6 ? num[i] / den[i] : 0;
+      this.refined = X;
+      return this;
+    }
+    refine(iters = 8, lam = 0.8) {
+      if (!this.refined) this.refineInit();
+      const { w, h } = this;
+      const X = this.refined;
+      // 精修用较窄的核，跑得动；太宽会把残差又抹开
+      const sig = this.sig * 0.75, R = Math.ceil(sig * 2.0), S = 2 * R + 1;
+      const K = new Float64Array(S * S);
+      let ksum = 0;
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+        const v = Math.exp(-(dx * dx + dy * dy) / (2 * sig * sig));
+        K[(dy + R) * S + (dx + R)] = v; ksum += v;
+      }
+      const gn = new Float64Array(w * h), gd = new Float64Array(w * h);
+      for (let it = 0; it < iters; it++) {
+        gn.fill(0); gd.fill(0);
+        for (const s of this.samples) {
+          for (let j = 0; j < s.v.length; j++) {
+            const ix = Math.round(s.x[j]), iy = Math.round(s.y[j]);
+            let pred = 0, wsum = 0;
+            for (let dy = -R; dy <= R; dy++) {
+              const y = iy + dy; if (y < 0 || y >= h) continue;
+              const row = (dy + R) * S;
+              for (let dx = -R; dx <= R; dx++) {
+                const x = ix + dx; if (x < 0 || x >= w) continue;
+                const kk = K[row + dx + R];
+                pred += kk * X[y * w + x]; wsum += kk;
+              }
+            }
+            if (wsum < 1e-9) continue;
+            const res = s.v[j] - pred / wsum;
+            for (let dy = -R; dy <= R; dy++) {
+              const y = iy + dy; if (y < 0 || y >= h) continue;
+              const row = (dy + R) * S;
+              for (let dx = -R; dx <= R; dx++) {
+                const x = ix + dx; if (x < 0 || x >= w) continue;
+                const kk = K[row + dx + R];
+                gn[y * w + x] += kk * res; gd[y * w + x] += kk;
+              }
+            }
+          }
+        }
+        for (let i = 0; i < X.length; i++) if (gd[i] > 1e-9) X[i] += lam * gn[i] / gd[i];
+      }
+      return X;
+    }
+    toCanvas(cv, useRefined) {
+      const { num, den, w, h } = this;
+      const Xr = useRefined ? this.refined : null;
+      const g = cv.getContext("2d");
+      const im = g.createImageData(w, h);
+      const val = i => (Xr ? Xr[i] : num[i] / den[i]);
+      let lo = Infinity, hi = -Infinity;
+      for (let i = 0; i < num.length; i++) if (den[i] > 1e-6) {
+        const v = val(i); if (v < lo) lo = v; if (v > hi) hi = v;
+      }
+      const rng = hi - lo || 1;
+      for (let i = 0; i < num.length; i++) {
+        const has = den[i] > 1e-6;
+        const t = has ? (val(i) - lo) / rng : 0;
+        const c = (t * 255) | 0;
+        im.data[i * 4] = c; im.data[i * 4 + 1] = c; im.data[i * 4 + 2] = c;
+        im.data[i * 4 + 3] = has ? 255 : 255;     // 没采到的地方留黑，不是留空
+      }
+      const tmp = document.createElement("canvas");
+      tmp.width = w; tmp.height = h;
+      tmp.getContext("2d").putImageData(im, 0, 0);
+      g.clearRect(0, 0, cv.width, cv.height);
+      g.imageSmoothingEnabled = true;
+      const sc = Math.min(cv.width / w, cv.height / h);
+      g.drawImage(tmp, (cv.width - w * sc) / 2, (cv.height - h * sc) / 2, w * sc, h * sc);
+    }
   }
 
   // ── 六边形绘制 ─────────────────────────────────────────────
@@ -95,14 +241,17 @@ const FlyEye = (() => {
       gray[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
     return { gray, cw, ch };
   }
-  function crop(src, dx, dy) {
+  function cropAt(src, dx, dy) {
     const { gray, cw, ch } = src;
     const x0 = Math.max(0, Math.min(cw - W, Math.round((cw - W) / 2 + dx)));
     const y0 = Math.max(0, Math.min(ch - H, Math.round((ch - H) / 2 + dy)));
     const out = new Float32Array(W * H);
     for (let y = 0; y < H; y++) out.set(gray.subarray((y0 + y) * cw + x0, (y0 + y) * cw + x0 + W), y * W);
-    return out;
+    // ox,oy = 这一帧相机画面在"世界"里的原点。累积时把小眼中心加上它，
+    // 才知道这个小眼当时看的是世界哪一点。
+    return { frame: out, ox: x0, oy: y0 };
   }
+  const crop = (src, dx, dy) => cropAt(src, dx, dy).frame;
 
   // ── 预设图：不上传也能玩 ────────────────────────────────
   function preset(kind, size = 420) {
@@ -132,7 +281,8 @@ const FlyEye = (() => {
     return c;
   }
 
-  return { S, W, H, STEPS, DT, gaze, hexGeom, drawHex, frameFor, crop, preset };
+  return { S, W, H, STEPS, DT, gaze, hexGeom, drawHex, frameFor, crop, cropAt, preset, Accum,
+           setSpacing: v => { SPACING = v; }, spacing: () => SPACING };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = FlyEye;
 
@@ -146,10 +296,20 @@ function initFlyEye(assets) {
   const $ = id => document.getElementById(id);
 
   const cvs = {
-    src: $("eSrc"), omm: $("eOmm"), act: $("eAct"),
+    src: $("eSrc"), omm: $("eOmm"), acc: $("eAcc"), act: $("eAct"),
     retina: $("eRetina"), lamina: $("eLamina"), medulla: $("eMedulla"), motion: $("eMotion"),
   };
   const geom = E.hexGeom(S.lat, cvs.omm.width, cvs.omm.height);
+  const meta = S.retina.meta;
+  E.setSpacing(meta.spacing_px || 16.4);
+  const CX = Float64Array.from(meta.centers_x), CY = Float64Array.from(meta.centers_y);
+  const perm = S.retina.perm;
+  const ACC = {};                       // 超分辨累积：小眼原始 + 四个解码层
+  for (const k of ["acc", "retina", "lamina", "medulla", "motion"])
+    ACC[k] = new E.Accum(CX, CY, 16.4, E.W, E.H);   // 选图时按实际尺寸重建
+  // 画布用**大图**尺寸：投点坐标是 ox+cx，会超出相机画面范围。
+  // 按相机尺寸开会把越界的点全丢掉（这个 bug 让相关从 0.85 掉到 0.40）。
+  let ACCW = E.W, ACCH = E.H;
   let src = null, img = null;
 
   function showSource(canvasOrImg) {
@@ -160,6 +320,11 @@ function initFlyEye(assets) {
     const w = img.width * sc, h = img.height * sc;
     g.drawImage(img, (cvs.src.width - w) / 2, (cvs.src.height - h) / 2, w, h);
     src = E.frameFor(img);
+    if (src.cw !== ACCW || src.ch !== ACCH) {
+      ACCW = src.cw; ACCH = src.ch;
+      for (const k of ["acc", "retina", "lamina", "medulla", "motion"])
+        ACC[k] = new E.Accum(CX, CY, E.spacing(), ACCW, ACCH);
+    }
     $("eStatus").textContent = "按「让果蝇看」开始";
   }
 
@@ -168,19 +333,42 @@ function initFlyEye(assets) {
     S.running = true;
     S.net.reset();
     const actType = $("eType").value;
+    for (const a of Object.values(ACC)) a.clear();
     let k = 0;
     const tick = () => {
       if (!S.running) return;
       const [dx, dy] = E.gaze(k);
-      const hex = S.retina.sample(E.crop(src, dx, dy));
+      // 累积要用**同一个**裁切原点，否则投回世界坐标会错位
+      const { ox, oy, frame } = E.cropAt(src, dx, dy);
+      const hex = S.retina.sample(frame);
       S.net.step(hex, E.DT);
       E.drawHex(cvs.omm, hex, geom, "gray");
       E.drawHex(cvs.act, S.net.get(actType), geom, "signed");
+      ACC.acc.add(hex, perm, ox, oy);
       for (const key of ["retina", "lamina", "medulla", "motion"])
-        E.drawHex(cvs[key], S.dec[key].decode(t => S.net.get(t)), geom, "gray");
+        ACC[key].add(S.dec[key].decode(t => S.net.get(t)), perm, ox, oy);
+      // 高分辨画布重绘较贵，隔几步画一次；最后一步一定画
+      if (k % 8 === 7 || k === E.STEPS - 1)
+        for (const key of ["acc", "retina", "lamina", "medulla", "motion"]) ACC[key].toCanvas(cvs[key]);
       $("eStatus").textContent = `扫视中 ${k + 1}/${E.STEPS} 步（${((k + 1) * E.DT * 1000).toFixed(0)} ms 脑内时间）`;
       if (++k < E.STEPS) { S.raf = requestAnimationFrame(tick); }
-      else { S.running = false; $("eStatus").textContent = `看完了：${E.STEPS} 步 / ${(E.STEPS * E.DT * 1000).toFixed(0)} ms 脑内时间`; }
+      else {
+        // 扫完再精修：朴素平均**不提分辨率**（实测 -0.2%），
+        // 靠反投影解反问题才行（0.851 → 0.920，超过单次接受角天花板 0.883）
+        const keys = ["acc", "retina", "lamina", "medulla", "motion"];
+        for (const key of keys) ACC[key].refineInit();
+        let it = 0;
+        const ITERS = 8;
+        const step = () => {
+          if (!S.running) return;
+          for (const key of keys) { ACC[key].refine(1); ACC[key].toCanvas(cvs[key], true); }
+          $("eStatus").textContent = `反投影精修 ${++it}/${ITERS} 轮`;
+          if (it < ITERS) S.raf = requestAnimationFrame(step);
+          else { S.running = false; $("eStatus").textContent =
+            `完成：${E.STEPS} 步扫视（${(E.STEPS * E.DT * 1000).toFixed(0)} ms 脑内时间）· ${E.STEPS * 721} 次小眼采样 · 精修 ${ITERS} 轮`; }
+        };
+        S.raf = requestAnimationFrame(step);
+      }
     };
     tick();
   }

@@ -52,14 +52,24 @@ const corr = (a, b) => {
 net.reset();
 const getAct = t => net.get(t);
 let truth = null, last = {};
+// 超分辨累积：同一个小眼在不同时刻落到世界不同位置，多帧合起来信息量更高
+const CX = Float64Array.from(meta.centers_x), CY = Float64Array.from(meta.centers_y);
+// 画布必须是**大图**尺寸：投点坐标是 ox+cx，范围到 CW×CH。
+// 之前按相机尺寸 W×H 开，越界的点全被丢掉，而且和对照图整体错位。
+const accAll = new Eye.Accum(CX, CY, meta.spacing_px, CW, CH);
+const accOne = new Eye.Accum(CX, CY, meta.spacing_px, CW, CH);
 const t0 = Date.now();
 for (let k = 0; k < STEPS; k++) {
   const [dx, dy] = Eye.gaze(k);
-  const frame = Eye.crop(src, dx, dy);
+  const { frame, ox, oy } = Eye.cropAt(src, dx, dy);
   truth = Float64Array.from(ret.sample(frame));
   net.step(truth, DT);
-  if (k === STEPS - 1) for (const key of Object.keys(decs)) {
-    if (key[0] !== "_") last[key] = Float64Array.from(decs[key].decode(getAct));
+  accAll.add(truth, ret.perm, ox, oy);
+  if (k === STEPS - 1) {
+    accOne.clear(); accOne.add(truth, ret.perm, ox, oy);
+    for (const key of Object.keys(decs)) {
+      if (key[0] !== "_") last[key] = Float64Array.from(decs[key].decode(getAct));
+    }
   }
 }
 const ms = Date.now() - t0;
@@ -75,7 +85,36 @@ for (const key of Object.keys(decs)) {
   console.log(`${decs[key].label.padEnd(16)}${r.toFixed(3).padStart(9)}${String(ref).padStart(11)}`);
   if (!(r > 0.3)) bad++;
 }
+// 超分辨到底有没有用：拿累积图和原图（同一坐标系）逐像素比
+const world = gray;                       // 对照就是大图本身，同一坐标系
+const pick = (acc) => {
+  const v = [], t = [];
+  for (let i = 0; i < CW * CH; i++) if (acc.den[i] > 1e-6) { v.push(acc.num[i] / acc.den[i]); t.push(world[i]); }
+  return [v, t];
+};
+const [va, ta] = pick(accAll), [vo, to] = pick(accOne);
+const rAll = corr(va, ta), rOne = corr(vo, to);
+const tRef = Date.now();
+accAll.refine(8);
+const msRef = Date.now() - tRef;
+const [vr, tr] = (() => {
+  const v = [], t = [];
+  for (let i = 0; i < CW * CH; i++) if (accAll.den[i] > 1e-6) { v.push(accAll.refined[i]); t.push(world[i]); }
+  return [v, t];
+})();
+const rRef = corr(vr, tr);
+console.log(`\n超分辨累积（与原图逐像素比，${CW}×${CH} 全分辨率）`);
+console.log(`  单帧 721 个小眼        r = ${rOne.toFixed(3)}   覆盖 ${(vo.length / (CW * CH) * 100).toFixed(0)}%`);
+console.log(`  ${STEPS} 帧扫视累积        r = ${rAll.toFixed(3)}   覆盖 ${(va.length / (CW * CH) * 100).toFixed(0)}%`);
+console.log(`  反投影精修 8 轮      r = ${rRef.toFixed(3)}   用时 ${msRef} ms`);
+console.log(`  单帧 → 精修          ${((rRef - rOne) / Math.abs(rOne) * 100).toFixed(1)}%`);
+console.log(`  参考：把原图用 σ=8.2px 高斯模糊后与原图的相关 = 0.883（小眼接受角决定的天花板）`);
+
 console.log();
+if (rRef <= rOne + 0.005) {
+  console.log("✗ 反投影精修没有实质提升 —— 不要在页面上声称超分辨");
+  process.exit(1);
+}
 if (bad) { console.log(`✗ ${bad} 层重建相关低于 0.3 —— 链路接错了`); process.exit(1); }
 console.log("✓ 整条链路在 JS 里跑通，各层重建都有实质相关");
 console.log("  注：末帧 r 是单张图单帧，和训练时的跨图平均值不可直接比大小");
