@@ -178,7 +178,16 @@ const FlyEyeCam = (() => {
       }
       this.demo = [new Float64Array(this.n * 2), new Float64Array(this.n * 2)];  // [G,B] 交错
       this.out = [new Float64Array(this.n), new Float64Array(this.n)];   // 彩色（G 或 B）
-      this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7）
+      this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7：pale=Rh3 / yellow=Rh4）
+      // R1–R6（Rh1）：八个感光细胞里的六个，宽带，运动/亮度主通道，也是 flyvis 的主输入。
+      // 它**不参与 pale/yellow 马赛克** —— 每个小眼都有一整套 R1–6，所以三个通道全用上。
+      this.r16 = [new Float64Array(this.n), new Float64Array(this.n)];
+      // 各类感光细胞对三个渲染通道的权重：由 vision/opsins.js 按 Govardovskii 2000
+      // 模板积分得到，不是手填。生成器 vision/opsin_weights.js 会把同一张表写进
+      // results/vision/opsin_weights.json。
+      const OP = (typeof Opsins !== "undefined" ? Opsins
+                : (typeof require === "function" ? require("../vision/opsins.js") : null));
+      this.W = OP ? OP.weights(opts.sensitizer !== false) : null;
       this._uvMats = null;
     }
 
@@ -349,7 +358,7 @@ const FlyEyeCam = (() => {
       const q = wq, n = this.n, pale = this.pale, px = this.px;
       const vTmp = this._v || (this._v = new THREE.Vector3());
       for (let e = 0; e < 2; e++) {
-        const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e];
+        const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e], r16v = this.r16[e], W = this.W;
         for (let j = 0; j < n; j++) {
           // 方向表是按**点阵（柱序）**建的，不涉及 flygym 序 ——
           // 这里曾经多套了一层 retina.perm，把方向全打乱了：
@@ -360,8 +369,20 @@ const FlyEyeCam = (() => {
           // 唯一没被独立验证过的一环（方向表、cubeLookup 都单独验过）。
           vTmp.set(d[j * 3], d[j * 3 + 1], d[j * 3 + 2]).applyQuaternion(q);
           const off = cubeLookup(vTmp.x, vTmp.y, vTmp.z, size) * 4;   // 合并缓冲里的字节偏移
-          uvv[j] = px[off] / 255;                            // R = 紫外
-          col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
+          const U = px[off] / 255, G = px[off + 1] / 255, B = px[off + 2] / 255;
+          if (W) {
+            // 每一类感光细胞按**自己的光谱**对三个波段积分，而不是"pale 就取蓝通道"。
+            // pale/yellow 的差别现在也体现在 R7 上（Rh3 345 nm vs Rh4 375 nm），以前没有。
+            const p = pale[j];
+            const r7 = p ? W.Rh3 : W.Rh4, r8 = p ? W.Rh5 : W.Rh6, r1 = W.Rh1;
+            uvv[j] = r7.U * U + r7.B * B + r7.G * G;
+            col[j] = r8.U * U + r8.B * B + r8.G * G;
+            r16v[j] = r1.U * U + r1.B * B + r1.G * G;
+          } else {                                           // 没加载光谱表时的旧行为
+            uvv[j] = U;
+            col[j] = pale[j] ? B : G;
+            r16v[j] = (U + B + G) / 3;
+          }
         }
         // 去马赛克：把每个小眼缺的那一路用邻居里另一型的平均补上
         const dm = this.demo[e], nbr = this.nbr;
@@ -381,6 +402,7 @@ const FlyEyeCam = (() => {
       // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
       return { color: this.out.map(a => Float64Array.from(a)),
                uv: this.uv.map(a => Float64Array.from(a)),
+               r16: this.r16.map(a => Float64Array.from(a)),     // R1–R6，flyvis 的主输入
                gb: this.demo.map(a => Float64Array.from(a)) };
     }
 

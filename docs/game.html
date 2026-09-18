@@ -387,7 +387,7 @@ code { font: 12px var(--mono); }
         <figure><canvas id="eMotion" width="190" height="190"></canvas><figcaption>解码自 T4/T5</figcaption></figure>
       </div>
       <p class="sub"><b>后四栏是解码重建，会「补」出神经活动里其实没有的细节</b>——解码器学的是训练图像的统计规律。第三栏是未经解码的原始活动，两者的差距本身就是要看的东西（同 &sect;15 解码器压力测试）。越往右的层，画面丢得越多：到 T4/T5 只剩大形状，细条纹没了。</p>
-      <p class="sub"><b>舞台右上角那个小窗</b>是同一套东西的实时版：把 3D 世界从果蝇眼睛的位置再渲一遍（左右眼各偏前方 50&deg;），走同一张采样表成像。为了实时<b>跳过了 flyvis 和解码器</b>，只到「视网膜接收到什么」为止。原来每秒只刷 3 次，因为同步读回 GPU 像素要等一次约 4–5 ms 的往返；实测那次停顿<b>与读几个面、读多少像素、贴图多大全都无关</b>（读 1 面 6.3 ms ≈ 读 6 面 6.8 ms；边长 192→48 不降），所以降分辨率没用。改成 WebGL2 的 PBO 异步读回（下一帧取数，已验证与同步<b>逐字节相同</b>）后，单次从 10.6 ms 降到 2.9 ms，现在实测 <b>23 fps</b>，主画面仍 60 fps。渲染时会把果蝇自己的网格藏起来——摄像机在身体前方，不藏的话它自己的头会糊满半个视野。<br>
+      <p class="sub"><b>舞台右上角那个小窗</b>是同一套东西的实时版：把 3D 世界从果蝇眼睛的位置再渲一遍（左右眼各偏前方 50&deg;），走同一张采样表成像。为了实时<b>跳过了 flyvis 和解码器</b>，只到「视网膜接收到什么」为止。原来每秒只刷 3 次，因为同步读回 GPU 像素要等一次约 4–5 ms 的往返；实测那次停顿<b>与读几个面、读多少像素、贴图多大全都无关</b>（读 1 面 6.3 ms ≈ 读 6 面 6.8 ms；边长 192→48 不降），所以降分辨率没用。改成 WebGL2 的 PBO 异步读回（下一帧取数，已验证与同步<b>逐字节相同</b>）后，单次从 10.6 ms 降到 2.9 ms，现在实测 <b>23 fps</b>，主画面仍 60 fps。渲染时会把果蝇自己的网格藏起来——摄像机在身体前方，不藏的话它自己的头会糊满半个视野。<br><b>每一类感光细胞按自己的光谱积分</b>：以前是「pale 小眼取蓝通道、yellow 取绿通道」的类拜耳近似，现在用 Govardovskii et al. 2000 的视色素模板，按各自 λmax 逐 1 nm 积分出对三个渲染波段（紫外 300–400、蓝 400–500、绿 500–700）的权重：Rh3 (R7p, 345nm) 99.8% 来自紫外、Rh4 (R7y, 375nm) 88.3%、Rh5 (R8p, 437nm) 蓝占 66.4%、Rh6 (R8y, 508nm) 绿占 43.4%。更要紧的是补上了 <b>Rh1 (R1–R6)</b>——八个感光细胞里的六个、运动与亮度的主通道，此前完全没有建模，而它正是 flyvis 的主输入。两个假设要说明：场景是 sRGB 著作的、没有真实光谱，三个通道被当作各波段的平均反射率；果蝇 R1–6 还有一个 3-羟基视黄醇增感色素在 ~350nm 给第二个峰，不在该模板里，这里按手选幅度补上（两套权重都写在 results/vision/opsin_weights.json 里，可以对比）。<br>
       <b>视野边缘不再是近似</b>：一开始用透视投影 + FlyGym 的鱼眼校正，但透视投影天生到不了 180&deg;，157&deg; 时边缘已经被拉得极扁，鱼眼公式还有个奇点。现在改成<b>立方体贴图</b>——六个 90&deg; 面覆盖整个球面，每个小眼按自己的视线方向精确采样，不需要任何畸变补偿。小眼方向按六边形点阵定义：半径 15、小眼间角 5.7&deg;，<b>单眼视野 171&deg;</b>，接近真果蝇（文献 ~160&ndash;180&deg;）。几何自检实测：9 个已知方位平均误差 <b>0.7&deg;</b>。<br>
       <b>紫外（R7）</b>那一路是<b>手写设定</b>：sRGB 渲染里没有紫外，所以给场景里每类物体指定了一个紫外反射率。依据是真实的紫外世界结构——自然界里天空是压倒性的紫外源、绝大多数表面紫外很暗，果蝇正是靠这个对比找开阔空间、判断上下。<b>但数值没有任何测量依据</b>，只是结构上说得通；上传的照片里更是完全没有紫外信息。<br>
       <b>为什么看着一片绿</b>：一开始整场都用页面主题色（地板 #1a211e），绿蓝两通道只差 11%，果蝇眼里等于没有颜色；加上每个小眼只测一路，画面按感受器类型上色，70% 是 yellow 型 → 天生 70% 的格子是绿的。现在球场改成<b>真实配色</b>（木地板、白线、蓝红座椅），并做<b>去马赛克</b>——把每个小眼缺的那一路用邻居里另一型的平均补上，和拜耳滤镜同一回事（<b>果蝇本身并没有在每个小眼上同时拿到两路</b>，这是显示用的插值，可以关掉看原始马赛克）。<br>
@@ -1069,6 +1069,93 @@ const FlyCourt = (() => {
 if (typeof module !== "undefined" && module.exports) module.exports = FlyCourt;
 </script>
 <script>/**
+ * 果蝇视蛋白光谱 → 渲染通道权重。
+ *
+ * 为什么需要它：flyvis 的输入是 R1–R8，其中 **R1–R6 用 Rh1（宽带）**，是运动/亮度主通道。
+ * 而 eyecam 至今只产出 R8 那一路（pale 取蓝、yellow 取绿）和 R7 紫外，**Rh1 完全没建模**。
+ * 八个感光细胞里的六个缺席，下一步要把像素接进 flyvis 就没有正确的输入。
+ *
+ * 做法（每一步都写明是数据还是假设）：
+ *   · 视蛋白敏感度曲线用 **Govardovskii et al. 2000 的 A1 视色素模板**（已发表解析式，
+ *     α 带 + β 带），只需要各自的 λmax。【官方】
+ *   · λmax 用果蝇已发表值：Rh1 478（R1–6）、Rh3 345（R7p）、Rh4 375（R7y）、
+ *     Rh5 437（R8p）、Rh6 508（R8y）。【官方】
+ *   · 场景是 sRGB 著作的，没有真实光谱。把渲染出的三个通道当成三个代表波长处的
+ *     反射率采样（紫外 365、蓝 465、绿 550），用分段线性（帽函数）插出反射谱。【推测】
+ *   · 光源当作等能白（平谱）。【推测】
+ *   · 权重 = ∫ S(λ)·帽函数(λ) dλ ÷ ∫ S(λ) dλ，所以**理想白面（三通道都是 1）响应为 1**。
+ *
+ * 已知缺口：果蝇 R1–6 还带一个 3-羟基视黄醇「增感色素」，在 ~350 nm 给出第二个大峰，
+ * 这个**不在** Govardovskii 模板里。这里把它做成显式可开关的附加项 `sensitizer`，
+ * 幅度是手选的【推测】；关掉时 Rh1 的紫外敏感度会被**低估**，两套权重都写进了
+ * results/vision/opsin_weights.json，可以直接看差别。
+ */
+(function (root, factory) {
+  if (typeof module !== "undefined" && module.exports) module.exports = factory();
+  else root.Opsins = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // Govardovskii et al. 2000, A1 模板
+  function templateA1(lam, lmax) {
+    const x = lmax / lam;
+    const A = 69.7, a = 0.8795 + 0.0459 * Math.exp(-((lmax - 300) * (lmax - 300)) / 11940);
+    const B = 28, b = 0.922, C = -14.9, c = 1.104, D = 0.674;
+    const alpha = 1 / (Math.exp(A * (a - x)) + Math.exp(B * (b - x)) + Math.exp(C * (c - x)) + D);
+    const lmb = 189 + 0.315 * lmax;            // β 带中心
+    const bb = -40.5 + 0.195 * lmax;           // β 带宽度
+    const beta = 0.26 * Math.exp(-Math.pow((lam - lmb) / bb, 2));
+    return alpha + beta;
+  }
+
+  // 渲染通道 → 波段。**箱型**，不是帽函数：每个通道的语义就是"这一段里的平均反射率"。
+  // 第一版用帽函数（峰值 365/465/550 线性过渡），结果 Rh5（λmax 437，蓝）拿到 46% 的
+  // 紫外权重 —— 因为紫外帽一路延伸到 465，把 400–465 的紫蓝光算成了紫外。那是基函数的错，
+  // 不是光谱的事实。红端没有第四个通道（果蝇也没有红受体），600–700 并入绿带。
+  const BANDS = [{ key: "U", lo: 300, hi: 400 },
+                 { key: "B", lo: 400, hi: 500 },
+                 { key: "G", lo: 500, hi: 700 }];
+  function box(i, lam) { const b = BANDS[i]; return lam >= b.lo && lam < b.hi ? 1 : 0; }
+
+  const OPSINS = {
+    Rh1: { lmax: 478, cells: "R1–R6", note: "宽带，运动/亮度主通道" },
+    Rh3: { lmax: 345, cells: "R7p", note: "紫外" },
+    Rh4: { lmax: 375, cells: "R7y", note: "紫外" },
+    Rh5: { lmax: 437, cells: "R8p", note: "蓝" },
+    Rh6: { lmax: 508, cells: "R8y", note: "绿" },
+  };
+
+  /** 手选的增感色素项【推测】：~350 nm 的第二个峰，仅 Rh1（R1–6）有 */
+  const SENS = { lam: 350, width: 45, amp: 0.55 };
+
+  /**
+   * 算出每个视蛋白对三个渲染通道的权重。
+   * @param {boolean} sensitizer Rh1 是否带增感色素附加峰
+   * @returns {{[opsin:string]: {U:number,B:number,G:number}}}
+   */
+  function weights(sensitizer) {
+    const LO = 300, HI = 700, STEP = 1;
+    const out = {};
+    for (const [name, o] of Object.entries(OPSINS)) {
+      const w = [0, 0, 0]; let tot = 0;
+      // 注意 lam < HI 不是 <=：波段是左闭右开 [500,700)，写成 <= 的话 700 nm 这一个
+      // 采样点会进总量却不进任何波段，归一化差 1.5e-7（审计的 1e-9 容差抓到过）。
+      for (let lam = LO; lam < HI; lam += STEP) {
+        let S = templateA1(lam, o.lmax);
+        if (sensitizer && name === "Rh1")
+          S += SENS.amp * Math.exp(-Math.pow((lam - SENS.lam) / SENS.width, 2));
+        tot += S * STEP;
+        for (let i = 0; i < 3; i++) w[i] += S * box(i, lam) * STEP;
+      }
+      out[name] = { U: w[0] / tot, B: w[1] / tot, G: w[2] / tot };
+    }
+    return out;
+  }
+
+  return { templateA1, weights, OPSINS, BANDS, SENS };
+});
+
+/**
  * 果蝇第一人称复眼视窗：把 3D 世界从果蝇眼睛的位置渲一遍，
  * 走**真实的复眼采样表**成像，画到舞台右上角。
  *
@@ -1248,7 +1335,16 @@ const FlyEyeCam = (() => {
       }
       this.demo = [new Float64Array(this.n * 2), new Float64Array(this.n * 2)];  // [G,B] 交错
       this.out = [new Float64Array(this.n), new Float64Array(this.n)];   // 彩色（G 或 B）
-      this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7）
+      this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7：pale=Rh3 / yellow=Rh4）
+      // R1–R6（Rh1）：八个感光细胞里的六个，宽带，运动/亮度主通道，也是 flyvis 的主输入。
+      // 它**不参与 pale/yellow 马赛克** —— 每个小眼都有一整套 R1–6，所以三个通道全用上。
+      this.r16 = [new Float64Array(this.n), new Float64Array(this.n)];
+      // 各类感光细胞对三个渲染通道的权重：由 vision/opsins.js 按 Govardovskii 2000
+      // 模板积分得到，不是手填。生成器 vision/opsin_weights.js 会把同一张表写进
+      // results/vision/opsin_weights.json。
+      const OP = (typeof Opsins !== "undefined" ? Opsins
+                : (typeof require === "function" ? require("../vision/opsins.js") : null));
+      this.W = OP ? OP.weights(opts.sensitizer !== false) : null;
       this._uvMats = null;
     }
 
@@ -1419,7 +1515,7 @@ const FlyEyeCam = (() => {
       const q = wq, n = this.n, pale = this.pale, px = this.px;
       const vTmp = this._v || (this._v = new THREE.Vector3());
       for (let e = 0; e < 2; e++) {
-        const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e];
+        const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e], r16v = this.r16[e], W = this.W;
         for (let j = 0; j < n; j++) {
           // 方向表是按**点阵（柱序）**建的，不涉及 flygym 序 ——
           // 这里曾经多套了一层 retina.perm，把方向全打乱了：
@@ -1430,8 +1526,20 @@ const FlyEyeCam = (() => {
           // 唯一没被独立验证过的一环（方向表、cubeLookup 都单独验过）。
           vTmp.set(d[j * 3], d[j * 3 + 1], d[j * 3 + 2]).applyQuaternion(q);
           const off = cubeLookup(vTmp.x, vTmp.y, vTmp.z, size) * 4;   // 合并缓冲里的字节偏移
-          uvv[j] = px[off] / 255;                            // R = 紫外
-          col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
+          const U = px[off] / 255, G = px[off + 1] / 255, B = px[off + 2] / 255;
+          if (W) {
+            // 每一类感光细胞按**自己的光谱**对三个波段积分，而不是"pale 就取蓝通道"。
+            // pale/yellow 的差别现在也体现在 R7 上（Rh3 345 nm vs Rh4 375 nm），以前没有。
+            const p = pale[j];
+            const r7 = p ? W.Rh3 : W.Rh4, r8 = p ? W.Rh5 : W.Rh6, r1 = W.Rh1;
+            uvv[j] = r7.U * U + r7.B * B + r7.G * G;
+            col[j] = r8.U * U + r8.B * B + r8.G * G;
+            r16v[j] = r1.U * U + r1.B * B + r1.G * G;
+          } else {                                           // 没加载光谱表时的旧行为
+            uvv[j] = U;
+            col[j] = pale[j] ? B : G;
+            r16v[j] = (U + B + G) / 3;
+          }
         }
         // 去马赛克：把每个小眼缺的那一路用邻居里另一型的平均补上
         const dm = this.demo[e], nbr = this.nbr;
@@ -1451,6 +1559,7 @@ const FlyEyeCam = (() => {
       // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
       return { color: this.out.map(a => Float64Array.from(a)),
                uv: this.uv.map(a => Float64Array.from(a)),
+               r16: this.r16.map(a => Float64Array.from(a)),     // R1–R6，flyvis 的主输入
                gb: this.demo.map(a => Float64Array.from(a)) };
     }
 
