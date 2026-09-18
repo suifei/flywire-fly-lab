@@ -1626,7 +1626,7 @@ code { font: 12px var(--mono); }
                    ["（控制幅度后的偏相关）", f[0].partial_overlap_vs_delta_controlling_magnitude, f[1].partial_overlap_vs_delta_controlling_magnitude]]; })() : [])],
         r => /一起敲|1–3 跳|动力学指纹/.test(r[0]));
       $("nStruct").textContent =
-        `两个假设都在看结果之前写定。成立的那个：通路越集中，连线越能预测单敲除效应——“放电率 × 1–3 跳通路”在水通路上 ${w.singles.G3.spearman}、糖通路上 ${s.singles.G3.spearman}；` +
+        `两个假设都在看结果之前写定，两个最后都没站住。第一个：“通路越集中，连线越能预测单敲除效应”——在糖、水两条通路上看着成立（“放电率 × 1–3 跳通路”水通路 ${w.singles.G3.spearman}、糖通路 ${s.singles.G3.spearman}，而水通路确实更集中），但补上第三条 JON 通路后就翻了（见上一张表：JON 最集中却连线最预测不了）。两条通路排出来的“规律”，第三条就能推翻。` +
         `但对 MN9 的直接突触数在两条通路上都没用（效应最强的几个神经元对 MN9 一条直接突触都没有）。` +
         `被证伪的那个：“互为备份 = 各走各的路”。路径重叠度与配对结果的相关只有 ${s.pairs.spearman_overlap_vs_delta} 和 ${w.pairs.spearman_overlap_vs_delta}，` +
         `而且不是指标退化（最大重叠度到 0.59 / 0.70，一半以上的配对有非零重叠）。` +
