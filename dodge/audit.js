@@ -368,6 +368,26 @@ const chromePath = () => [process.env.CHROME_PATH,
          dp.toFixed(5), ">1e-4（改光谱前恒为 0）");
     }
 
+    // ── 仓库入口 ────────────────────────────────────────────
+    {
+      const REPO = "https://github.com/suifei/flywire-fly-lab";
+      const links = Array.from(document.querySelectorAll(".repo-btn"));
+      ok("仓库入口按钮数", links.length === 2, links.length, "2（源码 + Star）");
+      ok("都指向本仓库", links.length > 0 && links.every(a => a.href.indexOf(REPO) === 0),
+         links.map(a => a.getAttribute("href")).join(" | ").slice(0, 46), REPO);
+      ok("外链带 rel=noopener", links.every(a => (a.rel || "").indexOf("noopener") >= 0),
+         links.map(a => a.rel || "无").join("/"), "都带");
+      ok("每个按钮都有图标", links.every(a => a.querySelector("svg path")),
+         links.filter(a => a.querySelector("svg path")).length + "/" + links.length, "全部");
+      // star 数取不到时必须保持隐藏 —— 页面不能因为一个外部请求失败而出现空壳
+      const sn = document.getElementById("starN");
+      ok("star 数缺省时隐藏", !!sn && (sn.hidden || (sn.textContent || "").trim().length > 0),
+         sn ? (sn.hidden ? "隐藏" : JSON.stringify(sn.textContent)) : "无此元素", "隐藏或有内容");
+      // 可聚焦（键盘可达）
+      ok("按钮可键盘聚焦", links.every(a => a.tabIndex >= 0),
+         links.map(a => a.tabIndex).join("/"), "≥0");
+    }
+
     return out;
   });
 

@@ -114,10 +114,13 @@ const B = res.loom.峰值 > res.transN.峰值 && res.loom.峰值 > res.transF.�
 console.log(`\n判据 A   匀速扩张 > 匀速收缩   ${A ? "✓" : "✗"}  (${res.loomLin.峰值} vs ${res.recLin.峰值})`);
 console.log(`记录 A'  加速逼近 > 时间倒放   ${A2 ? "✓" : "✗"}  (${res.loom.峰值} vs ${res.rec.峰值})  不作判据`);
 console.log(`判据 B   逼近 > 两种平移       ${B ? "✓" : "✗"}  (${res.loom.峰值} vs 近 ${res.transN.峰值} / 远 ${res.transF.峰值})`);
-fs.writeFileSync(path.join(ROOT, "results/vision/lplc2_test.json"),
+// 同上：非默认 dt 只写带后缀的文件，绝不覆盖权威结果
+const OUT = path.join(ROOT, DT === 0.005 ? "results/vision/lplc2_test.json"
+                                         : `results/vision/lplc2_test_dt${Math.round(DT * 1000)}ms.json`);
+fs.writeFileSync(OUT,
   JSON.stringify({ 模型: { 亚型: model.types, 中心数: model.centers, 感受野半径: model.R },
                    预先判据: { A: "匀速扩张峰值 > 匀速收缩峰值", "A'": "加速逼近 > 时间倒放（记录，不作判据）",
                               B: "逼近峰值 > 两种平移峰值" },
                    结果: res, 判据A: A, "记录A'": A2, 判据B: B }, null, 1));
-console.log("→ results/vision/lplc2_test.json");
+console.log("→ " + path.relative(ROOT, OUT) + (DT === 0.005 ? "（权威）" : "（参数变体）"));
 process.exit(A && B ? 0 : 1);

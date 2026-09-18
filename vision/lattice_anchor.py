@@ -219,6 +219,61 @@ res["选定ORIENT"] = {"k": bestk[0], "swap": bestk[1], "sx": bestk[2], "sy": be
 (ROOT / "results/vision/lattice_anchor.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
 print("→ results/vision/lattice_anchor.json（已追加）")
 
+# ── 5b. 量一下 normalize() 对点阵形状做了什么 ──────────────────────
+# 这组数字出现在报告 §28.20 正文里，必须由脚本写进文件，不能是临时算的。
+def basis_angle(Z, pv, qv):
+    A = np.column_stack([np.ones(len(pv)), pv, qv])
+    B, *_ = np.linalg.lstsq(A, Z, rcond=None)
+    a1 = np.degrees(np.arctan2(B[1][1], B[1][0]))
+    a2 = np.degrees(np.arctan2(B[2][1], B[2][0]))
+    return a1, a2, abs((a2 - a1 + 180) % 360 - 180)
+
+def cart2(a, b):
+    return np.c_[a + b / 2.0, b * np.sqrt(3) / 2.0]
+
+distort = {}
+print("\nnormalize() 对点阵形状做了什么（报告 §28.20 的表）")
+print("           +p角    +q角   基矢夹角  长宽比")
+for side in ("left", "right"):
+    d = ca[ca.hemisphere == side].drop_duplicates("column_id")
+    pv, qv = d.p.to_numpy(float), d.q.to_numpy(float)
+    P = cart2(pv, qv)
+    rec = {}
+    for nm_, M in (("原始cart", P), ("normalize后", normalize_like_code(P))):
+        a1, a2, ang = basis_angle(M, pv, qv)
+        sd = M.std(0)
+        rec[nm_] = dict(p角=round(float(a1), 1), q角=round(float(a2), 1),
+                        基矢夹角=round(float(ang), 1), 长宽比=round(float(sd.max() / sd.min()), 2))
+        print(f"{side:5s} {nm_:12s} {a1:7.1f} {a2:7.1f} {ang:8.1f}° {sd.max()/sd.min():7.2f}")
+    distort[side] = rec
+fv_sd = uv.std(0)
+distort["flyvis点阵长宽比"] = round(float(fv_sd.max() / fv_sd.min()), 2)
+print(f"      flyvis 点阵长宽比 {fv_sd.max()/fv_sd.min():.2f}（正六边形应为 1.00）")
+
+# 两种锚定映射的覆盖代价（报告里也引用了）
+cover = {}
+for sc in (1.0, 0.6):
+    acc = []
+    for side in ("left", "right"):
+        d = ca[ca.hemisphere == side].drop_duplicates("column_id")
+        pp = d.p.to_numpy(float) - np.median(d.p.to_numpy(float))
+        qq = d.q.to_numpy(float) - np.median(d.q.to_numpy(float))
+        Z = cart2(-pp, -qq) * sc
+        idx = nearest(uv, Z)
+        dist = np.linalg.norm(Z - uv[idx], axis=1)
+        acc.append([float((dist < 1e-6).mean()), float((dist > 0.6).mean()),
+                    len(set(idx.tolist())), len(d) / len(set(idx.tolist()))])
+    m = np.array(acc).mean(0)
+    cover[f"anchor×{sc}"] = dict(精确落格点=round(m[0] * 100, 1), 夹到边缘=round(m[1] * 100, 1),
+                                 用到flyvis柱=int(round(m[2])), 每柱挤入真实柱=round(m[3], 2))
+    print(f"      anchor×{sc}: 精确落格点 {m[0]*100:.1f}%  夹到边缘 {m[1]*100:.1f}%  "
+          f"用到 {int(round(m[2]))}/721 个 flyvis 柱")
+
+res = json.loads((ROOT / "results/vision/lattice_anchor.json").read_text())
+res["normalize形变"] = distort
+res["锚定映射覆盖"] = cover
+(ROOT / "results/vision/lattice_anchor.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+
 # ── 6. 更干净的判据：比**基矢方向**，而不是比对应关系 ────────────────
 # 上面那个指标把朝向和形状归一化混在一起了（代码的 normalize 做 PCA + 各轴除以
 # 标准差，是各向异性缩放，会改角度）。这里直接问：在每种 ORIENT 下，
