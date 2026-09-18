@@ -45,12 +45,24 @@ def main():
     png = OUT / "retina_map.png"
     Image.fromarray(rgb).save(png, optimize=True)
 
+    # 每个小眼在相机画面里的重心 —— 超分辨累积要用它把采样值投回世界坐标。
+    ys, xs = np.mgrid[0:h, 0:w]
+    cx = np.bincount(m.ravel(), weights=xs.ravel(), minlength=722)[1:] / npx
+    cy = np.bincount(m.ravel(), weights=ys.ravel(), minlength=722)[1:] / npx
+    # 相邻小眼间距（像素）：决定累积时该用多大的落点核
+    from scipy.spatial import cKDTree
+    dd, _ = cKDTree(np.c_[cx, cy]).query(np.c_[cx, cy], k=2)
+    spacing = float(np.median(dd[:, 1]))
+
     doc = dict(
         source="flygym Retina.ommatidia_id_map（真实采样几何，含 zoom=%.2f / distortion=%.1f）"
                % (r.zoom, r.distortion_coefficient),
         width=int(w), height=int(h), n_ommatidia=721,
         encoding="retina_map.png 的 R 通道=编号高字节，G 通道=低字节；0 表示背景",
         pixels_per_ommatidium=npx.tolist(),
+        centers_x=np.round(cx, 3).tolist(),      # flygym 序
+        centers_y=np.round(cy, 3).tolist(),
+        spacing_px=round(spacing, 3),
         flygym_to_flyvis=perm.tolist(),
         display_swap_xy=True,
         display_note="六边形坐标画图时要交换 x/y：相机x↔hex_y、相机y↔hex_x（实测相关 1.000）",
@@ -71,6 +83,7 @@ def main():
     print(f"写入 {js}  {js.stat().st_size/1024:.0f} KB")
     print(f"写入 {binf}  {binf.stat().st_size/1024:.0f} KB（Node parity 用）")
     print(f"  721 个小眼，每个 {npx.min()}–{npx.max()} 像素（中位 {int(np.median(npx))}）")
+    print(f"  相邻小眼间距中位 {spacing:.1f} 像素 —— 扫视幅度小于它才能采到亚小眼位置")
 
 
 if __name__ == "__main__":

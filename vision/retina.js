@@ -19,6 +19,7 @@ const Retina = (() => {
      * @param {object} meta retina.json 的内容
      */
     constructor(idmap, meta) {
+      this.meta = meta;                    // 累积器要用里面的小眼中心坐标
       this.w = meta.width; this.h = meta.height;
       this.idmap = idmap;
       this.npx = Float64Array.from(meta.pixels_per_ommatidium);
