@@ -148,7 +148,10 @@ const FlyEyeCam = (() => {
       this.geom = null;
       this.lastMs = 0;
       this.sky = new THREE.Color(opts.sky || "#9fb4c8");
-      this.selfMeshes = opts.selfMeshes || [];
+      // 复制一份：外面可能整体重新赋值 fs.selfMeshes，别名会让这里悄悄指向旧数组。
+      // 建好之后还会把"视野扇区"推进来（见 eye.js）——那是给玩家看的标注，
+      // 不该出现在果蝇自己的复眼里。
+      this.selfMeshes = (opts.selfMeshes || []).slice();
       this.n = lattice.length;
       // 六边形邻居表：去马赛克要用。每个小眼只测一路（pale 测蓝 / yellow 测绿），
       // 另一路靠邻居里另一型的平均估出来 —— 和拜耳滤镜的去马赛克是同一回事。

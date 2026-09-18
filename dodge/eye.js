@@ -482,11 +482,37 @@ function initFlyEye(assets) {
                                             depthWrite: false, side: T.DoubleSide });
         const o = new T.Mesh(g, m); o.renderOrder = -1; fs.scene.add(o); return o;
       };
-      const parts = [
-        mk(-ov, ov, 0xffffff, 0.16),               // 双眼重叠
-        mk(ov, ax + half, 0x3fb984, 0.085),        // 左眼单眼
-        mk(-(ax + half), -ov, 0xe8b339, 0.085),    // 右眼单眼
+      // 颜色不是挑好看，是挑**在这块地板上叠得出来**的。
+      // 阳光 100% 时球场地板是 (255,161,76) —— 红通道已经削顶在 255。
+      // 原来右眼用金黄 0xe8b339，要抬的正好是 R 和 G，R 无处可涨，
+      // 实测扇区内外只差 Δ=8.4（RGB 距离），肉眼完全看不出来。
+      // 旧配色其实**三档阳光下都不达标**（左眼 15.7–18.2、右眼 8.4–19.4），
+      // 只是 100% 时右眼最差，所以在那里最先被看出来。
+      // 换成能把 R 压下去的冷色（青 / 蓝），并把单眼扇区不透明度 0.085 → 0.16。
+      // 校验脚本：dodge/field_contrast.js，审计里也有一题盯着它。
+      // 半透明色块叠在饱和橙地板上，出来的永远是"更亮或更暗的橙"——色相身份丢了。
+      // 所以每个扇区再描一道**不透明**的边界线：线不依赖底色，任何光照下都是它自己的颜色。
+      const outline = (from, to, color) => {
+        const pts = [new T.Vector3(0, 0, 0)];
+        for (let i = 0; i <= 48; i++) {
+          const a = from + (to - from) * i / 48;
+          pts.push(new T.Vector3(Math.cos(a) * R, Math.sin(a) * R, 0));
+        }
+        const m = new T.LineBasicMaterial({ color, transparent: true, opacity: 0.95, depthWrite: false });
+        const o = new T.LineLoop(new T.BufferGeometry().setFromPoints(pts), m);
+        o.renderOrder = 2; o.userData.z = 0.06;   // 比色块(0.03)高，避免和它自己 z-fighting
+        fs.scene.add(o); return o;
+      };
+      const SEC = [
+        [-ov, ov, 0xffffff, 0.22],                 // 双眼重叠（白：R 已削顶，只能靠抬 G/B 去饱和）
+        [ov, ax + half, 0x00e5b0, 0.16],           // 左眼单眼（青绿）
+        [-(ax + half), -ov, 0x2f8dff, 0.16],       // 右眼单眼（蓝）
       ];
+      const parts = SEC.map(([a, b, c, op]) => mk(a, b, c, op))
+                       .concat(SEC.map(([a, b, c]) => outline(a, b, c)));
+      // 扇区是画给玩家看的，果蝇自己不该"看见"它 —— 否则这些近乎不透明的
+      // 边界线会进到立方体贴图里，污染小眼读数（几何自检因此偶发红过一次）。
+      cam.selfMeshes.push(...parts);
       const wp = new T.Vector3(), wq = new T.Quaternion(), f = new T.Vector3();
       return {
         set(on) { for (const o of parts) o.visible = on; },
@@ -494,7 +520,7 @@ function initFlyEye(assets) {
           head.getWorldPosition(wp); head.getWorldQuaternion(wq);
           f.set(1, 0, 0).applyQuaternion(wq);
           const yaw = Math.atan2(f.y, f.x);
-          for (const o of parts) { o.position.set(wp.x, wp.y, 0.03); o.rotation.set(0, 0, yaw); }
+          for (const o of parts) { o.position.set(wp.x, wp.y, o.userData.z || 0.03); o.rotation.set(0, 0, yaw); }
         },
       };
     })();
