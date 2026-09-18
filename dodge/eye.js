@@ -192,7 +192,7 @@ const FlyEye = (() => {
     const s = Math.min(w / (x1 - x0 + 2), h / (y1 - y0 + 2));
     return { P, x0, y0, x1, y1, s, ox: (w - (x1 - x0) * s) / 2, oy: (h - (y1 - y0) * s) / 2 };
   }
-  function drawHex(cv, vals, geom, mode) {
+  function drawHex(cv, vals, geom, mode, pale) {
     const g = cv.getContext("2d"), { P, x0, y0, s, ox, oy } = geom;
     g.clearRect(0, 0, cv.width, cv.height);
     let lo = Infinity, hi = -Infinity;
@@ -211,6 +211,14 @@ const FlyEye = (() => {
     const rng = hi - lo || 1, r = s * 0.62;
     for (let i = 0; i < P.length; i++) {
       const t = (vals[i] - lo) / rng;
+      if (mode === "mosaic") {
+        // 彩色马赛克：pale 小眼（读蓝通道）画蓝，yellow（读绿）画绿。
+        // 这是 FlyGym 真实的 pale/yellow 分型，比例 30/70，和真果蝇一致。
+        const t2 = (vals[i] - lo) / rng;
+        g.fillStyle = pale && pale[i]
+          ? `rgb(${(t2 * 90) | 0},${(t2 * 150) | 0},${(t2 * 255) | 0})`
+          : `rgb(${(t2 * 110) | 0},${(t2 * 255) | 0},${(t2 * 120) | 0})`;
+      } else
       g.fillStyle = mode === "signed"
         ? (t > .5 ? `rgb(${200 + 55 * (t - .5) * 2 | 0},${120 - 110 * (t - .5) * 2 | 0},${90 - 80 * (t - .5) * 2 | 0})`
                   : `rgb(${90 - 60 * (.5 - t) * 2 | 0},${130 + 40 * (.5 - t) * 2 | 0},${200 + 55 * (.5 - t) * 2 | 0})`)
@@ -236,20 +244,26 @@ const FlyEye = (() => {
     const dw = img.width * sc, dh = img.height * sc;
     g.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
     const d = g.getImageData(0, 0, cw, ch).data;
-    const gray = new Float32Array(cw * ch);
-    for (let i = 0; i < gray.length; i++)
-      gray[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
-    return { gray, cw, ch };
+    // 保留绿/蓝两路：pale 小眼读蓝、yellow 读绿（FlyGym 原样）。
+    // 先转灰度会把 pale/yellow 的区别丢掉 —— 那是之前的实现缺陷。
+    const G = new Float32Array(cw * ch), B = new Float32Array(cw * ch);
+    for (let i = 0; i < G.length; i++) { G[i] = d[i * 4 + 1] / 255; B[i] = d[i * 4 + 2] / 255; }
+    return { G, B, cw, ch };
   }
   function cropAt(src, dx, dy) {
-    const { gray, cw, ch } = src;
+    const { G, B, cw, ch } = src;
     const x0 = Math.max(0, Math.min(cw - W, Math.round((cw - W) / 2 + dx)));
     const y0 = Math.max(0, Math.min(ch - H, Math.round((ch - H) / 2 + dy)));
-    const out = new Float32Array(W * H);
-    for (let y = 0; y < H; y++) out.set(gray.subarray((y0 + y) * cw + x0, (y0 + y) * cw + x0 + W), y * W);
+    const outG = new Float32Array(W * H), outB = new Float32Array(W * H);
+    for (let y = 0; y < H; y++) {
+      const a = (y0 + y) * cw + x0;
+      outG.set(G.subarray(a, a + W), y * W);
+      outB.set(B.subarray(a, a + W), y * W);
+    }
+    const out = outG;
     // ox,oy = 这一帧相机画面在"世界"里的原点。累积时把小眼中心加上它，
     // 才知道这个小眼当时看的是世界哪一点。
-    return { frame: out, ox: x0, oy: y0 };
+    return { frame: out, G: outG, B: outB, ox: x0, oy: y0 };
   }
   const crop = (src, dx, dy) => cropAt(src, dx, dy).frame;
 
@@ -273,6 +287,17 @@ const FlyEye = (() => {
       g.beginPath(); g.ellipse(255 * s, 175 * s, 22 * s, 26 * s, 0, 0, 7); g.fill();
       g.strokeStyle = "#222"; g.lineWidth = 10 * s; g.beginPath();
       g.arc(210 * s, 240 * s, 60 * s, 0.35, Math.PI - 0.35); g.stroke();
+    } else if (kind === "color") {                      // 色块：演示果蝇的光谱
+      const cols = [["#ff2020", "红"], ["#20ff40", "绿"], ["#2050ff", "蓝"], ["#ffffff", "白"]];
+      g.font = `bold ${26 * s}px system-ui,sans-serif`;
+      g.textAlign = "center"; g.textBaseline = "middle";
+      for (let i = 0; i < 4; i++) {
+        const x = 30 + (i % 2) * 190, y = 30 + ((i / 2) | 0) * 190;
+        g.fillStyle = cols[i][0];
+        g.fillRect(x * s, y * s, 170 * s, 170 * s);
+        g.fillStyle = "#000";
+        g.fillText(cols[i][1], (x + 85) * s, (y + 85) * s);
+      }
     } else {                                            // 文字：考验分辨率
       g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
       g.font = `bold ${150 * s}px system-ui,sans-serif`;
@@ -304,6 +329,7 @@ function initFlyEye(assets) {
   E.setSpacing(meta.spacing_px || 16.4);
   const CX = Float64Array.from(meta.centers_x), CY = Float64Array.from(meta.centers_y);
   const perm = S.retina.perm;
+  const PALE = S.retina.paleByColumn();     // 每柱是不是 pale 型（读蓝通道）
   const ACC = {};                       // 超分辨累积：小眼原始 + 四个解码层
   for (const k of ["acc", "retina", "lamina", "medulla", "motion"])
     ACC[k] = new E.Accum(CX, CY, 16.4, E.W, E.H);   // 选图时按实际尺寸重建
@@ -339,10 +365,10 @@ function initFlyEye(assets) {
       if (!S.running) return;
       const [dx, dy] = E.gaze(k);
       // 累积要用**同一个**裁切原点，否则投回世界坐标会错位
-      const { ox, oy, frame } = E.cropAt(src, dx, dy);
-      const hex = S.retina.sample(frame);
+      const { ox, oy, G, B } = E.cropAt(src, dx, dy);
+      const hex = S.retina.sampleGB(G, B);
       S.net.step(hex, E.DT);
-      E.drawHex(cvs.omm, hex, geom, "gray");
+      E.drawHex(cvs.omm, hex, geom, "mosaic", PALE);
       E.drawHex(cvs.act, S.net.get(actType), geom, "signed");
       ACC.acc.add(hex, perm, ox, oy);
       for (const key of ["retina", "lamina", "medulla", "motion"])
@@ -379,7 +405,7 @@ function initFlyEye(assets) {
     im.onload = () => showSource(im);
     im.src = URL.createObjectURL(f);
   });
-  for (const k of ["shapes", "face", "text"])
+  for (const k of ["shapes", "face", "text", "color"])
     $("ePre_" + k).addEventListener("click", () => showSource(E.preset(k)));
   $("eRun").addEventListener("click", run);
   $("eType").addEventListener("change", () => {

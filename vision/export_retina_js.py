@@ -31,6 +31,12 @@ def main():
     r = Fly(enable_vision=True).retina
     m = np.asarray(r.ommatidia_id_map).astype(np.uint16)      # 0 = 背景，1..721 = 小眼
     npx = np.asarray(r.num_pixels_per_ommatidia).astype(int)
+    # 小眼分 pale / yellow 两型（实测比例约 30/70，与真果蝇一致）。
+    # FlyGym 的采样：pale 读渲染图的蓝通道，yellow 读绿通道 —— 像拜耳滤镜的彩色马赛克。
+    #   ch_idx = pale_type_mask[k];  vals[k, ch_idx] += img[i, ch_idx + 1]
+    # 所以 1=pale→蓝，0=yellow→绿。果蝇真实的光谱通道是紫外/蓝/绿，
+    # 这里只能拿 sRGB 的蓝/绿近似，**紫外在照片里根本不存在**。
+    pale = np.asarray(r.pale_type_mask).astype(int)
     h, w = m.shape
 
     # flygym 小眼序号 → flyvis 柱位置：perm[j] = 落在 flyvis 第 j 柱的 flygym 序号
@@ -60,6 +66,9 @@ def main():
         width=int(w), height=int(h), n_ommatidia=721,
         encoding="retina_map.png 的 R 通道=编号高字节，G 通道=低字节；0 表示背景",
         pixels_per_ommatidium=npx.tolist(),
+        pale_type_mask=pale.tolist(),          # flygym 序：1=pale(读蓝), 0=yellow(读绿)
+        channel_note="pale 小眼取 sRGB 蓝通道，yellow 取绿通道（FlyGym 原样）；"
+                     "果蝇真实通道是紫外/蓝/绿，紫外无法从照片恢复",
         centers_x=np.round(cx, 3).tolist(),      # flygym 序
         centers_y=np.round(cy, 3).tolist(),
         spacing_px=round(spacing, 3),
@@ -83,6 +92,8 @@ def main():
     print(f"写入 {js}  {js.stat().st_size/1024:.0f} KB")
     print(f"写入 {binf}  {binf.stat().st_size/1024:.0f} KB（Node parity 用）")
     print(f"  721 个小眼，每个 {npx.min()}–{npx.max()} 像素（中位 {int(np.median(npx))}）")
+    print(f"  pale 小眼 {int(pale.sum())} 个（{pale.mean():.0%}，读蓝通道），"
+          f"yellow {int((1-pale).sum())} 个（读绿通道）")
     print(f"  相邻小眼间距中位 {spacing:.1f} 像素 —— 扫视幅度小于它才能采到亚小眼位置")
 
 
