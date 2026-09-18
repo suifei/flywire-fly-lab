@@ -543,6 +543,7 @@
       S.hitFlash = Math.max(0, S.hitFlash - dt);
     };
 
+    G.brain = brain; G.SUB = SUB;   // 供 dodge/audit.js 核对损毁是否真的切断了突触
     return G;
   }
 

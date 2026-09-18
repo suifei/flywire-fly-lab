@@ -237,6 +237,51 @@ const chromePath = () => [process.env.CHROME_PATH,
     for (const a of rr.color) for (const v of a) { tot++; if (v >= 0.99) sat++; }
     ok("果蝇眼里没过曝", sat / tot < 0.5, (sat / tot * 100).toFixed(1) + "% 饱和", "<50%");
 
+    // ── 游戏本体：神经元、损毁、说话、飞行片段 ──────────────
+    const g2 = window.__game;
+    ok("真实神经元开关数", g2.NEURONS.length === 10, g2.NEURONS.length, "10");
+    // JS 数字精度：FlyWire root ID ≈ 7.2e17 > 2^53。写成数字字面量会**静默掉精度**，
+    // 查表全落空 —— 这个坑踩过一次（曾误判水味觉 GRN 不在子回路里）。
+    const allIds = g2.NEURONS.flatMap(n => n.ids).concat(g2.WATER_IDS);
+    ok("神经元 ID 全是字符串（超 2^53）",
+       allIds.every(i => typeof i === "string" && /^\d{18}$/.test(i)),
+       allIds.length + " 个", "全字符串 18 位");
+    ok("每个开关都能在子回路里定位", g2.NEURONS.every(n => n.idx.length > 0),
+       g2.NEURONS.filter(n => n.idx.length).length + "/" + g2.NEURONS.length, "全部");
+    // 子回路与全脑的比值必须**各自独立测**，不是互相抄的
+    const same = g2.NEURONS.filter(n => Math.abs(n.game - n.full) < 0.005).length;
+    ok("子回路比值 ≠ 全脑比值（不是抄的）", same <= 2, same + "/10 完全相同", "≤2");
+    ok("水味觉 GRN：18 个里 17 个在子回路（§19 实测）",
+       g2.WATER_IDS.length === 18 && g2.waterIdx.length === 17,
+       `${g2.WATER_IDS.length} → ${g2.waterIdx.length}`, "18 → 17");
+    // 损毁必须**真的**把突触清零，不是只改个标志位
+    const nnz = () => { let c = 0; const w = g2.brain.w; for (let i = 0; i < w.length; i++) if (w[i] !== 0) c++; return c; };
+    const base = nnz();
+    g2.setNeuronLesion("Roundup", true); const cut = nnz(); g2.setNeuronLesion("Roundup", false);
+    ok("神经元损毁真的切断突触", cut < base, `${base} → ${cut}`, "变少");
+    ok("取消损毁后突触复原", nnz() === base, nnz() === base ? "复原" : "没复原", "复原");
+    g2.setLesion("LC4", true); const cutL = nnz(); g2.setLesion("LC4", false);
+    ok("输入组损毁（LC4）真的切断突触", cutL < base, `${base} → ${cutL}`, "变少");
+    // 输入组必须来自子回路元数据，不是硬编码 LC4/LPLC2（v1 的 bug：新输入静默失效）
+    const ins = Object.keys((g2.SUB.meta && g2.SUB.meta.inputs) || {});
+    const needIn = ["LC4", "LPLC2", "LC16", "SUGAR", "BITTER", "JO"];
+    ok("输入组都在子回路元数据里（不是硬编码）",
+       needIn.every(k => ins.includes(k)), ins.join("/") || "无", needIn.join("/"));
+    // 说话：静止时本来就该没话说，所以给一个真实刺激再看句子
+    const say0 = g2.speech();
+    ok("说话接口带真实发放率", say0 && say0.hz && typeof say0.hz.mn9 === "number",
+       say0 && say0.hz ? "mn9=" + say0.hz.mn9 + "Hz" : "无", "有 hz");
+    const gustSave = g2.gust;
+    g2.gust = { sugar: 100, bitter: 0, water: 0 };
+    const say1 = g2.speech();
+    g2.gust = gustSave;
+    ok("给糖它会说「甜」", say1.words.includes("甜") && say1.sentence.indexOf("甜") >= 0,
+       JSON.stringify(say1.sentence), "含「甜」");
+    const clips = g2.clips || [];
+    ok("飞行片段已装载（真实物理轨迹）",
+       clips.length >= 2 && clips.every(c => c.n > 10 && c.pos.length === c.n * 3),
+       clips.length + " 段 / " + clips.map(c => c.n).join(",") + " 帧", "≥2 段，每段 >10 帧");
+
     return out;
   });
 
