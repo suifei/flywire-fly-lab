@@ -233,10 +233,15 @@ FINDINGS = [
          result="**不是**。活跃集只重叠约三分之一（Jaccard 0.36），共同活跃的 128 个上效应也几乎不相关（Spearman 0.18、κ 0.15）",
          caveat="枢纽各自私有：CB0883 在水通路里根本不放电；CB0051 在糖通路里敲了没影响（0.97 vs 水的 0.49）",
          script="screen/pathway_compare.py", result_file="results/screen/pathway_compare.json", log="§21"),
-    dict(id="concentration", what="为什么有的通路模型预测得准、有的不准",
-         result="**通路集中度**能排序：Gini 水 0.92（n80=15）> JON 0.86（45）> 糖 0.78（62），连线预测器 G3 也是同序（0.49 > 0.43 > 0.32）",
-         caveat="两种「集中」不同：水是几个神经元各担一部分（大量协同），JON 是一个绝对瓶颈加约 2,000 个无关神经元",
-         script="screen/concentration.py", result_file="results/screen/concentration.json", log="§22.2"),
+    dict(id="concentration", what="通路集中度能不能解释「模型在哪条通路上预测得准」", status="negative",
+         result="**不能**。事先声明的方向是「越集中 → 连线越能预测」。实际 Gini 排 JON **0.922** ≈ 水 0.921 ≫ 糖 0.783，"
+                "而连线预测器 G3 排 水 0.485 > 糖 0.316 > **JON 0.288** —— 最集中的通路反而最预测不了；换成 n80 也救不回来",
+         caveat="**JON 一行必须取 `results/screen/jon_paper/concentration_full.json`**（论文刺激名单、596 个活跃神经元全打分）。"
+                "`concentration.json` 里那一行（0.858 / n80 45 / G3 0.434、只给 326 个打分）是 §24.3 宣布作废的宽刺激运行，不得引用。"
+                "两种「集中」本来就不同：水是几个神经元各担一部分（大量协同，n80=15），JON 是一个绝对瓶颈 aBN1 加一条长平尾（必需仅 5 个，n80 仍要 44）。"
+                "n = 3 条通路，本来也撑不起任何排序结论",
+         script="screen/concentration.py", result_file="results/screen/jon_paper/concentration_full.json", log="§22.2",
+         verify=[("gini", 0.9224, 0.001), ("g3_spearman", 0.288, 0.001), ("n80", 44, 0)]),
     dict(id="fly_speaks", what="能不能从全脑发放率解码出「果蝇在感知什么」",
          result="12 个词、301 试次一次跑完（429 s、3.3 GB），岭回归解码器给出第一句中文",
          caveat="词的触发是手写的感觉populations，句子模板也是手写的；这是**解码**不是语言",
@@ -268,7 +273,7 @@ FINDINGS = [
          caveat="12 个备份里有 5 个就是糖味觉受体本身。CB0883 单独敲 0.76（算不上必需），"
                 "配上 Clavicle / G2N-1 就把 MN9 打到 0.24 —— **单个敲除筛选系统性看不见这一类**",
          script="screen/hub_scan.py", result_file="results/screen/hub_scan_summary.json", log="§16.2"),
-    dict(id="olfaction", what="全脑模型能不能给出嗅觉转向信号", status_note="阴性",
+    dict(id="olfaction", what="全脑模型能不能给出嗅觉转向信号", status="negative",
          result="**不能**。单侧气味刺激的下行神经元侧化指数 |LI| ≤ 0.05",
          caveat="而且嗅觉刺激是**全或无的失控**：35 个 DM1 嗅觉受体神经元 10 Hz → 25 ms 内约 8,300 个神经元活跃。"
                 "右侧 ORN_DM1 对**左侧** DM1 投射神经元的突触反而更多（1,664 vs 1,288），侧向读出本身就被混淆。"

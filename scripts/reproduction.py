@@ -28,6 +28,29 @@ ap.add_argument("--check", action="store_true")
 a = ap.parse_args()
 
 # ── 校验 ──────────────────────────────────────────────
+# 台账条目允许出现的字段。写错字段名不能被静默吞掉——2026-09-19 就发生过：
+# 给 FINDINGS 条目加了 verify，而当时只有 PAPERS 走 verify，--check 照样印「通过」。
+OK_KEYS_CLAIM = {"id", "what", "status", "result", "caveat", "script", "result_file", "log", "verify"}
+OK_KEYS_FIND = {"id", "what", "status", "result", "caveat", "script", "result_file", "log", "verify"}
+
+
+def check_verify(c, who, bad):
+    """台账里的关键数字必须与结果文件对得上（台账本身也是手打的，同样会脱节）。"""
+    for expr, want, tol in c.get("verify", []):
+        if not c.get("result_file"):
+            bad.append(f"{who}：写了 verify 却没有 result_file")
+            continue
+        try:
+            v = json.loads((ROOT / c["result_file"]).read_text())
+            for k in expr.split("."):
+                v = v[k] if not isinstance(v, list) else v[int(k)]
+        except Exception as e:
+            bad.append(f"{who}：verify 取不到 {expr}（{e}）")
+            continue
+        if abs(float(v) - float(want)) > tol:
+            bad.append(f"{who}：台账写 {expr}={want}，文件里是 {v}")
+
+
 bad = []
 for p in PAPERS:
     for c in p["claims"]:
@@ -39,17 +62,7 @@ for p in PAPERS:
                 bad.append(f"{p['key']}/{c['id']}：{f} 不存在 → {v}")
         if c["status"] in ("reproduced", "partial", "negative") and not c.get("script"):
             bad.append(f"{p['key']}/{c['id']}：声称做过却没有 script")
-        # verify：台账里的关键数字必须与结果文件对得上（台账本身也是手打的，同样会脱节）
-        for expr, want, tol in c.get("verify", []):
-            try:
-                v = json.loads((ROOT / c["result_file"]).read_text())
-                for k in expr.split("."):
-                    v = v[k] if not isinstance(v, list) else v[int(k)]
-            except Exception as e:
-                bad.append(f"{p['key']}/{c['id']}：verify 取不到 {expr}（{e}）")
-                continue
-            if abs(float(v) - float(want)) > tol:
-                bad.append(f"{p['key']}/{c['id']}：台账写 {expr}={want}，文件里是 {v}")
+        check_verify(c, f"{p['key']}/{c['id']}", bad)
 import re as _re
 for q in PARAMETERS:
     if q.get("script") and not (ROOT / q["script"]).exists():
@@ -71,6 +84,13 @@ for f_ in FINDINGS:
         v = f_.get(k)
         if v and not (ROOT / v).exists():
             bad.append(f"本项目结果 {f_['id']}：{k} 不存在 → {v}")
+    for k in set(f_) - OK_KEYS_FIND:
+        bad.append(f"本项目结果 {f_['id']}：无法识别的字段 {k}（写错字段名会被静默忽略）")
+    check_verify(f_, f"本项目结果 {f_['id']}", bad)
+for p in PAPERS:
+    for c in p["claims"]:
+        for k in set(c) - OK_KEYS_CLAIM:
+            bad.append(f"{p['key']}/{c['id']}：无法识别的字段 {k}（写错字段名会被静默忽略）")
 if bad:
     print("✗ 台账校验不通过：")
     for b in bad:
@@ -82,7 +102,8 @@ for p in PAPERS:
     for c in p["claims"]:
         n[c["status"]] += 1
 tot = sum(n.values())
-nv = sum(len(c.get("verify", [])) for p_ in PAPERS for c in p_["claims"])
+nv = (sum(len(c.get("verify", [])) for p_ in PAPERS for c in p_["claims"])
+      + sum(len(f_.get("verify", [])) for f_ in FINDINGS))
 print(f"✓ 台账校验通过：{len(PAPERS)} 篇来源、{tot} 条主张、{len(PARAMETERS)} 个关键参数、{nv} 个数字与结果文件逐一核对")
 print("  " + "　".join(f"{LABEL[k][1]} {v}" for k, v in n.items() if v))
 if a.check:

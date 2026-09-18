@@ -1481,12 +1481,30 @@ code { font: 12px var(--mono); }
   },
   {
    "id": "concentration",
-   "what": "为什么有的通路模型预测得准、有的不准",
-   "result": "**通路集中度**能排序：Gini 水 0.92（n80=15）> JON 0.86（45）> 糖 0.78（62），连线预测器 G3 也是同序（0.49 > 0.43 > 0.32）",
-   "caveat": "两种「集中」不同：水是几个神经元各担一部分（大量协同），JON 是一个绝对瓶颈加约 2,000 个无关神经元",
+   "what": "通路集中度能不能解释「模型在哪条通路上预测得准」",
+   "status": "negative",
+   "result": "**不能**。事先声明的方向是「越集中 → 连线越能预测」。实际 Gini 排 JON **0.922** ≈ 水 0.921 ≫ 糖 0.783，而连线预测器 G3 排 水 0.485 > 糖 0.316 > **JON 0.288** —— 最集中的通路反而最预测不了；换成 n80 也救不回来",
+   "caveat": "**JON 一行必须取 `results/screen/jon_paper/concentration_full.json`**（论文刺激名单、596 个活跃神经元全打分）。`concentration.json` 里那一行（0.858 / n80 45 / G3 0.434、只给 326 个打分）是 §24.3 宣布作废的宽刺激运行，不得引用。两种「集中」本来就不同：水是几个神经元各担一部分（大量协同，n80=15），JON 是一个绝对瓶颈 aBN1 加一条长平尾（必需仅 5 个，n80 仍要 44）。n = 3 条通路，本来也撑不起任何排序结论",
    "script": "screen/concentration.py",
-   "result_file": "results/screen/concentration.json",
-   "log": "§22.2"
+   "result_file": "results/screen/jon_paper/concentration_full.json",
+   "log": "§22.2",
+   "verify": [
+    [
+     "gini",
+     0.9224,
+     0.001
+    ],
+    [
+     "g3_spearman",
+     0.288,
+     0.001
+    ],
+    [
+     "n80",
+     44,
+     0
+    ]
+   ]
   },
   {
    "id": "fly_speaks",
@@ -1545,7 +1563,7 @@ code { font: 12px var(--mono); }
   {
    "id": "olfaction",
    "what": "全脑模型能不能给出嗅觉转向信号",
-   "status_note": "阴性",
+   "status": "negative",
    "result": "**不能**。单侧气味刺激的下行神经元侧化指数 |LI| ≤ 0.05",
    "caveat": "而且嗅觉刺激是**全或无的失控**：35 个 DM1 嗅觉受体神经元 10 Hz → 25 ms 内约 8,300 个神经元活跃。右侧 ORN_DM1 对**左侧** DM1 投射神经元的突触反而更多（1,664 vs 1,288），侧向读出本身就被混淆。游戏里的「闻着找」是**手写**的高斯气味场，不是连接组",
    "script": "dodge/v4_olfaction_runaway.py",
@@ -6373,7 +6391,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
                    ["（控制幅度后的偏相关）", f[0].partial_overlap_vs_delta_controlling_magnitude, f[1].partial_overlap_vs_delta_controlling_magnitude]]; })() : [])],
         r => /一起敲|1–3 跳|动力学指纹/.test(r[0]));
       $("nStruct").textContent =
-        `两个假设都在看结果之前写定。成立的那个：通路越集中，连线越能预测单敲除效应——“放电率 × 1–3 跳通路”在水通路上 ${w.singles.G3.spearman}、糖通路上 ${s.singles.G3.spearman}；` +
+        `两个假设都在看结果之前写定，两个最后都没站住。第一个：“通路越集中，连线越能预测单敲除效应”——在糖、水两条通路上看着成立（“放电率 × 1–3 跳通路”水通路 ${w.singles.G3.spearman}、糖通路 ${s.singles.G3.spearman}，而水通路确实更集中），但补上第三条 JON 通路后就翻了（见上一张表：JON 最集中却连线最预测不了）。两条通路排出来的“规律”，第三条就能推翻。` +
         `但对 MN9 的直接突触数在两条通路上都没用（效应最强的几个神经元对 MN9 一条直接突触都没有）。` +
         `被证伪的那个：“互为备份 = 各走各的路”。路径重叠度与配对结果的相关只有 ${s.pairs.spearman_overlap_vs_delta} 和 ${w.pairs.spearman_overlap_vs_delta}，` +
         `而且不是指标退化（最大重叠度到 0.59 / 0.70，一半以上的配对有非零重叠）。` +
