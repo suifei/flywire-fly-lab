@@ -105,6 +105,22 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
 .row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
+.missionbar { border-top: 1px solid var(--rule); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.missionbar .mrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.mcard { text-align: left; border: 1px solid var(--rule); border-radius: 9px; background: var(--panel-2); padding: 9px 10px; cursor: pointer; color: var(--ink); }
+.mcard:hover { border-color: var(--ink-2); }
+.mcard b { display: block; font: 600 13.5px/1.3 var(--sans); }
+.mcard small { display: block; margin-top: 3px; color: var(--ink-2); font: 12px/1.35 var(--sans); }
+.mcard.done { border-color: var(--sugar); }
+.mcard.done b::after { content: " ✓"; color: var(--sugar); }
+.mcur { border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; background: var(--panel-2); }
+.mhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.mhead b { font: 600 15px/1.2 var(--sans); }
+.msub { margin: 4px 0; color: var(--ink-2); font: 12.5px/1.5 var(--sans); }
+.mnum { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+#mVerdict.pass { border-color: var(--sugar); color: var(--ink); }
+#mVerdict.fail { border-color: var(--critical); }
 .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
 .seg button { font: 500 12.5px/1 var(--sans); padding: 7px 10px; border: 0; background: var(--panel-2); color: var(--ink-2); cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--rule); }
@@ -249,7 +265,39 @@ code { font: 12px var(--mono); }
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
       </div>
+      <!-- v7 任务模式：把虚拟敲除筛选变成关卡。通过线由 node dodge/mission_test.js 实测后写定 -->
+      <div class="missionbar" id="missionBar">
+        <div class="mrow">
+          <button class="btn go" id="mOpen">任务模式</button>
+          <span class="sub" id="mIntro">7 个手术任务：只准动开关，把果蝇改造成指定的样子。每关的通过线都是实测出来的。</span>
+        </div>
+        <div id="mPanel" hidden>
+          <div class="mlist" id="mList"></div>
+          <div class="mcur" id="mCur" hidden>
+            <div class="mhead">
+              <b id="mTitle"></b>
+              <span class="pill" id="mBasis"></span>
+              <span class="pill" id="mClock">00:00</span>
+              <span class="pill" id="mVerdict">进行中</span>
+              <button class="btn" id="mRestart">重开这一关</button>
+              <button class="btn" id="mHint">提示</button>
+              <button class="btn" id="mGiveup">看参考解</button>
+              <button class="btn" id="mQuit">退出任务</button>
+            </div>
+            <p class="msub" id="mBrief"></p>
+            <p class="msub" id="mGoal"></p>
+            <p class="msub mnum" id="mLive"></p>
+            <p class="msub" id="mLine"></p>
+            <p class="msub" id="mWhy" hidden></p>
+          </div>
+        </div>
+      </div>
       <div class="controls">
+        <div class="row" id="optoRow">
+          <label class="k" title="给真实神经元一段泊松驱动（与论文 poi() 同一机制：被驱动神经元不应期置 0）；强度与时长手选">光遗传</label>
+          <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
+          <span class="pill" id="optoPill" hidden></span>
+        </div>
         <div class="row">
           <label class="k" id="lblMode">发球</label>
           <div class="seg" role="group" aria-labelledby="lblMode">
@@ -385,6 +433,25 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1" id="cPeers">
+      <h3>别人拿数字果蝇做了什么，我们差在哪</h3>
+      <p>2026 年 9 月 3 日 Janelia 与 Google 公开雄性果蝇全中枢神经系统连接组 <b>MaleCNS v1.0</b>（约 16.6 万神经元）之后的两周里，
+        网上冒出一批"把果蝇脑接进游戏"的项目：接《Minecraft》、接《DOOM》、接《Beat Saber》、当桌面宠物。
+        下面这几个是<b>我自己打开仓库页核实过的</b>（星数与说明取自各自 README，2026-09-19）：</p>
+      <div class="tbl"><table id="tPeers"></table></div>
+      <p class="sub"><b>它们的共同套路</b>：①把像素亮度灌进 R1–R6 光感受器；②手选几个下行神经元当按键（左右差转向、某个 DN 前进、DNp01 触发跳）；
+        ③在读出端加一层<b>训练出来的</b>网络（CEM / 岭回归 / 反向传播）。第三条是关键——一旦读出层足够灵活，
+        连接组是不是真的在起作用就说不清了。</p>
+      <p class="sub"><b>一篇值得读的批评</b>：Patrick Mineault，<i>Deconstructing viral fly sims</i>（2026-09-14，neuroai.science）。
+        他的核心质疑是：多数演示并没有建立从感觉到运动的完整闭环，视觉输入的作用近似于随机种子；
+        而"足够大的网络本来就能学会很多事，是不是果蝇都一样"。他提出的严格标准是：
+        行为要由感觉真正驱动、活动要在电生理上说得过去、并且能表现出个体性。</p>
+      <p class="sub"><b>我们和它们的差别，只有一条，但是这条最贵</b>：这个页面里<b>没有任何训练出来的读出层</b>。
+        从 LC4/LPLC2 到巨纤维、从糖味受体到 MN9、从 JO 到 aDN1，中间全是连接组里的真实突触，
+        参数就是论文那一套 LIF。代价是它笨——躲球靠一个手写的 dθ/dt 前端，真让它只用像素看，45 mm 外就完全是瞎的（我们把这个负结果也做成了开关）。
+        换来的是可以做对照：<b>任务模式里的「证明连接组真的在起作用」那一关，就是打乱接线之后看它垮掉</b>。
+        论文补充表 1D 做的是同一件事，我们实测糖 → MN9 从 82.9 Hz 掉到 3.5 Hz。</p>
+    </div>
     <div class="card" style="grid-column: 1 / -1" id="cRepro">
       <h3>复现台账：我们对着论文验了什么</h3>
       <p>这个项目不是"跑通了一个模型"，是<b>拿已发表的论文逐条对答案</b>。下表是全部结果，
@@ -893,13 +960,13 @@ code { font: 12px var(--mono); }
 <script id="repro-data" type="application/json">{
  "说明": "复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
  "counts": {
-  "reproduced": 16,
+  "reproduced": 19,
   "partial": 6,
   "negative": 0,
-  "not_done": 2,
+  "not_done": 1,
   "blocked": 1
  },
- "total_claims": 25,
+ "total_claims": 27,
  "papers": [
   {
    "key": "shiu2024",
@@ -1119,12 +1186,158 @@ code { font: 12px var(--mono); }
     {
      "id": "taste_interaction",
      "what": "糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）",
-     "status": "not_done",
-     "result": "—",
-     "caveat": "需要先把每种刺激标定到 MN9 = 40 Hz（论文口径），工期未估",
-     "script": null,
-     "result_file": null,
-     "log": "§附录·空白清单"
+     "status": "reproduced",
+     "result": "8 个条件全跑（全脑，各 6 个实现），刺激名单用**官方 notebook 的**。剔除全部被刺激 GRN 后的 466 个神经元上，与论文发放率的 Pearson **0.963–0.999**；四个组合的抑制方向全部一致：糖+苦 MN9 **0.2 Hz**（论文 1.3）、糖+Ir94e **0.8**（1.1）、水+苦 **18.8**（10.1）、水+Ir94e **10.7**（2.3）",
+     "caveat": "表头有**两套标定规则**：糖/水是驱动型（单独标到 MN9≈40 Hz：糖 60 Hz→35.7、水 220 Hz→38.3），苦/Ir94e 是抑制型（垫在糖上把 MN9 压到 1 Hz：苦 80 Hz、Ir94e 60 Hz）——只读前半句会让苦「无法标定」。频率网格只有 8 档，标定值是最近档而非精确 40/1 Hz。**对水的抑制比论文弱**：组合÷单独 水+苦 0.49（论文 0.25）、水+Ir94e **0.28（论文 0.06）**；Ir94e 单独的响应集与论文重叠最差（Jaccard 0.22，其余条件 0.68–0.93）。**一开始以为论文没公开刺激名单，按表 4 的高发放类型反推了一版**（苦 21 / Ir94e 21）；后来发现 figures.ipynb 的 Figure 3 单元格里就有原始名单（苦 21 / Ir94e 18）。两版都留着（反推版在 results/screen/taste/），官方名单版在糖的两个组合上更接近论文（0.005/0.023 vs 0.000/0.042）",
+     "script": "screen/taste_interaction.py",
+     "result_file": "results/screen/taste/notebook/summary.json",
+     "log": "§37",
+     "verify": [
+      [
+       "conditions.Sugar_Bitter.ours_mn9",
+       0.17,
+       0.02
+      ],
+      [
+       "conditions.Sugar_Ir94e.ours_mn9",
+       0.83,
+       0.02
+      ],
+      [
+       "conditions.Water_Bitter.ours_mn9",
+       18.83,
+       0.02
+      ],
+      [
+       "conditions.Water_Ir94e.ours_mn9",
+       10.67,
+       0.02
+      ],
+      [
+       "conditions.Sugar_Ir94e.pearson_nonstim",
+       0.963,
+       0.0005
+      ],
+      [
+       "conditions.Water_only.pearson_nonstim",
+       0.999,
+       0.0005
+      ],
+      [
+       "conditions.Ir94e_only.respond_jaccard_nonstim",
+       0.217,
+       0.001
+      ],
+      [
+       "interaction.Water_Ir94e.ours_ratio",
+       0.278,
+       0.001
+      ],
+      [
+       "interaction.Water_Ir94e.paper_ratio",
+       0.056,
+       0.001
+      ],
+      [
+       "calibration.sugar.chosen_mn9",
+       35.67,
+       0.01
+      ],
+      [
+       "calibration.water.chosen_mn9",
+       38.33,
+       0.01
+      ]
+     ]
+    },
+    {
+     "id": "taste_grid",
+     "what": "苦能压住强糖、Ir94e 压不住（Fig 3B–C，表 10 第 5 行）",
+     "status": "reproduced",
+     "result": "**两条事先写死的判据全部成立**。最强糖（220 Hz）下 MN9 = 93.0 Hz：苦 220 Hz 把它压到 **16.3 Hz（降 82.4%）**，Ir94e 220 Hz 只压到 **67.3 Hz（降 27.6%）**。5×6 的剂量网格上两者差距随糖强度单调拉开：糖 120 Hz 时苦 160 Hz 已压到 1.7 Hz，而 Ir94e 160 Hz 还有 18.0 Hz",
+     "caveat": "判据是先写下来再跑的（苦降 ≥50% 成立、Ir94e 降 <50% 成立），但**两个 50% 的阈值是我们定的**，论文只说了「苦能、Ir94e 不能」。频率档位受编译限制，只取了论文 11×11 网格的一个 5×6 子集；刺激名单用官方 notebook 的",
+     "script": "screen/taste_grid.py",
+     "result_file": "results/screen/taste/grid/summary.json",
+     "log": "§37",
+     "verify": [
+      [
+       "drop.bitter.drop_frac",
+       0.824,
+       0.002
+      ],
+      [
+       "drop.ir94e.drop_frac",
+       0.276,
+       0.002
+      ],
+      [
+       "drop.bitter.mn9_with_mod",
+       16.33,
+       0.02
+      ],
+      [
+       "drop.ir94e.mn9_with_mod",
+       67.33,
+       0.02
+      ],
+      [
+       "grid.220.none",
+       93.0,
+       0.02
+      ]
+     ]
+    },
+    {
+     "id": "responsive",
+     "what": "哪些神经元响应糖 / 响应水（Fig 1D、4A，表 10 第 2、6 行）",
+     "status": "reproduced",
+     "result": "**零新仿真**（基线段落里本来就存了全部神经元的计数）。糖：与实验一致 **10/11**，唯一错项 Usnea——**与论文点名的错项完全相同**；水：一致 **4/6**，两个错项 G2N-1 与 Roundup 也**正是论文自己列的那两个**。与论文自己的预测列逐条一致（糖 11/11、水 6/6）",
+     "caveat": "论文数的是 14 项（糖）和 10 项（水），比我们多的 MN6 / Fudog / TH-VUM 等没有把名字对到 v783 的 cell_type，所以我们只对表 2 / 表 5 里列出的类型计分。模型对这些类型**全部预测「响应」**，所以分数完全由实验侧有几个「不响应」决定——这一点论文也一样",
+     "script": "screen/responsive.py",
+     "result_file": "results/screen/responsive.json",
+     "log": "§37",
+     "verify": [
+      [
+       "sugar.correct",
+       10,
+       0
+      ],
+      [
+       "sugar.total",
+       11,
+       0
+      ],
+      [
+       "water.correct",
+       4,
+       0
+      ],
+      [
+       "water.total",
+       6,
+       0
+      ],
+      [
+       "sugar.same_as_paper",
+       11,
+       0
+      ],
+      [
+       "water.same_as_paper",
+       11,
+       0
+      ],
+      [
+       "sugar.n_paper_pred",
+       11,
+       0
+      ],
+      [
+       "water.n_paper_pred",
+       11,
+       0
+      ]
+     ]
     },
     {
      "id": "baseline_rates",
@@ -4881,6 +5094,17 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       this._updateStim();
     }
 
+    // 直接驱动**任意**神经元（"光遗传手指"）。必须单独有个接口，是因为 _updateStim 只会把
+    // **输入组**里的神经元放进 stimList —— 2026-09-19 实测：对中间神经元调 setRateNeurons
+    // 只会写 stimProb，永远不会真的放电。传 hz = 0 关掉。
+    // 与官方 poi() 一致：被驱动的神经元不应期置 0。
+    setOpto(idx, hz) {
+      this.optoIdx = Int32Array.from(idx || []);
+      this.optoProb = (Math.max(0, hz) * this.dt) / 1000;
+      for (const i of this.optoIdx) this.stimProb[i] = this.optoProb;
+      this._updateStim();
+    }
+
     _updateStim() {
       const list = [];
       for (let i = 0; i < this.n; i++) {
@@ -4892,6 +5116,16 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       for (const g of Object.keys(this.groups)) {
         if (!inputPrefixes.some(p => g.startsWith(p + "_"))) continue;
         for (const i of this.groups[g]) { this.rfc[i] = 0; if (this.stimProb[i] > 0) list.push(i); }
+      }
+      if (this.optoIdx && this.optoProb > 0) {          // 光遗传驱动的神经元不一定在输入组里
+        const seen = new Set(list);
+        for (const i of this.optoIdx) {
+          // 光遗传优先：游戏每一步都会用 setRate 重写输入组的 stimProb（没球时写 0），
+          // 不在这里盖回去的话，点在 LC4/LPLC2 上的脉冲会被立刻抹掉。
+          this.stimProb[i] = Math.max(this.stimProb[i], this.optoProb);
+          this.rfc[i] = 0;
+          if (!seen.has(i)) { seen.add(i); list.push(i); }
+        }
       }
       this.stimList = Int32Array.from(list);
     }
@@ -5076,6 +5310,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     // 口渴：论文的水味觉实验用的是脱水处理过（pseudodessicated）的果蝇，渴时才会对水伸喙。
     // 这里用一个手写的口渴度：随时间上升，喝水下降；口渴时喝水的阈值按比例降低（阈值形式是手写的，依据是论文的实验条件）。
     thirstRise: 0.06, thirstDrop: 0.5, waterThreshRatio: 0.12,
+    optoHz: 150, optoDur: 0.4,      // 光遗传脉冲：强度与时长（手选；论文的单神经元激活扫频用 25–200 Hz）
     speechEvery: 1.2,        // 每隔多久更新一次“果蝇在说什么”
     speechWind: 25,          // JO 里风的贡献 > 这个频率才算“感觉到风”
     autoDust: false, dustEvery: 5,
@@ -5133,7 +5368,8 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       S: { x: 0, y: 0, h: 0, z: 0, phase: 0, jumpT: -1, cooldown: 0, jumpDir: 0, t: 0, hitFlash: 0, omega: 0, thirst: 0,
            state: "walk", groomT: 0, speed: 0, proboscis: 0 },
       score: { dodge: 0, hit: 0, jump: 0, launched: 0, eaten: 0, eaten_sugar: 0, eaten_bitter: 0, eaten_mixed: 0,
-               contacts_sugar: 0, contacts_bitter: 0, contacts_mixed: 0, groom: 0, dust: 0, back_s: 0 },
+               eaten_water: 0, contacts_sugar: 0, contacts_bitter: 0, contacts_mixed: 0, contacts_water: 0,
+               groom: 0, dust: 0, back_s: 0, feed_s: 0, groom_s: 0 },
       balls: [], loom: { L: 0, R: 0 },
       pellets: [], dust: [], V3, gust: { sugar: 0, bitter: 0 },
       mode: opts.mode || "auto", ballSpeed: opts.ballSpeed || 60, mapSign: 1,
@@ -5210,6 +5446,19 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       const pos = new Map(SUB.fids.map((f, i) => [String(f), i]));
       G.waterIdx = G.WATER_IDS.map(f => pos.get(f)).filter(i => i !== undefined);
     }
+
+    // —— 光遗传手指（v7）：点一下，给指定神经元 optoDur 秒的泊松驱动 ——
+    // 真实成分：驱动的是这个子回路里**真实的** FlyWire 神经元，用的也是和感觉输入同一套泊松机制
+    //（与论文 poi() 相同：被驱动神经元不应期置 0）。手写成分：强度、时长、以及"点哪个"由页面决定。
+    G.opto = null;
+    G.optoPulse = (idx, hz = CFG.optoHz, dur = CFG.optoDur, label = "") => {
+      if (!idx || !idx.length) return null;
+      G.opto = { idx: Array.from(idx), hz, t: dur, dur, label };
+      brain.setOpto(G.opto.idx, hz);
+      G.onEvent && G.onEvent("opto", G.opto);
+      return G.opto;
+    };
+    G.optoStop = () => { if (G.opto) { brain.setOpto([], 0); G.opto = null; } };
 
     G.setNeuronLesion = (key, on) => {
       const rec = G.NEURONS.find(n => n.key === key);
@@ -5387,7 +5636,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
         for (const p of G.pellets) {
           if (Math.hypot(p.x - hx, p.y - hy) < CFG.pelletR + 0.3) {
             G.onPellet = p;
-            if (!p.touched) { p.touched = true; G.score["contacts_" + p.type]++; }
+            if (!p.touched) { p.touched = true; G.score["contacts_" + p.type] = (G.score["contacts_" + p.type] || 0) + 1; }
             if (p.type === "water") water = CFG.gustRate;
             else {
               if (p.type !== "bitter") sugar = CFG.gustRate;
@@ -5417,6 +5666,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
 
     G.step = () => {
       const S = G.S, dt = chunkDt;
+      if (G.opto) { G.opto.t -= dt; if (G.opto.t <= 0) G.optoStop(); }     // 光遗传脉冲到时自动关掉
       counts.fill(0);
       counts2.fill(0);
       brain.run(CFG.chunkSteps, (i, s) => {
@@ -5506,11 +5756,13 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
         S.y += Math.sin(S.h) * speed * dt;
         S.phase += speed * dt;                                         // 以 mm 计的步态进度（后退时倒放）
         if (state === "back") G.score.back_s += dt;
+        if (state === "feed") G.score.feed_s += dt;                    // 伸喙进食的累计秒数（比"吃完几颗"灵敏：水的驱动弱，常常够不到吃完一颗）
+        if (state === "groom") G.score.groom_s += dt;
         S.proboscis += ((state === "feed" ? 1 : 0) - S.proboscis) * Math.min(1, dt / 0.06);   // 伸喙动画进度
         if (state === "feed" && G.onPellet) {
           const p = G.onPellet; p.amount -= CFG.eatRate * dt;
           if (p.amount <= 0) {
-            G.pellets.splice(G.pellets.indexOf(p), 1); G.score.eaten++; G.score["eaten_" + p.type]++;
+            G.pellets.splice(G.pellets.indexOf(p), 1); G.score.eaten++; G.score["eaten_" + p.type] = (G.score["eaten_" + p.type] || 0) + 1;
             G.onEvent && G.onEvent("eaten", p); G.onPellet = null;
           }
         }
@@ -5613,6 +5865,706 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.FlyDodgeGame = api;
 })(typeof self !== "undefined" ? self : this);
 </script>
+<script>// 果蝇闪避 · 任务模式（v7）：把"虚拟敲除筛选"变成可玩的关卡。
+// 与渲染无关，页面和 node 自检共用——和 game_core.js 一样的约定。
+//
+// 每一关给一个**手术目标**，玩家只能动开关（通路断突触 / 真实神经元敲除 / 打乱接线 / 光遗传脉冲），
+// 不能改规则。通过与否由游戏自己测出来的行为指标判定。
+//
+// 三条规矩，写死在数据里、页面照着显示：
+//   1. `basis` 说明这一关靠的是**连接组**还是**手写规则**；
+//   2. `refKeys` 是参考解。`node dodge/mission_test.js` 实测「不干预」与「参考解」两种情况，
+//      **通过线是照那份实测分布定的**——先测再定线，不是先编故事。每条线旁边都写着实测值。
+//   3. 不许为了让某一关好看去改 game_core 里的规则（这条在 CLAUDE.md 里已经写了一年）。
+(function (root) {
+  const rate = s => (s.dodge + s.hit) ? s.dodge / (s.dodge + s.hit) : null;
+
+  const MISSIONS = [
+    {
+      id: "silence_alarm",
+      title: "关掉警报",
+      brief: "球照扔，但要让它一次都不起飞——同时还得照常吃到糖。",
+      why: "逃逸与进食是两条分开的通路：LC4/LPLC2 → 巨纤维管起飞，糖味 GRN → MN9 管伸喙。" +
+           "切断视觉那条，进食毫发无损——这与全脑筛选里「糖与水的活跃神经元集合只重叠三分之一、" +
+           "共用的那部分都在靠近输出的地方」是同一件事。",
+      basis: "连接组",
+      hint: "从「感觉输入」那一侧下手，别动运动输出——切运动输出会把吃也一起切掉。",
+      refKeys: ["les:LC4", "les:LPLC2"],
+      cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
+      metrics: g => ({ jump: g.score.jump, feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar }),
+      goal: "起跳 = 0，且伸喙进食累计 ≥ 3 s",
+      line: "实测（60 s × 3 种子）：不干预起跳 32 次、进食 8.7 s；切掉两条视觉通路后起跳 0 次、进食 10.6 s——" +
+            "**进食反而更长**，因为不再被起飞打断",
+      pass: m => m.jump === 0 && m.feedS >= 3,
+    },
+    {
+      id: "stop_itch",
+      title: "一刀止痒",
+      brief: "灰尘不停落在触角上，让它**再也不梳理**——躲球的本事不许丢。只准动一个真实神经元。",
+      why: "aBN1（SAD093）是梳理通路的绝对瓶颈：全脑筛选里单敲它让 aDN1 与 aDN2 同时归零，" +
+           "Hampel et al. 2015 的实验也证实。子回路里同样是 59.8 → 0 Hz。" +
+           "整条通路 596 个活跃神经元，只有这一个是不可替代的。",
+      basis: "连接组",
+      hint: "触角机械感觉通路上只有一个神经元是绝对瓶颈——在真实神经元开关里找它。",
+      refKeys: ["neu:aBN1"],
+      cfg: { autoDust: true, dustEvery: 3, autoPellets: false },
+      metrics: g => ({ groom: g.score.groom, groomS: +g.score.groom_s.toFixed(2), dust: g.score.dust, dodgeRate: rate(g.score) }),
+      goal: "梳理次数 = 0（且确实落过 ≥ 3 次灰）",
+      line: "实测（60 s × 3 种子）：不干预梳理 8.3 次、累计 5.0 s；敲 aBN1 后 0 次、0 s",
+      pass: m => m.groom === 0 && m.dust >= 3,
+    },
+    {
+      id: "starve",
+      title: "饿死它",
+      brief: "糖粒管够，但要让它伸不出喙——躲球的本事不许丢。",
+      why: "Roundup（CB0553）是糖 → MN9 通路上效应最强的前运动神经元之一：全脑敲除后比值 0.30，" +
+           "子回路里 0.05。它不在逃逸通路上，所以躲球不受影响。",
+      basis: "连接组",
+      hint: "别切糖味受体（那不算手术）。去找进食通路上效应最强的那个中间神经元。",
+      refKeys: ["neu:Roundup"],
+      cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
+      metrics: g => ({ feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar, dodgeRate: rate(g.score) }),
+      goal: "伸喙进食累计 < 1 s（且确实碰到过 ≥ 5 次糖粒）",
+      line: "实测（60 s × 3 种子）：不干预进食 8.7 s，敲 Roundup 后 0.0 s（三次全是 0）",
+      pass: m => m.feedS < 1 && m.contacts >= 5,
+    },
+    {
+      id: "synergy",
+      title: "一个不够，两个才行",
+      brief: "还是让它吃不成，但这次 Roundup 不给你用。试试看：单独敲哪个都不太行。",
+      why: "这是本项目最反直觉的一条结果：**单独敲除看不到的东西，必须把两个一起敲才会出现**。" +
+           "Clavicle 与 G2N-1 单独敲都还剩九成进食，一起敲就塌一半——低于「各自独立」应有的乘积。" +
+           "全脑筛选里这类协同有 10 对（留一稳定 7 对），而光看连线预测不出来（路径重叠与配对效应的 Spearman ≈ 0）。",
+      basis: "连接组",
+      hint: "两个都是论文里「伸喙必需」的类型。一个一个试没用，得同时敲。",
+      refKeys: ["neu:Clavicle", "neu:G2N-1"],
+      cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
+      metrics: g => ({ feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar }),
+      goal: "伸喙进食累计 < 4 s（且碰到过 ≥ 5 次糖粒）",
+      line: "实测（60 s × 3 种子，逐次）：不干预 6.1 / 8.6 / 11.2 s；单敲 Clavicle 5.4 / 8.1 / 5.1，" +
+            "单敲 G2N-1 4.8 / 6.8 / 7.9；两个一起 2.8 / 2.9 / 2.0。" +
+            "通过线 4 s 落在「单敲最低的 4.8」与「双敲最高的 2.9」之间——6 次单敲全过不了，3 次双敲全过。" +
+            "独立相乘的预期是 4.6 s，实测 2.6 s，所以确实是协同而不只是叠加",
+      singles: true,
+      pass: m => m.feedS < 4 && m.contacts >= 5,
+    },
+    {
+      id: "thirsty_boost",
+      title: "拆掉刹车",
+      brief: "场上只有水滴，而且它已经很渴了。想办法让喝水的驱动更强。",
+      why: "Phantom（CB0062）是抑制性（GABA）的：敲掉它，**水**通路的 MN9 翻倍——全脑 3.02 倍、子回路 2.06 倍。" +
+           "而同一个敲除在**糖**通路上几乎没有效果（0.92 / 0.97）。所以引用这个数字必须说明是哪条通路。",
+      basis: "连接组",
+      hint: "找一个抑制性神经元：切掉刹车，油门就显得更大。",
+      refKeys: ["neu:Phantom"],
+      cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["water"], autoDust: false },
+      init: g => { g.S.thirst = 0.8; },
+      tick: (g, a) => { if (g.onPellet && g.onPellet.type === "water") { const v = g.readout().mn9 || 0; a.n = (a.n || 0) + 1; a.sum = (a.sum || 0) + v; a.peak = Math.max(a.peak || 0, v); } },
+      metrics: (g, a) => ({ mn9Peak: +(a.peak || 0).toFixed(1), mn9Mean: +((a.sum || 0) / Math.max(a.n || 1, 1)).toFixed(1),
+                            feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_water || 0 }),
+      goal: "嘴下有水滴时的 MN9 峰值 ≥ 50 Hz",
+      line: "实测（60 s × 3 种子）：不干预峰值 35.3 Hz、均值 11.3；敲掉 Phantom 后峰值 71.4、均值 20.2——" +
+            "约 2.0 倍，与子回路实测的 2.06 倍、全脑的 3.02 倍同向。通过线 50 Hz 落在两者之间",
+      calibrated: true,
+      pass: m => m.mn9Peak >= 50,
+    },
+    {
+      id: "shuffle_control",
+      title: "证明连接组真的在起作用",
+      brief: "打开「打乱接线」——保留每个神经元的出度与权重，只把靶点随机重排，看闪避率会怎样。",
+      why: "这是论文补充表 1D 的对照，也是对「这些数字果蝇其实是随机网络在乱按键」这一质疑的正面回答：" +
+           "如果打乱之后表现照旧，那连接组就没在起作用。我们实测：糖 → MN9 从 82.9 Hz 掉到 3.5 ± 4.2 Hz。" +
+           "这一关用**原地起跳**模式，因为真实飞行轨迹的闪避率接近 100%，测不出差别。",
+      basis: "连接组",
+      hint: "开关在「动脑子」那一行。",
+      refKeys: ["pert:shuffle"],
+      cfg: { takeoff: "hop", autoPellets: false, autoDust: false },
+      metrics: g => ({ dodgeRate: rate(g.score) === null ? null : +rate(g.score).toFixed(3), jump: g.score.jump, launched: g.score.launched }),
+      goal: "起跳次数 < 20（同时看闪避率）",
+      line: "实测（60 s × 3 种子，逐次）：不干预起跳 33 / 32 / 33 次、闪避率 0.85 / 0.84 / 0.95；" +
+            "打乱后起跳 18 / 5 / 0 次、闪避率 0.07 / 0.79 / 0.43。" +
+            "**判据用起跳次数而不是闪避率**——闪避率逐次波动太大（打乱后仍有一次 0.79），" +
+            "而起跳次数三次都掉到 20 以下、三次不干预都在 32 以上，没有重叠。" +
+            "这也更贴近机制：打乱先打断的是 looming → 巨纤维那一路",
+      calibrated: true,
+      pass: m => m.jump < 20,
+    },
+    {
+      id: "opto_takeoff",
+      title: "不用球，让它自己飞",
+      brief: "场上一个球也没有。用「光遗传手指」直接点亮神经元，把它逼起飞。",
+      why: "点下去的是这个子回路里**真实的** FlyWire 神经元，用的是和感觉输入同一套泊松驱动" +
+           "（与论文 poi() 一致：被驱动的神经元不应期置 0）。实测：左侧 LC4+LPLC2 给 200 Hz、0.6 s，" +
+           "巨纤维峰值 206.7 Hz，越过 90 Hz 阈值并触发起飞。强度与时长是手选的。",
+      basis: "连接组（驱动真实神经元）+ 手写（强度、时长）",
+      hint: "光标点在视觉投射神经元上——直接点巨纤维是作弊（它是输出端）。",
+      refKeys: [],
+      refAct: (g, t) => { if (t > 0.5 && !g.opto && g.score.jump === 0) g.optoPulse(g.optoTargets.LC4_LPLC2_left, 200, 0.6, "LC4+LPLC2 左"); },
+      cfg: { autoPellets: false, autoDust: false, autoServe: false },
+      metrics: g => ({ jump: g.score.jump, launched: g.score.launched }),
+      goal: "在没有任何球的情况下起飞 ≥ 1 次",
+      line: "实测（60 s × 3 种子）：不点任何神经元时起飞 0 次；给左侧 LC4+LPLC2 200 Hz、0.6 s 一次就起飞（巨纤维峰值 206.7 Hz，阈值 90）",
+      pass: m => m.jump >= 1 && m.launched === 0,
+    },
+  ];
+
+  // 把 refKeys 应用到一局游戏上：les:X 通路断突触 / neu:X 真实神经元敲除 / pert:X 论文式扰动
+  function applyKeys(g, keys) {
+    for (const k of keys || []) {
+      const [kind, name] = k.split(":");
+      if (kind === "les") g.setLesion(name, true);
+      else if (kind === "neu") g.setNeuronLesion(name, true);
+      else if (kind === "pert") g.setPerturb(name, true);
+    }
+  }
+
+  const API = { MISSIONS, applyKeys };
+  if (typeof module !== "undefined" && module.exports) module.exports = API;
+  else root.FlyDodgeMissions = API;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script id="missions-data" type="application/json">{
+ "seconds_per_seed": 60,
+ "seeds": 3,
+ "ball_speed": 60,
+ "base_cfg": {
+  "encoding": "ache2019",
+  "gfTau": 0.02,
+  "takeoff": "clip"
+ },
+ "note": "每关两种情况各跑 3 个种子；通过线写在 missions.js 里，是照这份实测定的",
+ "missions": [
+  {
+   "id": "silence_alarm",
+   "title": "关掉警报",
+   "basis": "连接组",
+   "goal": "起跳 = 0，且伸喙进食累计 ≥ 3 s",
+   "line": "实测：不干预起跳 98 次/60 s；切两条视觉通路后 0 次，进食时长反而更长",
+   "why": "逃逸与进食是两条分开的通路：LC4/LPLC2 → 巨纤维管起飞，糖味 GRN → MN9 管伸喙。切断视觉那条，进食毫发无损——这与全脑筛选里「糖与水的活跃神经元集合只重叠三分之一、共用的那部分都在靠近输出的地方」是同一件事。",
+   "brief": "球照扔，但要让它一次都不起飞——同时还得照常吃到糖。",
+   "hint": "从「感觉输入」那一侧下手，别动运动输出——切运动输出会把吃也一起切掉。",
+   "refKeys": [
+    "les:LC4",
+    "les:LPLC2"
+   ],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "jump": 32,
+      "feedS": 8.67,
+      "contacts": 13
+     },
+     "runs": [
+      {
+       "jump": 33,
+       "feedS": 6.13,
+       "contacts": 12
+      },
+      {
+       "jump": 32,
+       "feedS": 8.64,
+       "contacts": 12
+      },
+      {
+       "jump": 31,
+       "feedS": 11.24,
+       "contacts": 15
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "jump": 0,
+      "feedS": 10.577,
+      "contacts": 6.333
+     },
+     "runs": [
+      {
+       "jump": 0,
+       "feedS": 8.35,
+       "contacts": 5
+      },
+      {
+       "jump": 0,
+       "feedS": 15.03,
+       "contacts": 9
+      },
+      {
+       "jump": 0,
+       "feedS": 8.35,
+       "contacts": 5
+      }
+     ]
+    }
+   },
+   "discriminating": true
+  },
+  {
+   "id": "stop_itch",
+   "title": "一刀止痒",
+   "basis": "连接组",
+   "goal": "梳理次数 = 0（且确实落过 ≥ 3 次灰）",
+   "line": "实测：不干预 60 s 里梳理若干次；敲 aBN1 后恒为 0",
+   "why": "aBN1（SAD093）是梳理通路的绝对瓶颈：全脑筛选里单敲它让 aDN1 与 aDN2 同时归零，Hampel et al. 2015 的实验也证实。子回路里同样是 59.8 → 0 Hz。整条通路 596 个活跃神经元，只有这一个是不可替代的。",
+   "brief": "灰尘不停落在触角上，让它**再也不梳理**——躲球的本事不许丢。只准动一个真实神经元。",
+   "hint": "触角机械感觉通路上只有一个神经元是绝对瓶颈——在真实神经元开关里找它。",
+   "refKeys": [
+    "neu:aBN1"
+   ],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "groom": 8.333,
+      "groomS": 4.983,
+      "dust": 20,
+      "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "groom": 8,
+       "groomS": 4.75,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 9,
+       "groomS": 5.4,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 8,
+       "groomS": 4.8,
+       "dust": 20,
+       "dodgeRate": 1
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "groom": 0,
+      "groomS": 0,
+      "dust": 20,
+      "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      }
+     ]
+    }
+   },
+   "discriminating": true
+  },
+  {
+   "id": "starve",
+   "title": "饿死它",
+   "basis": "连接组",
+   "goal": "伸喙进食累计 < 1 s（且确实碰到过 ≥ 5 次糖粒）",
+   "line": "实测（60 s × 2 种子）：不干预 14.8 s，敲 Roundup 后 0.0 s",
+   "why": "Roundup（CB0553）是糖 → MN9 通路上效应最强的前运动神经元之一：全脑敲除后比值 0.30，子回路里 0.05。它不在逃逸通路上，所以躲球不受影响。",
+   "brief": "糖粒管够，但要让它伸不出喙——躲球的本事不许丢。",
+   "hint": "别切糖味受体（那不算手术）。去找进食通路上效应最强的那个中间神经元。",
+   "refKeys": [
+    "neu:Roundup"
+   ],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "feedS": 8.67,
+      "contacts": 13,
+      "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "feedS": 6.13,
+       "contacts": 12,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 8.64,
+       "contacts": 12,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 11.24,
+       "contacts": 15,
+       "dodgeRate": 1
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 0,
+      "contacts": 11.667,
+      "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "feedS": 0,
+       "contacts": 9,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 0,
+       "contacts": 13,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 0,
+       "contacts": 13,
+       "dodgeRate": 1
+      }
+     ]
+    }
+   },
+   "discriminating": true
+  },
+  {
+   "id": "synergy",
+   "title": "一个不够，两个才行",
+   "basis": "连接组",
+   "goal": "伸喙进食累计 < 8 s（且碰到过 ≥ 5 次糖粒）",
+   "line": "实测（60 s × 2 种子）：不干预 14.8 s，单敲 Clavicle 13.5、单敲 G2N-1 11.6，两个一起 5.7——通过线 8 s 正落在「单敲过不了、双敲过得了」之间",
+   "why": "这是本项目最反直觉的一条结果：**单独敲除看不到的东西，必须把两个一起敲才会出现**。Clavicle 与 G2N-1 单独敲都还剩九成进食，一起敲就塌一半——低于「各自独立」应有的乘积。全脑筛选里这类协同有 10 对（留一稳定 7 对），而光看连线预测不出来（路径重叠与配对效应的 Spearman ≈ 0）。",
+   "brief": "还是让它吃不成，但这次 Roundup 不给你用。试试看：单独敲哪个都不太行。",
+   "hint": "两个都是论文里「伸喙必需」的类型。一个一个试没用，得同时敲。",
+   "refKeys": [
+    "neu:Clavicle",
+    "neu:G2N-1"
+   ],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 1,
+     "of": 3,
+     "mean": {
+      "feedS": 8.67,
+      "contacts": 13
+     },
+     "runs": [
+      {
+       "feedS": 6.13,
+       "contacts": 12
+      },
+      {
+       "feedS": 8.64,
+       "contacts": 12
+      },
+      {
+       "feedS": 11.24,
+       "contacts": 15
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 2.573,
+      "contacts": 12.333
+     },
+     "runs": [
+      {
+       "feedS": 2.77,
+       "contacts": 9
+      },
+      {
+       "feedS": 2.92,
+       "contacts": 13
+      },
+      {
+       "feedS": 2.03,
+       "contacts": 15
+      }
+     ]
+    },
+    "single_Clavicle": {
+     "pass": 2,
+     "of": 3,
+     "mean": {
+      "feedS": 6.187,
+      "contacts": 10.333
+     },
+     "runs": [
+      {
+       "feedS": 5.37,
+       "contacts": 8
+      },
+      {
+       "feedS": 8.09,
+       "contacts": 12
+      },
+      {
+       "feedS": 5.1,
+       "contacts": 11
+      }
+     ]
+    },
+    "single_G2N-1": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 6.49,
+      "contacts": 10.667
+     },
+     "runs": [
+      {
+       "feedS": 4.84,
+       "contacts": 8
+      },
+      {
+       "feedS": 6.75,
+       "contacts": 11
+      },
+      {
+       "feedS": 7.88,
+       "contacts": 13
+      }
+     ]
+    }
+   },
+   "discriminating": false,
+   "singles_pass": "Clavicle 2/3，G2N-1 3/3"
+  },
+  {
+   "id": "thirsty_boost",
+   "title": "拆掉刹车",
+   "basis": "连接组",
+   "goal": "嘴下有水滴时的 MN9 峰值 ≥ 通过线（见下方实测）",
+   "line": "通过线按实测定",
+   "why": "Phantom（CB0062）是抑制性（GABA）的：敲掉它，**水**通路的 MN9 翻倍——全脑 3.02 倍、子回路 2.06 倍。而同一个敲除在**糖**通路上几乎没有效果（0.92 / 0.97）。所以引用这个数字必须说明是哪条通路。",
+   "brief": "场上只有水滴，而且它已经很渴了。想办法让喝水的驱动更强。",
+   "hint": "找一个抑制性神经元：切掉刹车，油门就显得更大。",
+   "refKeys": [
+    "neu:Phantom"
+   ],
+   "calibrated": true,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "mn9Peak": 35.3,
+      "mn9Mean": 11.333,
+      "feedS": 4.997,
+      "contacts": 11.667
+     },
+     "runs": [
+      {
+       "mn9Peak": 32.8,
+       "mn9Mean": 10.9,
+       "feedS": 4.22,
+       "contacts": 10
+      },
+      {
+       "mn9Peak": 35.4,
+       "mn9Mean": 11.9,
+       "feedS": 5.64,
+       "contacts": 12
+      },
+      {
+       "mn9Peak": 37.7,
+       "mn9Mean": 11.2,
+       "feedS": 5.13,
+       "contacts": 13
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "mn9Peak": 71.367,
+      "mn9Mean": 20.2,
+      "feedS": 5.757,
+      "contacts": 12
+     },
+     "runs": [
+      {
+       "mn9Peak": 63.8,
+       "mn9Mean": 18.4,
+       "feedS": 5.38,
+       "contacts": 11
+      },
+      {
+       "mn9Peak": 70.6,
+       "mn9Mean": 20.2,
+       "feedS": 5.62,
+       "contacts": 11
+      },
+      {
+       "mn9Peak": 79.7,
+       "mn9Mean": 22,
+       "feedS": 6.27,
+       "contacts": 14
+      }
+     ]
+    }
+   },
+   "discriminating": true
+  },
+  {
+   "id": "shuffle_control",
+   "title": "证明连接组真的在起作用",
+   "basis": "连接组",
+   "goal": "闪避率跌破通过线（见下方实测）",
+   "line": "通过线按实测定",
+   "why": "这是论文补充表 1D 的对照，也是对「这些数字果蝇其实是随机网络在乱按键」这一质疑的正面回答：如果打乱之后表现照旧，那连接组就没在起作用。我们实测：糖 → MN9 从 82.9 Hz 掉到 3.5 ± 4.2 Hz。这一关用**原地起跳**模式，因为真实飞行轨迹的闪避率接近 100%，测不出差别。",
+   "brief": "打开「打乱接线」——保留每个神经元的出度与权重，只把靶点随机重排，看闪避率会怎样。",
+   "hint": "开关在「动脑子」那一行。",
+   "refKeys": [
+    "pert:shuffle"
+   ],
+   "calibrated": true,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "dodgeRate": 0.88,
+      "jump": 32.667,
+      "launched": 33
+     },
+     "runs": [
+      {
+       "dodgeRate": 0.85,
+       "jump": 33,
+       "launched": 34
+      },
+      {
+       "dodgeRate": 0.842,
+       "jump": 32,
+       "launched": 32
+      },
+      {
+       "dodgeRate": 0.947,
+       "jump": 33,
+       "launched": 33
+      }
+     ]
+    },
+    "ref": {
+     "pass": 2,
+     "of": 3,
+     "mean": {
+      "dodgeRate": 0.429,
+      "jump": 7.667,
+      "launched": 33
+     },
+     "runs": [
+      {
+       "dodgeRate": 0.065,
+       "jump": 18,
+       "launched": 34
+      },
+      {
+       "dodgeRate": 0.792,
+       "jump": 5,
+       "launched": 32
+      },
+      {
+       "dodgeRate": 0.429,
+       "jump": 0,
+       "launched": 33
+      }
+     ]
+    }
+   },
+   "discriminating": false
+  },
+  {
+   "id": "opto_takeoff",
+   "title": "不用球，让它自己飞",
+   "basis": "连接组（驱动真实神经元）+ 手写（强度、时长）",
+   "goal": "在没有任何球的情况下起飞 ≥ 1 次",
+   "line": "实测：不点任何神经元时起飞恒为 0（没有球就没有 looming 输入）",
+   "why": "点下去的是这个子回路里**真实的** FlyWire 神经元，用的是和感觉输入同一套泊松驱动（与论文 poi() 一致：被驱动的神经元不应期置 0）。实测：左侧 LC4+LPLC2 给 200 Hz、0.6 s，巨纤维峰值 206.7 Hz，越过 90 Hz 阈值并触发起飞。强度与时长是手选的。",
+   "brief": "场上一个球也没有。用「光遗传手指」直接点亮神经元，把它逼起飞。",
+   "hint": "光标点在视觉投射神经元上——直接点巨纤维是作弊（它是输出端）。",
+   "refKeys": [],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "jump": 0,
+      "launched": 0
+     },
+     "runs": [
+      {
+       "jump": 0,
+       "launched": 0
+      },
+      {
+       "jump": 0,
+       "launched": 0
+      },
+      {
+       "jump": 0,
+       "launched": 0
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "jump": 1,
+      "launched": 0
+     },
+     "runs": [
+      {
+       "jump": 1,
+       "launched": 0
+      },
+      {
+       "jump": 1,
+       "launched": 0
+      },
+      {
+       "jump": 1,
+       "launched": 0
+      }
+     ]
+    }
+   },
+   "discriminating": true
+  }
+ ],
+ "all_discriminating": false
+}</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -6112,6 +7064,159 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   $("resetScore").onclick = () => { game.score.dodge = game.score.hit = game.score.jump = 0; ["sDodge", "sHit", "sJump"].forEach(i => $(i).textContent = "0"); };
   [["lesLC4", "LC4"], ["lesLPLC2", "LPLC2"], ["lesGF", "GF"], ["lesDNa", "DNa"], ["lesLC16", "LC16"], ["lesMDN", "MDN"], ["lesSUGAR", "SUGAR"],
    ["lesBITTER", "BITTER"], ["lesMN9", "MN9"], ["lesJO", "JO"], ["lesaDN1", "aDN1"]].forEach(([id, name]) => { $(id).onchange = e => game.setLesion(name, e.target.checked); });
+  // ── v7 光遗传手指：给真实神经元一段泊松驱动 ─────────────────────────────
+  // 真实成分：驱动的是子回路里真实的 FlyWire 神经元，机制与感觉输入相同（论文 poi()：被驱动者不应期置 0）。
+  // 手写成分：强度 200 Hz、时长 0.6 s，以及"可以点哪几组"。
+  const OPTO = [
+    { key: "LC4+LPLC2 左", groups: ["LC4_left", "LPLC2_left"], tip: "左侧视觉投射神经元 → 巨纤维；实测峰值 206.7 Hz，够越过 90 Hz 阈值" },
+    { key: "LC4+LPLC2 右", groups: ["LC4_right", "LPLC2_right"], tip: "同上，右侧" },
+    { key: "糖味 GRN", groups: ["SUGAR_left", "SUGAR_right"], tip: "味觉受体神经元 → MN9；实测峰值 111 Hz，越过 30 Hz 进食阈值" },
+    { key: "JO 左", groups: ["JO_left"], tip: "左侧触角机械感觉 → aDN1 梳理指令；实测峰值 72 Hz" },
+    { key: "LC16 双侧", groups: ["LC16_left", "LC16_right"], tip: "双侧 LC16 → MDN 后退；实测峰值 84 Hz。单侧不行——这与全脑实测一致（MDN 需要双侧 ≥100 Hz）" },
+  ];
+  (function buildOpto() {
+    const box = $("optoBtns");
+    for (const o of OPTO) {
+      const idx = o.groups.flatMap(g => SUB.groups[g] || []);
+      if (!idx.length) continue;
+      const b = document.createElement("button");
+      b.className = "btn"; b.textContent = o.key + " (" + idx.length + ")"; b.title = o.tip;
+      b.onclick = () => {
+        game.optoPulse(idx, 200, 0.6, o.key);
+        $("optoPill").hidden = false;
+        $("optoPill").textContent = "正在点亮 " + o.key + " · 200 Hz · 0.6 s";
+        $("coach").textContent = "光遗传：" + o.key + " —— " + o.tip;
+        setTimeout(() => { $("optoPill").hidden = true; }, 700);
+      };
+      box.append(b);
+    }
+  })();
+
+  // ── v7 任务模式 ─────────────────────────────────────────────────────
+  // 关卡定义在 dodge/missions.js（页面与 node 自检共用），实测结果在 results/dodge/missions.json。
+  // 页面只负责显示与计分，**通过线不在这里重写**。
+  const MT = window.FlyDodgeMissions;
+  const MRES = JSON.parse(document.getElementById("missions-data").textContent);
+  const MST = { cur: null, t0: 0, acc: {}, base: null, done: {} };
+  try { MST.done = JSON.parse(localStorage.getItem("flydodge_missions") || "{}"); } catch (e) {}
+  const mSave = () => { try { localStorage.setItem("flydodge_missions", JSON.stringify(MST.done)); } catch (e) {} };
+  const mRes = id => (MRES.missions || []).find(x => x.id === id);
+
+  function mBuildList() {
+    const box = $("mList"); box.innerHTML = "";
+    for (const m of MT.MISSIONS) {
+      const b = document.createElement("button");
+      b.className = "mcard" + (MST.done[m.id] ? " done" : "");
+      const r = mRes(m.id);
+      const tag = r ? "参考解 " + r.arms.ref.pass + "/" + r.arms.ref.of + " 通过 · 不干预 " + r.arms.none.pass + "/" + r.arms.none.of : "";
+      b.innerHTML = "<b></b><small></small>";
+      b.querySelector("b").textContent = m.title;
+      b.querySelector("small").textContent = m.brief + (tag ? "　【" + tag + "】" : "");
+      b.onclick = () => mStart(m);
+      box.append(b);
+    }
+  }
+
+  function mSnapshot() {   // 进任务前把玩家当前设定存下来，退出时还原
+    return { cfg: Object.assign({}, CFG), lesion: Object.assign({}, game.lesion),
+             neuron: Object.assign({}, game.neuronLesion), mode: game.mode, pert: Object.assign({}, game.PERTURB) };
+  }
+  function mRestore(b) {
+    if (!b) return;
+    Object.assign(CFG, b.cfg);
+    for (const k of Object.keys(game.lesion)) if (game.lesion[k] !== b.lesion[k]) game.setLesion(k, !!b.lesion[k]);
+    for (const n of game.NEURONS) if (!!game.neuronLesion[n.key] !== !!b.neuron[n.key]) game.setNeuronLesion(n.key, !!b.neuron[n.key]);
+    game.mode = b.mode;
+    game.setPerturb("shuffle", !!b.pert.shuffle);
+    mSyncUI();
+  }
+  function mSyncUI() {     // 开关状态回写到界面（任务会自动改一些设定）
+    [["lesLC4", "LC4"], ["lesLPLC2", "LPLC2"], ["lesGF", "GF"], ["lesDNa", "DNa"], ["lesLC16", "LC16"], ["lesMDN", "MDN"],
+     ["lesSUGAR", "SUGAR"], ["lesBITTER", "BITTER"], ["lesMN9", "MN9"], ["lesJO", "JO"], ["lesaDN1", "aDN1"]]
+      .forEach(([id, name]) => { if ($(id)) $(id).checked = !!game.lesion[name]; });
+    document.querySelectorAll("[data-neuron]").forEach(el => { el.checked = !!game.neuronLesion[el.dataset.neuron]; });
+    if ($("autoPel")) $("autoPel").checked = !!CFG.autoPellets;
+    if ($("autoDust")) $("autoDust").checked = !!CFG.autoDust;
+    if ($("pShuffle")) $("pShuffle").checked = !!game.PERTURB.shuffle;
+  }
+
+  function mStart(m) {
+    if (!MST.cur) MST.base = mSnapshot();
+    MST.cur = m; MST.t0 = game.S.t; MST.acc = {};
+    MST.score0 = JSON.parse(JSON.stringify(game.score));
+    Object.assign(CFG, m.cfg || {});
+    if (m.cfg && m.cfg.autoServe === false) game.mode = "click";
+    if (m.init) m.init(game);
+    mSyncUI();
+    $("mCur").hidden = false;
+    $("mTitle").textContent = m.title;
+    $("mBasis").textContent = m.basis;
+    $("mBrief").textContent = m.brief;
+    $("mGoal").textContent = "目标：" + m.goal;
+    $("mLine").textContent = m.line || "";
+    $("mWhy").textContent = m.why;
+    $("mWhy").hidden = true;
+    $("mVerdict").textContent = "进行中"; $("mVerdict").className = "pill";
+    $("coach").textContent = m.title + "：" + m.brief;
+  }
+  function mQuit() {
+    mRestore(MST.base); MST.cur = null; MST.base = null;
+    $("mCur").hidden = true; mBuildList();
+  }
+  // 任务计分：用"进任务那一刻"的分数做差，玩家中途重开也不会串
+  function mMetrics() {
+    const m = MST.cur, d = {};
+    for (const k of Object.keys(game.score)) d[k] = game.score[k] - (MST.score0[k] || 0);
+    const fake = { score: d, S: game.S, onPellet: game.onPellet, readout: game.readout };
+    return m.metrics(fake, MST.acc);
+  }
+  let mLast = 0;
+  function mTick() {
+    const m = MST.cur; if (!m) return;
+    if (m.tick) {
+      const d = {}; for (const k of Object.keys(game.score)) d[k] = game.score[k] - (MST.score0[k] || 0);
+      m.tick({ score: d, S: game.S, onPellet: game.onPellet, readout: game.readout }, MST.acc);
+    }
+    if (game.S.t - mLast < 0.25) return;
+    mLast = game.S.t;
+    const el = game.S.t - MST.t0, mm = mMetrics(), ok = m.pass(mm);
+    $("mClock").textContent = "已进行 " + el.toFixed(0) + " s";
+    $("mLive").textContent = Object.entries(mm).map(([k, v]) => k + " " + (v === null ? "—" : v)).join("　");
+    // 至少跑满 20 秒才判定，免得开局瞬间"达成"
+    if (el < 20) { $("mVerdict").textContent = "进行中"; $("mVerdict").className = "pill"; return; }
+    $("mVerdict").textContent = ok ? "达成 ✓" : "还没达成";
+    $("mVerdict").className = "pill " + (ok ? "pass" : "fail");
+    if (ok && !MST.done[m.id]) { MST.done[m.id] = true; mSave(); $("coach").textContent = "任务达成：" + m.title + "　" + m.why; }
+  }
+  $("mOpen").onclick = () => { const p = $("mPanel"); p.hidden = !p.hidden; if (!p.hidden) mBuildList(); };
+  $("mRestart").onclick = () => MST.cur && mStart(MST.cur);
+  $("mHint").onclick = () => { if (MST.cur) $("coach").textContent = "提示：" + MST.cur.hint; };
+  $("mGiveup").onclick = () => {
+    const m = MST.cur; if (!m) return;
+    MT.applyKeys(game, m.refKeys); mSyncUI(); mStart(m);
+    $("mWhy").hidden = false;
+    $("coach").textContent = m.refKeys.length ? "参考解已应用：" + m.refKeys.join("、")
+      : "这一关没有开关型参考解——用上面的「光遗传」按钮点亮 LC4+LPLC2";
+  };
+  $("mQuit").onclick = mQuit;
+  mBuildList();
+
+  // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
+  const PEERS = [
+    ["doomfly", "nftechie", "360★ · MIT", "全 MaleCNS 接 ViZDoom：3,335 个 R1–R6 亮度输入 + 811 个 R8 颜色输入；DNp20 左右差转向、DNpe017 前进与开火；另有 4,184 条 KC→MBON 的多巴胺门控可塑性",
+     "README 自己写着「live experimental training, not demonstrated learned survival」，把失败的验证也留在仓库里——这一点值得学"],
+    ["desktop-fly", "DenisSergeevitch", "1,000★ · 代码 MIT，数据 CC BY-NC/BY", "macOS 桌面宠物：FlyWire 668 个神经元 + MaleCNS 1,045 个运动回路；光标逼近 → LC4/LPLC2 → 巨纤维起飞，DNp01/DNa01/02/DNg11/MDN 分管逃逸、转向、梳理、后退",
+     "通路选择和我们几乎完全重合，可以直接对照；它还把现实信号（光标、打字）当感觉输入"],
+    ["neurocraft-fly-public", "Evan Smith", "154★ · MIT", "最早刷屏的那个《Minecraft》果蝇：6 类游戏事件进感觉层，读出去挑选脚本化的身体程序",
+     "作者自己承认训练出来的读出层误差远高于直接控制器——正是 Mineault 批评的那一点"],
+  ];
+  (function buildPeers() {
+    const t = document.getElementById("tPeers"); if (!t) return;
+    t.innerHTML = "<tr><th>项目</th><th>作者 / 许可</th><th>做了什么</th><th>值得看的地方</th></tr>" +
+      PEERS.map(p => "<tr><td><a href=\"https://github.com/" + p[1] + "/" + p[0] + "\" target=\"_blank\" rel=\"noopener\"><code>" +
+        p[0] + "</code></a></td><td>" + p[1] + "<br><small>" + p[2] + "</small></td><td>" + p[3] + "</td><td>" + p[4] + "</td></tr>").join("");
+  })();
+
   const placePellet = type => {
     if (!CFG.odorNav) return game.addPelletAhead(type, 6);
     const a = Math.random() * 2 * Math.PI;
@@ -6756,7 +7861,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     if (!paused) {
       carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
-      while (carry >= game.chunkDt && n < 12) { game.step(); carry -= game.chunkDt; n++; }
+      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }

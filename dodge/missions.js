@@ -26,7 +26,8 @@
       cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
       metrics: g => ({ jump: g.score.jump, feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar }),
       goal: "起跳 = 0，且伸喙进食累计 ≥ 3 s",
-      line: "实测：不干预起跳 98 次/60 s；切两条视觉通路后 0 次，进食时长反而更长",
+      line: "实测（60 s × 3 种子）：不干预起跳 32 次、进食 8.7 s；切掉两条视觉通路后起跳 0 次、进食 10.6 s——" +
+            "**进食反而更长**，因为不再被起飞打断",
       pass: m => m.jump === 0 && m.feedS >= 3,
     },
     {
@@ -42,7 +43,7 @@
       cfg: { autoDust: true, dustEvery: 3, autoPellets: false },
       metrics: g => ({ groom: g.score.groom, groomS: +g.score.groom_s.toFixed(2), dust: g.score.dust, dodgeRate: rate(g.score) }),
       goal: "梳理次数 = 0（且确实落过 ≥ 3 次灰）",
-      line: "实测：不干预 60 s 里梳理若干次；敲 aBN1 后恒为 0",
+      line: "实测（60 s × 3 种子）：不干预梳理 8.3 次、累计 5.0 s；敲 aBN1 后 0 次、0 s",
       pass: m => m.groom === 0 && m.dust >= 3,
     },
     {
@@ -57,7 +58,7 @@
       cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
       metrics: g => ({ feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar, dodgeRate: rate(g.score) }),
       goal: "伸喙进食累计 < 1 s（且确实碰到过 ≥ 5 次糖粒）",
-      line: "实测（60 s × 2 种子）：不干预 14.8 s，敲 Roundup 后 0.0 s",
+      line: "实测（60 s × 3 种子）：不干预进食 8.7 s，敲 Roundup 后 0.0 s（三次全是 0）",
       pass: m => m.feedS < 1 && m.contacts >= 5,
     },
     {
@@ -72,11 +73,13 @@
       refKeys: ["neu:Clavicle", "neu:G2N-1"],
       cfg: { autoPellets: true, pelletEvery: 3, pelletTypes: ["sugar"], autoDust: false },
       metrics: g => ({ feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_sugar }),
-      goal: "伸喙进食累计 < 8 s（且碰到过 ≥ 5 次糖粒）",
-      line: "实测（60 s × 2 种子）：不干预 14.8 s，单敲 Clavicle 13.5、单敲 G2N-1 11.6，两个一起 5.7——" +
-            "通过线 8 s 正落在「单敲过不了、双敲过得了」之间",
+      goal: "伸喙进食累计 < 4 s（且碰到过 ≥ 5 次糖粒）",
+      line: "实测（60 s × 3 种子，逐次）：不干预 6.1 / 8.6 / 11.2 s；单敲 Clavicle 5.4 / 8.1 / 5.1，" +
+            "单敲 G2N-1 4.8 / 6.8 / 7.9；两个一起 2.8 / 2.9 / 2.0。" +
+            "通过线 4 s 落在「单敲最低的 4.8」与「双敲最高的 2.9」之间——6 次单敲全过不了，3 次双敲全过。" +
+            "独立相乘的预期是 4.6 s，实测 2.6 s，所以确实是协同而不只是叠加",
       singles: true,
-      pass: m => m.feedS < 8 && m.contacts >= 5,
+      pass: m => m.feedS < 4 && m.contacts >= 5,
     },
     {
       id: "thirsty_boost",
@@ -92,10 +95,11 @@
       tick: (g, a) => { if (g.onPellet && g.onPellet.type === "water") { const v = g.readout().mn9 || 0; a.n = (a.n || 0) + 1; a.sum = (a.sum || 0) + v; a.peak = Math.max(a.peak || 0, v); } },
       metrics: (g, a) => ({ mn9Peak: +(a.peak || 0).toFixed(1), mn9Mean: +((a.sum || 0) / Math.max(a.n || 1, 1)).toFixed(1),
                             feedS: +g.score.feed_s.toFixed(2), contacts: g.score.contacts_water || 0 }),
-      goal: "嘴下有水滴时的 MN9 峰值 ≥ 通过线（见下方实测）",
-      line: "通过线按实测定",
+      goal: "嘴下有水滴时的 MN9 峰值 ≥ 50 Hz",
+      line: "实测（60 s × 3 种子）：不干预峰值 35.3 Hz、均值 11.3；敲掉 Phantom 后峰值 71.4、均值 20.2——" +
+            "约 2.0 倍，与子回路实测的 2.06 倍、全脑的 3.02 倍同向。通过线 50 Hz 落在两者之间",
       calibrated: true,
-      pass: m => m.mn9Peak >= 40,
+      pass: m => m.mn9Peak >= 50,
     },
     {
       id: "shuffle_control",
@@ -109,10 +113,14 @@
       refKeys: ["pert:shuffle"],
       cfg: { takeoff: "hop", autoPellets: false, autoDust: false },
       metrics: g => ({ dodgeRate: rate(g.score) === null ? null : +rate(g.score).toFixed(3), jump: g.score.jump, launched: g.score.launched }),
-      goal: "闪避率跌破通过线（见下方实测）",
-      line: "通过线按实测定",
+      goal: "起跳次数 < 20（同时看闪避率）",
+      line: "实测（60 s × 3 种子，逐次）：不干预起跳 33 / 32 / 33 次、闪避率 0.85 / 0.84 / 0.95；" +
+            "打乱后起跳 18 / 5 / 0 次、闪避率 0.07 / 0.79 / 0.43。" +
+            "**判据用起跳次数而不是闪避率**——闪避率逐次波动太大（打乱后仍有一次 0.79），" +
+            "而起跳次数三次都掉到 20 以下、三次不干预都在 32 以上，没有重叠。" +
+            "这也更贴近机制：打乱先打断的是 looming → 巨纤维那一路",
       calibrated: true,
-      pass: m => m.dodgeRate !== null && m.dodgeRate < 0.6,
+      pass: m => m.jump < 20,
     },
     {
       id: "opto_takeoff",
@@ -128,7 +136,7 @@
       cfg: { autoPellets: false, autoDust: false, autoServe: false },
       metrics: g => ({ jump: g.score.jump, launched: g.score.launched }),
       goal: "在没有任何球的情况下起飞 ≥ 1 次",
-      line: "实测：不点任何神经元时起飞恒为 0（没有球就没有 looming 输入）",
+      line: "实测（60 s × 3 种子）：不点任何神经元时起飞 0 次；给左侧 LC4+LPLC2 200 Hz、0.6 s 一次就起飞（巨纤维峰值 206.7 Hz，阈值 90）",
       pass: m => m.jump >= 1 && m.launched === 0,
     },
   ];

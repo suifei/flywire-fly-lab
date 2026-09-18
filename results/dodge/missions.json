@@ -1,50 +1,81 @@
 {
- "seconds_per_seed": 20,
- "seeds": 1,
+ "seconds_per_seed": 60,
+ "seeds": 3,
  "ball_speed": 60,
- "note": "每关两种情况各跑 1 个种子；pass 由 missions.js 的判据算出，判据本身是照这份实测定的",
+ "base_cfg": {
+  "encoding": "ache2019",
+  "gfTau": 0.02,
+  "takeoff": "clip"
+ },
+ "note": "每关两种情况各跑 3 个种子；通过线写在 missions.js 里，是照这份实测定的",
  "missions": [
   {
    "id": "silence_alarm",
    "title": "关掉警报",
    "basis": "连接组",
-   "goal": "起跳 = 0 且 吃到 ≥ 2 颗",
+   "goal": "起跳 = 0，且伸喙进食累计 ≥ 3 s",
+   "line": "实测：不干预起跳 98 次/60 s；切两条视觉通路后 0 次，进食时长反而更长",
+   "why": "逃逸与进食是两条分开的通路：LC4/LPLC2 → 巨纤维管起飞，糖味 GRN → MN9 管伸喙。切断视觉那条，进食毫发无损——这与全脑筛选里「糖与水的活跃神经元集合只重叠三分之一、共用的那部分都在靠近输出的地方」是同一件事。",
+   "brief": "球照扔，但要让它一次都不起飞——同时还得照常吃到糖。",
+   "hint": "从「感觉输入」那一侧下手，别动运动输出——切运动输出会把吃也一起切掉。",
    "refKeys": [
     "les:LC4",
     "les:LPLC2"
    ],
    "calibrated": false,
-   "none": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "jump": 11,
-     "eaten": 0,
-     "dodgeRate": 1
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "jump": 32,
+      "feedS": 8.67,
+      "contacts": 13
+     },
+     "runs": [
+      {
+       "jump": 33,
+       "feedS": 6.13,
+       "contacts": 12
+      },
+      {
+       "jump": 32,
+       "feedS": 8.64,
+       "contacts": 12
+      },
+      {
+       "jump": 31,
+       "feedS": 11.24,
+       "contacts": 15
+      }
+     ]
     },
-    "runs": [
-     {
-      "jump": 11,
-      "eaten": 0,
-      "dodgeRate": 1
-     }
-    ]
-   },
-   "ref": {
-    "pass": 1,
-    "of": 1,
-    "mean": {
-     "jump": 0,
-     "eaten": 2,
-     "dodgeRate": 0.571
-    },
-    "runs": [
-     {
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
       "jump": 0,
-      "eaten": 2,
-      "dodgeRate": 0.5714285714285714
-     }
-    ]
+      "feedS": 10.577,
+      "contacts": 6.333
+     },
+     "runs": [
+      {
+       "jump": 0,
+       "feedS": 8.35,
+       "contacts": 5
+      },
+      {
+       "jump": 0,
+       "feedS": 15.03,
+       "contacts": 9
+      },
+      {
+       "jump": 0,
+       "feedS": 8.35,
+       "contacts": 5
+      }
+     ]
+    }
    },
    "discriminating": true
   },
@@ -52,224 +83,459 @@
    "id": "stop_itch",
    "title": "一刀止痒",
    "basis": "连接组",
-   "goal": "梳理 = 0 且 吃到 ≥ 1 颗 且 闪避率 ≥ 40%",
+   "goal": "梳理次数 = 0（且确实落过 ≥ 3 次灰）",
+   "line": "实测：不干预 60 s 里梳理若干次；敲 aBN1 后恒为 0",
+   "why": "aBN1（SAD093）是梳理通路的绝对瓶颈：全脑筛选里单敲它让 aDN1 与 aDN2 同时归零，Hampel et al. 2015 的实验也证实。子回路里同样是 59.8 → 0 Hz。整条通路 596 个活跃神经元，只有这一个是不可替代的。",
+   "brief": "灰尘不停落在触角上，让它**再也不梳理**——躲球的本事不许丢。只准动一个真实神经元。",
+   "hint": "触角机械感觉通路上只有一个神经元是绝对瓶颈——在真实神经元开关里找它。",
    "refKeys": [
     "neu:aBN1"
    ],
    "calibrated": false,
-   "none": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "groom": 3,
-     "dust": 6,
-     "eaten": 0,
-     "dodgeRate": 1
-    },
-    "runs": [
-     {
-      "groom": 3,
-      "dust": 6,
-      "eaten": 0,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "groom": 8.333,
+      "groomS": 4.983,
+      "dust": 20,
       "dodgeRate": 1
-     }
-    ]
-   },
-   "ref": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "groom": 0,
-     "dust": 6,
-     "eaten": 0,
-     "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "groom": 8,
+       "groomS": 4.75,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 9,
+       "groomS": 5.4,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 8,
+       "groomS": 4.8,
+       "dust": 20,
+       "dodgeRate": 1
+      }
+     ]
     },
-    "runs": [
-     {
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
       "groom": 0,
-      "dust": 6,
-      "eaten": 0,
+      "groomS": 0,
+      "dust": 20,
       "dodgeRate": 1
-     }
-    ]
+     },
+     "runs": [
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      },
+      {
+       "groom": 0,
+       "groomS": 0,
+       "dust": 20,
+       "dodgeRate": 1
+      }
+     ]
+    }
    },
-   "discriminating": false
+   "discriminating": true
   },
   {
    "id": "starve",
    "title": "饿死它",
    "basis": "连接组",
-   "goal": "吃到 = 0（且确实碰到过糖粒 ≥ 3 次）且 闪避率 ≥ 40%",
+   "goal": "伸喙进食累计 < 1 s（且确实碰到过 ≥ 5 次糖粒）",
+   "line": "实测（60 s × 2 种子）：不干预 14.8 s，敲 Roundup 后 0.0 s",
+   "why": "Roundup（CB0553）是糖 → MN9 通路上效应最强的前运动神经元之一：全脑敲除后比值 0.30，子回路里 0.05。它不在逃逸通路上，所以躲球不受影响。",
+   "brief": "糖粒管够，但要让它伸不出喙——躲球的本事不许丢。",
+   "hint": "别切糖味受体（那不算手术）。去找进食通路上效应最强的那个中间神经元。",
    "refKeys": [
     "neu:Roundup"
    ],
    "calibrated": false,
-   "none": {
-    "pass": 1,
-    "of": 1,
-    "mean": {
-     "eaten": 0,
-     "contacts": 3,
-     "dodgeRate": 1
-    },
-    "runs": [
-     {
-      "eaten": 0,
-      "contacts": 3,
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "feedS": 8.67,
+      "contacts": 13,
       "dodgeRate": 1
-     }
-    ]
-   },
-   "ref": {
-    "pass": 1,
-    "of": 1,
-    "mean": {
-     "eaten": 0,
-     "contacts": 3,
-     "dodgeRate": 1
+     },
+     "runs": [
+      {
+       "feedS": 6.13,
+       "contacts": 12,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 8.64,
+       "contacts": 12,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 11.24,
+       "contacts": 15,
+       "dodgeRate": 1
+      }
+     ]
     },
-    "runs": [
-     {
-      "eaten": 0,
-      "contacts": 3,
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 0,
+      "contacts": 11.667,
       "dodgeRate": 1
-     }
-    ]
+     },
+     "runs": [
+      {
+       "feedS": 0,
+       "contacts": 9,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 0,
+       "contacts": 13,
+       "dodgeRate": 1
+      },
+      {
+       "feedS": 0,
+       "contacts": 13,
+       "dodgeRate": 1
+      }
+     ]
+    }
    },
-   "discriminating": false
+   "discriminating": true
+  },
+  {
+   "id": "synergy",
+   "title": "一个不够，两个才行",
+   "basis": "连接组",
+   "goal": "伸喙进食累计 < 8 s（且碰到过 ≥ 5 次糖粒）",
+   "line": "实测（60 s × 2 种子）：不干预 14.8 s，单敲 Clavicle 13.5、单敲 G2N-1 11.6，两个一起 5.7——通过线 8 s 正落在「单敲过不了、双敲过得了」之间",
+   "why": "这是本项目最反直觉的一条结果：**单独敲除看不到的东西，必须把两个一起敲才会出现**。Clavicle 与 G2N-1 单独敲都还剩九成进食，一起敲就塌一半——低于「各自独立」应有的乘积。全脑筛选里这类协同有 10 对（留一稳定 7 对），而光看连线预测不出来（路径重叠与配对效应的 Spearman ≈ 0）。",
+   "brief": "还是让它吃不成，但这次 Roundup 不给你用。试试看：单独敲哪个都不太行。",
+   "hint": "两个都是论文里「伸喙必需」的类型。一个一个试没用，得同时敲。",
+   "refKeys": [
+    "neu:Clavicle",
+    "neu:G2N-1"
+   ],
+   "calibrated": false,
+   "arms": {
+    "none": {
+     "pass": 1,
+     "of": 3,
+     "mean": {
+      "feedS": 8.67,
+      "contacts": 13
+     },
+     "runs": [
+      {
+       "feedS": 6.13,
+       "contacts": 12
+      },
+      {
+       "feedS": 8.64,
+       "contacts": 12
+      },
+      {
+       "feedS": 11.24,
+       "contacts": 15
+      }
+     ]
+    },
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 2.573,
+      "contacts": 12.333
+     },
+     "runs": [
+      {
+       "feedS": 2.77,
+       "contacts": 9
+      },
+      {
+       "feedS": 2.92,
+       "contacts": 13
+      },
+      {
+       "feedS": 2.03,
+       "contacts": 15
+      }
+     ]
+    },
+    "single_Clavicle": {
+     "pass": 2,
+     "of": 3,
+     "mean": {
+      "feedS": 6.187,
+      "contacts": 10.333
+     },
+     "runs": [
+      {
+       "feedS": 5.37,
+       "contacts": 8
+      },
+      {
+       "feedS": 8.09,
+       "contacts": 12
+      },
+      {
+       "feedS": 5.1,
+       "contacts": 11
+      }
+     ]
+    },
+    "single_G2N-1": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "feedS": 6.49,
+      "contacts": 10.667
+     },
+     "runs": [
+      {
+       "feedS": 4.84,
+       "contacts": 8
+      },
+      {
+       "feedS": 6.75,
+       "contacts": 11
+      },
+      {
+       "feedS": 7.88,
+       "contacts": 13
+      }
+     ]
+    }
+   },
+   "discriminating": false,
+   "singles_pass": "Clavicle 2/3，G2N-1 3/3"
   },
   {
    "id": "thirsty_boost",
-   "title": "让它更贪水",
+   "title": "拆掉刹车",
    "basis": "连接组",
-   "goal": "伸喙喝水的累计时长 ≥ 通过线（按实测定；用时长而不是「喝完几滴」，因为水只驱动 17 个受体、往往够不到喝完一整滴）",
+   "goal": "嘴下有水滴时的 MN9 峰值 ≥ 通过线（见下方实测）",
+   "line": "通过线按实测定",
+   "why": "Phantom（CB0062）是抑制性（GABA）的：敲掉它，**水**通路的 MN9 翻倍——全脑 3.02 倍、子回路 2.06 倍。而同一个敲除在**糖**通路上几乎没有效果（0.92 / 0.97）。所以引用这个数字必须说明是哪条通路。",
+   "brief": "场上只有水滴，而且它已经很渴了。想办法让喝水的驱动更强。",
+   "hint": "找一个抑制性神经元：切掉刹车，油门就显得更大。",
    "refKeys": [
     "neu:Phantom"
    ],
    "calibrated": true,
-   "none": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "feedS": 1.45,
-     "eaten": 0,
-     "contacts": 3,
-     "thirst": 0.96
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "mn9Peak": 35.3,
+      "mn9Mean": 11.333,
+      "feedS": 4.997,
+      "contacts": 11.667
+     },
+     "runs": [
+      {
+       "mn9Peak": 32.8,
+       "mn9Mean": 10.9,
+       "feedS": 4.22,
+       "contacts": 10
+      },
+      {
+       "mn9Peak": 35.4,
+       "mn9Mean": 11.9,
+       "feedS": 5.64,
+       "contacts": 12
+      },
+      {
+       "mn9Peak": 37.7,
+       "mn9Mean": 11.2,
+       "feedS": 5.13,
+       "contacts": 13
+      }
+     ]
     },
-    "runs": [
-     {
-      "feedS": 1.45,
-      "eaten": 0,
-      "contacts": 3,
-      "thirst": 0.96
-     }
-    ]
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "mn9Peak": 71.367,
+      "mn9Mean": 20.2,
+      "feedS": 5.757,
+      "contacts": 12
+     },
+     "runs": [
+      {
+       "mn9Peak": 63.8,
+       "mn9Mean": 18.4,
+       "feedS": 5.38,
+       "contacts": 11
+      },
+      {
+       "mn9Peak": 70.6,
+       "mn9Mean": 20.2,
+       "feedS": 5.62,
+       "contacts": 11
+      },
+      {
+       "mn9Peak": 79.7,
+       "mn9Mean": 22,
+       "feedS": 6.27,
+       "contacts": 14
+      }
+     ]
+    }
    },
-   "ref": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "feedS": 1.63,
-     "eaten": 0,
-     "contacts": 3,
-     "thirst": 1
-    },
-    "runs": [
-     {
-      "feedS": 1.63,
-      "eaten": 0,
-      "contacts": 3,
-      "thirst": 1
-     }
-    ]
-   },
-   "discriminating": false
+   "discriminating": true
   },
   {
    "id": "shuffle_control",
    "title": "证明连接组真的在起作用",
    "basis": "连接组",
-   "goal": "闪避率跌破通过线（按实测定，见下方）",
+   "goal": "闪避率跌破通过线（见下方实测）",
+   "line": "通过线按实测定",
+   "why": "这是论文补充表 1D 的对照，也是对「这些数字果蝇其实是随机网络在乱按键」这一质疑的正面回答：如果打乱之后表现照旧，那连接组就没在起作用。我们实测：糖 → MN9 从 82.9 Hz 掉到 3.5 ± 4.2 Hz。这一关用**原地起跳**模式，因为真实飞行轨迹的闪避率接近 100%，测不出差别。",
+   "brief": "打开「打乱接线」——保留每个神经元的出度与权重，只把靶点随机重排，看闪避率会怎样。",
+   "hint": "开关在「动脑子」那一行。",
    "refKeys": [
     "pert:shuffle"
    ],
    "calibrated": true,
-   "none": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "dodgeRate": 1,
-     "jump": 11,
-     "launched": 11
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "dodgeRate": 0.88,
+      "jump": 32.667,
+      "launched": 33
+     },
+     "runs": [
+      {
+       "dodgeRate": 0.85,
+       "jump": 33,
+       "launched": 34
+      },
+      {
+       "dodgeRate": 0.842,
+       "jump": 32,
+       "launched": 32
+      },
+      {
+       "dodgeRate": 0.947,
+       "jump": 33,
+       "launched": 33
+      }
+     ]
     },
-    "runs": [
-     {
-      "dodgeRate": 1,
-      "jump": 11,
-      "launched": 11
-     }
-    ]
-   },
-   "ref": {
-    "pass": 0,
-    "of": 1,
-    "mean": {
-     "dodgeRate": 0.545,
-     "jump": 6,
-     "launched": 11
-    },
-    "runs": [
-     {
-      "dodgeRate": 0.5454545454545454,
-      "jump": 6,
-      "launched": 11
-     }
-    ]
+    "ref": {
+     "pass": 2,
+     "of": 3,
+     "mean": {
+      "dodgeRate": 0.429,
+      "jump": 7.667,
+      "launched": 33
+     },
+     "runs": [
+      {
+       "dodgeRate": 0.065,
+       "jump": 18,
+       "launched": 34
+      },
+      {
+       "dodgeRate": 0.792,
+       "jump": 5,
+       "launched": 32
+      },
+      {
+       "dodgeRate": 0.429,
+       "jump": 0,
+       "launched": 33
+      }
+     ]
+    }
    },
    "discriminating": false
   },
   {
-   "id": "two_channels",
-   "title": "两条视觉通路的分工",
-   "basis": "连接组 + 手写编码",
-   "goal": "仍能起飞（起跳 ≥ 1），说明 LPLC2 单独也能推过阈值",
-   "refKeys": [
-    "les:LC4"
-   ],
+   "id": "opto_takeoff",
+   "title": "不用球，让它自己飞",
+   "basis": "连接组（驱动真实神经元）+ 手写（强度、时长）",
+   "goal": "在没有任何球的情况下起飞 ≥ 1 次",
+   "line": "实测：不点任何神经元时起飞恒为 0（没有球就没有 looming 输入）",
+   "why": "点下去的是这个子回路里**真实的** FlyWire 神经元，用的是和感觉输入同一套泊松驱动（与论文 poi() 一致：被驱动的神经元不应期置 0）。实测：左侧 LC4+LPLC2 给 200 Hz、0.6 s，巨纤维峰值 206.7 Hz，越过 90 Hz 阈值并触发起飞。强度与时长是手选的。",
+   "brief": "场上一个球也没有。用「光遗传手指」直接点亮神经元，把它逼起飞。",
+   "hint": "光标点在视觉投射神经元上——直接点巨纤维是作弊（它是输出端）。",
+   "refKeys": [],
    "calibrated": false,
-   "none": {
-    "pass": 1,
-    "of": 1,
-    "mean": {
-     "jump": 11,
-     "dodgeRate": 1,
-     "jumpsPerMin": 33
+   "arms": {
+    "none": {
+     "pass": 0,
+     "of": 3,
+     "mean": {
+      "jump": 0,
+      "launched": 0
+     },
+     "runs": [
+      {
+       "jump": 0,
+       "launched": 0
+      },
+      {
+       "jump": 0,
+       "launched": 0
+      },
+      {
+       "jump": 0,
+       "launched": 0
+      }
+     ]
     },
-    "runs": [
-     {
-      "jump": 11,
-      "dodgeRate": 1,
-      "jumpsPerMin": 33
-     }
-    ]
+    "ref": {
+     "pass": 3,
+     "of": 3,
+     "mean": {
+      "jump": 1,
+      "launched": 0
+     },
+     "runs": [
+      {
+       "jump": 1,
+       "launched": 0
+      },
+      {
+       "jump": 1,
+       "launched": 0
+      },
+      {
+       "jump": 1,
+       "launched": 0
+      }
+     ]
+    }
    },
-   "ref": {
-    "pass": 1,
-    "of": 1,
-    "mean": {
-     "jump": 11,
-     "dodgeRate": 1,
-     "jumpsPerMin": 33
-    },
-    "runs": [
-     {
-      "jump": 11,
-      "dodgeRate": 1,
-      "jumpsPerMin": 33
-     }
-    ]
-   },
-   "discriminating": false
+   "discriminating": true
   }
  ],
  "all_discriminating": false
