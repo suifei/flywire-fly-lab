@@ -91,6 +91,29 @@ for p in PAPERS:
     for c in p["claims"]:
         for k in set(c) - OK_KEYS_CLAIM:
             bad.append(f"{p['key']}/{c['id']}：无法识别的字段 {k}（写错字段名会被静默忽略）")
+
+# ── 错误账本的总数（这个数自己漂过两次：README 写 40 时 docs/index.html 还停在 28）──
+# 前两轮 28 处是历史值（写在 §23 的错误账本里，不逐条编号）；第三轮 §36.1/§36.5 的表格行是编号的，
+# 总数 = 28 + 第三轮行数。任何一处手抄的总数与它对不上就拦下。
+ROUND12 = 28
+_rep = (ROOT / "docs/log/report.md").read_text()
+_r3 = set()
+for _m in _re.finditer(r"^\|\s*(\d+)\s*\|\s*[^|]+\|[^|]+\|[^|]+\|\s*$", _rep, _re.M):
+    _n = int(_m.group(1))
+    if 1 <= _n <= 99 and "倒查" in _rep[max(0, _m.start() - 3000):_m.start()]:
+        _r3.add(_n)
+if _r3 != set(range(1, max(_r3) + 1)) if _r3 else True:
+    bad.append(f"错误账本第三轮编号不连续：{sorted(_r3)}")
+_total = ROUND12 + len(_r3)
+for _f, _pat in [("README.md", r"共查出 \*\*(\d+) 处\*\*问题"),
+                 ("docs/index.html", r"共查出 (\d+) 处问题")]:
+    _t = (ROOT / _f).read_text()
+    _m = _re.search(_pat, _t)
+    if not _m:
+        bad.append(f"{_f}：找不到错误账本总数（正则没匹配上）")
+    elif int(_m.group(1)) != _total:
+        bad.append(f"{_f}：写着 {_m.group(1)} 处，实际 {ROUND12} + {len(_r3)} = {_total} 处")
+
 if bad:
     print("✗ 台账校验不通过：")
     for b in bad:
