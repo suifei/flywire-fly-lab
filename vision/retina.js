@@ -27,7 +27,11 @@ const Retina = (() => {
       this.n = meta.n_ommatidia;
       if (idmap.length !== this.w * this.h)
         throw new Error(`idmap 长度 ${idmap.length} != ${this.w}×${this.h}`);
+      // pale=1 读蓝通道，yellow=0 读绿通道（FlyGym 原样；果蝇真实通道是紫外/蓝/绿，
+      // 紫外无法从 sRGB 照片恢复，所以这里只有两个通道）
+      this.pale = Int8Array.from(meta.pale_type_mask || new Array(this.n).fill(0));
       this._sum = new Float64Array(this.n + 1);
+      this._sumB = new Float64Array(this.n + 1);
       this._gym = new Float64Array(this.n);
       this.out = new Float64Array(this.n);
     }
@@ -47,6 +51,34 @@ const Retina = (() => {
       for (let k = 0; k < n; k++) _gym[k] = _sum[k + 1] / npx[k];
       for (let j = 0; j < n; j++) out[j] = _gym[perm[j]];   // flygym 序 → flyvis 柱序
       return out;
+    }
+
+    /**
+     * 双通道采样，和 FlyGym 的 _raw_image_to_hex_pxls 一致：
+     * 每个小眼只读**它自己那一路** —— pale 读蓝、yellow 读绿，像拜耳滤镜。
+     * 结果仍是每柱一个标量，因为 flyvis 每个小眼只吃一个数（它是用光流训练的，
+     * 没有颜色通道）。颜色信息到这里就被压成一维了，这是模型的限制，不是果蝇的。
+     * @returns {Float64Array} 721 个值（flyvis 柱序）
+     */
+    sampleGB(frameG, frameB) {
+      const { idmap, _sum, _sumB, _gym, npx, perm, out, n, pale } = this;
+      _sum.fill(0); _sumB.fill(0);
+      for (let i = 0; i < idmap.length; i++) {
+        const id = idmap[i];
+        if (id === 0) continue;
+        _sum[id] += frameG[i]; _sumB[id] += frameB[i];
+      }
+      for (let k = 0; k < n; k++)
+        _gym[k] = (pale[k] ? _sumB[k + 1] : _sum[k + 1]) / npx[k];
+      for (let j = 0; j < n; j++) out[j] = _gym[perm[j]];
+      return out;
+    }
+
+    /** 每个 flyvis 柱是不是 pale 型（画彩色马赛克要用） */
+    paleByColumn() {
+      const a = new Int8Array(this.n);
+      for (let j = 0; j < this.n; j++) a[j] = this.pale[this.perm[j]];
+      return a;
     }
   }
 

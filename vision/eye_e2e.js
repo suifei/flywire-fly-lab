@@ -38,7 +38,7 @@ for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) {
   else if (u > .58 && v > .58 && (u - .58) + (v - .58) < .34 && v > .62) g = .78;  // 斜边
   gray[y * CW + x] = g;
 }
-const src = { gray, cw: CW, ch: CH };
+const src = { G: gray, B: gray, cw: CW, ch: CH };   // 测试图是灰的，两路相同
 
 const corr = (a, b) => {
   const n = a.length; let ma = 0, mb = 0;
@@ -61,8 +61,8 @@ const accOne = new Eye.Accum(CX, CY, meta.spacing_px, CW, CH);
 const t0 = Date.now();
 for (let k = 0; k < STEPS; k++) {
   const [dx, dy] = Eye.gaze(k);
-  const { frame, ox, oy } = Eye.cropAt(src, dx, dy);
-  truth = Float64Array.from(ret.sample(frame));
+  const { G, B, ox, oy } = Eye.cropAt(src, dx, dy);
+  truth = Float64Array.from(ret.sampleGB(G, B));
   net.step(truth, DT);
   accAll.add(truth, ret.perm, ox, oy);
   if (k === STEPS - 1) {
