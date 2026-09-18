@@ -50,9 +50,22 @@ for p in PAPERS:
                 continue
             if abs(float(v) - float(want)) > tol:
                 bad.append(f"{p['key']}/{c['id']}：台账写 {expr}={want}，文件里是 {v}")
+import re as _re
 for q in PARAMETERS:
     if q.get("script") and not (ROOT / q["script"]).exists():
         bad.append(f"参数 {q['name']}：script 不存在 → {q['script']}")
+    # code_check：台账写的参数值必须和代码里真实的值一致（参数漂移是另一类静默错误）
+    cc = q.get("code_check")
+    if cc:
+        f_, pat, want = cc
+        if not (ROOT / f_).exists():
+            bad.append(f"参数 {q['name']}：code_check 的文件不存在 → {f_}")
+            continue
+        m = _re.search(pat, (ROOT / f_).read_text(), _re.S)
+        if not m:
+            bad.append(f"参数 {q['name']}：code_check 正则在 {f_} 里没匹配到")
+        elif "/".join(m.groups()) != want:
+            bad.append(f"参数 {q['name']}：台账写 {want}，{f_} 里是 {'/'.join(m.groups())}")
 for f_ in FINDINGS:
     for k in ("script", "result_file"):
         v = f_.get(k)
