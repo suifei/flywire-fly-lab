@@ -518,7 +518,7 @@ function initFlyEye(assets) {
       try {
         const r = cam.update(head, [cvL, cvR]);
         if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
-        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
+        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
@@ -534,7 +534,7 @@ function initFlyEye(assets) {
         const head = pickHead(); if (!head) return null;
         const r = cam.update(head, [cvL, cvR]);
         if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
-        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
+        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);
         if (window.__eyeField) window.__eyeField(head);
         return r;
       },
