@@ -320,6 +320,54 @@ const chromePath = () => [process.env.CHROME_PATH,
       ok("复眼视窗成像速率", fps >= 10, fps.toFixed(1) + " fps", "≥10（原同步版 3）");
     }
 
+    // ── 视蛋白光谱（R1–6 / R7 / R8）────────────────────────────
+    const W = cam2.W;
+    ok("加载了视蛋白光谱表", !!W && !!W.Rh1, W ? Object.keys(W).join("/") : "无", "Rh1/Rh3/Rh4/Rh5/Rh6");
+    if (W) {
+      // 归一化：理想白面（三通道都是 1）每一类响应都应该正好是 1
+      let worstSum = 0, worstName = "";
+      for (const [k, v] of Object.entries(W)) {
+        const d = Math.abs(v.U + v.B + v.G - 1);
+        if (d > worstSum) { worstSum = d; worstName = k; }
+      }
+      ok("每类权重归一化（白面响应=1）", worstSum < 1e-9,
+         worstName + " 偏差 " + worstSum.toExponential(1), "<1e-9");
+      // 光谱顺序：紫外型必须以紫外为主，绿型的绿权重必须最大
+      ok("Rh3(345nm) 以紫外为主", W.Rh3.U > 0.95, W.Rh3.U.toFixed(3), ">0.95");
+      ok("Rh4(375nm) 以紫外为主", W.Rh4.U > 0.80, W.Rh4.U.toFixed(3), ">0.80");
+      ok("Rh5(437nm) 蓝权重最大", W.Rh5.B > W.Rh5.U && W.Rh5.B > W.Rh5.G,
+         `U${W.Rh5.U.toFixed(2)}/B${W.Rh5.B.toFixed(2)}/G${W.Rh5.G.toFixed(2)}`, "B 最大");
+      ok("Rh6(508nm) 绿权重全场最大", Object.values(W).every(v => v.G <= W.Rh6.G + 1e-12),
+         W.Rh6.G.toFixed(3), "所有类里最大");
+      // λmax 越长，绿权重越高（单调性）——光谱表算错了这条最先塌
+      const order = ["Rh3", "Rh4", "Rh5", "Rh1", "Rh6"];        // λmax 345/375/437/478/508
+      let mono = true;
+      for (let i = 1; i < order.length; i++) if (W[order[i]].G < W[order[i - 1]].G) mono = false;
+      ok("λmax 越长绿权重越高", mono, order.map(k => W[k].G.toFixed(2)).join("<"), "单调递增");
+    }
+    // R1–R6：八个感光细胞里的六个，以前完全没建模
+    ok("有 R1–R6（Rh1）输出", !!rr.r16 && rr.r16[0].length === rr.color[0].length,
+       rr.r16 ? rr.r16[0].length : "无", rr.color[0].length);
+    if (rr.r16) {
+      let dc = 0, du2 = 0;
+      for (let i = 0; i < rr.r16[0].length; i++) {
+        dc += Math.abs(rr.r16[0][i] - rr.color[0][i]);
+        du2 += Math.abs(rr.r16[0][i] - rr.uv[0][i]);
+      }
+      const n0 = rr.r16[0].length;
+      ok("R1–6 与 R8 不同（不是复制）", dc / n0 > 0.01, (dc / n0).toFixed(4), ">0.01");
+      ok("R1–6 与 R7 不同（不是复制）", du2 / n0 > 0.01, (du2 / n0).toFixed(4), ">0.01");
+    }
+    // pale / yellow 现在在紫外上也不同了（Rh3 vs Rh4）——改光谱之前两者完全一样
+    {
+      const pal = cam2.pale, uvA = rr.uv[0];
+      let sp = 0, np = 0, sy = 0, ny = 0;
+      for (let i = 0; i < uvA.length; i++) { if (pal[i]) { sp += uvA[i]; np++; } else { sy += uvA[i]; ny++; } }
+      const dp = Math.abs(sp / np - sy / ny);
+      ok("pale/yellow 的紫外响应不同(Rh3≠Rh4)", dp > 1e-4,
+         dp.toFixed(5), ">1e-4（改光谱前恒为 0）");
+    }
+
     return out;
   });
 
