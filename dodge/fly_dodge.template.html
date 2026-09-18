@@ -105,6 +105,22 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
 .row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
+.missionbar { border-top: 1px solid var(--rule); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.missionbar .mrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.mcard { text-align: left; border: 1px solid var(--rule); border-radius: 9px; background: var(--panel-2); padding: 9px 10px; cursor: pointer; color: var(--ink); }
+.mcard:hover { border-color: var(--ink-2); }
+.mcard b { display: block; font: 600 13.5px/1.3 var(--sans); }
+.mcard small { display: block; margin-top: 3px; color: var(--ink-2); font: 12px/1.35 var(--sans); }
+.mcard.done { border-color: var(--sugar); }
+.mcard.done b::after { content: " ✓"; color: var(--sugar); }
+.mcur { border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; background: var(--panel-2); }
+.mhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.mhead b { font: 600 15px/1.2 var(--sans); }
+.msub { margin: 4px 0; color: var(--ink-2); font: 12.5px/1.5 var(--sans); }
+.mnum { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+#mVerdict.pass { border-color: var(--sugar); color: var(--ink); }
+#mVerdict.fail { border-color: var(--critical); }
 .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
 .seg button { font: 500 12.5px/1 var(--sans); padding: 7px 10px; border: 0; background: var(--panel-2); color: var(--ink-2); cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--rule); }
@@ -249,7 +265,39 @@ code { font: 12px var(--mono); }
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
       </div>
+      <!-- v7 任务模式：把虚拟敲除筛选变成关卡。通过线由 node dodge/mission_test.js 实测后写定 -->
+      <div class="missionbar" id="missionBar">
+        <div class="mrow">
+          <button class="btn go" id="mOpen">任务模式</button>
+          <span class="sub" id="mIntro">7 个手术任务：只准动开关，把果蝇改造成指定的样子。每关的通过线都是实测出来的。</span>
+        </div>
+        <div id="mPanel" hidden>
+          <div class="mlist" id="mList"></div>
+          <div class="mcur" id="mCur" hidden>
+            <div class="mhead">
+              <b id="mTitle"></b>
+              <span class="pill" id="mBasis"></span>
+              <span class="pill" id="mClock">00:00</span>
+              <span class="pill" id="mVerdict">进行中</span>
+              <button class="btn" id="mRestart">重开这一关</button>
+              <button class="btn" id="mHint">提示</button>
+              <button class="btn" id="mGiveup">看参考解</button>
+              <button class="btn" id="mQuit">退出任务</button>
+            </div>
+            <p class="msub" id="mBrief"></p>
+            <p class="msub" id="mGoal"></p>
+            <p class="msub mnum" id="mLive"></p>
+            <p class="msub" id="mLine"></p>
+            <p class="msub" id="mWhy" hidden></p>
+          </div>
+        </div>
+      </div>
       <div class="controls">
+        <div class="row" id="optoRow">
+          <label class="k" title="给真实神经元一段泊松驱动（与论文 poi() 同一机制：被驱动神经元不应期置 0）；强度与时长手选">光遗传</label>
+          <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
+          <span class="pill" id="optoPill" hidden></span>
+        </div>
         <div class="row">
           <label class="k" id="lblMode">发球</label>
           <div class="seg" role="group" aria-labelledby="lblMode">
@@ -385,6 +433,25 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1" id="cPeers">
+      <h3>别人拿数字果蝇做了什么，我们差在哪</h3>
+      <p>2026 年 9 月 3 日 Janelia 与 Google 公开雄性果蝇全中枢神经系统连接组 <b>MaleCNS v1.0</b>（约 16.6 万神经元）之后的两周里，
+        网上冒出一批"把果蝇脑接进游戏"的项目：接《Minecraft》、接《DOOM》、接《Beat Saber》、当桌面宠物。
+        下面这几个是<b>我自己打开仓库页核实过的</b>（星数与说明取自各自 README，2026-09-19）：</p>
+      <div class="tbl"><table id="tPeers"></table></div>
+      <p class="sub"><b>它们的共同套路</b>：①把像素亮度灌进 R1–R6 光感受器；②手选几个下行神经元当按键（左右差转向、某个 DN 前进、DNp01 触发跳）；
+        ③在读出端加一层<b>训练出来的</b>网络（CEM / 岭回归 / 反向传播）。第三条是关键——一旦读出层足够灵活，
+        连接组是不是真的在起作用就说不清了。</p>
+      <p class="sub"><b>一篇值得读的批评</b>：Patrick Mineault，<i>Deconstructing viral fly sims</i>（2026-09-14，neuroai.science）。
+        他的核心质疑是：多数演示并没有建立从感觉到运动的完整闭环，视觉输入的作用近似于随机种子；
+        而"足够大的网络本来就能学会很多事，是不是果蝇都一样"。他提出的严格标准是：
+        行为要由感觉真正驱动、活动要在电生理上说得过去、并且能表现出个体性。</p>
+      <p class="sub"><b>我们和它们的差别，只有一条，但是这条最贵</b>：这个页面里<b>没有任何训练出来的读出层</b>。
+        从 LC4/LPLC2 到巨纤维、从糖味受体到 MN9、从 JO 到 aDN1，中间全是连接组里的真实突触，
+        参数就是论文那一套 LIF。代价是它笨——躲球靠一个手写的 dθ/dt 前端，真让它只用像素看，45 mm 外就完全是瞎的（我们把这个负结果也做成了开关）。
+        换来的是可以做对照：<b>任务模式里的「证明连接组真的在起作用」那一关，就是打乱接线之后看它垮掉</b>。
+        论文补充表 1D 做的是同一件事，我们实测糖 → MN9 从 82.9 Hz 掉到 3.5 Hz。</p>
+    </div>
     <div class="card" style="grid-column: 1 / -1" id="cRepro">
       <h3>复现台账：我们对着论文验了什么</h3>
       <p>这个项目不是"跑通了一个模型"，是<b>拿已发表的论文逐条对答案</b>。下表是全部结果，
@@ -669,6 +736,8 @@ code { font: 12px var(--mono); }
 <script>/*__EYE_JS__*/</script>
 <script>/*__BRAIN_JS__*/</script>
 <script>/*__GAME_CORE_JS__*/</script>
+<script>/*__MISSIONS_JS__*/</script>
+<script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -1168,6 +1237,159 @@ code { font: 12px var(--mono); }
   $("resetScore").onclick = () => { game.score.dodge = game.score.hit = game.score.jump = 0; ["sDodge", "sHit", "sJump"].forEach(i => $(i).textContent = "0"); };
   [["lesLC4", "LC4"], ["lesLPLC2", "LPLC2"], ["lesGF", "GF"], ["lesDNa", "DNa"], ["lesLC16", "LC16"], ["lesMDN", "MDN"], ["lesSUGAR", "SUGAR"],
    ["lesBITTER", "BITTER"], ["lesMN9", "MN9"], ["lesJO", "JO"], ["lesaDN1", "aDN1"]].forEach(([id, name]) => { $(id).onchange = e => game.setLesion(name, e.target.checked); });
+  // ── v7 光遗传手指：给真实神经元一段泊松驱动 ─────────────────────────────
+  // 真实成分：驱动的是子回路里真实的 FlyWire 神经元，机制与感觉输入相同（论文 poi()：被驱动者不应期置 0）。
+  // 手写成分：强度 200 Hz、时长 0.6 s，以及"可以点哪几组"。
+  const OPTO = [
+    { key: "LC4+LPLC2 左", groups: ["LC4_left", "LPLC2_left"], tip: "左侧视觉投射神经元 → 巨纤维；实测峰值 206.7 Hz，够越过 90 Hz 阈值" },
+    { key: "LC4+LPLC2 右", groups: ["LC4_right", "LPLC2_right"], tip: "同上，右侧" },
+    { key: "糖味 GRN", groups: ["SUGAR_left", "SUGAR_right"], tip: "味觉受体神经元 → MN9；实测峰值 111 Hz，越过 30 Hz 进食阈值" },
+    { key: "JO 左", groups: ["JO_left"], tip: "左侧触角机械感觉 → aDN1 梳理指令；实测峰值 72 Hz" },
+    { key: "LC16 双侧", groups: ["LC16_left", "LC16_right"], tip: "双侧 LC16 → MDN 后退；实测峰值 84 Hz。单侧不行——这与全脑实测一致（MDN 需要双侧 ≥100 Hz）" },
+  ];
+  (function buildOpto() {
+    const box = $("optoBtns");
+    for (const o of OPTO) {
+      const idx = o.groups.flatMap(g => SUB.groups[g] || []);
+      if (!idx.length) continue;
+      const b = document.createElement("button");
+      b.className = "btn"; b.textContent = o.key + " (" + idx.length + ")"; b.title = o.tip;
+      b.onclick = () => {
+        game.optoPulse(idx, 200, 0.6, o.key);
+        $("optoPill").hidden = false;
+        $("optoPill").textContent = "正在点亮 " + o.key + " · 200 Hz · 0.6 s";
+        $("coach").textContent = "光遗传：" + o.key + " —— " + o.tip;
+        setTimeout(() => { $("optoPill").hidden = true; }, 700);
+      };
+      box.append(b);
+    }
+  })();
+
+  // ── v7 任务模式 ─────────────────────────────────────────────────────
+  // 关卡定义在 dodge/missions.js（页面与 node 自检共用），实测结果在 results/dodge/missions.json。
+  // 页面只负责显示与计分，**通过线不在这里重写**。
+  const MT = window.FlyDodgeMissions;
+  const MRES = JSON.parse(document.getElementById("missions-data").textContent);
+  const MST = { cur: null, t0: 0, acc: {}, base: null, done: {} };
+  try { MST.done = JSON.parse(localStorage.getItem("flydodge_missions") || "{}"); } catch (e) {}
+  const mSave = () => { try { localStorage.setItem("flydodge_missions", JSON.stringify(MST.done)); } catch (e) {} };
+  const mRes = id => (MRES.missions || []).find(x => x.id === id);
+
+  function mBuildList() {
+    const box = $("mList"); box.innerHTML = "";
+    for (const m of MT.MISSIONS) {
+      const b = document.createElement("button");
+      b.className = "mcard" + (MST.done[m.id] ? " done" : "");
+      const r = mRes(m.id);
+      const tag = r ? "参考解 " + r.arms.ref.pass + "/" + r.arms.ref.of + " 通过 · 不干预 " + r.arms.none.pass + "/" + r.arms.none.of : "";
+      b.innerHTML = "<b></b><small></small>";
+      b.querySelector("b").textContent = m.title;
+      b.querySelector("small").textContent = m.brief + (tag ? "　【" + tag + "】" : "");
+      b.onclick = () => mStart(m);
+      box.append(b);
+    }
+  }
+
+  function mSnapshot() {   // 进任务前把玩家当前设定存下来，退出时还原
+    return { cfg: Object.assign({}, CFG), lesion: Object.assign({}, game.lesion),
+             neuron: Object.assign({}, game.neuronLesion), mode: game.mode, pert: Object.assign({}, game.PERTURB) };
+  }
+  function mRestore(b) {
+    if (!b) return;
+    Object.assign(CFG, b.cfg);
+    for (const k of Object.keys(game.lesion)) if (game.lesion[k] !== b.lesion[k]) game.setLesion(k, !!b.lesion[k]);
+    for (const n of game.NEURONS) if (!!game.neuronLesion[n.key] !== !!b.neuron[n.key]) game.setNeuronLesion(n.key, !!b.neuron[n.key]);
+    game.mode = b.mode;
+    game.setPerturb("shuffle", !!b.pert.shuffle);
+    mSyncUI();
+  }
+  function mSyncUI() {     // 开关状态回写到界面（任务会自动改一些设定）
+    [["lesLC4", "LC4"], ["lesLPLC2", "LPLC2"], ["lesGF", "GF"], ["lesDNa", "DNa"], ["lesLC16", "LC16"], ["lesMDN", "MDN"],
+     ["lesSUGAR", "SUGAR"], ["lesBITTER", "BITTER"], ["lesMN9", "MN9"], ["lesJO", "JO"], ["lesaDN1", "aDN1"]]
+      .forEach(([id, name]) => { if ($(id)) $(id).checked = !!game.lesion[name]; });
+    document.querySelectorAll("[data-neuron]").forEach(el => { el.checked = !!game.neuronLesion[el.dataset.neuron]; });
+    if ($("autoPel")) $("autoPel").checked = !!CFG.autoPellets;
+    if ($("autoDust")) $("autoDust").checked = !!CFG.autoDust;
+    if ($("pShuffle")) $("pShuffle").checked = !!game.PERTURB.shuffle;
+  }
+
+  function mStart(m) {
+    if (!MST.cur) MST.base = mSnapshot();
+    MST.cur = m; MST.t0 = game.S.t; MST.acc = {};
+    MST.score0 = JSON.parse(JSON.stringify(game.score));
+    Object.assign(CFG, m.cfg || {});
+    if (m.cfg && m.cfg.autoServe === false) game.mode = "click";
+    if (m.init) m.init(game);
+    mSyncUI();
+    $("mCur").hidden = false;
+    $("mTitle").textContent = m.title;
+    $("mBasis").textContent = m.basis;
+    $("mBrief").textContent = m.brief;
+    $("mGoal").textContent = "目标：" + m.goal;
+    $("mLine").textContent = m.line || "";
+    $("mWhy").textContent = m.why;
+    $("mWhy").hidden = true;
+    $("mVerdict").textContent = "进行中"; $("mVerdict").className = "pill";
+    $("coach").textContent = m.title + "：" + m.brief;
+  }
+  function mQuit() {
+    mRestore(MST.base); MST.cur = null; MST.base = null;
+    $("mCur").hidden = true; mBuildList();
+  }
+  // 任务计分：用"进任务那一刻"的分数做差，玩家中途重开也不会串
+  function mMetrics() {
+    const m = MST.cur, d = {};
+    for (const k of Object.keys(game.score)) d[k] = game.score[k] - (MST.score0[k] || 0);
+    const fake = { score: d, S: game.S, onPellet: game.onPellet, readout: game.readout };
+    return m.metrics(fake, MST.acc);
+  }
+  let mLast = 0;
+  function mTick() {
+    const m = MST.cur; if (!m) return;
+    if (m.tick) {
+      const d = {}; for (const k of Object.keys(game.score)) d[k] = game.score[k] - (MST.score0[k] || 0);
+      m.tick({ score: d, S: game.S, onPellet: game.onPellet, readout: game.readout }, MST.acc);
+    }
+    if (game.S.t - mLast < 0.25) return;
+    mLast = game.S.t;
+    const el = game.S.t - MST.t0, mm = mMetrics(), ok = m.pass(mm);
+    $("mClock").textContent = "已进行 " + el.toFixed(0) + " s";
+    $("mLive").textContent = Object.entries(mm).map(([k, v]) => k + " " + (v === null ? "—" : v)).join("　");
+    // 至少跑满 20 秒才判定，免得开局瞬间"达成"
+    if (el < 20) { $("mVerdict").textContent = "进行中"; $("mVerdict").className = "pill"; return; }
+    $("mVerdict").textContent = ok ? "达成 ✓" : "还没达成";
+    $("mVerdict").className = "pill " + (ok ? "pass" : "fail");
+    if (ok && !MST.done[m.id]) { MST.done[m.id] = true; mSave(); $("coach").textContent = "任务达成：" + m.title + "　" + m.why; }
+  }
+  $("mOpen").onclick = () => { const p = $("mPanel"); p.hidden = !p.hidden; if (!p.hidden) mBuildList(); };
+  $("mRestart").onclick = () => MST.cur && mStart(MST.cur);
+  $("mHint").onclick = () => { if (MST.cur) $("coach").textContent = "提示：" + MST.cur.hint; };
+  $("mGiveup").onclick = () => {
+    const m = MST.cur; if (!m) return;
+    MT.applyKeys(game, m.refKeys); mSyncUI(); mStart(m);
+    $("mWhy").hidden = false;
+    $("coach").textContent = m.refKeys.length ? "参考解已应用：" + m.refKeys.join("、")
+      : "这一关没有开关型参考解——用上面的「光遗传」按钮点亮 LC4+LPLC2";
+  };
+  $("mQuit").onclick = mQuit;
+  mBuildList();
+
+  // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
+  const PEERS = [
+    ["doomfly", "nftechie", "360★ · MIT", "全 MaleCNS 接 ViZDoom：3,335 个 R1–R6 亮度输入 + 811 个 R8 颜色输入；DNp20 左右差转向、DNpe017 前进与开火；另有 4,184 条 KC→MBON 的多巴胺门控可塑性",
+     "README 自己写着「live experimental training, not demonstrated learned survival」，把失败的验证也留在仓库里——这一点值得学"],
+    ["desktop-fly", "DenisSergeevitch", "1,000★ · 代码 MIT，数据 CC BY-NC/BY", "macOS 桌面宠物：FlyWire 668 个神经元 + MaleCNS 1,045 个运动回路；光标逼近 → LC4/LPLC2 → 巨纤维起飞，DNp01/DNa01/02/DNg11/MDN 分管逃逸、转向、梳理、后退",
+     "通路选择和我们几乎完全重合，可以直接对照；它还把现实信号（光标、打字）当感觉输入"],
+    ["neurocraft-fly-public", "Evan Smith", "154★ · MIT", "最早刷屏的那个《Minecraft》果蝇：6 类游戏事件进感觉层，读出去挑选脚本化的身体程序",
+     "作者自己承认训练出来的读出层误差远高于直接控制器——正是 Mineault 批评的那一点"],
+  ];
+  (function buildPeers() {
+    const t = document.getElementById("tPeers"); if (!t) return;
+    t.innerHTML = "<tr><th>项目</th><th>作者 / 许可</th><th>做了什么</th><th>值得看的地方</th></tr>" +
+      PEERS.map(p => "<tr><td><a href=\"https://github.com/" + p[1] + "/" + p[0] + "\" target=\"_blank\" rel=\"noopener\"><code>" +
+        p[0] + "</code></a></td><td>" + p[1] + "<br><small>" + p[2] + "</small></td><td>" + p[3] + "</td><td>" + p[4] + "</td></tr>").join("");
+  })();
+
   const placePellet = type => {
     if (!CFG.odorNav) return game.addPelletAhead(type, 6);
     const a = Math.random() * 2 * Math.PI;
@@ -1812,7 +2034,7 @@ code { font: 12px var(--mono); }
     if (!paused) {
       carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
-      while (carry >= game.chunkDt && n < 12) { game.step(); carry -= game.chunkDt; n++; }
+      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }

@@ -99,6 +99,29 @@ PAPERS = [
                           ("interaction.Water_Ir94e.ours_ratio", 0.278, 0.001),
                           ("interaction.Water_Ir94e.paper_ratio", 0.056, 0.001),
                           ("calibration.sugar.chosen_mn9", 35.67, 0.01), ("calibration.water.chosen_mn9", 38.33, 0.01)]),
+             dict(id="taste_grid", what="苦能压住强糖、Ir94e 压不住（Fig 3B–C，表 10 第 5 行）", status="reproduced",
+                  result="**两条事先写死的判据全部成立**。最强糖（220 Hz）下 MN9 = 93.0 Hz："
+                         "苦 220 Hz 把它压到 **16.3 Hz（降 82.4%）**，Ir94e 220 Hz 只压到 **67.3 Hz（降 27.6%）**。"
+                         "5×6 的剂量网格上两者差距随糖强度单调拉开：糖 120 Hz 时苦 160 Hz 已压到 1.7 Hz，"
+                         "而 Ir94e 160 Hz 还有 18.0 Hz",
+                  caveat="判据是先写下来再跑的（苦降 ≥50% 成立、Ir94e 降 <50% 成立），但**两个 50% 的阈值是我们定的**，"
+                         "论文只说了「苦能、Ir94e 不能」。频率档位受编译限制，只取了论文 11×11 网格的一个 5×6 子集；"
+                         "刺激名单用官方 notebook 的",
+                  script="screen/taste_grid.py", result_file="results/screen/taste/grid/summary.json", log="§37",
+                  verify=[("drop.bitter.drop_frac", 0.824, 0.002), ("drop.ir94e.drop_frac", 0.276, 0.002),
+                          ("drop.bitter.mn9_with_mod", 16.33, 0.02), ("drop.ir94e.mn9_with_mod", 67.33, 0.02),
+                          ("grid.220.none", 93.0, 0.02)]),
+             dict(id="responsive", what="哪些神经元响应糖 / 响应水（Fig 1D、4A，表 10 第 2、6 行）", status="reproduced",
+                  result="**零新仿真**（基线段落里本来就存了全部神经元的计数）。糖：与实验一致 **10/11**，"
+                         "唯一错项 Usnea——**与论文点名的错项完全相同**；水：一致 **4/6**，两个错项 G2N-1 与 Roundup "
+                         "也**正是论文自己列的那两个**。与论文自己的预测列逐条一致（糖 11/11、水 6/6）",
+                  caveat="论文数的是 14 项（糖）和 10 项（水），比我们多的 MN6 / Fudog / TH-VUM 等没有把名字对到 v783 的 cell_type，"
+                         "所以我们只对表 2 / 表 5 里列出的类型计分。模型对这些类型**全部预测「响应」**，"
+                         "所以分数完全由实验侧有几个「不响应」决定——这一点论文也一样",
+                  script="screen/responsive.py", result_file="results/screen/responsive.json", log="§37",
+                  verify=[("sugar.correct", 10, 0), ("sugar.total", 11, 0), ("water.correct", 4, 0),
+                          ("water.total", 6, 0), ("sugar.same_as_paper", 11, 0), ("water.same_as_paper", 11, 0),
+                          ("sugar.n_paper_pred", 11, 0), ("water.n_paper_pred", 11, 0)]),
              dict(id="baseline_rates", what="基线发放率：糖 → MN9、LC4 → 巨纤维", status="reproduced",
                   result="糖 100 Hz → MN9 **98/69 Hz**；左侧 54 个 LC4 100 Hz → 巨纤维 **85/40 Hz**",
                   caveat="PyTorch 后端在 DNa02 上与 Brian2 有 20 vs 10 Hz 的差异（各自独立抽泊松输入，在噪声量级）",
