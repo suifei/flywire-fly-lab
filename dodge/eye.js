@@ -412,6 +412,31 @@ function initFlyEye(assets) {
     if (!S.running && S.net) E.drawHex(cvs.act, S.net.get($("eType").value), geom, "signed");
   });
 
+  // ── 舞台右上角的第一人称复眼视窗 ────────────────────────
+  // 和上面那块用同一套采样表、同一套 pale/yellow 分型，
+  // 但为了实时**跳过 flyvis 和解码器**，只到"视网膜接收到什么"为止。
+  (() => {
+    const fs = window.__flyScene;
+    const box = $("eyecam");
+    if (!fs || !box || typeof FlyEyeCam === "undefined") { if (box) box.hidden = true; return; }
+    const cvL = $("ecL"), cvR = $("ecR");
+    let cam;
+    try {
+      const sky = getComputedStyle(document.documentElement)
+        .getPropertyValue("--stage-top").trim() || "#9fb4c8";
+      cam = new FlyEyeCam.Cam(fs.THREE, fs.renderer, fs.scene, S.retina, S.lat,
+                              { hexGeom: E.hexGeom, drawHex: E.drawHex },
+                              { sky, selfMeshes: fs.selfMeshes });
+    } catch (err) { box.hidden = true; return; }
+    const note = $("ecNote");
+    window.__eyeTick = (x, y, z, h) => {
+      if (!cam.shouldUpdate(performance.now(), 3)) return;
+      try { cam.update(x, y, z, h, [cvL, cvR]); }
+      catch (err) { window.__eyeTick = null; box.hidden = true; }
+    };
+    if (note) note.textContent = "果蝇视角 · 721 小眼/眼 · 3 fps";
+  })();
+
   showSource(E.preset("shapes"));
   $("eNote").textContent =
     `flyvis ${S.net.types.length} 类细胞 / ${S.net.nTaps} 个卷积抽头 · ` +

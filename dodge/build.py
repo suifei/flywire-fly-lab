@@ -50,6 +50,7 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__FLYVIS_JS__*/", (ROOT / "vision/flyvis.js").read_text()),
                   ("/*__RETINA_JS__*/", (ROOT / "vision/retina.js").read_text()),
                   ("/*__DECODER_JS__*/", (ROOT / "vision/decoder.js").read_text()),
+                  ("/*__EYECAM_JS__*/", (D / "eyecam.js").read_text()),
                   ("/*__EYE_JS__*/", (D / "eye.js").read_text()),
                   ("/*__BRAIN_JS__*/", (D / "brain.js").read_text()),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text())]:
