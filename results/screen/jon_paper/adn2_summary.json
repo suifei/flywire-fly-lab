@@ -1,0 +1,106 @@
+{
+ "design": {
+  "readout": "aDN2",
+  "freq": 160,
+  "R": 6,
+  "call": 0.8,
+  "n_stim": 145,
+  "note": "零新仿真：复用 §24.3 的段落（存的是全部活跃神经元的稀疏计数）"
+ },
+ "baseline": {
+  "aDN2": [
+   25,
+   25,
+   26,
+   26,
+   21,
+   24
+  ],
+  "mean": 24.5,
+  "paper": 23.7,
+  "aDN1_same_segments": 24.2,
+  "aDN1_paper": 23.3
+ },
+ "null_median_single": [
+  26.0,
+  24.0,
+  24.5,
+  25.0,
+  23.0,
+  22.0
+ ],
+ "paper_comparison": {
+  "n": 279,
+  "n_skipped_missing_segments": 1,
+  "spearman": 0.527,
+  "pearson": 0.946,
+  "calls_ours": 4,
+  "calls_paper": 5,
+  "call_agreement": 0.996,
+  "kappa": 0.887,
+  "median_abs_diff": 0.019
+ },
+ "required": [
+  {
+   "fid": "720575940630907434",
+   "name": "aBN1",
+   "paper": 0.0,
+   "ours": 0.0,
+   "cell_type": "SAD093"
+  },
+  {
+   "fid": "720575940609530653",
+   "name": "JO_FDP_5",
+   "paper": 0.6962,
+   "ours": 0.6713,
+   "cell_type": "JO-FD2"
+  },
+  {
+   "fid": "720575940633153375",
+   "name": "JO_EVL_1",
+   "paper": 0.7145,
+   "ours": 0.7336,
+   "cell_type": "JO-EV1"
+  },
+  {
+   "fid": "720575940609541917",
+   "name": "JO_EDM_7",
+   "paper": 0.7468,
+   "ours": 0.7336,
+   "cell_type": "JO-ED2_b"
+  }
+ ],
+ "disagreements": [
+  {
+   "fid": "720575940638664437",
+   "name": "JO_EDM_14",
+   "paper": 0.737,
+   "ours": 0.8097,
+   "cell_type": "JO-CM"
+  }
+ ],
+ "aBN1": {
+  "ratio_aDN2": 0.0,
+  "ratio_aDN1": 0.0,
+  "paper_7e": 0.0
+ },
+ "concentration": {
+  "aDN2": {
+   "n_scored": 595,
+   "n_required": 4,
+   "gini": 0.8813,
+   "n80": 68,
+   "max_effect": 1.0,
+   "median_effect": 0.0
+  },
+  "aDN1": {
+   "n_scored": 595,
+   "n_required": 4,
+   "gini": 0.9213,
+   "n80": 44,
+   "max_effect": 1.0,
+   "median_effect": 0.0
+  },
+  "note": "两个读出在**同一批**被打分的神经元上算，可直接比较；与 §24.3 的数字不可比（那里只覆盖 304 个）"
+ }
+}
