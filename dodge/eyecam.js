@@ -304,6 +304,11 @@ const FlyEyeCam = (() => {
       let lo = Infinity, hi = -Infinity;
       for (const r of readouts) for (const v of r) { if (v < lo) lo = v; if (v > hi) hi = v; }
       const rng = (hi - lo) || 1;
+      // 绿/蓝两路有自己的量程，不能和紫外共用 —— 紫外的天空是压倒性的亮，
+      // 共用量程会把绿蓝全压成黑。
+      let lo2 = Infinity, hi2 = -Infinity;
+      if (gbs) for (const a of gbs) for (const v of a) { if (v < lo2) lo2 = v; if (v > hi2) hi2 = v; }
+      const rng2 = (hi2 - lo2) || 1;
       const rad = Math.max(1.3, W2 / 170);
       for (let e = 0; e < 2; e++) {
         const { az, el } = this.dirs[e], r = readouts[e];
@@ -311,7 +316,18 @@ const FlyEyeCam = (() => {
           const t = (r[j] - lo) / rng;
           // 紫外没有对应的可见色，用紫罗兰表示；彩色路按 pale/yellow 分型
           if (mode === "uv") {
-            g.fillStyle = `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`;
+            if (gbs) {
+              // 三通道合成：果蝇的全部三路一起看。
+              // 紫外→紫（R7 每个小眼都有，**本来就不存在马赛克**），
+              // 绿/蓝→绿/蓝（这两路才是马赛克的，去马赛克只作用在它们身上）。
+              const G = Math.max(0, Math.min(1, (gbs[e][j * 2] - lo2) / rng2));
+              const B = Math.max(0, Math.min(1, (gbs[e][j * 2 + 1] - lo2) / rng2));
+              g.fillStyle = `rgb(${((t * 0.85 + G * 0.15) * 255) | 0},` +
+                            `${((G * 0.75 + t * 0.25) * 255) | 0},` +
+                            `${((B * 0.55 + t * 0.45) * 255) | 0})`;
+            } else {
+              g.fillStyle = `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`;
+            }
           } else if (gbs) {
             // 「果蝇色」：去马赛克后的绿/蓝两路，红给 0（果蝇几乎看不见红）
             const G = Math.max(0, Math.min(1, (gbs[e][j * 2] - lo) / rng));

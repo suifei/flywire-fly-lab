@@ -151,6 +151,92 @@ const chromePath = () => [process.env.CHROME_PATH,
       ok("三扇区合计 = 总视野", Math.abs(spans[0] + spans[1] + spans[2] - total) < 1,
          (spans[0] + spans[1] + spans[2]).toFixed(1) + "°", total.toFixed(1) + "°");
     }
+    // ── 固定光源与阴影 ────────────────────────────────────
+    const lights = [];
+    FS.scene.traverse(o => { if (o.isDirectionalLight && o.castShadow) lights.push(o); });
+    ok("阴影总开关", FS.renderer.shadowMap.enabled === true, FS.renderer.shadowMap.enabled, "true");
+    ok("投射阴影的固定光源数", lights.length >= 4, lights.length, "≥4");
+    // 阴影贴图只有真的渲染过才会被分配；只配 castShadow 不渲染的话它是 null
+    ok("阴影贴图已实际渲染", lights.length > 0 && lights.every(l => l.shadow.map),
+       lights.filter(l => l.shadow.map).length + "/" + lights.length, "全部");
+    // 计数：谁投、谁收
+    let casters = 0, receivers = 0;
+    FS.scene.traverse(o => { if (o.isMesh) { if (o.castShadow) casters++; if (o.receiveShadow) receivers++; } });
+    ok("阴影投射体", casters > 0, casters, ">0");
+    ok("阴影接收面", receivers > 0, receivers, ">0");
+    // 关键一题：每盏灯的阴影相机要装得下**整个场景**。
+    // （远裁面短了一截就是之前那个 bug —— 远处物体直接没影子。）
+    const box = new T.Box3();
+    FS.scene.traverse(o => { if (o.isMesh && (o.castShadow || o.receiveShadow)) box.expandByObject(o); });
+    const corners = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y])
+      for (const z of [box.min.z, box.max.z]) corners.push(new T.Vector3(x, y, z));
+    let worst = -1, worstName = "";
+    for (const L of lights) {
+      L.shadow.updateMatrices(L);
+      const c = L.shadow.camera;
+      const fr = new T.Frustum().setFromProjectionMatrix(
+        new T.Matrix4().multiplyMatrices(c.projectionMatrix, c.matrixWorldInverse));
+      const miss = corners.filter(v => !fr.containsPoint(v)).length;
+      if (miss > worst) { worst = miss; worstName = `${miss}/8 角落在外`; }
+    }
+    ok("每盏灯的阴影相机装得下整个场景", worst === 0, worstName || "无光源", "0/8 在外");
+    const sz = lights.length ? lights[0].shadow.mapSize.x : 0;
+    ok("阴影贴图分辨率", sz >= 2048, sz, "≥2048");
+
+    // ── 深度精度（z-fighting 防线）────────────────────────
+    // 两层地面曾经只差 0.034 mm，远处深度分不开 → 放射状条纹。
+    const planes = [];
+    FS.scene.traverse(o => {
+      if (!o.isMesh || !o.geometry) return;
+      const t = o.geometry.type;
+      if (t !== "PlaneGeometry" && t !== "CircleGeometry") return;
+      const p = o.geometry.parameters;
+      const big = t === "PlaneGeometry" ? Math.min(p.width, p.height) : p.radius * 2;
+      if (big < 100 || (p.thetaLength && p.thetaLength < 6.2)) return;
+      o.updateWorldMatrix(true, false);
+      planes.push({ name: o.name || t, z: new T.Vector3().setFromMatrixPosition(o.matrixWorld).z });
+    });
+    planes.sort((a, b) => a.z - b.z);
+    let minGap = Infinity;
+    for (let i = 1; i < planes.length; i++) minGap = Math.min(minGap, planes[i].z - planes[i - 1].z);
+    ok("大平面层间距（够远处深度分辨）", planes.length < 2 || minGap >= 1,
+       planes.length < 2 ? "只有 " + planes.length + " 层" : minGap.toFixed(3) + " mm", "≥1 mm");
+    const ratio = FS.camera.far / FS.camera.near;
+    ok("相机远近裁面比值", ratio <= 1000, Math.round(ratio) + ":1", "≤1000:1");
+
+    // ── 三通道合成 / 去马赛克 ─────────────────────────────
+    const cam = D.instance(), cvB = document.getElementById("ecB"), cvUV = document.getElementById("ecUV");
+    ok("去马赛克输出 = 每小眼两路（G,B 交错）",
+       rr.gb && rr.gb[0].length === rr.color[0].length * 2,
+       rr.gb ? rr.gb[0].length : "无", rr.color[0].length * 2);
+    // G 和 B 必须真的不同，否则去马赛克只是把同一路复制了一遍
+    let dgb = 0;
+    for (let i = 0; i < rr.gb[0].length; i += 2) dgb += Math.abs(rr.gb[0][i] - rr.gb[0][i + 1]);
+    ok("去马赛克的绿/蓝两路不同", dgb / (rr.gb[0].length / 2) > 0.005,
+       (dgb / (rr.gb[0].length / 2)).toFixed(4), ">0.005");
+    const px = cv => { const c = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
+                       let col = 0, lit = 0;
+                       for (let i = 0; i < c.length; i += 4) {
+                         if (c[i] + c[i + 1] + c[i + 2] < 24) continue; lit++;
+                         if (Math.abs(c[i] - c[i + 1]) > 8 || Math.abs(c[i + 1] - c[i + 2]) > 8) col++; }
+                       return { col, lit, frac: lit ? col / lit : 0 }; };
+    const save = cam.demosaic;
+    cam.demosaic = true; D.forceUpdate();
+    const bOn = px(cvB), uOn = px(cvUV);
+    ok("合成视野面板是彩色的", bOn.frac > 0.1, (bOn.frac * 100).toFixed(0) + "% 彩色像素", ">10%");
+    ok("紫外面板是三通道合成", uOn.frac > 0.1, (uOn.frac * 100).toFixed(0) + "% 彩色像素", ">10%");
+    const snap = cv => cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data.join(",");
+    const onB = snap(cvB), onU = snap(cvUV);
+    cam.demosaic = false; D.forceUpdate();
+    ok("去马赛克开关真的改变合成视野", snap(cvB) !== onB, snap(cvB) !== onB ? "变了" : "没变", "变了");
+    ok("去马赛克开关真的改变紫外面板", snap(cvUV) !== onU, snap(cvUV) !== onU ? "变了" : "没变", "变了");
+    cam.demosaic = save; D.forceUpdate();
+    // 场景不过曝：果蝇眼里不能一片死白（加了 4 盏灯之后真的糊过一次）
+    let sat = 0, tot = 0;
+    for (const a of rr.color) for (const v of a) { tot++; if (v >= 0.99) sat++; }
+    ok("果蝇眼里没过曝", sat / tot < 0.5, (sat / tot * 100).toFixed(1) + "% 饱和", "<50%");
+
     return out;
   });
 

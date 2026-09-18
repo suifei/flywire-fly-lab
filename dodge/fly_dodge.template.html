@@ -215,7 +215,7 @@ code { font: 12px var(--mono); }
           <canvas id="ecB" width="300" height="104"></canvas>
           <div class="ec-scale"><span>左 90&deg;</span><span>前 0&deg;</span><span>右 90&deg;</span></div>
           <canvas id="ecUV" width="300" height="104"></canvas>
-          <div class="ec-scale"><span>R7 紫外</span><span>手写反射率</span></div>
+          <div class="ec-scale"><span>三通道合成</span><span>紫外+蓝+绿</span></div>
           <label class="ec-sw"><input type="checkbox" id="ecDemo" checked> 去马赛克</label>
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
@@ -684,9 +684,16 @@ code { font: 12px var(--mono); }
   const stage = $("stage");
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  // 真实阴影：四盏顶灯各投一张 shadow map（见 dodge/court.js）。
+  // 原来只有两个"假影子"——果蝇脚下一个暗椭圆、每个球一个暗圆。
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   stage.prepend(renderer.domElement);
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 4 / 3, 0.1, 800);
+  // 近裁面从 0.1 提到 1：0.1/800 = 8000:1 的比值，远处深度精度差到
+  // 分不开相距 0.03 mm 的两层地面（球场 z=0.004 vs 外圈 z=-0.03），
+  // 画面远端出现放射状条纹 —— 那是 z-fighting，不是阴影瑕疵。
+  const camera = new THREE.PerspectiveCamera(42, 4 / 3, 1, 900);
   camera.up.set(0, 0, 1);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = !reduceMotion; controls.minDistance = 10; controls.maxDistance = 420;   // 放到 420 才能看全球场（场地 320×172 + 观众席）
@@ -694,15 +701,25 @@ code { font: 12px var(--mono); }
   // 复眼视窗要从果蝇眼位再渲一遍同一个场景，所以把这几个对象露出来。
   // （视窗的装配在 bootFlyEye 里，那边等采样表 PNG 解码完才就绪。）
   window.__flyScene = { THREE, renderer, scene, camera, controls, selfMeshes: [] };
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x88928e, 0.95); scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-20, -30, 60); scene.add(sun);
+  // 加了 4 盏顶灯之后要把原来的环境光和太阳压下来，否则总光强从 1.65 涨到 3.0，
+  // 木地板会曝成亮黄色（实测过）。现在 0.30 + 0.20 + 4×0.25 = 1.5。
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x88928e, 0.30); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.20); sun.position.set(-20, -30, 60); scene.add(sun);
   const HEMI0 = hemi.intensity, SUN0 = sun.intensity;
   function applyLight(v) {            // v: 0–1；只改画面亮度与阴影浓度，视觉前端的增益在 game_core 里按同一个值算
     hemi.intensity = HEMI0 * (0.18 + 0.82 * v); sun.intensity = SUN0 * (0.1 + 0.9 * v);
+    // 场馆顶灯跟着一起调，否则拉暗阳光时场地还是亮的
+    if (courtGroup && courtGroup.lights)
+      for (const L of courtGroup.lights) L.intensity = 0.25 * (0.12 + 0.88 * v);
     renderer.toneMappingExposure = 0.55 + 0.45 * v;
   }
-  const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 64), new THREE.MeshBasicMaterial());
-  floor.position.z = -0.03; scene.add(floor);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 64),
+    new THREE.MeshLambertMaterial());        // 受光材质，场地外那圈也能接到阴影
+  floor.position.z = -3;   // 和球场拉开 3 mm，彻底避开 z-fighting
+  // 不接收阴影：它半径 600 mm，纯装饰，球场外没有任何投射体。
+  // 把它算进阴影范围会把阴影相机撑到 1200 mm 宽 —— 2048 的阴影图
+  // 每像素 0.59 mm，而果蝇只有 3 mm，影子会碎成块。
+  floor.receiveShadow = false; scene.add(floor);
   const gridGroup = new THREE.Group(); scene.add(gridGroup);
   // 球场：按 1:50 缩小的篮球场（真实 28×15 m → 560×300 mm），带篮架和观众席。
   // 纯场景装饰，不参与任何神经计算；边界逻辑在 game_core 的 CFG.courtW/H。
@@ -716,10 +733,15 @@ code { font: 12px var(--mono); }
     geo.setIndex(new THREE.BufferAttribute(decodeB64(m.faces, Uint32Array), 1));
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0.05, side: THREE.DoubleSide }));
+    // 只让躯干和翅膀投影。果蝇有 89 个部件，每条腿分 6 节，
+    // 在 0.3 mm/texel 的阴影图上全部走样成放射状条纹（实测：关掉果蝇投影后画面完全干净）。
+    // 躯干+翅膀已经够看出影子，细小腿节的影子本来也看不见。
+    mesh.castShadow = /thorax|abdomen|a[1-6]$|wing|head/i.test(m.name || "");
     mesh.name = m.name; body.add(mesh); return mesh;
   });
+  // 假影子：有真阴影之后就关掉，否则一个物体落两个影子
   const flyShadow = new THREE.Mesh(new THREE.CircleGeometry(1.5 * FLY_SCALE, 32), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18, depthWrite: false }));
-  flyShadow.scale.set(1.7, 1, 1); scene.add(flyShadow);
+  flyShadow.scale.set(1.7, 1, 1); flyShadow.visible = false; scene.add(flyShadow);
   const GF = GAIT.frames.length, gq = new THREE.Quaternion();
   const meshIdx = Object.fromEntries(GAIT.meshes.map((m, i) => [m.name, i]));
   const groomDz = GAIT.frames[0][2] - POSES.groom[0][2];                 // 梳理姿态（固定模型）与步态帧的胸部高度对齐
@@ -761,14 +783,14 @@ code { font: 12px var(--mono); }
   function makePellet(pl) {
     const g = new THREE.Group();
     if (pl.type === "mixed") {
-      const a = new THREE.Mesh(halfGeo, new THREE.MeshStandardMaterial({ color: css("--sugar"), roughness: 0.5, side: THREE.DoubleSide }));
+      const a = new THREE.Mesh(halfGeo, new THREE.MeshStandardMaterial({ color: css("--sugar"), roughness: 0.5, side: THREE.DoubleSide })); a.castShadow = true;
       const b = new THREE.Mesh(halfGeo, new THREE.MeshStandardMaterial({ color: css("--bitter"), roughness: 0.5, side: THREE.DoubleSide })); b.rotation.y = Math.PI;
       g.add(a, b);
     } else if (pl.type === "water") {
       const m = new THREE.Mesh(new THREE.SphereGeometry(CFG.pelletR * 0.95, 20, 14),
         new THREE.MeshStandardMaterial({ color: css("--water"), roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.8 }));
       m.scale.z = 0.55; g.add(m);
-    } else g.add(new THREE.Mesh(pelletGeo, new THREE.MeshStandardMaterial({ color: css(pl.type === "sugar" ? "--sugar" : "--bitter"), roughness: 0.5 })));
+    } else { const pm = new THREE.Mesh(pelletGeo, new THREE.MeshStandardMaterial({ color: css(pl.type === "sugar" ? "--sugar" : "--bitter"), roughness: 0.5 })); pm.castShadow = true; g.add(pm); }
     if (pl.type !== "water") g.rotation.x = Math.PI / 2;
     g.position.set(pl.x, pl.y, pl.type === "water" ? 0.1 : 0.18); scene.add(g); pelletMeshes.set(pl.id, g);
   }
@@ -884,14 +906,16 @@ code { font: 12px var(--mono); }
   game.onEvent = (type, b) => {
     if (type === "launch") {
       const m = new THREE.Mesh(ballGeo, new THREE.MeshStandardMaterial({ color: css("--ball"), roughness: 0.35 }));
+      m.castShadow = true;
       const sh = new THREE.Mesh(ballShGeo, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16, depthWrite: false }));
+      sh.visible = false;
       scene.add(m, sh); ballMeshes.set(b.id, { m, sh });
       $("coach").hidden = true;
     } else if (type === "remove") {
       const e = ballMeshes.get(b.id); if (e) { scene.remove(e.m, e.sh); e.m.material.dispose(); ballMeshes.delete(b.id); }
     } else if (type === "pellet") { makePellet(b);
     } else if (type === "eaten" || type === "removePellet") { const g = pelletMeshes.get(b.id); if (g) { scene.remove(g); pelletMeshes.delete(b.id); } if (type === "eaten") $("sEat").textContent = game.score.eaten;
-    } else if (type === "dust") { const m = new THREE.Mesh(dustGeo, new THREE.MeshStandardMaterial({ color: 0x8a8f8c, roughness: 1 })); scene.add(m); dustMeshes.set(b.id, { m, side: b.side });
+    } else if (type === "dust") { const m = new THREE.Mesh(dustGeo, new THREE.MeshStandardMaterial({ color: 0x8a8f8c, roughness: 1 })); m.castShadow = true; scene.add(m); dustMeshes.set(b.id, { m, side: b.side });
     } else if (type === "groomed") { for (const [, e] of dustMeshes) scene.remove(e.m); dustMeshes.clear(); $("sGroom").textContent = game.score.groom;
     } else if (type === "state" && b.to === "groom") { $("sGroom").textContent = game.score.groom;
     } else if (type === "hit" || type === "dodge" || type === "jump") {
@@ -916,6 +940,7 @@ code { font: 12px var(--mono); }
         board: "#dfe6ea", rim: "#e0562a",
         seatA: "#1f4fa8", seatB: "#b3322c",
       });
+      applyLight(CFG.light === undefined ? 1 : CFG.light);
     }
     for (const p of parts) {
       const n = p.name, m = p.material; m.transparent = false; m.opacity = 1;
@@ -1623,7 +1648,7 @@ code { font: 12px var(--mono); }
     }
     poseFly();
     fly.position.set(S.x, S.y, S.z); fly.rotation.z = S.h;
-    flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = S.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8));
+    if (flyShadow.visible) { flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = S.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8)); }
     for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) { e.m.position.set(b.x, b.y, CFG.ballR); e.sh.position.set(b.x, b.y, 0.01); } }
     let di = 0;
     for (const [, e] of dustMeshes) {
