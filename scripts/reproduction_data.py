@@ -23,11 +23,16 @@ PAPERS = [
              dict(id="sugar_mn9", what="糖味觉 GRN → MN9 沉默筛选（补充表 1A–C）", status="reproduced",
                   result="与论文判定 κ **0.59**、Pearson 0.83；对论文自己的光遗传实验 **6/10**",
                   caveat="Roundup 与 Zorro 的比值紧贴 0.8 判据，判定随实现数与归一化口径翻转；其余 8 个类型四种口径一致",
-                  script="screen/sugar_mn9_screen.py", result_file="results/screen/summary.json", log="§14"),
+                  script="screen/sugar_mn9_screen.py", result_file="results/screen/summary.json", log="§14",
+         verify=[("exploratory_null_normalized.by_freq.50Hz.kappa", 0.59, 0.005),
+                          ("exploratory_null_normalized.by_freq.50Hz.pearson", 0.831, 0.005)]),
              dict(id="water_mn9", what="水味觉 GRN → MN9 沉默筛选（补充表 5/6）", status="reproduced",
                   result="κ **0.87**、Pearson 0.96、判定一致率 97%；对实验 **9/10**（与论文同分）",
                   caveat="唯一错项 Usnea 是神经肽通路，模型里只有经典递质",
-                  script="screen/water_screen.py", result_file="results/screen/water/summary.json", log="§19"),
+                  script="screen/water_screen.py", result_file="results/screen/water/summary.json", log="§19",
+         verify=[("paper_comparison.kappa", 0.869, 0.002), ("paper_comparison.pearson", 0.958, 0.002),
+                          ("paper_comparison.call_agreement", 0.973, 0.002),
+                          ("experiment_score.ours_single.correct", 9, 0)]),
              dict(id="jon_adn1", what="触角机械感觉 JON → aDN1 梳理指令（补充表 7A/B/D）", status="reproduced",
                   result="κ **0.907**、Pearson 0.945；基线 aDN1 **24.2 Hz**（论文 23.3）；论文判必需的 6 个我们判出 5 个",
                   caveat="刺激名单是从补充表 7A 反推的 146 个（被刺激神经元发放率精确等于刺激频率）。"
@@ -45,7 +50,9 @@ PAPERS = [
              dict(id="abn1_bottleneck", what="aBN1 是梳理通路的绝对瓶颈", status="reproduced",
                   result="单敲 aBN1 让 **aDN1 与 aDN2 同时归零**（比值 0.000，论文两表也都是 0.000）",
                   caveat="两个梳理指令神经元共用同一个瓶颈——这一条事先声明不预设答案",
-                  script="screen/jon_adn2.py", result_file="results/screen/jon_paper/adn2_summary.json", log="§29"),
+                  script="screen/jon_adn2.py", result_file="results/screen/jon_paper/adn2_summary.json", log="§29",
+         verify=[("aBN1.ratio_aDN1", 0.0, 1e-9), ("aBN1.ratio_aDN2", 0.0, 1e-9),
+                          ("aBN1.paper_7e", 0.0, 1e-9)]),
              dict(id="shuffle", what="打乱接线对照（补充表 1D）", status="partial",
                   result="糖 → MN9 从 **82.9 Hz 掉到 3.5 ± 4.2 Hz**（比值 0.043），与论文同量级（Zorro_l 102.2 → 2.75 ± 7.17）",
                   caveat="只在 4,599 个神经元的**子回路**上做，不是全脑；论文未公开打乱做法，我们用的是「保出度与权重、只重排靶点」。定性方向可比，定量不可比",
@@ -84,14 +91,17 @@ PAPERS = [
              dict(id="hexconv", what="网络本质上是六边形卷积（权重只依赖源型/靶型/位移）", status="reproduced",
                   result="**50 个集成成员全部通过**逐成员验证；45,669 个节点只由 604 个核、**2,355 个抽头**决定 → 80 KB JSON",
                   caveat="导出脚本会验证这个前提，不成立就拒绝导出（exit 2）",
-                  script="vision/export_flyvis_js.py", result_file="results/vision/flyvis_net.json", log="§28.1"),
+                  script="vision/export_flyvis_js.py", result_file="results/vision/flyvis_net.json", log="§28.1",
+         verify=[("len:kernels", 604, 0), ("sumlen:kernels", 2355, 0)]),
              dict(id="t4t5_dir", what="T4/T5 亚型的方向选择性（**50 个集成成员全测**）", status="partial",
                   result="跨成员离散度极大：有方向选择性的成员数 T4a 34/50、T4b 31/50、T4c 42/50、**T4d 37/50**；"
                          "T4a 偏好方向中位 275° 但范围 3–357°",
                   caveat="**成员 000 里 T4d 与 T5b 没有方向选择性，但那只是它自己的性质**——T4d 在 37/50 个成员里有，"
                          "DSI 中位 0.849。所以「文献的 a/b/c/d = 四个正交方向在 flyvis 里不成立」必须限定为「在成员 000 里不成立」。"
                          "「偏好方向落在六边形棱方向族」只有 T4a（28/34）与 T4b（24/31）有集成支持，T4c 仅 13/42",
-                  script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§28.17 + §33.2"),
+                  script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§28.17 + §33.2",
+         verify=[("按亚型.T4d.n_selective", 37, 0), ("按亚型.T4a.n_selective", 34, 0),
+                          ("按亚型.T4c.n_selective", 42, 0), ("成员数", 50, 0), ("测定成功", 50, 0)]),
          ]),
     dict(key="ache2019", cite="Ache et al. 2019, Curr Biol 29:1073-1081",
          url="https://www.cell.com/current-biology/fulltext/S0960-9822(19)30138-1",
@@ -224,15 +234,20 @@ FINDINGS = [
          caveat="单个神经元会失真。最典型是 CB0883：全脑里是枢纽（单敲 0.76、配对 0.24），子回路里**完全无作用**（1.07）——"
                 "它依赖的旁路正是 wmin≥3 / K≤3 裁掉的。早先写的「+0.21 糖 / +0.92 水」是错的，来自混用归一化口径",
          script="dodge/subcircuit_vs_fullbrain_knockouts.py",
-         result_file="results/dodge/subcircuit_vs_fullbrain_knockouts.json", log="§25.2"),
+         result_file="results/dodge/subcircuit_vs_fullbrain_knockouts.json", log="§25.2",
+         verify=[("sugar.pearson", 0.745, 0.002), ("water.pearson", 0.891, 0.002),
+                 ("sugar.spearman", 0.576, 0.002), ("water.spearman", 0.842, 0.002), ("n", 10, 0)]),
     dict(id="redundancy_needs_sim", what="能不能只看连线就预测「一起敲会不会塌」",
          result="**不能**。路径重叠与配对 Δ 的 Spearman 是 **−0.008（糖）/ 0.013（水）**，且已排除指标退化",
          caveat="换成动力学指纹方向对但很弱（−0.21 / −0.14），而指纹本身就是单敲全脑仿真——省的是筛选，不是配对那一跑",
-         script="screen/structure_vs_function.py", result_file="results/screen/structure_vs_function.json", log="§22"),
+         script="screen/structure_vs_function.py", result_file="results/screen/structure_vs_function.json", log="§22",
+         verify=[("sugar.pairs.spearman_overlap_vs_delta", -0.008, 0.002),
+                 ("water.pairs.spearman_overlap_vs_delta", 0.013, 0.002)]),
     dict(id="two_pathways", what="糖和水是不是同一批神经元",
          result="**不是**。活跃集只重叠约三分之一（Jaccard 0.36），共同活跃的 128 个上效应也几乎不相关（Spearman 0.18、κ 0.15）",
          caveat="枢纽各自私有：CB0883 在水通路里根本不放电；CB0051 在糖通路里敲了没影响（0.97 vs 水的 0.49）",
-         script="screen/pathway_compare.py", result_file="results/screen/pathway_compare.json", log="§21"),
+         script="screen/pathway_compare.py", result_file="results/screen/pathway_compare.json", log="§21",
+         verify=[("jaccard", 0.356, 0.002)]),
     dict(id="concentration", what="通路集中度能不能解释「模型在哪条通路上预测得准」", status="negative",
          result="**不能**。事先声明的方向是「越集中 → 连线越能预测」。实际 Gini 排 JON **0.922** ≈ 水 0.921 ≫ 糖 0.783，"
                 "而连线预测器 G3 排 水 0.485 > 糖 0.316 > **JON 0.288** —— 最集中的通路反而最预测不了；换成 n80 也救不回来",
@@ -261,7 +276,9 @@ FINDINGS = [
                 "而果蝇**光是走路**，自体运动的全场光流就造出峰值 **126 Hz** 的假逼近",
          caveat="球半径 2.5 mm、小眼间角 5.7° → 60 mm 外不到一个小眼。败因是分辨率与未补偿的自体运动，不是 LPLC2 模型。"
                 "所以做成可切换对照，不做默认前端",
-         script="dodge/front_end_compare.js", result_file="results/vision/front_end_compare.json", log="§28.19"),
+         script="dodge/front_end_compare.js", result_file="results/vision/front_end_compare.json", log="§28.19",
+         verify=[("摘要.自体运动噪声.峰值", 125.8, 0.1),
+                 ("摘要.连接组可分辨的最远距离mm", 25, 0)]),
     dict(id="dopamine", what="模型里有没有奖赏信号（吃到糖会不会分泌多巴胺）",
          result="**没有**。不失控的糖刺激下 PAM 神经元放电 **0/307**；DAN 只在失控里放电，"
                 "而且 PPL1 > PAM，气味失控与糖失控完全一样",
@@ -272,7 +289,8 @@ FINDINGS = [
                 "其中只有 **12 个**单敲比值 < 1、可解释为备份；**108 个是亚可加**（共用瓶颈）",
          caveat="12 个备份里有 5 个就是糖味觉受体本身。CB0883 单独敲 0.76（算不上必需），"
                 "配上 Clavicle / G2N-1 就把 MN9 打到 0.24 —— **单个敲除筛选系统性看不见这一类**",
-         script="screen/hub_scan.py", result_file="results/screen/hub_scan_summary.json", log="§16.2"),
+         script="screen/hub_scan.py", result_file="results/screen/hub_scan_summary.json", log="§16.2",
+         verify=[("summary.n_synergy", 32, 0)]),
     dict(id="olfaction", what="全脑模型能不能给出嗅觉转向信号", status="negative",
          result="**不能**。单侧气味刺激的下行神经元侧化指数 |LI| ≤ 0.05",
          caveat="而且嗅觉刺激是**全或无的失控**：35 个 DM1 嗅觉受体神经元 10 Hz → 25 ms 内约 8,300 个神经元活跃。"
@@ -298,11 +316,13 @@ FINDINGS = [
                 "所以 §28.17 那句「T4d/T5b 无方向选择性」只是成员 000 的性质。"
                 "教训：`vision/export_flyvis_js.py` 里硬编码着 `flow/0000/000`，一路沿用了十几节——"
                 "**凡是「某个预训练模型给出 X」的结论，都要问一句：这个模型是从几个里挑的**",
-         script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§33"),
+         script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§33",
+         verify=[("LPLC2判据.A", 17, 0), ("LPLC2判据.可建模成员", 49, 0), ("测定成功", 50, 0)]),
     dict(id="lattice_distortion", what="flyvis 与 FlyWire 的柱坐标怎么对齐",
          result="用解剖（两视叶质心定左右、全脑质心→GNG 定腹侧、叉积定前后）加实测 T4/T5 方向，"
                 "把 8 种朝向**钉到唯一一种**（旋转 φ=277°，即 u=−p, v=−q）",
          caveat="同时查出原流程有形变：`normalize()` 把 Codex 六边形基矢夹角**从 60.0° 拉成 122.6°**。"
                 "换成保几何映射后「逼近 > 近距平移」翻转成立（3/3 重复），但只有一种映射给出该结果，属**有条件的修正**",
-         script="vision/lattice_anchor.py", result_file="results/vision/lattice_anchor.json", log="§28.20"),
+         script="vision/lattice_anchor.py", result_file="results/vision/lattice_anchor.json", log="§28.20",
+         verify=[("T4T5拟合.phi", 277, 0)]),
 ]

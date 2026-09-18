@@ -12,8 +12,12 @@
   --check 只校验不写文件（CI 用）
 """
 import argparse
-import json
 import sys
+# 工作区在 exFAT 外接盘上，时间戳只有 2 秒精度。台账文件改动前后字节数常常相同，
+# 于是 __pycache__ 里的 .pyc 会被判定为仍然有效，--check 就会读到**过期的台账**。
+# 2026-09-19 实测踩到：改回正确值后仍然报旧值，删掉 __pycache__ 才对。
+sys.dont_write_bytecode = True
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,10 +44,21 @@ def check_verify(c, who, bad):
         if not c.get("result_file"):
             bad.append(f"{who}：写了 verify 却没有 result_file")
             continue
+        # expr 支持三种取值：直接取标量；"len:路径" 取长度；"sumlen:路径" 取各元素长度之和
+        # （后两种是为了能核对「604 个核」「2,355 个抽头」这类由结构决定、而不是存成字段的数字）
+        op, _, path = expr.partition(":")
+        if not path:
+            op, path = "", expr
         try:
             v = json.loads((ROOT / c["result_file"]).read_text())
-            for k in expr.split("."):
+            for k in path.split("."):
                 v = v[k] if not isinstance(v, list) else v[int(k)]
+            if op == "len":
+                v = len(v)
+            elif op == "sumlen":
+                v = sum(len(x) for x in (v.values() if isinstance(v, dict) else v))
+            elif op:
+                raise ValueError(f"未知取值方式 {op}")
         except Exception as e:
             bad.append(f"{who}：verify 取不到 {expr}（{e}）")
             continue
