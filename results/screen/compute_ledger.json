@@ -1,43 +1,74 @@
 {
+ "说明": "只统计 results/screen 下的全脑 Brian2 段；段数按 keys 行数去重；墙钟取 npz 的 wall 字段之和",
+ "自洽列": "秒/段应当在 2 s 上下；偏离说明段数或墙钟记错了",
  "rows": [
   {
+   "files": 135,
+   "rows": 2680,
+   "segments": 2638,
+   "wall_h": 1.464,
    "name": "糖主筛选（14 节）",
-   "segments": 2680,
-   "wall_h": 1.464
+   "sec_per_segment": 2.0
   },
   {
-   "name": "双敲除（16 节，6/12 实现 + 枢纽配对）",
+   "files": 92,
+   "rows": 1808,
    "segments": 1808,
-   "wall_h": 1.009
+   "wall_h": 1.009,
+   "name": "双敲除（16 节，6/12 实现 + 枢纽配对）",
+   "sec_per_segment": 2.01
   },
   {
+   "files": 223,
+   "rows": 4411,
+   "segments": 4389,
+   "wall_h": 2.418,
    "name": "枢纽全扫描（16.2 + 21.1 节，CB0883 与 CB0051）",
-   "segments": 4411,
-   "wall_h": 2.418
+   "sec_per_segment": 1.98
   },
   {
+   "files": 134,
+   "rows": 2650,
+   "segments": 2650,
+   "wall_h": 1.436,
    "name": "水通路（19 节）",
-   "segments": 2662,
-   "wall_h": 1.447
+   "sec_per_segment": 1.95
   },
   {
+   "files": 168,
+   "rows": 3345,
+   "segments": 3345,
+   "wall_h": 1.955,
    "name": "JON 全部 JO-（24 节，已作废）",
-   "segments": 3357,
-   "wall_h": 1.966
+   "sec_per_segment": 2.1
   },
   {
+   "files": 23,
+   "rows": 450,
+   "segments": 450,
+   "wall_h": 0.286,
    "name": "JON 弱刺激（24.1 节）",
-   "segments": 498,
-   "wall_h": 0.322
+   "sec_per_segment": 2.29
   },
   {
-   "name": "JON 论文名单（24.2 + 24.3 节）",
-   "segments": 2212,
-   "wall_h": 1.252
+   "files": 178,
+   "rows": 3519,
+   "segments": 3519,
+   "wall_h": 1.991,
+   "name": "JON 论文名单（24.2 + 24.3 节，含集中度段）",
+   "sec_per_segment": 2.04
   }
  ],
- "total_segments": 17628,
- "total_wall_h": 9.88,
- "fly_brain_time_h": 4.95,
- "note": "从盘上全部 *.npz 逐块重数（段数 = chunk_keys 长度，机时 = 每块存的 wall 之和）"
+ "total_files": 953,
+ "total_rows": 18863,
+ "total_segments": 18799,
+ "total_wall_h": 10.56,
+ "sec_per_segment": 2.02,
+ "duplicate_rows": 64,
+ "fly_brain_time_h": 5.22,
+ "上一版账本": {
+  "total_segments": 17628,
+  "差": 1171,
+  "说明": "上一版是报告正文里的临时 shell 循环生成的，会随时过期"
+ }
 }
