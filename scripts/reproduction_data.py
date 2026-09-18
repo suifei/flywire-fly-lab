@@ -111,6 +111,34 @@ PAPERS = [
                   verify=[("drop.bitter.drop_frac", 0.824, 0.002), ("drop.ir94e.drop_frac", 0.276, 0.002),
                           ("drop.bitter.mn9_with_mod", 16.33, 0.02), ("drop.ir94e.mn9_with_mod", 67.33, 0.02),
                           ("grid.220.none", 93.0, 0.02)]),
+             dict(id="jon_ce_f", what="aBN1 只对 JO-CE 响应、对 JO-F 几乎不响应（Fig 5G / 补充表 8）", status="reproduced",
+                  result="**两条事先写死的判据都成立**：aBN1 在 JO-CE 150 Hz 下 **52.00 Hz**（论文 50.77）、"
+                         "JO-F 150 Hz 下 **1.67 Hz**（论文 1.23）。表 8 全向量（剔除被刺激的 JON 后 277 个神经元）"
+                         "两列 Pearson 都是 **0.999**，Spearman 0.98 / 0.99",
+                  caveat="刺激名单用官方 notebook Figure 5b 的 neu_JON_CE(70) / neu_JON_F(60)——"
+                         "三者并集与 §24.3 反推的 146 个**完全相同**，是一次独立印证。"
+                         "判据阈值（CE > 10 Hz、F < 5 Hz）是照论文表 8 里 aBN1 那一行的数量级定的，跑之前写死",
+                  script="screen/jon_ce_f.py", result_file="results/screen/jon_ce_f/summary.json", log="§37",
+                  verify=[("abn1.ours_ce", 52.0, 0.02), ("abn1.ours_f", 1.67, 0.02),
+                          ("abn1.paper_ce", 50.77, 0.02), ("abn1.paper_f", 1.23, 0.02),
+                          ("vector.CE.pearson_nonstim", 0.999, 0.0005), ("vector.F.pearson_nonstim", 0.999, 0.0005)]),
+             dict(id="sufficiency", what="106 个 SEZ 类型「足以引发伸喙」（Fig 2A / 补充表 3，论文自报 101/106）", status="reproduced",
+                  result="模型里有神经元的 **101** 个类型全跑（50 与 200 Hz 各 3 个实现）。与论文 MN9 发放率的 "
+                         "**Pearson 0.993（50 Hz）/ 0.998（200 Hz）**，Spearman 0.99 / 1.00；"
+                         "判定与论文**逐条一致 100/101**；对光遗传实验 **95/101**，"
+                         "而论文自己在同一批 101 个上是 **96/101**",
+                  caveat="**判据口径是从论文表 3 自身反查出来的**：只看 50 Hz、MN9_Left、>0 Hz，在论文自己的数字上恰好给出它所报的 "
+                         "101/106；换成左右取大是 99、换成 200 Hz 是 96 / 92——所以这个口径是唯一能对上的那个，"
+                         "反查完才跑的我们这一版。106 个类型里有 5 个（TH_VUM、Salivary_MN13、bamboo、gallinule、meteor）"
+                         "在 v783 模型里没有神经元，所以分母是 101 而不是 106。"
+                         "唯一比论文多错的是 **FMIn**（我们 0.00，论文 0.37，判据线就在 0）——它的效应本来就贴着线。"
+                         "这一轮**必须**把不应期逐段门控（RFC_GATE）：这些 SEZ 神经元是中间神经元，"
+                         "本段没被刺激时若照旧把 rfc 置 0，全脑动力学会被污染",
+                  script="screen/sufficiency.py", result_file="results/screen/sufficiency/summary.json", log="§37",
+                  verify=[("ours_vs_opto.correct", 95, 0), ("paper_vs_opto.correct", 96, 0),
+                          ("ours_vs_paper_calls.same", 100, 0), ("n_compared", 101, 0),
+                          ("pearson_50", 0.993, 0.0005), ("pearson_200", 0.998, 0.0005),
+                          ("spearman_200", 1.0, 0.0005)]),
              dict(id="responsive", what="哪些神经元响应糖 / 响应水（Fig 1D、4A，表 10 第 2、6 行）", status="reproduced",
                   result="**零新仿真**（基线段落里本来就存了全部神经元的计数）。糖：与实验一致 **10/11**，"
                          "唯一错项 Usnea——**与论文点名的错项完全相同**；水：一致 **4/6**，两个错项 G2N-1 与 Roundup "
