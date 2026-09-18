@@ -32,6 +32,19 @@ const md = tpl.split("\n").map((l, i) => [i + 1, l])
 ok("模板字符串里无 markdown ** **（textContent 会显示星号）", md.length === 0,
    md.length ? `第 ${md.map(([i]) => i).join("、")} 行` : "");
 
+// 页面内联脚本本身必须能通过语法检查。
+// 为什么单列一条：2026-09-19 新加的一段里少写了一个右括号，模板的两条静态检查
+// 全过、smoke 也全过，直到三分钟的真浏览器测试才报 "missing ) after argument list"。
+// 语法错误应该在一秒内暴露，不该等到浏览器。
+{
+  const blocks = [...tpl.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type="application\/json")[^>]*>([\s\S]*?)<\/script>/g)]
+    .map(m => m[1]).filter(b => b.trim() && !b.includes("/*__"));
+  const vm = require("vm");
+  let bad = [];
+  blocks.forEach((b, i) => { try { new vm.Script(b); } catch (e) { bad.push(`第 ${i + 1} 块：${e.message}`); } });
+  ok("页面内联脚本语法正确", bad.length === 0, bad.join("；"));
+}
+
 // ── 2. 大脑引擎与游戏逻辑真的能跑 ──────────────────────────────
 section("引擎运行");
 const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/subcircuit_v2.json"), "utf8"));
