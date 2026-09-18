@@ -147,6 +147,15 @@ print("  " + "　".join(f"{LABEL[k][1]} {v}" for k, v in n.items() if v))
 if a.check:
     sys.exit(0)
 
+def plain(t):
+    """去掉 what 里自带的 ** 强调。
+
+    渲染 `- **{what}** — …` 时，如果 what 自己含 `**`（例如「参数稳健性（补充表 11A–F，**全脑**）」），
+    markdown 的加粗就会嵌套错位，页面上直接显示出星号。2026-09-19 倒查时在 REPRODUCTION.md 里看到。
+    """
+    return t.replace("**", "")
+
+
 # ── 渲染 Markdown ────────────────────────────────────
 L = ["# 复现台账",
      "",
@@ -180,7 +189,7 @@ for p in PAPERS:
     L.append("")
     for c in p["claims"]:
         if c.get("caveat"):
-            L.append(f"- **{c['what']}** — {c['caveat']}" + (f"（日志 {c['log']}）" if c.get("log") else ""))
+            L.append(f"- **{plain(c['what'])}** — {c['caveat']}" + (f"（日志 {c['log']}）" if c.get("log") else ""))
     L.append("")
 
 L += ["---", "", "## 关键参数", "",
@@ -196,14 +205,14 @@ for f_ in FINDINGS:
 L.append("")
 for f_ in FINDINGS:
     if f_.get("caveat"):
-        L.append(f"- **{f_['what']}** — {f_['caveat']}" + (f"（日志 {f_['log']}）" if f_.get("log") else ""))
+        L.append(f"- **{plain(f_['what'])}** — {f_['caveat']}" + (f"（日志 {f_['log']}）" if f_.get("log") else ""))
 
 L += ["", "---", "",
       "## 还没做的（按可行性排序）", ""]
 todo = [(p, c) for p in PAPERS for c in p["claims"] if c["status"] in ("not_done", "blocked")]
 for p, c in todo:
     icon = LABEL[c["status"]][0]
-    L.append(f"- {icon} **{c['what']}**（{p['cite'].split(',')[0]}）：{c.get('caveat') or '—'}")
+    L.append(f"- {icon} **{plain(c['what'])}**（{p['cite'].split(',')[0]}）：{c.get('caveat') or '—'}")
 L.append("")
 
 (ROOT / "REPRODUCTION.md").write_text("\n".join(L))
