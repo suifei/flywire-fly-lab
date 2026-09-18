@@ -2,6 +2,12 @@
 
 > 基于 2026-09-13 的核实与本机实测（M1 Pro 16 GB）。**【实测】** 本机跑过；**【官方】** Eon 公开的内容；**【社区】** 第三方项目；**【推测】** 未验证的判断
 
+> **这是 2026-09-13 的规划文档，保留作为记录。** 当时列的三条路线后来大部分都做了：
+> 路线 C（开环刺激）已做透；路线 B（FlyGym + FlyWire 闭环）原型已验证前端并标定增益；
+> 路线 A 里的 flyvis 视觉系统已经整个搬进浏览器实时运行。
+> **当前实际做到哪一步，看 [`REPRODUCTION.md`](REPRODUCTION.md)**，不要以本文为准。
+
+
 ## 1. 现状一句话
 
 Eon **没有公开**大脑→身体的接口代码。可用的积木有三块：
@@ -126,7 +132,7 @@ FlyGym 复眼 (2×721) → [视觉前端] 每侧 looming/物体位置特征 → 
 | “FlyGym 提供复眼视觉，每步作为 observation 返回” | FlyGym 2.1 需要显式调用 `sim.get_ommatidia_readouts(fly_name)`；它不再是 Gymnasium 环境，没有 `obs` 字典 |
 | “FlyGym 的视觉来自 Lappalainen 模型” | 不对。FlyGym 的 `Retina` 只做图像到小眼的采样和鱼眼校正，**不含**神经网络模型；Lappalainen 模型是独立的 flyvis 项目 |
 | “先装 FlyGym 跑通视觉 demo” | 已完成：`flygym_vision_demo.py`，趋向 / 回避 / 盲走三组对比 |
-| “FlyWire 视网膜神经元坐标数据公开” | 注释表里有每个神经元的 `pos_x/y/z` 与 `soma_x/y/z`（已下载）；是否有专门的眼平面投影坐标，未核实 |
+| “FlyWire 视网膜神经元坐标数据公开” | 注释表里有 `pos_x/y/z` 与 `soma_x/y/z`。**“是否有专门的眼平面投影坐标”这一条已在 2026-09-14 核实：有。** Codex 的 `column_assignment.csv.gz`（Matsliah et al. 2024）给出每个柱的 `(p,q)` 六边形坐标，本项目用它做了 flyvis↔FlyWire 的晶格对齐（日志 §18 / §28.20） |
 
 ## 6. 后续补充（2026-09-14，详见 docs/log/report.md 第 10–11 节）
 
