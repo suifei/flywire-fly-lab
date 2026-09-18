@@ -39,6 +39,17 @@ for p in PAPERS:
                 bad.append(f"{p['key']}/{c['id']}：{f} 不存在 → {v}")
         if c["status"] in ("reproduced", "partial", "negative") and not c.get("script"):
             bad.append(f"{p['key']}/{c['id']}：声称做过却没有 script")
+        # verify：台账里的关键数字必须与结果文件对得上（台账本身也是手打的，同样会脱节）
+        for expr, want, tol in c.get("verify", []):
+            try:
+                v = json.loads((ROOT / c["result_file"]).read_text())
+                for k in expr.split("."):
+                    v = v[k] if not isinstance(v, list) else v[int(k)]
+            except Exception as e:
+                bad.append(f"{p['key']}/{c['id']}：verify 取不到 {expr}（{e}）")
+                continue
+            if abs(float(v) - float(want)) > tol:
+                bad.append(f"{p['key']}/{c['id']}：台账写 {expr}={want}，文件里是 {v}")
 for q in PARAMETERS:
     if q.get("script") and not (ROOT / q["script"]).exists():
         bad.append(f"参数 {q['name']}：script 不存在 → {q['script']}")
@@ -58,7 +69,8 @@ for p in PAPERS:
     for c in p["claims"]:
         n[c["status"]] += 1
 tot = sum(n.values())
-print(f"✓ 台账校验通过：{len(PAPERS)} 篇来源、{tot} 条主张、{len(PARAMETERS)} 个关键参数")
+nv = sum(len(c.get("verify", [])) for p_ in PAPERS for c in p_["claims"])
+print(f"✓ 台账校验通过：{len(PAPERS)} 篇来源、{tot} 条主张、{len(PARAMETERS)} 个关键参数、{nv} 个数字与结果文件逐一核对")
 print("  " + "　".join(f"{LABEL[k][1]} {v}" for k, v in n.items() if v))
 if a.check:
     sys.exit(0)
