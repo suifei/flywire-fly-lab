@@ -71,10 +71,13 @@ PAPERS = [
                   result="**50 个集成成员全部通过**逐成员验证；45,669 个节点只由 604 个核、**2,355 个抽头**决定 → 80 KB JSON",
                   caveat="导出脚本会验证这个前提，不成立就拒绝导出（exit 2）",
                   script="vision/export_flyvis_js.py", result_file="results/vision/flyvis_net.json", log="§28.1"),
-             dict(id="t4t5_dir", what="T4/T5 亚型的方向选择性", status="partial",
-                  result="偏好方向落在六边形点阵的**棱方向族 30°+60°k**（差 0.7–11.1°），不是顶点族；时间频率峰在 2–5 Hz",
-                  caveat="**T4d 与 T5b 没有方向选择性**——文献那套「a/b/c/d = 四个正交方向」在 flyvis 里不成立。集成扫描结果见台账 ensemble 字段",
-                  script="vision/t4t5_directions.js", result_file="results/vision/t4t5_directions.json", log="§28.17"),
+             dict(id="t4t5_dir", what="T4/T5 亚型的方向选择性（**50 个集成成员全测**）", status="partial",
+                  result="跨成员离散度极大：有方向选择性的成员数 T4a 34/50、T4b 31/50、T4c 42/50、**T4d 37/50**；"
+                         "T4a 偏好方向中位 275° 但范围 3–357°",
+                  caveat="**成员 000 里 T4d 与 T5b 没有方向选择性，但那只是它自己的性质**——T4d 在 37/50 个成员里有，"
+                         "DSI 中位 0.849。所以「文献的 a/b/c/d = 四个正交方向在 flyvis 里不成立」必须限定为「在成员 000 里不成立」。"
+                         "「偏好方向落在六边形棱方向族」只有 T4a（28/34）与 T4b（24/31）有集成支持，T4c 仅 13/42",
+                  script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§28.17 + §33.2"),
          ]),
     dict(key="ache2019", cite="Ache et al. 2019, Curr Biol 29:1073-1081",
          url="https://www.cell.com/current-biology/fulltext/S0960-9822(19)30138-1",
@@ -110,9 +113,12 @@ PAPERS = [
          url="https://www.nature.com/articles/nature24626", note="LPLC2 汇集「背离感受野中心」的运动",
          claims=[
              dict(id="lplc2_pooling", what="LPLC2 = 汇集背离中心的 T4/T5 运动", status="partial",
-                  result="按此形式实现并在合成刺激上验证：匀速扩张 > 匀速收缩 **1.24×**、逼近 > 两种平移 1.26×/1.69×",
-                  caveat="裕度很小；**只在峰值上成立，均值上近距平移反而更高**（与 §18 全脑结论一致）。汇集必须用 mean 不能用 max（max 时比值 0.76，是反的）",
-                  script="vision/lplc2_test.js", result_file="results/vision/lplc2_test.json", log="§28.18",
+                  result="在成员 000 上三条判据全过（匀速扩张 > 收缩 1.24×、逼近 > 两种平移 1.26×/1.69×），"
+                         "但**在 50 个集成成员里只有 8/49 三条全过**（A 单独 17/49、B 单独 11/49）",
+                  caveat="**成员 000 属于少数派（约 16%）**，所以这不是 flyvis 的普遍性质。此外裕度很小、"
+                         "**只在峰值上成立，均值上近距平移反而更高**（与 §18 全脑结论一致）；"
+                         "汇集必须用 mean 不能用 max（max 时比值 0.76，是反的）",
+                  script="vision/lplc2_test.js", result_file="results/vision/lplc2_test.json", log="§28.18 + §33.3",
                   verify=[("结果.loomLin.峰值", 0.1943, 0.0002), ("结果.recLin.峰值", 0.1569, 0.0002)]),
          ]),
     dict(key="hampel2015", cite="Hampel et al. 2015, eLife 4:e07866",
@@ -227,6 +233,14 @@ FINDINGS = [
          caveat="球半径 2.5 mm、小眼间角 5.7° → 60 mm 外不到一个小眼。败因是分辨率与未补偿的自体运动，不是 LPLC2 模型。"
                 "所以做成可切换对照，不做默认前端",
          script="dodge/front_end_compare.js", result_file="results/vision/front_end_compare.json", log="§28.19"),
+    dict(id="ensemble", what="我们的视觉结论有多少是「那一个模型」的性质",
+         result="50 个成员全跑：卷积前提 **50/50** 成立（唯一在集成层面稳的）；"
+                "而 LPLC2 三条判据全过只有 **8/49**，我们一直用的成员 000 正是其中之一",
+         caveat="T4d 在 **37/50** 个成员里**有**方向选择性（DSI 中位 0.849），"
+                "所以 §28.17 那句「T4d/T5b 无方向选择性」只是成员 000 的性质。"
+                "教训：`vision/export_flyvis_js.py` 里硬编码着 `flow/0000/000`，一路沿用了十几节——"
+                "**凡是「某个预训练模型给出 X」的结论，都要问一句：这个模型是从几个里挑的**",
+         script="vision/ensemble_check.js", result_file="results/vision/ensemble_summary.json", log="§33"),
     dict(id="lattice_distortion", what="flyvis 与 FlyWire 的柱坐标怎么对齐",
          result="用解剖（两视叶质心定左右、全脑质心→GNG 定腹侧、叉积定前后）加实测 T4/T5 方向，"
                 "把 8 种朝向**钉到唯一一种**（旋转 φ=277°，即 u=−p, v=−q）",

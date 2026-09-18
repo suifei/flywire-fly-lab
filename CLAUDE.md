@@ -167,6 +167,13 @@ node dodge/field_contrast.js           # are the visual-field sectors actually v
 node vision/opsin_weights.js           # Govardovskii 2000 opsin template -> per-channel weights (results/vision/opsin_weights.json).
 #   Rh1 (R1-R6, the main flyvis input) was NOT modelled at all before 2026-09-18; eyecam now returns r16 alongside color/uv.
 node vision/t4t5_directions.js         # measure T4/T5 preferred directions in flyvis with drifting gratings (~2 min).
+#   **ENSEMBLE CAVEAT (2026-09-19, report §33)**: flyvis ships 50 pretrained ensemble members and
+#   export_flyvis_js.py hardcoded flow/0000/000 — every vision conclusion from §18/§28.17/§28.18/§28.20 rests on
+#   THAT ONE MODEL. Running all 50 (`node vision/ensemble_check.js`, ~36 min, CPU): the hex-convolution premise holds
+#   50/50 (the only ensemble-level result), but "T4d and T5b are not direction-selective" is member-000-specific —
+#   T4d IS selective in 37/50 members with median DSI 0.849. The LPLC2 criteria pass in only 8/49 members and 000 is
+#   one of them. Preferred directions scatter across nearly the whole circle. Any "this pretrained model gives X"
+#   claim must state how many models it was picked from.
 #   MUST subtract the static-grating baseline (T4c/T4d/T5c/T5d have 0.15-0.36 tonic activity; skipping it put T4c's DSI at
 #   0.41 instead of 0.815). Result: preferred directions sit on the hex EDGE family (30+60k), NOT the vertex family;
 #   T4d and T5b are not direction-selective at all, so the literature a/b/c/d = four cardinal axes does NOT hold here.
