@@ -127,6 +127,23 @@ python dodge/measure_neurons_fullbrain.py   # full-brain knockout ratios for the
 python dodge/subcircuit_vs_fullbrain_knockouts.py   # does the subcircuit reproduce the full-brain screen? (read-only, exploratory, n=10) → results/dodge/subcircuit_vs_fullbrain_knockouts.json
 python dodge/collect_v6_results.py && python3 dodge/build.py   # page inlines results/dodge/v6_results.json at /*__V6__*/
 
+# "Let the fly draw your image" — whole fly visual system in the browser (report.md §28)
+# flyvis is a HEX CONVOLUTION net: 45,669 nodes = 65 types x 721 columns, 1.5M edges but only
+# 604 (source_type->target_type) kernels totalling 2,355 taps -> the entire visual system is 80 KB
+# of JSON and runs in JS at 4.6 ms/step. The exporter VERIFIES that premise (weights must depend
+# only on (stype,ttype,du,dv)) and refuses to export otherwise.
+conda activate fba
+python vision/export_flyvis_js.py      # -> results/vision/flyvis_net.json (80 KB)
+python vision/export_retina_js.py      # FlyGym ommatidia_id_map -> retina_map.png/.bin + retina.json
+python vision/flyvis_parity.py && python vision/retina_parity.py   # fixtures for the JS parity tests
+python vision/train_decoder.py --n 24 --steps 40   # hex-conv decoders, HELD-OUT WHOLE IMAGES (~12 min)
+python vision/draw_eye.py loom_L       # render existing flyvis data as a compound-eye view (no sim)
+node vision/flyvis_parity.js && node vision/retina_parity.js && node vision/eye_e2e.js
+node dodge/browser_test.js             # real Chrome; CI=1 makes a missing Chrome an error, not a skip
+# Conventions that were verified, never guess them: du,dv = target - source;
+# the 721 brightnesses go to R1-R8 simultaneously; display swaps axes (camera x <-> hex y).
+# T4/T5 barely respond to a STATIC image, so the fly must saccade - that is a requirement, not decoration.
+
 # Fly "speaks Chinese" → Claude Opus 5 (report.md §13)
 conda activate brain-fly-cpu && python language/fly_words.py   # 12 words × sensory populations, 301 trials in one Brian2 run (429 s, 3.3 GB) → ridge decoders → first sentence
 python3 language/ask_claude.py                                 # sends the sentence verbatim via `claude -p --model claude-opus-5` from a temp dir OUTSIDE the repo

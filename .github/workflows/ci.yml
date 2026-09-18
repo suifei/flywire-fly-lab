@@ -31,6 +31,12 @@ jobs:
       - name: 冒烟测试（用真实数据执行渲染路径）
         run: node dodge/smoke_test.js
 
+      - name: 视觉链路 parity（JS 必须和 Python 逐值对上）
+        run: |
+          node vision/flyvis_parity.js
+          node vision/retina_parity.js
+          node vision/eye_e2e.js
+
       - name: Python 语法检查
         run: |
           python3 -m py_compile run_experiment.py connectome_vision_loop.py \
@@ -47,3 +53,18 @@ jobs:
             echo "::error::  python3 dodge/build.py && cp results/dodge/fly_dodge.html docs/game.html"
             exit 1
           fi
+
+      - name: 安装浏览器测试依赖
+        run: npm install --no-audit --no-fund
+
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+
+      - name: 真浏览器里跑一遍「让果蝇看你的图」
+        # smoke_test 只能跑不依赖 DOM 的分支；复眼这块要 canvas / getImageData。
+        # 这个项目吃过亏：node --check 全过，线上白屏。
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: node dodge/browser_test.js

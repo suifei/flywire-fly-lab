@@ -154,6 +154,16 @@ svg.chart text { font: 10.5px var(--mono); fill: var(--muted); }
 .tip b { font: 600 12px var(--mono); }
 code { font: 12px var(--mono); }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+
+.eyebar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:10px 0; }
+.eyebar .btn { cursor:pointer; }
+.eyebar .go { font-weight:700; }
+.eyegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:8px 0; }
+.eyegrid figure { margin:0; text-align:center; }
+.eyegrid canvas { width:100%; height:auto; aspect-ratio:1; background:#0d1117; border-radius:8px; }
+.eyegrid figcaption { font-size:12px; opacity:.72; margin-top:4px; line-height:1.35; }
+.eyegrid figcaption.hi { opacity:1; }
+.eyegrid figcaption span { opacity:.6; font-size:11px; }
 </style>
 
 <div class="wrap">
@@ -309,6 +319,42 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1">
+      <h3>让果蝇看你的图</h3>
+      <p>上传一张图，果蝇用它<b>真实的视觉系统</b>看一遍，再画出来。链路上没有示意图：你的图先变成 450&times;512 的相机画面，按 FlyGym 的真实复眼采样表（含鱼眼畸变）归并到 <b>721 个小眼</b>，再喂进 flyvis 的预训练连接组视觉网络（65 类细胞 &times; 721 柱，2355 个卷积抽头），最后由六边形卷积解码器还原。</p>
+      <p>果蝇会<b>扫视</b>——因为 T4/T5 是运动检测器，盯着不动的图几乎不响应。真果蝇也靠扫视和飞行中的视网膜滑动看世界，所以动起来不是为了好看，是让视觉系统真正工作起来的必要条件。</p>
+      <div class="eyebar">
+        <label class="btn">选图片<input type="file" id="eFile" accept="image/*" hidden></label>
+        <span class="sub">或用预设：</span>
+        <button id="ePre_shapes">几何</button>
+        <button id="ePre_face">人脸</button>
+        <button id="ePre_text">文字</button>
+        <button id="eRun" class="go">让果蝇看</button>
+        <span class="sub">直显类型</span>
+        <select id="eType">
+          <option value="R1">R1 光感受器</option>
+          <option value="L1">L1 大单极（ON）</option>
+          <option value="L2">L2 大单极（OFF）</option>
+          <option value="Mi1" selected>Mi1 髓质</option>
+          <option value="Tm1">Tm1 髓质</option>
+          <option value="T4a">T4a 运动（前&rarr;后）</option>
+          <option value="T5a">T5a 运动（OFF）</option>
+        </select>
+        <span class="sub" id="eStatus"></span>
+      </div>
+      <div class="eyegrid">
+        <figure><canvas id="eSrc" width="190" height="190"></canvas><figcaption>你的图</figcaption></figure>
+        <figure><canvas id="eOmm" width="190" height="190"></canvas><figcaption>721 个小眼接收到的</figcaption></figure>
+        <figure><canvas id="eAct" width="190" height="190"></canvas><figcaption class="hi">神经活动直显<br><span>神经元里真有的</span></figcaption></figure>
+        <figure><canvas id="eRetina" width="190" height="190"></canvas><figcaption>解码自 R1&ndash;R8</figcaption></figure>
+        <figure><canvas id="eLamina" width="190" height="190"></canvas><figcaption>解码自 L1&ndash;L5</figcaption></figure>
+        <figure><canvas id="eMedulla" width="190" height="190"></canvas><figcaption>解码自 Mi/Tm</figcaption></figure>
+        <figure><canvas id="eMotion" width="190" height="190"></canvas><figcaption>解码自 T4/T5</figcaption></figure>
+      </div>
+      <p class="sub"><b>后四栏是解码重建，会「补」出神经活动里其实没有的细节</b>——解码器学的是训练图像的统计规律。第三栏是未经解码的原始活动，两者的差距本身就是要看的东西（同 &sect;15 解码器压力测试）。越往右的层，画面丢得越多：到 T4/T5 只剩大形状，细条纹没了。</p>
+      <p class="sub" id="eNote"></p>
+    </div>
+
     <div class="card">
       <h3>进食与苦味</h3>
       <p>每 4 s 在果蝇前方放一颗：糖 → 苦 → 混合 轮换（3 局 × 120 s，无球）。头部碰到颗粒 → 两侧糖/苦味觉神经元 200 Hz；MN9 平均 &gt; 30 Hz 就停下伸喙吃。</p>
@@ -503,6 +549,13 @@ code { font: 12px var(--mono); }
 <script id="v3-data" type="application/json">/*__V3__*/</script>
 <script id="v4-data" type="application/json">/*__V4__*/</script>
 <script id="v6-data" type="application/json">/*__V6__*/</script>
+<script id="flyvis-data" type="application/json">/*__FLYVIS_NET__*/</script>
+<script id="retina-data" type="application/json">/*__RETINA_META__*/</script>
+<script id="decoders-data" type="application/json">/*__DECODERS__*/</script>
+<script>/*__FLYVIS_JS__*/</script>
+<script>/*__RETINA_JS__*/</script>
+<script>/*__DECODER_JS__*/</script>
+<script>/*__EYE_JS__*/</script>
 <script>/*__BRAIN_JS__*/</script>
 <script>/*__GAME_CORE_JS__*/</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
@@ -1549,4 +1602,11 @@ code { font: 12px var(--mono); }
   readPalette(); resize(); paintScene(); poseFly();
   requestAnimationFrame(frame);
 })();
+</script>
+<script>
+bootFlyEye(
+  JSON.parse(document.getElementById("flyvis-data").textContent),
+  JSON.parse(document.getElementById("retina-data").textContent),
+  "data:image/png;base64,/*__RETINA_PNG_B64__*/",
+  JSON.parse(document.getElementById("decoders-data").textContent));
 </script>

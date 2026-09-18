@@ -50,6 +50,10 @@ results/vision/*
 !results/vision/*.json
 # 这张图是 dodge/build.py 重建游戏页的必需输入（246 KB），不放行的话别人 clone 下来构建会失败
 !results/vision/lplc2_looming_vs_translation.png
+# 复眼采样表：PNG 是 build.py 内联进游戏页的必需输入（15 KB），
+# BIN 是 Node 端 parity 测试用的同一张表（450 KB）。两个都不放行，CI 会挂。
+!results/vision/retina_map.png
+!results/vision/retina_map.bin
 !results/vnc/
 results/vnc/*
 !results/vnc/*/
@@ -102,3 +106,8 @@ scratch/artifact-capture/
 # ── GitHub Pages ────────────────────────────────────────
 # docs/ 全部发布（game.html 由 dodge/build.py 生成后复制过来）
 !docs/
+
+# ── 内容制作工作区（视频 / 文章 / 配音素材）────────────────────
+# 不进仓库：里面是录屏、渲染中间件、配音稿、平台相关的运营材料，
+# 与代码和科研结果无关，体积也大。
+studio/
