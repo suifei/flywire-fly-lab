@@ -419,7 +419,7 @@ function initFlyEye(assets) {
     const fs = window.__flyScene;
     const box = $("eyecam");
     if (!fs || !box || typeof FlyEyeCam === "undefined") { if (box) box.hidden = true; return; }
-    const cvL = $("ecL"), cvR = $("ecR"), cvB = $("ecB");
+    const cvL = $("ecL"), cvR = $("ecR"), cvB = $("ecB"), cvUV = $("ecUV");
     // 视线要用**头部位姿**，不能只用机体偏航角 —— 起飞时机体大幅上仰，
     // 只用偏航角的话视线还在平视，看到的东西是错的（用户实测发现）。
     //
@@ -462,13 +462,13 @@ function initFlyEye(assets) {
                               { sky, selfMeshes: fs.selfMeshes });
     } catch (err) { box.hidden = true; return; }
     // ── 主画面上的视野投影 ────────────────────────────────
-    // 用的是量出来的真实几何：每眼 157°（FlyGym fovy_per_eye），
+    // 每眼 171°（点阵半径 15 × 小眼间角 5.7°），
     // 光轴 ±63.1°（MuJoCo 里实测），于是：
-    //   正前 30.8° 双眼重叠 · 两侧各 126.2° 单眼 · 背后 77° 盲区
+    //   正前 44.8° 双眼重叠 · 两侧各 126.2° 单眼 · 背后 62.8° 盲区
     // 画在地面上，是**水平投影**；果蝇俯仰时真实视野会跟着转，这里不表现。
     const field = (() => {
       const T = fs.THREE, DEG = Math.PI / 180;
-      const half = FlyEyeCam.FOVY / 2 * DEG, ax = FlyEyeCam.EYE_AZ;
+      const half = FlyEyeCam.HALF_FOV, ax = FlyEyeCam.EYE_AZ;
       const ov = half - ax;                        // 单侧重叠半角
       const R = 22;
       const mk = (from, to, color, op) => {
@@ -506,13 +506,15 @@ function initFlyEye(assets) {
       const head = pickHead();
       if (!head) return;
       try {
-        const readouts = cam.update(head, [cvL, cvR]);
-        if (cvB && readouts) cam.drawBrain(cvB, readouts);
+        const r = cam.update(head, [cvL, cvR]);
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
     };
-    if (note) note.textContent = "果蝇视角 · 721 小眼/眼 · 3 fps";
+    if (note) note.textContent =
+      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 立方体贴图精确采样 · 3 fps`;
 
     // 几何自检用的钩子（dodge/eyecam_geom_test.js 会用）：
     // 能强制刷新一次，并拿到虚拟头部，这样测试可以把已知方位的物体
@@ -521,16 +523,18 @@ function initFlyEye(assets) {
       forceUpdate() {
         const head = pickHead(); if (!head) return null;
         const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r);
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
         return r;
       },
       head: () => pickHead(),
-      EYE_AZ: FlyEyeCam.EYE_AZ, FOVY: FlyEyeCam.FOVY,
+      EYE_AZ: FlyEyeCam.EYE_AZ, HALF_FOV: FlyEyeCam.HALF_FOV, DPHI: FlyEyeCam.DPHI,
       dirs: () => cam.dirs,
+      instance: () => cam,            // 几何自检要直接查立方体贴图缓冲
       perm: () => cam.permArr,       // flyvis 柱序 → flygym 序（方向表按后者索引）
       cams: () => cam.cams,          // 两台眼相机，用来核对它们到底朝哪
-      brainAzRange: 150,          // drawBrain 画的是 ±150°
+      brainAzRange: 155,          // drawBrain 画的是 ±155°
     };
   })();
 

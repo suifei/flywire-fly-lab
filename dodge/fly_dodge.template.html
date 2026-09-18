@@ -174,7 +174,7 @@ code { font: 12px var(--mono); }
 .eyecam figure { margin:0; text-align:center; }
 .eyecam .ec-row canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
 .eyecam figcaption { font-size:9px; opacity:.6; margin-top:1px; }
-#ecB { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
+#ecB, #ecUV { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
 .ec-scale { display:flex; justify-content:space-between; width:162px; font-size:8px; opacity:.45; margin-top:1px; }
 .eyecam small { display:block; font-size:9px; opacity:.55; margin-top:2px; text-align:center; }
 @media (max-width: 720px) { .eyecam canvas { width:56px; height:56px; } }
@@ -212,6 +212,8 @@ code { font: 12px var(--mono); }
           </div>
           <canvas id="ecB" width="300" height="104"></canvas>
           <div class="ec-scale"><span>左 90&deg;</span><span>前 0&deg;</span><span>右 90&deg;</span></div>
+          <canvas id="ecUV" width="300" height="104"></canvas>
+          <div class="ec-scale"><span>R7 紫外</span><span>手写反射率</span></div>
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
       </div>
@@ -263,7 +265,7 @@ code { font: 12px var(--mono); }
           <label class="k">环境</label>
           <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
           <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
-          <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>157°/眼 · 光轴 ±63.1° · 正前 30.8° 双眼重叠</small></label>
+          <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>171°/眼 · 光轴 ±63.1° · 正前 44.8° 双眼重叠 · 背后 62.8° 盲区</small></label>
           <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
         </div>
         <div class="row">
@@ -383,7 +385,9 @@ code { font: 12px var(--mono); }
       </div>
       <p class="sub"><b>后四栏是解码重建，会「补」出神经活动里其实没有的细节</b>——解码器学的是训练图像的统计规律。第三栏是未经解码的原始活动，两者的差距本身就是要看的东西（同 &sect;15 解码器压力测试）。越往右的层，画面丢得越多：到 T4/T5 只剩大形状，细条纹没了。</p>
       <p class="sub"><b>舞台右上角那个小窗</b>是同一套东西的实时版：把 3D 世界从果蝇眼睛的位置再渲一遍（左右眼各偏前方 50&deg;），走同一张采样表成像。为了实时<b>跳过了 flyvis 和解码器</b>，只到「视网膜接收到什么」为止，每秒刷 3 次（读回 GPU 像素会打断渲染流水线）。渲染时会把果蝇自己的网格藏起来——摄像机在身体前方，不藏的话它自己的头会糊满半个视野。<br>
-      诚实标注：<b>小眼排布、采样表、pale/yellow 分型是真实的</b>；<b>视野角度和镜头畸变是近似的</b>（FlyGym 的鱼眼参数没有照搬，用的是 130&deg; 透视投影；真果蝇单眼视野接近 180&deg;，透视投影到不了）；天空是游戏的 CSS 渐变、不在 3D 场景里，所以离屏渲染时用舞台天空色补了个底。</p>
+      <b>视野边缘不再是近似</b>：一开始用透视投影 + FlyGym 的鱼眼校正，但透视投影天生到不了 180&deg;，157&deg; 时边缘已经被拉得极扁，鱼眼公式还有个奇点。现在改成<b>立方体贴图</b>——六个 90&deg; 面覆盖整个球面，每个小眼按自己的视线方向精确采样，不需要任何畸变补偿。小眼方向按六边形点阵定义：半径 15、小眼间角 5.7&deg;，<b>单眼视野 171&deg;</b>，接近真果蝇（文献 ~160&ndash;180&deg;）。几何自检实测：9 个已知方位平均误差 <b>0.7&deg;</b>。<br>
+      <b>紫外（R7）</b>那一路是<b>手写设定</b>：sRGB 渲染里没有紫外，所以给场景里每类物体指定了一个紫外反射率。依据是真实的紫外世界结构——自然界里天空是压倒性的紫外源、绝大多数表面紫外很暗，果蝇正是靠这个对比找开阔空间、判断上下。<b>但数值没有任何测量依据</b>，只是结构上说得通；上传的照片里更是完全没有紫外信息。<br>
+      仍然是近似的：小眼间角取了常数 5.7&deg;（真果蝇从正前 ~4.5&deg; 到侧面 ~8&deg; 渐变）；天空是游戏的 CSS 渐变、不在 3D 场景里，离屏渲染时用舞台天空色补了个底。</p>
       <p class="sub" id="eNote"></p>
     </div>
 

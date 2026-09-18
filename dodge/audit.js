@@ -59,7 +59,8 @@ const chromePath = () => [process.env.CHROME_PATH,
     ok("flyvis 卷积抽头数", taps === 2355, taps, "2355");
     const ret = JSON.parse(document.getElementById("retina-data").textContent);
     ok("小眼数", ret.n_ommatidia === 721, ret.n_ommatidia, "721");
-    ok("相机画面尺寸", ret.width === 450 && ret.height === 512, `${ret.width}×${ret.height}`, "450×512");
+    ok("相机画面尺寸（上传图那条链路用）", ret.width === 450 && ret.height === 512,
+       `${ret.width}×${ret.height}`, "450×512");
     const pale = ret.pale_type_mask.reduce((a, b) => a + b, 0);
     ok("pale 型小眼（读蓝通道）", pale === 216, pale, "216");
     ok("yellow 型小眼（读绿通道）", 721 - pale === 505, 721 - pale, "505");
@@ -68,13 +69,15 @@ const chromePath = () => [process.env.CHROME_PATH,
     ok("解码器留出整张图测试", dec.n_test_images >= 2, dec.n_test_images + " 张", "≥2");
 
     // ── 复眼视窗几何 ──────────────────────────────────────
-    const fovy = D.FOVY, az = D.EYE_AZ * 180 / Math.PI;
-    ok("单眼视场 fovy（FlyGym 规范）", fovy === 157, fovy + "°", "157°");
+    const half = D.HALF_FOV * 180 / Math.PI, fovy = 2 * half, az = D.EYE_AZ * 180 / Math.PI;
+    ok("小眼间角 Δφ", Math.abs(D.DPHI * 180 / Math.PI - 5.7) < 0.01,
+       (D.DPHI * 180 / Math.PI).toFixed(1) + "°", "5.7°");
+    ok("单眼视野 = 2×15×Δφ", Math.abs(fovy - 171) < 0.2, fovy.toFixed(1) + "°", "171°");
     ok("光轴方位角（MuJoCo 实测）", Math.abs(az - 63.1) < 0.05, az.toFixed(1) + "°", "63.1°");
     const binoc = fovy - 2 * az, total = fovy + 2 * az, blind = 360 - total;
-    ok("双眼重叠 = fovy − 2×光轴", Math.abs(binoc - 30.8) < 0.2, binoc.toFixed(1) + "°", "30.8°");
-    ok("总视野 = fovy + 2×光轴", Math.abs(total - 283.2) < 0.2, total.toFixed(1) + "°", "283.2°");
-    ok("背后盲区", Math.abs(blind - 76.8) < 0.2, blind.toFixed(1) + "°", "76.8°");
+    ok("双眼重叠 = 单眼视野 − 2×光轴", Math.abs(binoc - 44.8) < 0.2, binoc.toFixed(1) + "°", "44.8°");
+    ok("总视野 = 单眼视野 + 2×光轴", Math.abs(total - 297.2) < 0.2, total.toFixed(1) + "°", "297.2°");
+    ok("背后盲区", Math.abs(blind - 62.8) < 0.2, blind.toFixed(1) + "°", "62.8°");
 
     // 方向表：两眼应对称，且范围接近 ±fovy/2 绕各自光轴
     const dirs = D.dirs();
@@ -88,12 +91,30 @@ const chromePath = () => [process.env.CHROME_PATH,
     ok("右眼方向表中心 ≈ −63.1°", Math.abs(rng[1].mid + 63.1) < 4, rng[1].mid.toFixed(1) + "°", "−63.1°±4");
     ok("两眼方向表对称", Math.abs(rng[0].mid + rng[1].mid) < 3,
        (rng[0].mid + rng[1].mid).toFixed(1), "≈0");
-    ok("方向表覆盖接近 fovy/2", Math.abs(rng[0].half - fovy / 2) < 8,
-       rng[0].half.toFixed(1) + "°", (fovy / 2) + "°±8");
+    ok("方向表覆盖 = 单眼半视野", Math.abs(rng[0].half - half) < 1,
+       rng[0].half.toFixed(1) + "°", half.toFixed(1) + "°");
+    // 每个小眼与本眼光轴的球面夹角必须都 ≤ 半视野（方位等距投影的定义）
+    let maxSep = 0;
+    for (let e = 0; e < 2; e++) {
+      const d = dirs[e], A = (e ? -1 : 1) * D.EYE_AZ;
+      for (let i = 0; i < d.az.length; i++) {
+        const c = Math.cos(d.el[i]) * Math.cos(d.az[i] - A);
+        const sep = Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI;
+        if (sep > maxSep) maxSep = sep;
+      }
+    }
+    ok("小眼与光轴最大夹角 = 半视野", Math.abs(maxSep - half) < 0.5,
+       maxSep.toFixed(1) + "°", half.toFixed(1) + "°");
+    // 紫外通道必须真的有数据，且与彩色通道不同（否则是同一路复制的）
+    const rr = D.forceUpdate();
+    let du = 0;
+    for (let i = 0; i < rr.uv[0].length; i++) du += Math.abs(rr.uv[0][i] - rr.color[0][i]);
+    ok("紫外通道与彩色通道不同", du / rr.uv[0].length > 0.02,
+       (du / rr.uv[0].length).toFixed(4), ">0.02");
     ok("有效小眼数（扣掉鱼眼奇点外）", rng[0].n > 600 && rng[0].n <= 721, rng[0].n, "600–721");
 
     // 两只眼必须给出**不同**的读数（否则是同一台相机渲了两次）
-    const rd = D.forceUpdate();
+    const rd0 = D.forceUpdate(), rd = rd0.color;
     let diff = 0;
     for (let i = 0; i < rd[0].length; i++) diff += Math.abs(rd[0][i] - rd[1][i]);
     ok("左右眼读数不同（不是同一台相机）", diff / rd[0].length > 0.01,
@@ -124,7 +145,7 @@ const chromePath = () => [process.env.CHROME_PATH,
     const spans = fans.map(p => p.thetaLength * 180 / Math.PI).sort((a, b) => a - b);
     ok("视野投影有 3 个扇区", fans.length === 3, fans.length, "3");
     if (spans.length === 3) {
-      ok("重叠扇区 = 30.8°", Math.abs(spans[0] - binoc) < 0.5, spans[0].toFixed(1) + "°", binoc.toFixed(1) + "°");
+      ok("重叠扇区 = 双眼重叠角", Math.abs(spans[0] - binoc) < 0.5, spans[0].toFixed(1) + "°", binoc.toFixed(1) + "°");
       ok("两个单眼扇区相等", Math.abs(spans[1] - spans[2]) < 0.5,
          `${spans[1].toFixed(1)}° / ${spans[2].toFixed(1)}°`, "相等");
       ok("三扇区合计 = 总视野", Math.abs(spans[0] + spans[1] + spans[2] - total) < 1,

@@ -16,73 +16,107 @@
  *   · 紫外缺失 —— 场景是 sRGB 渲的，没有紫外通道（果蝇最重要的通道之一）。
  */
 const FlyEyeCam = (() => {
-  // 全部照抄 FlyGym 的 config.yaml["vision"]，不是估的：
-  const RW = 450, RH = 512;              // raw_img_width_px / raw_img_height_px
-  const FOVY = 157;                      // fovy_per_eye（度，竖直方向）
-  const ZOOM = 2.72;                     // fisheye_zoom
-  const DIST = 3.8;                      // fisheye_distortion_coefficient
-  const EYE_AZ = 63.1 * Math.PI / 180;   // 左右眼光轴相对机体前方的方位角
-                                         // （在 MuJoCo 里实测 LEye_cam +63.1° / REye_cam −63.1°）
+  // 光轴方位角：在 MuJoCo 里实测 LEye_cam +63.1° / REye_cam −63.1°
+  const EYE_AZ = 63.1 * Math.PI / 180;
+
+  // ── 小眼视线方向：直接从六边形点阵算 ──────────────────────
+  //
+  // 为什么不再用 FlyGym 那套（157° 透视 + 鱼眼校正）：
+  // 那是为 MuJoCo 的**直线渲染**做的补偿 —— 透视投影天生到不了 180°，
+  // 157° 时边缘已经被拉得极扁，鱼眼公式还有个奇点（半径 0.513 处分母变号）。
+  // 换成立方体贴图后不存在这个限制：六个 90° 面覆盖整个球面，
+  // 任意方向都能精确采样，于是小眼方向可以直接按点阵定义。
+  //
+  // 点阵半径 15（721 = 3·15²+3·15+1），小眼间角取 5.7°，
+  // 单眼视野 = 2×15×5.7 = **171°**，接近真果蝇（文献 ~160–180°）。
+  // 真果蝇的小眼间角从正前 ~4.5° 到侧面 ~8° 渐变，这里取**常数 5.7°**
+  // 是简化，属于手写设定。
+  const DPHI = 5.7 * Math.PI / 180;
+  const HALF_FOV = 15 * DPHI;              // 每眼半视野 85.5° → 单眼 171°
 
   /**
-   * FlyGym 的鱼眼校正（`Retina._correct_fisheye`，源自 iFish, MIT）。
-   * MuJoCo 渲的是**直线透视图**，边缘角度被过度拉伸；这一步把它扭成
-   * "等角等像素"，**然后才**用 ommatidia_id_map 采样（见 fly.py:1098）。
-   * 之前我整个漏了这一步，所以视野边缘是错的。
-   *
-   * 这里预先算出「校正后像素 → 原始像素」的查找表，跑的时候只剩一次取址。
-   * @returns {Int32Array} 长度 RW*RH，值为原始图的像素下标；-1 表示落在画面外
+   * @param {Array<[number,number]>} lattice 721 个柱的轴向六边形坐标
+   * @param {number} sign +1 左眼 / −1 右眼
+   * @returns {{dir:Float64Array, az:Float64Array, el:Float64Array}}
+   *   dir 是 3×n 的方向（**头部本地系**：+x 前、+y 上、+z 右）
    */
-  function buildFisheye() {
-    const map = new Int32Array(RW * RH).fill(-1);
-    for (let r = 0; r < RH; r++) {
-      const rn = ((2 * r - RH) / RH) / ZOOM;
-      for (let c = 0; c < RW; c++) {
-        const cn = ((2 * c - RW) / RW) / ZOOM;
-        const denom = 1 - DIST * (cn * cn + rn * rn) + 1e-6;
-        // 奇点：denom 在半径 r > sqrt(1/3.8) = 0.513 处变负，映射翻转到对侧，
-        // 取到的是镜像位置的垃圾内容。最外圈小眼正好落在这附近
-        // （画面角上 r ≈ 0.52），几何自检里表现为"物体出现在视野最外缘"。
-        // 这一圈标为无效，宁可空着也不要假内容。
-        if (denom <= 0.05) continue;
-        const sr = Math.trunc(((rn / denom) + 1) * RH / 2);
-        const sc = Math.trunc(((cn / denom) + 1) * RW / 2);
-        if (sr >= 0 && sr < RH && sc >= 0 && sc < RW) map[r * RW + c] = sr * RW + sc;
-      }
+  function latticeDirs(lattice, sign) {
+    const n = lattice.length;
+    const dir = new Float64Array(n * 3), az = new Float64Array(n), el = new Float64Array(n);
+    const yaw0 = sign * EYE_AZ;
+    // 光轴 F，以及它所在切平面的两个基：R = 方位角增大的方向，U = 上。
+    const F = [Math.cos(yaw0), 0, -Math.sin(yaw0)];
+    const R = [-Math.sin(yaw0), 0, -Math.cos(yaw0)];
+    const U = [0, 1, 0];
+    for (let i = 0; i < n; i++) {
+      const [u, v] = lattice[i];
+      const hx = u + v / 2, hy = v * Math.sqrt(3) / 2;
+      // **方位等距投影**：把 (hx,hy) 当成偏离光轴的角度向量，
+      // 偏离角 θ = |h|·Δφ，方向 φ = atan2(hy,hx)。
+      //
+      // 第一版把 hx、hy 分别当成方位角和仰角（等距圆柱投影），
+      // 结果仰角接近 ±85° 的小眼全挤向极点、方位角失去意义 ——
+      // 几何自检里表现为"右眼报出本该只有左眼看得到的方位"。
+      const th = Math.hypot(hx, hy) * DPHI, ph = Math.atan2(hy, hx);
+      const ct = Math.cos(th), st = Math.sin(th), cp = Math.cos(ph), sp = Math.sin(ph);
+      const x = F[0] * ct + (R[0] * cp + U[0] * sp) * st;
+      const y = F[1] * ct + (R[1] * cp + U[1] * sp) * st;
+      const z = F[2] * ct + (R[2] * cp + U[2] * sp) * st;
+      dir[i * 3] = x; dir[i * 3 + 1] = y; dir[i * 3 + 2] = z;
+      az[i] = Math.atan2(-z, x);          // 与 d=(cos az·cos el, sin el, −sin az·cos el) 一致
+      el[i] = Math.asin(Math.max(-1, Math.min(1, y)));
     }
-    return map;
+    return { dir, az, el };
   }
 
   /**
-   * 每个小眼的视线方向（机体坐标系）。
-   *
-   * 小眼中心坐标是在**校正后**的图像里量的（id_map 作用于 fish_img），
-   * 所以要先经鱼眼逆映射回原始像素，再按 fovy=157° 的透视投影算出射线，
-   * 最后绕 z 轴转 ±63.1° 到机体坐标系。
-   * @returns {{az:Float64Array, el:Float64Array}} 方位角/仰角，弧度
+   * 世界方向 → 立方体贴图的（面, 像素下标）。
+   * 用的是 OpenGL 立方体贴图的标准约定；面序 0:+X 1:−X 2:+Y 3:−Y 4:+Z 5:−Z。
+   * readRenderTargetPixels 读回是**自下而上**的，所以行要翻。
    */
-  function eyeDirections(cx, cy, fish, sign) {
-    const n = cx.length;
-    const az = new Float64Array(n), el = new Float64Array(n);
-    const ty = Math.tan(FOVY * Math.PI / 360);      // tan(fovy/2)
-    const tx = ty * (RW / RH);                      // 水平半角（同一焦距）
-    const yaw = sign * EYE_AZ;
-    for (let k = 0; k < n; k++) {
-      const dc = Math.round(cx[k]), dr = Math.round(cy[k]);
-      const si = (dr >= 0 && dr < RH && dc >= 0 && dc < RW) ? fish[dr * RW + dc] : -1;
-      if (si < 0) { az[k] = NaN; el[k] = NaN; continue; }   // 落在鱼眼奇点外，方向无意义
-      const sr = (si / RW) | 0, sc = si % RW;
-      // 相机看向 -z，x 向右、y 向上（MuJoCo / three.js 一致）
-      const x = (2 * sc / RW - 1) * tx, y = (1 - 2 * sr / RH) * ty, z = -1;
-      // 相机 -z → 机体 +x（前方）；相机 +x → 机体 -y（右）；相机 +y → 机体 +z（上）
-      const fx = -z, fy = -x, fz = y;
-      const cxr = Math.cos(yaw), sxr = Math.sin(yaw);
-      const bx = fx * cxr - fy * sxr, by = fx * sxr + fy * cxr, bz = fz;
-      const len = Math.hypot(bx, by, bz);
-      az[k] = Math.atan2(by / len, bx / len);
-      el[k] = Math.asin(bz / len);
-    }
-    return { az, el };
+  function cubeLookup(x, y, z, size) {
+    const ax = Math.abs(x), ay = Math.abs(y), az2 = Math.abs(z);
+    let face, sc, tc, ma;
+    if (ax >= ay && ax >= az2) { ma = ax; if (x > 0) { face = 0; sc = -z; } else { face = 1; sc = z; } tc = -y; }
+    else if (ay >= az2) { ma = ay; if (y > 0) { face = 2; sc = x; tc = z; } else { face = 3; sc = x; tc = -z; } }
+    else { ma = az2; if (z > 0) { face = 4; sc = x; } else { face = 5; sc = -x; } tc = -y; }
+    let sX = Math.floor(0.5 * (sc / ma + 1) * size);
+    let sY = Math.floor(0.5 * (tc / ma + 1) * size);
+    sX = Math.min(size - 1, Math.max(0, sX));
+    sY = Math.min(size - 1, Math.max(0, sY));
+    // **不要翻行**：普通渲染目标 readRenderTargetPixels 是自下而上的，
+    // 但立方体贴图的面是自上而下存的 —— 多翻一次会让整幅画面上下颠倒，
+    // 表现为"小眼报出的方位和它实际看到的方向成镜像"。
+    // 这是实测出来的：在 +X 面上放偏心标记，实测行 133 而翻转后的预测是 47。
+    return face * size * size + sY * size + sX;
+  }
+
+  // ── 紫外反射率（手写设定，不是测量值）────────────────────
+  //
+  // 果蝇的 R7 是紫外感受器（pale 型 Rh3 ~345 nm / yellow 型 Rh4 ~375 nm），
+  // 而 sRGB 渲染里根本没有紫外。这里给场景里每类物体**指定**一个紫外反射率。
+  //
+  // 指定的依据是真实的紫外世界结构，不是随手编的：自然界里**天空是压倒性的
+  // 紫外源**，绝大多数表面紫外很暗 —— 果蝇正是靠这个对比找开阔空间、
+  // 判断上下（背侧边缘区）。所以这里天空给 1.0，地面和器械都很低。
+  //
+  // **但它终究是手写的**：数值没有任何测量依据，只是结构上说得通。
+  // 上传的照片里更是完全没有紫外信息，那一路会显示为"无数据"。
+  const UV = {
+    sky: 1.0, floor: 0.06, line: 0.30, seat: 0.09,
+    rig: 0.16, board: 0.22, rim: 0.18,
+    ball: 0.02, pellet: 0.14, fly: 0.05, default: 0.08,
+  };
+  function uvOf(obj) {
+    const n = (obj.name || "") + " " + (obj.parent && obj.parent.name || "");
+    if (/ball/i.test(n)) return UV.ball;
+    if (/pellet|dust/i.test(n)) return UV.pellet;
+    if (/court|floor/i.test(n)) return UV.floor;
+    if (/seat|stand/i.test(n)) return UV.seat;
+    if (/rim/i.test(n)) return UV.rim;
+    if (/board/i.test(n)) return UV.board;
+    if (/post|rig/i.test(n)) return UV.rig;
+    return UV.default;
   }
 
   class Cam {
@@ -96,36 +130,29 @@ const FlyEyeCam = (() => {
      */
     constructor(THREE, renderer, scene, retina, lattice, draw, opts = {}) {
       this.THREE = THREE; this.renderer = renderer; this.scene = scene;
-      this.retina = retina; this.draw = draw;
-      this.eyeYaw = opts.eyeYaw ?? (50 * Math.PI / 180);   // 两眼各偏离前方的角度
-      this.eyeUp = opts.eyeUp ?? 1.4;                      // 眼睛离身体原点的高度
-      this.eyeFwd = opts.eyeFwd ?? 0.9;                    // 向前偏移
-      this.fov = FOVY;                                     // 照抄 FlyGym 的 fovy_per_eye
-      this.target = new THREE.WebGLRenderTarget(RW, RH, {
+      this.retina = retina; this.draw = draw; this.lattice = lattice;
+      this.size = opts.cube || 192;                        // 每面边长
+      this.rt = new THREE.WebGLCubeRenderTarget(this.size, {
+        format: THREE.RGBAFormat, type: THREE.UnsignedByteType,
         minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-        format: THREE.RGBAFormat, depthBuffer: true,
       });
-      this.cams = [0, 1].map(() => {
-        const c = new THREE.PerspectiveCamera(this.fov, RW / RH, 0.05, 800);
-        c.up.set(0, 0, 1);
-        return c;
-      });
-      this.buf = new Uint8Array(RW * RH * 4);
-      this.G = new Float32Array(RW * RH);
-      this.B = new Float32Array(RW * RH);
+      // 两只眼几乎同位（FlyGym 里相距 0.76 mm，在本场景可忽略），
+      // 所以**一张立方体贴图两只眼共用**，各自按自己的方向表采样。
+      this.cube = new THREE.CubeCamera(0.05, 900, this.rt);
+      this.buf = new Uint8Array(this.size * this.size * 4);
+      this.faces = [];                                     // 6 面的 RGB
+      for (let f = 0; f < 6; f++) this.faces.push(new Uint8Array(this.size * this.size * 3));
+      this.dirs = [1, -1].map(sg => latticeDirs(lattice, sg));
       this.pale = retina.paleByColumn();
-      this.fish = buildFisheye();                          // 校正后像素 → 原始像素
-      // 每个小眼的视线方向（机体系）。左眼 +63.1°，右眼 −63.1°。
-      const m = retina.meta;
-      this.dirs = [1, -1].map(sg => eyeDirections(
-        Float64Array.from(m.centers_x), Float64Array.from(m.centers_y), this.fish, sg));
       this.permArr = retina.perm;
-      this.geom = null; this.lattice = lattice;
+      this.geom = null;
       this.lastMs = 0;
-      // 游戏的天空是 CSS 渐变，不在 3D 场景里。离屏渲染时那块是透明的，
-      // 果蝇会"看到"一片纯黑。用舞台的天空色当清屏色补上。
       this.sky = new THREE.Color(opts.sky || "#9fb4c8");
       this.selfMeshes = opts.selfMeshes || [];
+      this.n = lattice.length;
+      this.out = [new Float64Array(this.n), new Float64Array(this.n)];   // 彩色（G 或 B）
+      this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7）
+      this._uvMats = null;
     }
 
     /** 每秒最多刷几次（默认 3）——读回 GPU 像素会打断流水线，不能每帧做 */
@@ -147,63 +174,83 @@ const FlyEyeCam = (() => {
      * @param {HTMLCanvasElement[]} canvases [左眼, 右眼]
      * @returns {Float64Array[]} 两只眼的 721 个小眼读数，供合成视窗用
      */
+    /**
+     * @param {object} headObj 果蝇头部（用它的世界位姿：同时跟上机体姿态和头部摆动）
+     * @param {HTMLCanvasElement[]} canvases [左眼, 右眼]
+     * @returns {{color:Float64Array[], uv:Float64Array[]}}
+     */
     update(headObj, canvases) {
-      const { THREE, renderer, scene, target, cams, buf, G, B, retina, fish } = this;
+      const { THREE, renderer, scene, rt, cube, buf, faces, size, retina } = this;
       if (!this.geom) this.geom = this.draw.hexGeom(this.lattice, canvases[0].width, canvases[0].height);
       const prevTarget = renderer.getRenderTarget();
       const prevClear = renderer.getClearColor(new THREE.Color());
       const prevAlpha = renderer.getClearAlpha();
       renderer.setClearColor(this.sky, 1);
-      // 真果蝇看不到自己的头。FlyGym 渲眼图时也会把头、口器、胸、触角等
-      // 14 个部件隐藏（config.yaml 的 hidden_segments）。
-      const self = (this.selfMeshes || []).map(m => [m, m.visible]);
+
+      // 果蝇看不到自己的头（FlyGym 渲眼图时也隐藏头/口器/胸/触角共 14 个部件）
+      const self = this.selfMeshes.map(m => [m, m.visible]);
       for (const [m] of self) m.visible = false;
+
+      // 紫外：R 通道空着没用，正好拿来装 R7。渲之前把每个材质的 red
+      // 换成它的紫外反射率，渲完还原。这样一次渲染同时得到 紫外/绿/蓝 三路。
+      if (!this._uvMats) {
+        this._uvMats = [];
+        scene.traverse(o => {
+          if (!o.material) return;
+          for (const m of (Array.isArray(o.material) ? o.material : [o.material]))
+            if (m.color) this._uvMats.push([m, uvOf(o)]);
+        });
+      }
+      const savedR = this._uvMats.map(([m]) => m.color.r);
+      this._uvMats.forEach(([m, v], i) => { m.color.r = v; });
+      // 天空（清屏色）也要带紫外：自然界里天空是压倒性的紫外源
+      renderer.setClearColor(new THREE.Color(UV.sky, this.sky.g, this.sky.b), 1);
 
       const wp = this._wp || (this._wp = new THREE.Vector3());
       const wq = this._wq || (this._wq = new THREE.Quaternion());
       headObj.getWorldPosition(wp); headObj.getWorldQuaternion(wq);
-      // 头部网格的本地坐标轴**实测**是：+x 前方、+y 上方、+z 右方。
-      //   本地 +x → [0.964, 0.164, 0.211]  ≈ 前
-      //   本地 +y → [-0.241, 0.192, 0.951] ≈ 世界 +z（上）
-      //   本地 +z → [0.116, -0.967, 0.225] ≈ 世界 -y（右）
-      // 我一开始验证了前方轴，却想当然地把 +z 当成上，绕"右方"轴转 63.1°，
-      // 视线被抬到仰角 70.7° —— 看的全是天空。几何自检把这个揪了出来。
-      const fwd = (this._f || (this._f = new THREE.Vector3())).set(1, 0, 0).applyQuaternion(wq);
-      const up = (this._u || (this._u = new THREE.Vector3())).set(0, 1, 0).applyQuaternion(wq);
-      const tgt = this._t || (this._t = new THREE.Vector3());
-      const readouts = [];
+      cube.position.copy(wp);
+      cube.update(renderer, scene);
 
-      for (let e = 0; e < 2; e++) {
-        // 在头部本地系里定方向：+x 前、+z 右 → 向左是 −z。
-        // 左眼 +63.1°（偏左），右眼 −63.1°（偏右）。
-        const a = (e === 0 ? 1 : -1) * EYE_AZ;
-        const c = cams[e];
-        c.position.copy(wp);
-        c.up.copy(up);
-        tgt.set(Math.cos(a), 0, -Math.sin(a)).applyQuaternion(wq).multiplyScalar(10).add(wp);
-        c.lookAt(tgt);
-        c.updateProjectionMatrix();
-        renderer.setRenderTarget(target);
-        renderer.render(scene, c);
-        renderer.readRenderTargetPixels(target, 0, 0, RW, RH, buf);
-        // WebGL 读回自下而上，而采样表按正常图像（自上而下）建 →
-        // 不翻转的话果蝇看到的世界是上下颠倒的。
-        // 同时在这里做鱼眼校正：fish[dst] 给出该位置该取原始图的哪个像素。
-        for (let d = 0; d < RW * RH; d++) {
-          const si = fish[d];
-          if (si < 0) { G[d] = 0; B[d] = 0; continue; }
-          const sr = (si / RW) | 0, sc = si % RW;
-          const i = ((RH - 1 - sr) * RW + sc) * 4;
-          G[d] = buf[i + 1] / 255; B[d] = buf[i + 2] / 255;
+      for (let f = 0; f < 6; f++) {
+        renderer.readRenderTargetPixels(rt, 0, 0, size, size, buf, f);
+        const dst = faces[f];
+        for (let i = 0, j = 0; i < buf.length; i += 4, j += 3) {
+          dst[j] = buf[i]; dst[j + 1] = buf[i + 1]; dst[j + 2] = buf[i + 2];
         }
-        const hex = Float64Array.from(retina.sampleGB(G, B));
-        readouts.push(hex);
-        this.draw.drawHex(canvases[e], hex, this.geom, "mosaic", this.pale);
       }
+      this._uvMats.forEach(([m], i) => { m.color.r = savedR[i]; });
       for (const [m, v] of self) m.visible = v;
+
+      // 按每个小眼的方向去采样：不需要鱼眼，任意方向都能精确取到
+      const q = wq, n = this.n, pale = this.pale;
+      const vTmp = this._v || (this._v = new THREE.Vector3());
+      for (let e = 0; e < 2; e++) {
+        const d = this.dirs[e].dir, col = this.out[e], uvv = this.uv[e];
+        for (let j = 0; j < n; j++) {
+          // 方向表是按**点阵（柱序）**建的，不涉及 flygym 序 ——
+          // 这里曾经多套了一层 retina.perm，把方向全打乱了：
+          // 右眼会"看到"本该只有左眼能看到的方位（几何自检里表现为
+          // 两眼都看到同一个标记、合成质心落在 0° 附近）。
+          // 局部 → 世界：用 three.js 自己的实现，不手写四元数展开。
+          // 3 fps 下每帧 1442 次向量运算可以忽略，而手写展开是整条链路里
+          // 唯一没被独立验证过的一环（方向表、cubeLookup 都单独验过）。
+          vTmp.set(d[j * 3], d[j * 3 + 1], d[j * 3 + 2]).applyQuaternion(q);
+          const idx = cubeLookup(vTmp.x, vTmp.y, vTmp.z, size);
+          const face = (idx / (size * size)) | 0, off = (idx % (size * size)) * 3;
+          const px = faces[face];
+          uvv[j] = px[off] / 255;                            // R = 紫外
+          col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
+        }
+        this.draw.drawHex(canvases[e], col, this.geom, "mosaic", pale);
+      }
+
       renderer.setRenderTarget(prevTarget);
       renderer.setClearColor(prevClear, prevAlpha);
-      return readouts;
+      // 返回**副本**：this.out/this.uv 是复用缓冲区，直接返回引用的话
+      // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
+      return { color: this.out.map(a => Float64Array.from(a)),
+               uv: this.uv.map(a => Float64Array.from(a)) };
     }
 
     /**
@@ -214,39 +261,37 @@ const FlyEyeCam = (() => {
      * 鱼眼逆映射 + 157° 透视投影 + ±63.1° 光轴 算出来的。
      * 正前方那条重叠带就是**双眼视区**，两侧是单眼区，背后是盲区。
      */
-    drawBrain(cv, readouts) {
-      const g = cv.getContext("2d"), W = cv.width, H = cv.height;
-      g.clearRect(0, 0, W, H);
-      const AZ = 150 * Math.PI / 180;               // 画 ±150°，够覆盖 283° 的视野
-      const EL = 80 * Math.PI / 180;
-      const X = a => W * (0.5 + a / (2 * AZ));
-      const Y = e => H * (0.5 - e / (2 * EL));
-      // 双眼重叠带：两眼视场各 157°、光轴 ±63.1° → 重叠 157−2×63.1 = 30.8°
-      const ov = (157 - 2 * (EYE_AZ * 180 / Math.PI)) / 2 * Math.PI / 180;
+    drawBrain(cv, readouts, mode) {
+      const g = cv.getContext("2d"), W2 = cv.width, H2 = cv.height;
+      g.clearRect(0, 0, W2, H2);
+      const AZ = 155 * Math.PI / 180, EL = 90 * Math.PI / 180;
+      const X = a => W2 * (0.5 + a / (2 * AZ));
+      const Y = e => H2 * (0.5 - e / (2 * EL));
+      // 双眼重叠：每眼半视野 15×Δφ = 85.5°，光轴 ±63.1° → 重叠 ±22.4°
+      const ov = HALF_FOV - EYE_AZ;
       g.fillStyle = "rgba(255,255,255,.055)";
-      g.fillRect(X(-ov), 0, X(ov) - X(-ov), H);
+      g.fillRect(X(-ov), 0, X(ov) - X(-ov), H2);
       let lo = Infinity, hi = -Infinity;
       for (const r of readouts) for (const v of r) { if (v < lo) lo = v; if (v > hi) hi = v; }
       const rng = (hi - lo) || 1;
-      const rad = Math.max(1.4, W / 150);
+      const rad = Math.max(1.3, W2 / 170);
       for (let e = 0; e < 2; e++) {
-        const { az, el } = this.dirs[e], r = readouts[e], perm = this.permArr;
+        const { az, el } = this.dirs[e], r = readouts[e];
         for (let j = 0; j < r.length; j++) {
-          const k = perm[j];                        // 柱序 → flygym 序（方向表按 flygym 序）
-          if (!Number.isFinite(az[k])) continue;            // 无效小眼不画
           const t = (r[j] - lo) / rng;
-          g.fillStyle = this.pale[j]
-            ? `rgb(${(t * 90) | 0},${(t * 150) | 0},${(t * 255) | 0})`
-            : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`;
-          g.beginPath(); g.arc(X(az[k]), Y(el[k]), rad, 0, 7); g.fill();
+          // 紫外没有对应的可见色，用紫罗兰表示；彩色路按 pale/yellow 分型
+          g.fillStyle = mode === "uv"
+            ? `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`
+            : (this.pale[j]
+              ? `rgb(${(t * 90) | 0},${(t * 150) | 0},${(t * 255) | 0})`
+              : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`);
+          g.beginPath(); g.arc(X(az[j]), Y(el[j]), rad, 0, 7); g.fill();
         }
       }
-      // 不在这张画布上画刻度线 —— 它是**要被测量的数据画布**，
-      // 混进恒亮的装饰会在归一化后主导差分（几何自检一开始就被它骗了）。
-      // 刻度改用画布外的 HTML 标签。
+      // 不在数据画布上画刻度线 —— 恒亮装饰会在归一化后主导差分测量。
     }
   }
 
-  return { Cam, RW, RH, FOVY, ZOOM, DIST, EYE_AZ, buildFisheye, eyeDirections };
+  return { Cam, DPHI, HALF_FOV, EYE_AZ, latticeDirs, cubeLookup, UV };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = FlyEyeCam;
