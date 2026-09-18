@@ -68,7 +68,7 @@
     autoDust: false, dustEvery: 5,
     autoDist: 55, autoEvery: [1.4, 2.2], ballLife: 4,
 
-    // —— v4：手写嗅觉导航（非连接组；全脑模型给不出气味侧化，见 report.md 11.4）——
+    // —— v4：手写嗅觉导航（非连接组；全脑模型给不出气味侧化，见 docs/log/report.md 11.4）——
     // 颗粒散发高斯气味场；左右触角各采一次浓度，浓度 > odorMin 时按 sign(左 − 右) 以 odorTurn 转向，叠加在 DNa 转向上；
     // 已经尝过（碰过）的颗粒不再吸引。odorNav 为 true 时自动放的颗粒改放在 pelletAround mm 外的随机方位。
     odorNav: false, odorSigma: 15, odorTurn: 120, odorMin: 0.01, antennaAhead: 1.0, antennaSep: 0.6, pelletAround: 25,

@@ -13,7 +13,7 @@
   * LIF 模型与注入方式与 run_experiment.py 相同（Shiu et al. 参数；Poisson 事件 v += 68.75 mV，被注入神经元不应期 0）。
 
 注意：脚本没有调用 b2.seed()，所以 standalone 每次 device.run 由系统随机源播种，40 次运行的泊松噪声互相独立
-（不同于 run_experiment.py 曾经的问题，见 report.md 14.0 节）。但每个条件默认只跑 1 次，没有重复；用 --repeats N 可以对每个条件重复 N 次，
+（不同于 run_experiment.py 曾经的问题，见 docs/log/report.md 14.0 节）。但每个条件默认只跑 1 次，没有重复；用 --repeats N 可以对每个条件重复 N 次，
 用来估计运行间的变异（结果写 connectome_responses_reps.csv，rates_*.npz 仍只存第 1 次）。
 用法（brain-fly-cpu 环境）：python vision/connectome_from_flyvis.py [--repeats N]
 输出：results/vision/connectome_responses.csv（每个刺激 × 朝向的汇总）与 results/vision/rates_<stim>_o<k>.npz（20 ms 发放率曲线）
