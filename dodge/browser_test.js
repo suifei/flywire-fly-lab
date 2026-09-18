@@ -50,7 +50,8 @@ function chromePath() {
     if (strict) { console.error("✗ " + m); process.exit(1); }
     console.log("跳过：" + m); process.exit(0);
   }
-  if (!fs.existsSync(PAGE)) { console.error(`没有 ${PAGE}`); process.exit(1); }
+  const isUrl = /^https?:\/\//.test(PAGE);
+  if (!isUrl && !fs.existsSync(PAGE)) { console.error(`没有 ${PAGE}`); process.exit(1); }
 
   const browser = await puppeteer.launch({
     executablePath: exe, headless: "new",
@@ -63,8 +64,9 @@ function chromePath() {
   page.on("console", m => { if (m.type() === "error") errs.push("console: " + m.text()); });
   page.on("pageerror", e => errs.push("pageerror: " + e.message));
 
-  console.log(`打开 ${path.relative(ROOT, PAGE)} …`);
-  await page.goto("file://" + PAGE, { waitUntil: "load", timeout: 120000 });
+  const target = isUrl ? PAGE : "file://" + PAGE;
+  console.log(`打开 ${isUrl ? PAGE : path.relative(ROOT, PAGE)} …`);
+  await page.goto(target, { waitUntil: "load", timeout: 180000 });
 
   // 等资产装配完成（eNote 被填上说明 bootFlyEye 跑通了）
   await page.waitForFunction(
