@@ -191,6 +191,19 @@ def build_world(looming):
     return fly, sim, cam
 
 
+VARIANT_ARGS = (("gain", "lc4_gain"), ("turn", "turn_gain"), ("win", "window_ms"), ("dur", "duration"))
+
+
+def variant_suffix(a, ap):
+    """非默认参数 → 目录名后缀，默认参数 → 空串（写正典目录）。
+
+    §26 的原始运行被 §27 的 gain 标定运行覆盖过，所以这道保护是必需的。
+    抽成函数是为了能单独测——只看代码不算验证过。
+    """
+    return "".join(f"_{short}{getattr(a, name):g}"
+                   for short, name in VARIANT_ARGS if getattr(a, name) != ap.get_default(name))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--duration", type=float, default=1.0)
@@ -208,8 +221,14 @@ def main():
     a = ap.parse_args()
     looming = not a.no_looming
     tag = ("frontend_" if a.frontend_only else "") + ("looming" if looming else "control")
-    a.out = a.out or HERE / "results" / f"connectome_loop_{tag}"
+    # 非默认参数写带后缀的目录，**不覆盖正典结果**。
+    # 这道保护是补上的：报告 §26 的原始运行就被 §27 的 gain 标定运行覆盖掉了，
+    # 只是碰巧 §27.0 给日志加了 exp_L/exp_R，§26 的数字才能反算回来（见 §26 末补记）。
+    variant = variant_suffix(a, ap)
+    a.out = a.out or HERE / "results" / f"connectome_loop_{tag}{variant}"
     a.out.mkdir(parents=True, exist_ok=True)
+    if variant:
+        print(f"非默认参数 → 写入 {a.out.name}（不覆盖正典目录 connectome_loop_{tag}）")
     device = a.device if a.device != "auto" else (
         "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
