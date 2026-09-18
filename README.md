@@ -4,11 +4,11 @@
 > **先看 [`REPRODUCTION.md`](REPRODUCTION.md)**：对着论文逐条验了什么、结果如何、哪些做不到。
 > 完整过程日志在 [`docs/log/report.md`](docs/log/report.md)。
 
-**把果蝇全脑连接组跑在一台 16 GB 笔记本上，接上身体，做成游戏，再对它做 17,628 次虚拟手术。**
+**把果蝇全脑连接组跑在一台 16 GB 笔记本上，接上身体，做成游戏，再对它做 18,799 次虚拟手术。**
 完整记录能做到什么、**做不到什么**，以及作者自查出的每一处错误。
 
 > A complete, reproducible attempt to run the *Drosophila* whole-brain connectome on a laptop:
-> wire it to a physics body, ship it as a browser game, and run a 17,628-segment virtual knockout
+> wire it to a physics body, ship it as a browser game, and run a 18,799-segment virtual knockout
 > screen across three sensory pathways. Every negative result and every self-caught mistake is
 > documented. Docs are in Chinese; code comments are in Chinese; issues in English are welcome.
 
@@ -26,7 +26,7 @@
 |---|---|
 | 模型规模 | 138,639 个神经元、15,091,983 条带权连接，dt = 0.1 ms |
 | 跑一秒大脑 | 约 2.5 秒，峰值内存 3–4 GB |
-| 虚拟敲除筛选 | **17,628 段**全脑仿真，9.88 小时机时，3 条感觉通路 |
+| 虚拟敲除筛选 | **18,799 段**全脑仿真，10.56 小时机时，3 条感觉通路 |
 | 浏览器里的子回路 | 4,599 个神经元、338,837 条连接（全脑的 3%），比实时快 13 倍 |
 
 ## 主要结论
@@ -58,11 +58,13 @@ JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的
 | 腹神经索产生走路节律 | 有节律，但凑不出三角步态；六条腿里实际只有一条在动 |
 | 闻到气味往哪边转 | 单侧刺激给不出左右差异；刺激稍强，约 8,300 个神经元一起失控放电 |
 | 学习 / 记忆 / 可塑性 | 模型里根本没有，突触权重固定 |
-| 闭环行为（大脑 + 身体） | **仍未验证**。视觉前端已单独验证（[§26](docs/log/report.md)），但加载大脑后的行为没有结论 |
+| 闭环行为（大脑 + 身体） | **仍未验证**。视觉前端已单独验证（[§26](docs/log/report.md)），增益已标定（§27），但加载全脑后的行为没有结论 |
+| 让果蝇只靠眼睛躲球 | 做了，**是负结果且可量化**：真实像素 → flyvis → LPLC2 这条链路在 **45 mm 外读数恒为 0**，25 mm 以内才把球从噪声里分出来；而果蝇**光是走路**，自体运动的光流就造出峰值 **126 Hz** 的假逼近。球半径 2.5 mm、小眼间角 5.7°——60 mm 外它还不到一个小眼（[§28.19](docs/log/report.md)） |
 
 ## 作者自查出的错误
 
-[docs/log/report.md §23](docs/log/report.md) 里有一份**错误账本**，记录所有自己发现、又自己改掉的错误，不删。两轮逐数字核对（对照结果文件）共查出 **28 处**问题，其中：
+[docs/log/report.md §23](docs/log/report.md) 里有一份**错误账本**，记录所有自己发现、又自己改掉的错误，不删。三轮逐数字核对（对照结果文件）共查出 **40 处**问题。第三轮（2026-09-19，从最新结论倒查到最早）新查出 12 处，典型的有：
+机时账本**第三次**记少了（漏 1,171 段，因为它一直由报告正文里的临时 shell 循环生成）；同一个比值在页面用归一化、在报告用未归一化、两处都不标口径，导致文档自相矛盾；以及最重的一条——**我们所有视觉结论都建立在 flyvis 50 个预训练模型里的 1 个上**。其中：
 
 - 仿真软件把随机种子编译进程序，导致"跑了 4 次"其实是同一次的 4 份拷贝 → 34 个实验重跑；
 - 一张表里的 "2/2 准确率" 是**手写的字符串**，其中一个神经元**从来没有被测过** → 改为 "1/1 可测"；
