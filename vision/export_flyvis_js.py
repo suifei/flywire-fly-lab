@@ -16,20 +16,25 @@
 用法：conda activate fba && python vision/export_flyvis_js.py
 """
 import json
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "results/vision/flyvis_net.json"
+# 成员号可由命令行或环境变量指定。**默认 000 仍写权威文件**，其它成员写到
+# results/vision/ensemble/flyvis_net_<id>.json —— 不覆盖权威文件（这个坑刚踩过，见 §28.17）。
+MEMBER = os.environ.get("FLYVIS_MEMBER", "000")
+OUT = (ROOT / "results/vision/flyvis_net.json" if MEMBER == "000"
+       else ROOT / f"results/vision/ensemble/flyvis_net_{MEMBER}.json")
 
 
 def main():
     import flyvis
     import torch
 
-    nv = flyvis.NetworkView("flow/0000/000")
+    nv = flyvis.NetworkView(f"flow/0000/{MEMBER}")
     net = nv.init_network()
     c = net.connectome
     p = net._param_api()
@@ -112,7 +117,7 @@ def main():
           f"（{', '.join(f'{t}:{len(v)}' for t, v in exc.items())}）")
 
     doc = dict(
-        source="flyvis flow/0000/000 (pretrained, connectome-constrained)",
+        source=f"flyvis flow/0000/{MEMBER} (pretrained, connectome-constrained)",
         equation="dv/dt = 1/max(tau,dt) * (-v + bias + sum_in w*relu(v_src) + x_t); w=sign*syn_count*syn_strength; Euler",
         activation="relu",
         types=types,

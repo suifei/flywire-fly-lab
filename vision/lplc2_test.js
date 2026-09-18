@@ -37,11 +37,16 @@ const ROOT = path.resolve(__dirname, "..");
 const FlyVis = require(path.join(__dirname, "flyvis.js"));
 const LPLC2 = require(path.join(__dirname, "lplc2.js"));
 
-const netDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "results/vision/flyvis_net.json"), "utf8"));
+// 网络与方向表可由环境变量指定（集成扫描用）；默认是权威的成员 000。
+const NETFILE = process.env.FLYVIS_NET ? path.resolve(process.env.FLYVIS_NET)
+                                       : path.join(ROOT, "results/vision/flyvis_net.json");
+const DIRFILE = process.env.DIR_JSON ? path.resolve(process.env.DIR_JSON)
+                                     : path.join(ROOT, "results/vision/t4t5_directions.json");
+const netDoc = JSON.parse(fs.readFileSync(NETFILE, "utf8"));
 const net = FlyVis.load(netDoc);
 const lat = netDoc.lattice, N = lat.length;
 const pos = lat.map(([u, v]) => [u + v / 2, v * Math.sqrt(3) / 2]);
-const dirTable = JSON.parse(fs.readFileSync(path.join(ROOT, "results/vision/t4t5_directions.json"), "utf8")).定标;
+const dirTable = JSON.parse(fs.readFileSync(DIRFILE, "utf8")).定标;
 
 const model = LPLC2.build(lat, dirTable, {});   // 默认 R=20 / stride=3，理由见 lplc2.js
 console.log(`LPLC2 模型：用上 ${model.types.length} 个亚型 [${model.types.join(", ")}]，`
@@ -115,12 +120,13 @@ console.log(`\n判据 A   匀速扩张 > 匀速收缩   ${A ? "✓" : "✗"}  ($
 console.log(`记录 A'  加速逼近 > 时间倒放   ${A2 ? "✓" : "✗"}  (${res.loom.峰值} vs ${res.rec.峰值})  不作判据`);
 console.log(`判据 B   逼近 > 两种平移       ${B ? "✓" : "✗"}  (${res.loom.峰值} vs 近 ${res.transN.峰值} / 远 ${res.transF.峰值})`);
 // 同上：非默认 dt 只写带后缀的文件，绝不覆盖权威结果
-const OUT = path.join(ROOT, DT === 0.005 ? "results/vision/lplc2_test.json"
+const OUT = process.env.OUT_JSON ? path.resolve(process.env.OUT_JSON)
+          : path.join(ROOT, DT === 0.005 ? "results/vision/lplc2_test.json"
                                          : `results/vision/lplc2_test_dt${Math.round(DT * 1000)}ms.json`);
 fs.writeFileSync(OUT,
   JSON.stringify({ 模型: { 亚型: model.types, 中心数: model.centers, 感受野半径: model.R },
                    预先判据: { A: "匀速扩张峰值 > 匀速收缩峰值", "A'": "加速逼近 > 时间倒放（记录，不作判据）",
                               B: "逼近峰值 > 两种平移峰值" },
                    结果: res, 判据A: A, "记录A'": A2, 判据B: B }, null, 1));
-console.log("→ " + path.relative(ROOT, OUT) + (DT === 0.005 ? "（权威）" : "（参数变体）"));
+console.log("→ " + path.relative(ROOT, OUT) + (DT === 0.005 && !process.env.FLYVIS_NET ? "（权威）" : "（变体）"));
 process.exit(A && B ? 0 : 1);

@@ -321,6 +321,14 @@ code { font: 12px var(--mono); }
           </div>
           <label class="toggle"><input type="checkbox" id="slowmo" checked> 飞行时慢放 <small>×0.04，看清拍翅；不慢放时翅膀按 218 Hz 显示为残影</small></label>
         </div>
+        <div class="row" id="perturbRow">
+          <label class="k" id="lblPert">动脑子</label>
+          <label class="toggle" style="gap:8px">突触权重 <input type="range" id="pWeight" min="40" max="160" value="100" style="width:96px"><small id="pWeightTxt">100%</small></label>
+          <label class="toggle" style="gap:8px">抑制强度 <input type="range" id="pInhib" min="0" max="200" value="100" style="width:96px"><small id="pInhibTxt">100%</small></label>
+          <label class="toggle"><input type="checkbox" id="pGlut"> 谷氨酸改兴奋性 <small>论文表 11F；子回路里 635 个（13.8%）</small></label>
+          <label class="toggle"><input type="checkbox" id="pShuffle"> 打乱接线 <small>论文表 1D 的对照：保出度与权重，只随机重排靶点</small></label>
+          <button id="pReset" type="button">复原</button>
+        </div>
         <div class="row">
           <label class="k" id="lblMap">转向映射</label>
           <div class="seg" role="group" aria-labelledby="lblMap">
@@ -486,6 +494,19 @@ code { font: 12px var(--mono); }
       </details>
     </div>
     <div class="card" style="grid-column: 1 / -1">
+      <h3 id="hPert">接线到底重不重要？——把论文的对照实验做成滑块</h3>
+      <p>舞台下方「动脑子」那一排，对应论文（Shiu et al. 2024）自己做过的对照。
+        <b>打乱接线</b>是补充表 1D：保持每个神经元的出度和它那串权重，只把突触后靶点随机重排——
+        接线一乱，糖味觉到伸喙运动神经元 MN9 的信号几乎全没了。
+        <b>权重 / 抑制滑块</b>是补充表 11B–E（论文取 ±30%），<b>谷氨酸改兴奋性</b>是表 11F
+        （默认模型把谷氨酸当抑制性；子回路里有 635 个谷氨酸能神经元，占 13.8%）。</p>
+      <div class="lower" style="gap:12px">
+        <div><p class="sub"><b>打乱接线：正确接线 vs 随机重排</b></p><div class="tbl"><table id="tShuf"></table></div></div>
+        <div><p class="sub"><b>参数扰动下，10 个神经元的敲除判定还一样吗</b></p><div class="tbl"><table id="tPert"></table></div></div>
+      </div>
+      <p class="sub" id="nPert"></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
       <h3 id="hVnc6">全腹神经索：6 条腿、巨纤维电突触、本体感觉闭环</h3>
       <p>同一个发放率模型换成完整的 MANC 腹神经索（23,532 个神经元，6 条腿）。作者代码是稠密矩阵、要约 9 GB，这里改成稀疏存储，方程、参数抽样和求解器不变；先在前足网络上和作者稠密版逐点对齐。刺激强度按“DNg100 发放率与前足网络默认实验相同”标定。</p>
       <div class="lower" style="gap:12px">
@@ -612,6 +633,8 @@ code { font: 12px var(--mono); }
 <div class="tip" id="tip" hidden></div>
 
 <script id="sub-data" type="application/json">/*__SUBCIRCUIT__*/</script>
+<script id="sub-nt" type="application/json">/*__SUB_NT__*/</script>
+<script id="perturb-data" type="application/json">/*__PERTURB__*/</script>
 <script id="gait-data" type="application/json">/*__GAIT__*/</script>
 <script id="play-data" type="application/json">/*__RESULTS__*/</script>
 <script id="flight-data" type="application/json">/*__FLIGHT__*/</script>
@@ -652,11 +675,37 @@ code { font: 12px var(--mono); }
   const ENC = { ache: { encoding: "ache2019", lplc2Mu: 45, gfTau: 0.02 }, legacy: { encoding: "legacy", gfTau: 0.08 } };
   const game = window.FlyDodgeGame.createGame(SUB, ConnectomeBrain, { seed: (Date.now() % 100000) + 1, ballSpeed: 60, mode: "auto",
     cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
+  // 递质标签：给「谷氨酸改兴奋性」那一档扰动用（论文补充表 11F）
+  try { game.brain.setNT(JSON.parse(document.getElementById("sub-nt").textContent).nt); } catch (e) {}
   window.__game = game;      // 供 dodge/audit.js 核对场地边界等不变量
   const POSES = JSON.parse(document.getElementById("poses-data").textContent);
   const V3R = JSON.parse(document.getElementById("v3-data").textContent);
   const V4R = JSON.parse(document.getElementById("v4-data").textContent);
   const V6R = JSON.parse(document.getElementById("v6-data").textContent);
+  // 「动脑子」那一排的实测结果（node dodge/measure_perturb.js 写的，页面不写字面量）
+  (() => {
+    const P = JSON.parse(document.getElementById("perturb-data").textContent);
+    const NM = { sugar: "糖 → MN9", water: "水 → MN9", groom: "梳理 → aDN1" };
+    const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    let h = "<tr><th>通路</th><th>正确接线</th><th>打乱后（" + P.shuffle.n + " 次）</th><th>比值</th></tr>";
+    for (const k of ["sugar", "water", "groom"]) {
+      const s = P.shuffle[k];
+      h += `<tr><td>${NM[k]}</td><td>${P.baseline_hz[k].toFixed(1)} Hz</td>`
+         + `<td>${s.均值Hz.toFixed(1)} ± ${s.标准差.toFixed(1)} Hz</td><td><b>${s.比值.toFixed(3)}</b></td></tr>`;
+    }
+    document.getElementById("tShuf").innerHTML = h;
+    let g = "<tr><th>扰动</th><th>判定不变</th><th>翻转的神经元</th></tr>";
+    for (const r of P.call_robustness.per_perturbation) {
+      const f = r.翻转的.map(x => `${esc(x.key)} ${x.基线}→${x.扰动后}`).join("；") || "—";
+      g += `<tr><td>${esc(r.扰动)}</td><td>${r.判定不变}/${r.总数}</td><td>${f}</td></tr>`;
+    }
+    document.getElementById("tPert").innerHTML = g;
+    document.getElementById("nPert").textContent =
+      `判据与论文一致：敲除后比值 ≤ ${P.call_robustness.call_threshold} 记为「该通路必需」，`
+      + `看的是判定是否翻转，不是发放率变了多少。翻转的全是贴着判据两侧的边缘情况。`
+      + `注意：论文在全脑 138,639 个神经元上跑，这里是 4,599 个的子回路；论文也没有公开打乱的具体做法，`
+      + `所以这里比的是定性方向，不声称复现论文的定量结果。`;
+  })();
   const V5_NOTES_ALL = "稍好但没有质变：标定强度下失控更少（1/16 对 3/16），更多腿出现节律，常有中右、右后两条同侧腿接近交替摆动（副本 1 相位差 164°）；但仍不是三足步态，同一条腿的摆动与支撑依旧同相，前左、前右、后左腿基本不动。相位性本体感觉反馈在不失控的副本里保持节律，但没有比开环更多的节律腿；错位对照一次反而多出两条腿、一次失控，没有一致证据说明反馈内容在起作用。巨纤维 → TTMn 结论不变：只有化学突触时 TTMn 基本不放电（0–1 Hz），手加等效 1,500 个突触的电突触后跟随 23/13 Hz（旧数据 30/25 Hz），巨纤维刺激 12/12 让全腹神经索失控。";
   const V5_NOTES = {
     all: V5_NOTES_ALL,
@@ -1105,6 +1154,21 @@ code { font: 12px var(--mono); }
   })();
   $("windOn").onchange = e => { CFG.wind = e.target.checked; motes.visible = e.target.checked; $("windvane").hidden = !e.target.checked; };
   $("lightSlider").oninput = e => { CFG.light = +e.target.value / 100; $("lightTxt").textContent = e.target.value + "%"; applyLight(CFG.light); };
+  // ── 论文式扰动（Shiu 2024 补充表 1D / 11B–F）──────────────────────────
+  // 这些是**定性演示**：论文在全脑上跑，这里是 4,599 个神经元的子回路；
+  // 而且论文没给打乱的具体做法，我们用的是"保出度与权重、只重排靶点"。
+  $("pWeight").oninput = e => { const v = +e.target.value / 100;
+    $("pWeightTxt").textContent = e.target.value + "%"; game.setPerturb("weightScale", v); };
+  $("pInhib").oninput = e => { const v = +e.target.value / 100;
+    $("pInhibTxt").textContent = e.target.value + "%"; game.setPerturb("inhibScale", v); };
+  $("pGlut").onchange = e => game.setPerturb("glutExc", e.target.checked);
+  $("pShuffle").onchange = e => game.setPerturb("shuffle", e.target.checked);
+  $("pReset").onclick = () => {
+    game.resetPerturb();
+    $("pWeight").value = 100; $("pWeightTxt").textContent = "100%";
+    $("pInhib").value = 100; $("pInhibTxt").textContent = "100%";
+    $("pGlut").checked = false; $("pShuffle").checked = false;
+  };
   $("saysOn").onchange = e => { if (!e.target.checked) $("says").hidden = true; };
   $("encAche").onclick = () => { Object.assign(CFG, ENC.ache); segSet([$("encAche"), $("encLegacy")], $("encAche")); $("encNote").textContent = "LC4 ∝ 角速度，LPLC2 = 角尺寸的高斯（中心 45°）。"; };
   $("encLegacy").onclick = () => { Object.assign(CFG, ENC.legacy); segSet([$("encAche"), $("encLegacy")], $("encLegacy")); $("encNote").textContent = "第一版：LC4 与 LPLC2 都 = 120 Hz ×（dθ/dt，rad/s）。"; };

@@ -388,6 +388,64 @@ const chromePath = () => [process.env.CHROME_PATH,
          links.map(a => a.tabIndex).join("/"), "≥0");
     }
 
+    // ── 论文式扰动（表 1D / 11B–F）──────────────────────────
+    // 这些开关最容易"看着生效实际没生效"：设了标志位但权重没动、或打乱了 post
+    // 却没被 run() 用上（run 原来解构的是 this.post，不是 postArr）。所以逐条查实际数组。
+    {
+      const b = g2.brain;
+      const w0 = Float32Array.from(b.w);
+      const sumAbs = a => { let s2 = 0; for (let i = 0; i < a.length; i++) s2 += Math.abs(a[i]); return s2; };
+      const neg = a => { let s2 = 0; for (let i = 0; i < a.length; i++) if (a[i] < 0) s2 += a[i]; return s2; };
+      const pos = a => { let s2 = 0; for (let i = 0; i < a.length; i++) if (a[i] > 0) s2 += a[i]; return s2; };
+      const b0 = { abs: sumAbs(w0), neg: neg(w0), pos: pos(w0) };
+
+      g2.setPerturb("weightScale", 0.5);
+      ok("权重滑块真的缩放了权重", Math.abs(sumAbs(b.w) / b0.abs - 0.5) < 1e-3,
+         (sumAbs(b.w) / b0.abs).toFixed(4), "0.5");
+      g2.setPerturb("weightScale", 1);
+
+      g2.setPerturb("inhibScale", 0.5);
+      ok("抑制滑块只动负权重", Math.abs(neg(b.w) / b0.neg - 0.5) < 1e-3 && Math.abs(pos(b.w) / b0.pos - 1) < 1e-3,
+         `负 ${(neg(b.w) / b0.neg).toFixed(3)} / 正 ${(pos(b.w) / b0.pos).toFixed(3)}`, "负 0.5 / 正 1.0");
+      g2.setPerturb("inhibScale", 1);
+
+      // 谷氨酸改兴奋性：这些神经元的传出突触应当全部变成非负，且负权总量下降
+      const nt = b.nt;
+      ok("加载了递质标签", !!nt && nt.length === b.n, nt ? nt.length : "无", b.n);
+      if (nt) {
+        const nGlut = nt.filter(x => x === 1).length;
+        g2.setPerturb("glutExc", true);
+        let bad = 0;
+        for (let i = 0; i < b.n; i++) if (nt[i] === 1)
+          for (let k = b.indptr[i]; k < b.indptr[i + 1]; k++) if (b.w[k] < 0) bad++;
+        ok("谷氨酸改兴奋性后无负权", bad === 0, bad + " 条仍为负", "0");
+        ok("负权总量确实下降", neg(b.w) > b0.neg, `${neg(b.w).toFixed(1)} vs 原 ${b0.neg.toFixed(1)}`, "变小（绝对值）");
+        ok("子回路里的谷氨酸能神经元数", nGlut > 0, nGlut, ">0");
+        g2.setPerturb("glutExc", false);
+      }
+
+      // 打乱接线：postArr 必须真的变，而且 run() 用的就是它
+      const p0 = Array.from(b.postArr);
+      g2.setPerturb("shuffle", true);
+      const p1 = Array.from(b.postArr);
+      let diff = 0;
+      for (let i = 0; i < p0.length; i++) if (p0[i] !== p1[i]) diff++;
+      ok("打乱接线真的改了靶点", diff > p0.length * 0.5,
+         `${diff}/${p0.length} 条变了`, ">50%");
+      const same = p0.slice().sort((a, c) => a - c).join(",") === p1.slice().sort((a, c) => a - c).join(",");
+      ok("打乱保持靶点多重集不变", same, same ? "一致" : "不一致", "一致（只重排，不增删）");
+      g2.setPerturb("shuffle", false);
+      ok("取消打乱后复原", Array.from(b.postArr).join(",") === p0.join(","), "复原", "复原");
+
+      g2.resetPerturb();
+      ok("复原按钮把权重还原", Math.abs(sumAbs(b.w) - b0.abs) < 1e-2,
+         sumAbs(b.w).toFixed(1), b0.abs.toFixed(1));
+      // 页面表格真的渲染了
+      const rs = document.querySelectorAll("#tShuf tr").length, rp = document.querySelectorAll("#tPert tr").length;
+      ok("打乱接线表格已渲染", rs >= 4, rs + " 行", "≥4（表头+3 通路）");
+      ok("扰动稳健性表格已渲染", rp >= 6, rp + " 行", "≥6（表头+5 种扰动）");
+    }
+
     return out;
   });
 
