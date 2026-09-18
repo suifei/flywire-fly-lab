@@ -1,0 +1,200 @@
+{
+ "说明": "同一批仿真、同一个判据，四种口径并排；判定口径依赖的类型不能单说'我们判它必需/不必需'",
+ "判据": 0.8,
+ "数据来源": {
+  "论文与R=6": "results/screen/summary.json",
+  "R=12未归一": "results/screen/hub_scan_summary.json（stage B 只覆盖 |1−比值|≥0.05 的）"
+ },
+ "types": {
+  "Bract": {
+   "experiment_required": false,
+   "paper": 1.08748,
+   "R6_raw": 0.8173,
+   "R6_norm": 0.914,
+   "R12_raw": null,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": null
+   },
+   "estimator_dependent": false
+  },
+  "Clavicle": {
+   "experiment_required": true,
+   "paper": 0.6638080040837057,
+   "R6_raw": 0.5481,
+   "R6_norm": 0.6129,
+   "R12_raw": 0.6469,
+   "calls": {
+    "paper": true,
+    "R6_raw": true,
+    "R6_norm": true,
+    "R12_raw": true
+   },
+   "estimator_dependent": false
+  },
+  "Fdg": {
+   "experiment_required": false,
+   "paper": 0.85420254789066,
+   "R6_raw": 0.9519,
+   "R6_norm": 1.0645,
+   "R12_raw": null,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": null
+   },
+   "estimator_dependent": false
+  },
+  "FMIn": {
+   "experiment_required": true,
+   "paper": 1.3138938788840253,
+   "R6_raw": 1.3269,
+   "R6_norm": 1.4839,
+   "R12_raw": 1.3394,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": false
+   },
+   "estimator_dependent": false
+  },
+  "G2N-1": {
+   "experiment_required": true,
+   "paper": 0.6192110839127055,
+   "R6_raw": 0.4423,
+   "R6_norm": 0.4946,
+   "R12_raw": 0.5968,
+   "calls": {
+    "paper": true,
+    "R6_raw": true,
+    "R6_norm": true,
+    "R12_raw": true
+   },
+   "estimator_dependent": false
+  },
+  "Phantom": {
+   "experiment_required": false,
+   "paper": 1.0823329472269188,
+   "R6_raw": 0.8654,
+   "R6_norm": 0.9677,
+   "R12_raw": null,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": null
+   },
+   "estimator_dependent": false
+  },
+  "Rattle": {
+   "experiment_required": true,
+   "paper": 0.8644941448531981,
+   "R6_raw": 0.8269,
+   "R6_norm": 0.9247,
+   "R12_raw": null,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": null
+   },
+   "estimator_dependent": false
+  },
+  "Roundup": {
+   "experiment_required": false,
+   "paper": 0.6672385364045482,
+   "R6_raw": 0.7404,
+   "R6_norm": 0.828,
+   "R12_raw": 0.7472,
+   "calls": {
+    "paper": true,
+    "R6_raw": true,
+    "R6_norm": false,
+    "R12_raw": true
+   },
+   "estimator_dependent": true
+  },
+  "Usnea": {
+   "experiment_required": true,
+   "paper": 1.2298458370232994,
+   "R6_raw": 1.3654,
+   "R6_norm": 1.5269,
+   "R12_raw": 1.0888,
+   "calls": {
+    "paper": false,
+    "R6_raw": false,
+    "R6_norm": false,
+    "R12_raw": false
+   },
+   "estimator_dependent": false
+  },
+  "Zorro": {
+   "experiment_required": true,
+   "paper": 0.7718697721903554,
+   "R6_raw": 0.7596,
+   "R6_norm": 0.8495,
+   "R12_raw": 0.8292,
+   "calls": {
+    "paper": true,
+    "R6_raw": true,
+    "R6_norm": false,
+    "R12_raw": false
+   },
+   "estimator_dependent": true
+  }
+ },
+ "estimator_dependent": [
+  "Roundup",
+  "Zorro"
+ ],
+ "score_by_protocol": {
+  "paper": {
+   "correct": 6,
+   "of": 10,
+   "correct_types": [
+    "Bract",
+    "Clavicle",
+    "Fdg",
+    "G2N-1",
+    "Phantom",
+    "Zorro"
+   ]
+  },
+  "R6_raw": {
+   "correct": 6,
+   "of": 10,
+   "correct_types": [
+    "Bract",
+    "Clavicle",
+    "Fdg",
+    "G2N-1",
+    "Phantom",
+    "Zorro"
+   ]
+  },
+  "R6_norm": {
+   "correct": 6,
+   "of": 10,
+   "correct_types": [
+    "Bract",
+    "Clavicle",
+    "Fdg",
+    "G2N-1",
+    "Phantom",
+    "Roundup"
+   ]
+  },
+  "R12_raw": {
+   "correct": 2,
+   "of": 6,
+   "correct_types": [
+    "Clavicle",
+    "G2N-1"
+   ]
+  }
+ }
+}
