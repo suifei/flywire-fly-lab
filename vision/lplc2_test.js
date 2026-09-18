@@ -47,7 +47,7 @@ const model = LPLC2.build(lat, dirTable, {});   // 默认 R=20 / stride=3，理�
 console.log(`LPLC2 模型：用上 ${model.types.length} 个亚型 [${model.types.join(", ")}]，`
           + `${model.centers} 个中心，感受野半径 ${model.R} 个小眼\n`);
 
-const DT = 0.005, T = 1.2, STEPS = Math.round(T / DT);
+const DT = +(process.env.DT || 0.005), T = 1.2, STEPS = Math.round(T / DT);
 const PRE = Math.round(0.4 / DT);                  // 首帧静态预呈现的步数
 const SKIP = Math.round(0.3 / DT);                 // 运动开始后不计分的步数
 const EDGE = 0.8;                                  // 边缘软化宽度（小眼），防点阵混叠
