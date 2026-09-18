@@ -39,6 +39,7 @@ from xlsx_lite import read_xlsx  # noqa: E402
 FREQS = (10, 20, 40, 60, 80, 120, 160, 220)
 R_CAL, R_RUN, R_MAX = 3, 6, 6
 TARGET_MN9 = 40.0
+TARGET_SUPPRESS = 1.0      # 论文抬头：抑制型模态的频率选成把 40 Hz 的 MN9 压到 1 Hz
 WDIR = S.OUT / "taste"
 BITTER_T = ["LB1a,LB1d", "LB1b", "LB1c"]
 IR94E_T = ["LB1e", "LB2a-b", "LB2c", "LB2d"]
@@ -97,20 +98,41 @@ def cmd_calib():
     mn9i = fid2i[S.MN9]
     sc = S.Screen()
     print(f"GRN：" + "，".join(f"{k} {len(v)}" for k, v in g.items()) + f"（合计 {len(order)}）", flush=True)
-    out = {}
-    for mod in ("sugar", "water", "bitter", "ir94e"):
+    # 论文表 4 抬头的完整规则：
+    #   "GRN firing rates are chosen to elicit 40 Hz MN9 firing, **or reduce 40 Hz MN9 to 1 Hz**."
+    # 也就是分两类：
+    #   驱动型（糖、水）——单独刺激，找让 MN9 ≈ 40 Hz 的频率；
+    #   抑制型（苦、Ir94e）——**在糖垫底的情况下**，找把 MN9 从 40 Hz 压到 ≈ 1 Hz 的频率。
+    # 第一版把四个模态都按"单独刺激达到 40 Hz"标定，而苦味单独刺激在 10–220 Hz 全程 MN9 = 0，
+    # 于是退化成随便选了最低频。读了抬头全文才发现规则是两套。
+    def sweep(mods_fn, label):
         rates = []
         for fi, f in enumerate(FREQS):
             segs = [(fi, r, ()) for r in range(R_CAL)]
-            plan = [[(mod, fi)] for _ in segs]
-            cnt, wall = sc.run_chunk(segs, extra_args={sc.ingate: ingate_for(sc, segs + [(0, 0, ())] * (S.K - len(segs)), span, plan + [[]] * (S.K - len(plan)))})
+            plan = [mods_fn(fi) for _ in segs]
+            pad = S.K - len(segs)
+            cnt, _ = sc.run_chunk(segs, extra_args={sc.ingate: ingate_for(sc, segs + [(0, 0, ())] * pad, span, plan + [[]] * pad)})
             m = float(np.mean(mn9_of(cnt, mn9i, R_CAL)))
             rates.append(m)
-            print(f"  {mod:7s} {f:4d} Hz → MN9 {m:6.1f} Hz", flush=True)
+            print(f"  {label:16s} {f:4d} Hz → MN9 {m:6.1f} Hz", flush=True)
+        return rates
+
+    out = {}
+    for mod in ("sugar", "water"):                       # 驱动型：达到 40 Hz
+        rates = sweep(lambda fi, m=mod: [(m, fi)], mod)
         best = int(np.argmin([abs(x - TARGET_MN9) for x in rates]))
-        out[mod] = dict(freqs=list(FREQS), mn9=[round(x, 2) for x in rates],
-                        chosen_fi=best, chosen_hz=FREQS[best], chosen_mn9=round(rates[best], 2))
+        out[mod] = dict(kind="driver", target=TARGET_MN9, freqs=list(FREQS),
+                        mn9=[round(x, 2) for x in rates], chosen_fi=best,
+                        chosen_hz=FREQS[best], chosen_mn9=round(rates[best], 2))
         print(f"  → {mod}：选 {FREQS[best]} Hz（MN9 {rates[best]:.1f}，目标 {TARGET_MN9}）\n", flush=True)
+    sfi = out["sugar"]["chosen_fi"]
+    for mod in ("bitter", "ir94e"):                      # 抑制型：把糖驱动的 MN9 压到 1 Hz
+        rates = sweep(lambda fi, m=mod: [("sugar", sfi), (m, fi)], f"sugar+{mod}")
+        best = int(np.argmin([abs(x - TARGET_SUPPRESS) for x in rates]))
+        out[mod] = dict(kind="suppressor", target=TARGET_SUPPRESS, on_top_of="sugar",
+                        sugar_hz=FREQS[sfi], freqs=list(FREQS), mn9=[round(x, 2) for x in rates],
+                        chosen_fi=best, chosen_hz=FREQS[best], chosen_mn9=round(rates[best], 2))
+        print(f"  → {mod}：选 {FREQS[best]} Hz（糖垫底时 MN9 {rates[best]:.1f}，目标 {TARGET_SUPPRESS}）\n", flush=True)
     (WDIR / "calibration.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
     print("→", WDIR / "calibration.json")
 
