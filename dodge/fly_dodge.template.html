@@ -1465,11 +1465,30 @@ code { font: 12px var(--mono); }
     // 口径必须写明：本表「我们」这一列是**零参照归一化**后的比值（报告 §14.4：这个网络对初始条件敏感，
     // 敲掉任何一个哪怕只放 1–3 个电的神经元都会让 MN9 回归条件均值，50 Hz 下零参照比值 0.894）。
     // 未归一化的同一批仿真给出不同的两项判定。四种口径的并排见 screen/recheck_calls.py。
-    $("nScreenTypes").insertAdjacentHTML("afterend",
-      `<p class="sub" id="nScreenNorm">本表「我们」一列是<b>零参照归一化</b>后的比值（报告 §14.4）。同一批仿真换成未归一化，`
-      + `Roundup 从 0.83（不必需）变成 0.74（必需）、Zorro 从 0.85（不必需）变成 0.76（必需）——`
-      + `<b>10 个类型里恰好这 2 个的判定是口径依赖的</b>，另外 8 个在四种口径（R=6/12 × 归一化与否）下判定完全一致。`
-      + `四种口径都得 6/10，只是答对的是哪 6 个差一个互换。引用这两个的比值时必须同时说明口径。</p>`);
+    // 这一段的每个数字都从 recheck_calls.json 算，**不写死**：以前写死过，用户点名过一次。
+    const RC = V6R.recheck_calls;
+    $("nScreenTypes").insertAdjacentHTML("afterend", (() => {
+      if (!RC) return "";
+      const T = RC.types, call = RC.判据;
+      const dep = Object.keys(T).filter(k => T[k].estimator_dependent).sort();
+      const say = k => {
+        const t = T[k], lab = r => (r <= call ? "必需" : "不必需");
+        return `${k} 从 ${t.R6_norm.toFixed(2)}（${lab(t.R6_norm)}）变成 ${t.R6_raw.toFixed(2)}（${lab(t.R6_raw)}）`;
+      };
+      const cols = ["paper", "R6_raw", "R6_norm", "R12_raw"];
+      const score = c => {
+        const v = Object.values(T).filter(t => t.calls[c] !== null && t.calls[c] !== undefined);
+        return [v.filter(t => t.calls[c] === (t.experiment_required === true)).length, v.length];
+      };
+      const comparable = cols.filter(c => score(c)[1] === Object.keys(T).length).map(c => score(c)[0]);
+      const same = comparable.length && comparable.every(x => x === comparable[0]);
+      return `<p class="sub" id="nScreenNorm">本表「我们」一列是<b>零参照归一化</b>后的比值（报告 §14.4）。同一批仿真换成未归一化，`
+        + dep.map(say).join("、") + `——`
+        + `<b>${Object.keys(T).length} 个类型里恰好这 ${dep.length} 个的判定是口径依赖的</b>，`
+        + `另外 ${Object.keys(T).length - dep.length} 个在四种口径（R=6/12 × 归一化与否）下判定完全一致。`
+        + (same ? `口径齐全的那几种都得 ${comparable[0]}/${Object.keys(T).length}，只是答对的是哪几个差一个互换。` : "")
+        + `引用这两个的比值时必须同时说明口径。</p>`;
+    })());
     const PAPER = { CB0192: "Zorro", CB0553: "Roundup", CB0616: "G2N-1", AN_GNG_30: "Clavicle", CB0008: "Usnea", CB0062: "Phantom",
       CB0499: "Rattle", CB0366: "FMIn", CB0038: "Fdg", DNge173: "Bract", DNge174: "Bract", DNg67: "Fudog" };
     const pn = c => c ? (PAPER[c] ? `${c} = ${PAPER[c]}` : c) : "?";

@@ -129,6 +129,12 @@ if jw and "three_pathways" in out:
 if jp and "three_pathways" in out:
     out["three_pathways"]["jon_paper"] = dict(baseline=jp["design"]["baseline_stats"][str(jp["design"]["chosen"])]["mean"],
                                               comparison=jp["comparison"], items=jp["items"][:6])
+# §31：四种口径并排（R=6/12 × 归一化与否）。页面那段「换成未归一化会怎样」以前是**写死**的数字，
+# 用户点名过一次，所以改成从这里渲染。
+rc = load("screen/recheck_calls.json")
+if rc:
+    out["recheck_calls"] = rc
+
 jf = load("screen/jon_paper/full_summary.json")   # 24.3 节：用论文名单把整条通路重做，取代 24 节的数字
 jc = load("screen/jon_paper/concentration_full.json")   # 22.2 节：全部 596 个活跃神经元的集中度（与糖/水同口径）
 if jf and "three_pathways" in out:
