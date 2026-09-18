@@ -116,11 +116,61 @@ function chromePath() {
     console.log(`${s.id.padEnd(10)}${String(s.n ?? "-").padStart(11)}${String(s.mean ?? "-").padStart(8)}${String(s.sd ?? "-").padStart(9)}  ${s.ok ? "✓" : "✗ " + (s.why || "画面是空的/纯色")}`);
     if (!s.ok) bad++;
   }
+  // ── v7：任务模式与光遗传手指，在真浏览器里点一遍 ─────────────────────
+  console.log("\n任务模式 / 光遗传");
+  const ui = [];
+  const step = async (name, fn) => { try { ui.push([name, await fn()]); } catch (e) { ui.push([name, "异常：" + e.message]); } };
+
+  await step("光遗传按钮渲染出来了", async () => {
+    const n = await page.$$eval("#optoBtns button", b => b.length);
+    return n >= 4 ? true : `只有 ${n} 个`;
+  });
+  await step("点亮 LC4+LPLC2 后巨纤维越过阈值", async () => {
+    const r = await page.evaluate(async () => {
+      const g = window.__game, SUB = g.brain.groups || {};
+      const idx = (SUB.LC4_left || []).concat(SUB.LPLC2_left || []);
+      g.optoPulse(idx, 200, 0.6, "test");
+      let mx = 0;
+      for (let i = 0; i < Math.round(0.8 / g.chunkDt); i++) { g.step(); mx = Math.max(mx, g.readout().gf); }
+      return { mx, thr: g.CFG.gfThreshold };
+    });
+    return r.mx > r.thr ? `巨纤维峰值 ${r.mx.toFixed(0)} Hz > 阈值 ${r.thr}` : `只到 ${r.mx.toFixed(0)} Hz`;
+  });
+  await step("任务面板能打开且七关都在", async () => {
+    await page.click("#mOpen");
+    const n = await page.$$eval("#mList .mcard", b => b.length);
+    return n === 7 ? true : `只有 ${n} 关`;
+  });
+  await step("进入第一关后目标与实测说明都显示了", async () => {
+    await page.click("#mList .mcard");
+    const t = await page.$eval("#mTitle", e => e.textContent.trim());
+    const goal = await page.$eval("#mGoal", e => e.textContent.trim());
+    const line = await page.$eval("#mLine", e => e.textContent.trim());
+    return (t && goal.length > 5 && line.length > 10) ? `${t}｜${goal.slice(0, 24)}…` : "文本是空的";
+  });
+  await step("看参考解会真的把开关拨下去", async () => {
+    await page.click("#mGiveup");
+    const on = await page.evaluate(() => Object.entries(window.__game.lesion).filter(([, v]) => v).map(([k]) => k));
+    return on.length ? on.join("+") : "没有任何开关被拨下";
+  });
+  await step("退出任务会还原玩家原来的设定", async () => {
+    await page.click("#mQuit");
+    const on = await page.evaluate(() => Object.entries(window.__game.lesion).filter(([, v]) => v).map(([k]) => k));
+    return on.length === 0 ? true : "残留：" + on.join("+");
+  });
+  let uiBad = 0;
+  for (const [name, v] of ui) {
+    const ok = v === true || (typeof v === "string" && !v.startsWith("异常") && !v.startsWith("只") && !v.startsWith("没有") && !v.startsWith("残留") && !v.startsWith("文本"));
+    console.log(`  ${ok ? "✓" : "✗"} ${name}${typeof v === "string" ? "  " + v : ""}`);
+    if (!ok) uiBad++;
+  }
+
   await browser.close();
 
   console.log();
+  if (uiBad) console.log(`✗ 任务模式 / 光遗传有 ${uiBad} 项没通过`);
   if (errs.length) { console.log(`✗ 页面报了 ${errs.length} 个错：`); errs.slice(0, 6).forEach(e => console.log("   " + e)); }
   if (bad) console.log(`✗ ${bad} 个画布没画出东西`);
-  if (errs.length || bad) process.exit(1);
-  console.log("✓ 浏览器里跑通：无报错，10 个画布都画出了内容");
+  if (errs.length || bad || uiBad) process.exit(1);
+  console.log("✓ 浏览器里跑通：无报错，10 个画布都画出了内容，任务模式与光遗传都能用");
 })().catch(e => { console.error("FAIL", e); process.exit(1); });
