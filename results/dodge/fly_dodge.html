@@ -433,6 +433,21 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1" id="cMissions">
+      <h3>任务模式：每一关的通过线都是实测出来的</h3>
+      <p>七个手术任务，玩家只准动开关（断突触 / 敲真实神经元 / 打乱接线 / 光遗传脉冲），不准改规则。
+        问题是：<b>怎么知道一关设计得对不对？</b>我们的做法是把每关都用 <code>node dodge/mission_test.js</code>
+        跑两遍——<b>不干预</b>和<b>参考解</b>，各 3 个种子 × 60 秒，然后<b>照着实测分布定通过线</b>。
+        一关如果不干预也能过，它就没在考任何东西；参考解如果过不了，那这关就是不可能完成的。下表是全部实测值。</p>
+      <div class="tbl"><table id="tMissions"></table></div>
+      <p class="sub" id="mNote"></p>
+      <p class="sub"><b>两处按数据改过设计，值得写出来</b>：①「一个不够，两个才行」原本把线画在 8 s，
+        结果单敲也能过；实测逐次是——不干预 6.1/8.6/11.2 s、单敲 Clavicle 5.4/8.1/5.1、单敲 G2N-1 4.8/6.8/7.9、
+        两个一起 2.8/2.9/2.0，于是线改到 4 s，落在「单敲最低的 4.8」与「双敲最高的 2.9」之间。
+        ②「证明连接组真的在起作用」原本判闪避率，但打乱之后逐次是 0.07/0.79/0.43——<b>波动大到有一次跟没打乱差不多</b>，
+        所以判据换成起跳次数（打乱后 18/5/0 次 vs 不干预 33/32/33，完全不重叠），这也更贴近机制：
+        打乱先打断的是 looming → 巨纤维那一路。</p>
+    </div>
     <div class="card" style="grid-column: 1 / -1" id="cPeers">
       <h3>别人拿数字果蝇做了什么，我们差在哪</h3>
       <p>2026 年 9 月 3 日 Janelia 与 Google 公开雄性果蝇全中枢神经系统连接组 <b>MaleCNS v1.0</b>（约 16.6 万神经元）之后的两周里，
@@ -6039,7 +6054,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "title": "关掉警报",
    "basis": "连接组",
    "goal": "起跳 = 0，且伸喙进食累计 ≥ 3 s",
-   "line": "实测：不干预起跳 98 次/60 s；切两条视觉通路后 0 次，进食时长反而更长",
+   "line": "实测（60 s × 3 种子）：不干预起跳 32 次、进食 8.7 s；切掉两条视觉通路后起跳 0 次、进食 10.6 s——**进食反而更长**，因为不再被起飞打断",
    "why": "逃逸与进食是两条分开的通路：LC4/LPLC2 → 巨纤维管起飞，糖味 GRN → MN9 管伸喙。切断视觉那条，进食毫发无损——这与全脑筛选里「糖与水的活跃神经元集合只重叠三分之一、共用的那部分都在靠近输出的地方」是同一件事。",
    "brief": "球照扔，但要让它一次都不起飞——同时还得照常吃到糖。",
    "hint": "从「感觉输入」那一侧下手，别动运动输出——切运动输出会把吃也一起切掉。",
@@ -6109,7 +6124,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "title": "一刀止痒",
    "basis": "连接组",
    "goal": "梳理次数 = 0（且确实落过 ≥ 3 次灰）",
-   "line": "实测：不干预 60 s 里梳理若干次；敲 aBN1 后恒为 0",
+   "line": "实测（60 s × 3 种子）：不干预梳理 8.3 次、累计 5.0 s；敲 aBN1 后 0 次、0 s",
    "why": "aBN1（SAD093）是梳理通路的绝对瓶颈：全脑筛选里单敲它让 aDN1 与 aDN2 同时归零，Hampel et al. 2015 的实验也证实。子回路里同样是 59.8 → 0 Hz。整条通路 596 个活跃神经元，只有这一个是不可替代的。",
    "brief": "灰尘不停落在触角上，让它**再也不梳理**——躲球的本事不许丢。只准动一个真实神经元。",
    "hint": "触角机械感觉通路上只有一个神经元是绝对瓶颈——在真实神经元开关里找它。",
@@ -6186,7 +6201,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "title": "饿死它",
    "basis": "连接组",
    "goal": "伸喙进食累计 < 1 s（且确实碰到过 ≥ 5 次糖粒）",
-   "line": "实测（60 s × 2 种子）：不干预 14.8 s，敲 Roundup 后 0.0 s",
+   "line": "实测（60 s × 3 种子）：不干预进食 8.7 s，敲 Roundup 后 0.0 s（三次全是 0）",
    "why": "Roundup（CB0553）是糖 → MN9 通路上效应最强的前运动神经元之一：全脑敲除后比值 0.30，子回路里 0.05。它不在逃逸通路上，所以躲球不受影响。",
    "brief": "糖粒管够，但要让它伸不出喙——躲球的本事不许丢。",
    "hint": "别切糖味受体（那不算手术）。去找进食通路上效应最强的那个中间神经元。",
@@ -6254,8 +6269,8 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "id": "synergy",
    "title": "一个不够，两个才行",
    "basis": "连接组",
-   "goal": "伸喙进食累计 < 8 s（且碰到过 ≥ 5 次糖粒）",
-   "line": "实测（60 s × 2 种子）：不干预 14.8 s，单敲 Clavicle 13.5、单敲 G2N-1 11.6，两个一起 5.7——通过线 8 s 正落在「单敲过不了、双敲过得了」之间",
+   "goal": "伸喙进食累计 < 4 s（且碰到过 ≥ 5 次糖粒）",
+   "line": "实测（60 s × 3 种子，逐次）：不干预 6.1 / 8.6 / 11.2 s；单敲 Clavicle 5.4 / 8.1 / 5.1，单敲 G2N-1 4.8 / 6.8 / 7.9；两个一起 2.8 / 2.9 / 2.0。通过线 4 s 落在「单敲最低的 4.8」与「双敲最高的 2.9」之间——6 次单敲全过不了，3 次双敲全过。独立相乘的预期是 4.6 s，实测 2.6 s，所以确实是协同而不只是叠加",
    "why": "这是本项目最反直觉的一条结果：**单独敲除看不到的东西，必须把两个一起敲才会出现**。Clavicle 与 G2N-1 单独敲都还剩九成进食，一起敲就塌一半——低于「各自独立」应有的乘积。全脑筛选里这类协同有 10 对（留一稳定 7 对），而光看连线预测不出来（路径重叠与配对效应的 Spearman ≈ 0）。",
    "brief": "还是让它吃不成，但这次 Roundup 不给你用。试试看：单独敲哪个都不太行。",
    "hint": "两个都是论文里「伸喙必需」的类型。一个一个试没用，得同时敲。",
@@ -6266,7 +6281,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "calibrated": false,
    "arms": {
     "none": {
-     "pass": 1,
+     "pass": 0,
      "of": 3,
      "mean": {
       "feedS": 8.67,
@@ -6310,7 +6325,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
      ]
     },
     "single_Clavicle": {
-     "pass": 2,
+     "pass": 0,
      "of": 3,
      "mean": {
       "feedS": 6.187,
@@ -6332,7 +6347,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
      ]
     },
     "single_G2N-1": {
-     "pass": 3,
+     "pass": 0,
      "of": 3,
      "mean": {
       "feedS": 6.49,
@@ -6354,15 +6369,15 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
      ]
     }
    },
-   "discriminating": false,
-   "singles_pass": "Clavicle 2/3，G2N-1 3/3"
+   "discriminating": true,
+   "singles_pass": "Clavicle 0/3，G2N-1 0/3"
   },
   {
    "id": "thirsty_boost",
    "title": "拆掉刹车",
    "basis": "连接组",
-   "goal": "嘴下有水滴时的 MN9 峰值 ≥ 通过线（见下方实测）",
-   "line": "通过线按实测定",
+   "goal": "嘴下有水滴时的 MN9 峰值 ≥ 50 Hz",
+   "line": "实测（60 s × 3 种子）：不干预峰值 35.3 Hz、均值 11.3；敲掉 Phantom 后峰值 71.4、均值 20.2——约 2.0 倍，与子回路实测的 2.06 倍、全脑的 3.02 倍同向。通过线 50 Hz 落在两者之间",
    "why": "Phantom（CB0062）是抑制性（GABA）的：敲掉它，**水**通路的 MN9 翻倍——全脑 3.02 倍、子回路 2.06 倍。而同一个敲除在**糖**通路上几乎没有效果（0.92 / 0.97）。所以引用这个数字必须说明是哪条通路。",
    "brief": "场上只有水滴，而且它已经很渴了。想办法让喝水的驱动更强。",
    "hint": "找一个抑制性神经元：切掉刹车，油门就显得更大。",
@@ -6438,8 +6453,8 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "id": "shuffle_control",
    "title": "证明连接组真的在起作用",
    "basis": "连接组",
-   "goal": "闪避率跌破通过线（见下方实测）",
-   "line": "通过线按实测定",
+   "goal": "起跳次数 < 20（同时看闪避率）",
+   "line": "实测（60 s × 3 种子，逐次）：不干预起跳 33 / 32 / 33 次、闪避率 0.85 / 0.84 / 0.95；打乱后起跳 18 / 5 / 0 次、闪避率 0.07 / 0.79 / 0.43。**判据用起跳次数而不是闪避率**——闪避率逐次波动太大（打乱后仍有一次 0.79），而起跳次数三次都掉到 20 以下、三次不干预都在 32 以上，没有重叠。这也更贴近机制：打乱先打断的是 looming → 巨纤维那一路",
    "why": "这是论文补充表 1D 的对照，也是对「这些数字果蝇其实是随机网络在乱按键」这一质疑的正面回答：如果打乱之后表现照旧，那连接组就没在起作用。我们实测：糖 → MN9 从 82.9 Hz 掉到 3.5 ± 4.2 Hz。这一关用**原地起跳**模式，因为真实飞行轨迹的闪避率接近 100%，测不出差别。",
    "brief": "打开「打乱接线」——保留每个神经元的出度与权重，只把靶点随机重排，看闪避率会怎样。",
    "hint": "开关在「动脑子」那一行。",
@@ -6475,7 +6490,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
      ]
     },
     "ref": {
-     "pass": 2,
+     "pass": 3,
      "of": 3,
      "mean": {
       "dodgeRate": 0.429,
@@ -6501,14 +6516,14 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
      ]
     }
    },
-   "discriminating": false
+   "discriminating": true
   },
   {
    "id": "opto_takeoff",
    "title": "不用球，让它自己飞",
    "basis": "连接组（驱动真实神经元）+ 手写（强度、时长）",
    "goal": "在没有任何球的情况下起飞 ≥ 1 次",
-   "line": "实测：不点任何神经元时起飞恒为 0（没有球就没有 looming 输入）",
+   "line": "实测（60 s × 3 种子）：不点任何神经元时起飞 0 次；给左侧 LC4+LPLC2 200 Hz、0.6 s 一次就起飞（巨纤维峰值 206.7 Hz，阈值 90）",
    "why": "点下去的是这个子回路里**真实的** FlyWire 神经元，用的是和感觉输入同一套泊松驱动（与论文 poi() 一致：被驱动的神经元不应期置 0）。实测：左侧 LC4+LPLC2 给 200 Hz、0.6 s，巨纤维峰值 206.7 Hz，越过 90 Hz 阈值并触发起飞。强度与时长是手选的。",
    "brief": "场上一个球也没有。用「光遗传手指」直接点亮神经元，把它逼起飞。",
    "hint": "光标点在视觉投射神经元上——直接点巨纤维是作弊（它是输出端）。",
@@ -6563,7 +6578,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
    "discriminating": true
   }
  ],
- "all_discriminating": false
+ "all_discriminating": true
 }</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
@@ -7200,6 +7215,26 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   };
   $("mQuit").onclick = mQuit;
   mBuildList();
+
+  // 任务实测表：只显示，数字全部来自 results/dodge/missions.json
+  (function buildMissionTable() {
+    const t = document.getElementById("tMissions"); if (!t) return;
+    const rows = (MRES.missions || []).map(m => {
+      const fmt = arm => Object.entries(arm.mean).map(([k, v]) => k + " " + (v === null ? "—" : v)).join("　");
+      const singles = Object.entries(m.arms).filter(([k]) => k.startsWith("single_"))
+        .map(([k, v]) => "单敲 " + k.slice(7) + "：" + v.pass + "/" + v.of + "（" + fmt(v) + "）").join("<br>");
+      return "<tr><td><b>" + m.title + "</b><br><small>" + m.basis + "</small></td>" +
+        "<td>" + m.goal + "</td>" +
+        "<td>" + m.arms.ref.pass + "/" + m.arms.ref.of + "<br><small>" + fmt(m.arms.ref) + "</small></td>" +
+        "<td>" + m.arms.none.pass + "/" + m.arms.none.of + "<br><small>" + fmt(m.arms.none) + "</small></td>" +
+        "<td><small>" + (m.line || "") + (singles ? "<br>" + singles : "") + "</small></td></tr>";
+    }).join("");
+    t.innerHTML = "<tr><th>任务</th><th>目标</th><th>参考解通过</th><th>不干预通过</th><th>实测（通过线的来源）</th></tr>" + rows;
+    const n = document.getElementById("mNote");
+    if (n) n.textContent = "每关两种情况各跑 " + MRES.seeds + " 个种子 × " + MRES.seconds_per_seed +
+      " 秒，球速 " + MRES.ball_speed + " mm/s。" + ((MRES.all_discriminating)
+        ? "七关全部满足「参考解全过、不干预全不过」。" : "有关卡不满足这一条，见上表。");
+  })();
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
   const PEERS = [

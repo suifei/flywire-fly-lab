@@ -433,6 +433,21 @@ code { font: 12px var(--mono); }
   </section>
 
   <section class="lower">
+    <div class="card" style="grid-column: 1 / -1" id="cMissions">
+      <h3>任务模式：每一关的通过线都是实测出来的</h3>
+      <p>七个手术任务，玩家只准动开关（断突触 / 敲真实神经元 / 打乱接线 / 光遗传脉冲），不准改规则。
+        问题是：<b>怎么知道一关设计得对不对？</b>我们的做法是把每关都用 <code>node dodge/mission_test.js</code>
+        跑两遍——<b>不干预</b>和<b>参考解</b>，各 3 个种子 × 60 秒，然后<b>照着实测分布定通过线</b>。
+        一关如果不干预也能过，它就没在考任何东西；参考解如果过不了，那这关就是不可能完成的。下表是全部实测值。</p>
+      <div class="tbl"><table id="tMissions"></table></div>
+      <p class="sub" id="mNote"></p>
+      <p class="sub"><b>两处按数据改过设计，值得写出来</b>：①「一个不够，两个才行」原本把线画在 8 s，
+        结果单敲也能过；实测逐次是——不干预 6.1/8.6/11.2 s、单敲 Clavicle 5.4/8.1/5.1、单敲 G2N-1 4.8/6.8/7.9、
+        两个一起 2.8/2.9/2.0，于是线改到 4 s，落在「单敲最低的 4.8」与「双敲最高的 2.9」之间。
+        ②「证明连接组真的在起作用」原本判闪避率，但打乱之后逐次是 0.07/0.79/0.43——<b>波动大到有一次跟没打乱差不多</b>，
+        所以判据换成起跳次数（打乱后 18/5/0 次 vs 不干预 33/32/33，完全不重叠），这也更贴近机制：
+        打乱先打断的是 looming → 巨纤维那一路。</p>
+    </div>
     <div class="card" style="grid-column: 1 / -1" id="cPeers">
       <h3>别人拿数字果蝇做了什么，我们差在哪</h3>
       <p>2026 年 9 月 3 日 Janelia 与 Google 公开雄性果蝇全中枢神经系统连接组 <b>MaleCNS v1.0</b>（约 16.6 万神经元）之后的两周里，
@@ -1373,6 +1388,26 @@ code { font: 12px var(--mono); }
   };
   $("mQuit").onclick = mQuit;
   mBuildList();
+
+  // 任务实测表：只显示，数字全部来自 results/dodge/missions.json
+  (function buildMissionTable() {
+    const t = document.getElementById("tMissions"); if (!t) return;
+    const rows = (MRES.missions || []).map(m => {
+      const fmt = arm => Object.entries(arm.mean).map(([k, v]) => k + " " + (v === null ? "—" : v)).join("　");
+      const singles = Object.entries(m.arms).filter(([k]) => k.startsWith("single_"))
+        .map(([k, v]) => "单敲 " + k.slice(7) + "：" + v.pass + "/" + v.of + "（" + fmt(v) + "）").join("<br>");
+      return "<tr><td><b>" + m.title + "</b><br><small>" + m.basis + "</small></td>" +
+        "<td>" + m.goal + "</td>" +
+        "<td>" + m.arms.ref.pass + "/" + m.arms.ref.of + "<br><small>" + fmt(m.arms.ref) + "</small></td>" +
+        "<td>" + m.arms.none.pass + "/" + m.arms.none.of + "<br><small>" + fmt(m.arms.none) + "</small></td>" +
+        "<td><small>" + (m.line || "") + (singles ? "<br>" + singles : "") + "</small></td></tr>";
+    }).join("");
+    t.innerHTML = "<tr><th>任务</th><th>目标</th><th>参考解通过</th><th>不干预通过</th><th>实测（通过线的来源）</th></tr>" + rows;
+    const n = document.getElementById("mNote");
+    if (n) n.textContent = "每关两种情况各跑 " + MRES.seeds + " 个种子 × " + MRES.seconds_per_seed +
+      " 秒，球速 " + MRES.ball_speed + " mm/s。" + ((MRES.all_discriminating)
+        ? "七关全部满足「参考解全过、不干预全不过」。" : "有关卡不满足这一条，见上表。");
+  })();
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
   const PEERS = [
