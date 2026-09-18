@@ -143,6 +143,10 @@ python dodge/collect_v4_results.py && python3 dodge/build.py  # page inlines res
 # v6: physics world + real-neuron knockouts + water (docs/log/report.md §25)
 conda activate flygym && python connectome_vision_loop.py --duration 1.0 --frontend-only   # ~1 min, 831 MB → results/connectome_loop_frontend_looming/
 python vision/frontend_check.py results/connectome_loop_frontend_looming/log.csv   # applies report §26's 4 pre-declared criteria mechanically
+node dodge/mission_test.js 60 3             # v7 任务模式自检：每关跑「不干预」与「参考解」各 3 种子 → results/dodge/missions.json（~9 min）
+#   **通过线照这份实测定**，不是先编故事；七关必须全部「参考解全过、不干预全不过」，否则 exit 1
+node dodge/mutant_test.js 60 3             # 盲盒突变体：10 个真实神经元敲除的行为可诊断性（~7 min）→ results/dodge/mutants.json
+#   实测只有 7/10 能从行为看出来；G2N-1 / Zorro / CB0883 六个指标全落在正常范围内
 node dodge/smoke_test.js                    # RUN THIS after editing fly_dodge.template.html — executes the render paths with real data instead of only checking syntax
 python dodge/landing_pose_check.py          # measures the pre-fix landing bug: body min z at the end of the hand-written descent (read-only, instant) → results/flight/landing_pose_check.json
 node dodge/measure_neurons.js               # in-subcircuit knockout ratios for the 10 screened neurons, sugar/water/grooming (3 seeds, ~2 min) → results/dodge/neuron_ratios.json; the page's toggle labels come from here
@@ -219,6 +223,16 @@ python screen/jon_screen.py baseline|screen|double|analyze   # third pathway: al
 python screen/jon_paper.py baseline|screen|full|analyze|full_analyze   # SAME pathway with the paper's real stimulus list (146 neurons reverse-engineered from Suppl. Table 7A); `full` redoes the whole pathway + 66 pairs (~13 min, 3.3 GB), `full_analyze` writes results/screen/jon_paper/full_summary.json and SUPERSEDES §24's numbers
 python screen/structure_vs_function.py   # can wiring alone predict knockout effects / redundancy? (read-only, ~3 min)
 python screen/pathway_compare.py        # sugar vs water: active-set overlap, effect agreement, hub cross-check (read-only, ~1 min)
+# 补充表 10 的十行预测（§37）。都是一次编译多条件；ST4 与 Fig 3 共用同一个 build
+TASTE_LIST=notebook python screen/taste_interaction.py calib|run|analyze   # 补充表 4：四味及其组合（8 条件 × 6 实现，~25 min）
+#   不设 TASTE_LIST 则用**反推**的刺激名单（留档）；官方名单在 figures.ipynb 的 Figure 3 单元格里
+python screen/taste_grid.py run|analyze     # Fig 3B-C 剂量网格（5×6，~7 min）：判据事先写死在脚本里
+python screen/responsive.py                 # 表 10 第 2、6 行：哪些神经元响应糖/水（只读，零新仿真，~10 s）
+python screen/sufficiency.py run|analyze    # Fig 2A：101 个 SEZ 类型的伸喙充分性（606 段，~22 min）
+#   判据是从论文表 3 自身反查出来的（50 Hz、MN9_Left、>0 恰好给出论文所报的 101/106）
+#   **必须开 RFC_GATE**：候选是中间神经元，不逐段门控不应期会污染全脑动力学
+python screen/jon_ce_f.py run|analyze       # Fig 5G：aBN1 只认 JO-CE 不认 JO-F（1 块，~1 min）
+python screen/shuffle_full.py run --n 10 && python screen/shuffle_full.py analyze   # 补充表 1D 全脑打乱（11 次建模，~11 min）
 python screen/audit.py [--fill]         # data audit: re-enumerates every segment the §14/16/19 analyses need and reports gaps (read-only unless --fill); 13,515 segments, currently 0 missing
 #   NOTE: audit.py covers only the §14/16/19 analyses. Total segments on disk across all screens is 18,799 / 10.56 h (deduped by key) —
 #   recount with `python screen/compute_ledger.py` (read-only, ~1 min; the old figure came from an ad-hoc shell loop
@@ -382,6 +396,22 @@ The looming experiment writes a fixed `looming_intensity` into LPLC2 rates; no v
 - Annotation-table positions (`pos_*`, `soma_*`) are voxel units at 4×4×40 nm; convert before computing distances.
 - **`until ! pgrep -f "X"; do sleep; done` SELF-MATCHES and hangs forever.** The waiter shell's own command line contains X, so `pgrep -f` finds itself and the condition never becomes true. Hit twice on 2026-09-19 (five stuck loops had to be killed). Wait on an artefact instead — `until [ -f out.json ]`, `until grep -q DONE log`, or a line count — or match a pattern the waiter's own command line cannot contain.
 - **Queued waiter jobs are how the "one simulation at a time" rule actually gets broken.** On 2026-09-19 a waiter queued earlier in the session ("wait for calibration, then run the 8 conditions") fired at the exact moment the old calibration exited — while a *replacement* calibration was being launched into the same Brian2 build directory. Both compiled at once and the second one died with `Project compilation failed (error code: 512)`. Nothing was corrupted (the chunk dir was empty) but two full-brain jobs ran in parallel. Before queuing a waiter, check what other waiters are already armed for the same condition, and prefer one chain over several independent ones; two Brian2 jobs sharing a build dir will collide even when memory is fine.
+- **补充表 10 是论文自己的记分卡，用它当清单比用正文干净**（§37）：十类预测、164 项，
+  每一行都写明了"我们预测了什么、对照的是哪个实验"。台账里官方论文那一块就是照这十行补完的。
+  两条方法上的经验：①**判据可以从论文表自身反查**——Fig 2A 有四种可能口径，只有"50 Hz、
+  MN9_Left、>0"能在论文自己的数字上重现它所报的 101/106，比猜阈值可靠；②**"论文没公开"
+  要先把仓库翻完再下结论**——苦/Ir94e 的刺激名单我判断成没公开并反推了一版，其实它就在
+  `external/fly-brain/code/paper-phil-drosophila/figures.ipynb` 的 Figure 3 单元格里。
+- **`Screen` 把全部候选刺激神经元一次编译进来是有代价的**：官方 `poi()` 只把**本次真正被刺激**
+  的神经元不应期置 0。糖/水/JON 三条通路的候选恰好全是感觉神经元、且每段都全体受刺激，
+  所以一直没暴露；换成 SEZ 那 308 个**中间神经元**就不对了。`RFC_GATE=True` 让不应期也逐段门控
+  （默认关，不动既有结果）。**"一直没出问题"不等于"这样做是对的"。**
+- **游戏里的新玩法必须先测再定规则**：`dodge/mission_test.js` 每关跑「不干预」与「参考解」两遍，
+  通过线照实测分布定；`dodge/mutant_test.js` 先回答"这些敲除行为上看得见吗"（答案是 7/10）。
+  一关如果不干预也能过，它就没在考任何东西；参考解如果过不了，那关就是不可能完成的。
+- **`node --check` 和 smoke 的模板静态检查都盖不住页面内联脚本的语法错误**：2026-09-19 少写一个
+  右括号，两条静态检查与 smoke 全过，直到三分钟的浏览器测试才报 `missing ) after argument list`。
+  `smoke_test.js` 现在会把内联 `<script>` 逐块 `new vm.Script()` 检查（重新注入 bug 验证过）。
 - **This workspace lives on an exFAT external drive, whose timestamps have 2-second resolution.** If an edit leaves a `.py` file at the *same byte size* and lands in the same 2 s window, `__pycache__` treats the stale `.pyc` as valid and the old code runs. Hit for real on 2026-09-19: after restoring a correct value in `scripts/reproduction_data.py`, `reproduction.py --check` kept reporting the old one until `scripts/__pycache__` was deleted. `reproduction.py` now sets `sys.dont_write_bytecode = True`; anywhere else, `rm -rf __pycache__` when a change appears to have no effect.
 - Background Python jobs writing to a log file are block-buffered: progress lines (without `flush=True`) appear only at exit. Use `python -u` when you need live progress.
 - **The game's visual front end does not look at pixels** (report §28.19): `visualInput` in `game_core.js` reads each ball's
