@@ -192,7 +192,7 @@ const FlyEye = (() => {
     const s = Math.min(w / (x1 - x0 + 2), h / (y1 - y0 + 2));
     return { P, x0, y0, x1, y1, s, ox: (w - (x1 - x0) * s) / 2, oy: (h - (y1 - y0) * s) / 2 };
   }
-  function drawHex(cv, vals, geom, mode, pale) {
+  function drawHex(cv, vals, geom, mode, pale, gb) {
     const g = cv.getContext("2d"), { P, x0, y0, s, ox, oy } = geom;
     g.clearRect(0, 0, cv.width, cv.height);
     let lo = Infinity, hi = -Infinity;
@@ -211,7 +211,12 @@ const FlyEye = (() => {
     const rng = hi - lo || 1, r = s * 0.62;
     for (let i = 0; i < P.length; i++) {
       const t = (vals[i] - lo) / rng;
-      if (mode === "mosaic") {
+      if (mode === "fly" && gb) {
+        // 「果蝇色」：去马赛克后的绿/蓝两路。红通道给 0 —— 果蝇几乎看不见红。
+        const G = Math.max(0, Math.min(1, (gb[i * 2] - lo) / rng));
+        const B = Math.max(0, Math.min(1, (gb[i * 2 + 1] - lo) / rng));
+        g.fillStyle = `rgb(${(40 * Math.min(G, B)) | 0},${(G * 255) | 0},${(B * 255) | 0})`;
+      } else if (mode === "mosaic") {
         // 彩色马赛克：pale 小眼（读蓝通道）画蓝，yellow（读绿）画绿。
         // 这是 FlyGym 真实的 pale/yellow 分型，比例 30/70，和真果蝇一致。
         const t2 = (vals[i] - lo) / rng;
@@ -500,6 +505,11 @@ function initFlyEye(assets) {
     }
     window.__eyeField = head => { if (!fieldOn || fieldOn.checked) field.update(head); };
 
+    const demoSw = $("ecDemo");
+    if (demoSw) {
+      cam.demosaic = demoSw.checked;
+      demoSw.addEventListener("change", () => { cam.demosaic = demoSw.checked; });
+    } else cam.demosaic = true;
     const note = $("ecNote");
     window.__eyeTick = (x, y, z, h) => {
       if (!cam.shouldUpdate(performance.now(), 3)) return;
@@ -507,14 +517,14 @@ function initFlyEye(assets) {
       if (!head) return;
       try {
         const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
     };
     if (note) note.textContent =
-      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 立方体贴图精确采样 · 3 fps`;
+      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 3 fps`;
 
     // 几何自检用的钩子（dodge/eyecam_geom_test.js 会用）：
     // 能强制刷新一次，并拿到虚拟头部，这样测试可以把已知方位的物体
@@ -523,7 +533,7 @@ function initFlyEye(assets) {
       forceUpdate() {
         const head = pickHead(); if (!head) return null;
         const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
         return r;
