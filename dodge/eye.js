@@ -537,20 +537,24 @@ function initFlyEye(assets) {
       demoSw.addEventListener("change", () => { cam.demosaic = demoSw.checked; });
     } else cam.demosaic = true;
     const note = $("ecNote");
+    // 每帧都进来：updateAsync 内部自己分两档 —— 取回上一次的像素（每帧试，
+    // 保证画面最多晚 1 帧）、提交新的渲染（按 EYE_FPS 节流）。
+    // 没有结果（GPU 还没画完）时 r 是 null，直接跳过这一帧的成像。
+    const EYE_FPS = 30;
     window.__eyeTick = (x, y, z, h) => {
-      if (!cam.shouldUpdate(performance.now(), 3)) return;
       const head = pickHead();
       if (!head) return;
       try {
-        const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
-        if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);
+        const r = cam.updateAsync(head, [cvL, cvR], EYE_FPS);
+        if (!r) { if (window.__eyeField) window.__eyeField(head); return; }
+        if (cvB) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
+        if (cvUV) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
     };
     if (note) note.textContent =
-      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 3 fps`;
+      `果蝇视角 · 721 小眼/眼 · 171°/眼 · ${EYE_FPS} fps 目标（实测 ~23）`;
 
     // 几何自检用的钩子（dodge/eyecam_geom_test.js 会用）：
     // 能强制刷新一次，并拿到虚拟头部，这样测试可以把已知方位的物体

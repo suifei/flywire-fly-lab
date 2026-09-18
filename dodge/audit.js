@@ -46,7 +46,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   await page.goto(isUrl ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
 
-  const R = await page.evaluate(() => {
+  const R = await page.evaluate(async () => {
     const out = [];
     const ok = (name, pass, got, want) => out.push({ name, pass: !!pass, got: String(got), want });
     const D = window.__eyeDiag, FS = window.__flyScene, T = FS.THREE;
@@ -281,6 +281,44 @@ const chromePath = () => [process.env.CHROME_PATH,
     ok("飞行片段已装载（真实物理轨迹）",
        clips.length >= 2 && clips.every(c => c.n > 10 && c.pos.length === c.n * 3),
        clips.length + " 段 / " + clips.map(c => c.n).join(",") + " 帧", "≥2 段，每段 >10 帧");
+
+    // ── 复眼异步读回（PBO）──────────────────────────────────────
+    // 这条优化省掉的是一次固定的 GPU 往返同步（~4–5 ms）。它静默退化的方式有两种：
+    // (a) 退回同步读回 —— 速率掉回 3 fps；(b) 取到的是**上一帧或空**的像素 —— 画面看着正常，
+    // 内容却是错的。两种都只能靠量。
+    const cam2 = D.instance();
+    ok("复眼走 WebGL2 异步读回", !!cam2._pbo(), cam2._pbo() ? "是" : "退回同步", "是");
+    if (cam2._pbo()) {
+      // 页面自己的循环每帧也在 collect，会把 fence 先消费掉 —— 测之前先停掉它，
+      // 否则这里永远等不到自己的那一笔（第一版就是这样，tries 跑满 60）。
+      const savedTick = window.__eyeTick; window.__eyeTick = null;
+      await new Promise(r => requestAnimationFrame(r));
+      cam2._pbo().sync = null; cam2._pendQ = null;        // 丢掉页面留下的半笔
+      cam2._renderCube(D.head());
+      cam2._submitAsync();
+      let tries = 0;
+      while (!cam2._tryCollect() && tries < 60) { await new Promise(r => requestAnimationFrame(r)); tries++; }
+      const asyncPx = Uint8Array.from(cam2.px);
+      cam2._readSync();                                    // 同一张贴图，改用同步读
+      let nd = 0, md = 0;
+      for (let i = 0; i < asyncPx.length; i++) {
+        const d = Math.abs(asyncPx[i] - cam2.px[i]); if (d) { nd++; if (d > md) md = d; }
+      }
+      ok("异步读回与同步逐字节相同", nd === 0,
+         nd === 0 ? asyncPx.length.toLocaleString() + " 字节全等" : nd + " 字节不同(max " + md + ")", "0 字节不同");
+      ok("异步读回等待帧数", tries <= 3, tries + " 帧", "≤3");
+      window.__eyeTick = savedTick;
+    }
+    // 实际成像速率（页面自己的循环）
+    {
+      let n = 0; const orig = cam2._resample.bind(cam2);
+      cam2._resample = c => { n++; return orig(c); };
+      const t0 = performance.now();
+      await new Promise(r => setTimeout(r, 1500));
+      const fps = n / ((performance.now() - t0) / 1000);
+      cam2._resample = orig;
+      ok("复眼视窗成像速率", fps >= 10, fps.toFixed(1) + " fps", "≥10（原同步版 3）");
+    }
 
     return out;
   });
