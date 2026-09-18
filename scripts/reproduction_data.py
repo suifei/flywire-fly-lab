@@ -52,10 +52,17 @@ PAPERS = [
                   script="dodge/measure_perturb.js", result_file="results/dodge/perturb.json", log="§30.1",
                   verify=[("baseline_hz.sugar", 82.9, 0.05), ("shuffle.sugar.均值Hz", 3.5, 0.1),
                           ("shuffle.sugar.比值", 0.043, 0.002)]),
-             dict(id="robustness", what="参数稳健性（补充表 11B–F）", status="partial",
-                  result="按论文判据（判定是否翻转）：突触权重 ±30% → **9/10 与 10/10 不变**；抑制 ±30% → 7/10 与 9/10；谷氨酸改兴奋性 → 7/10",
-                  caveat="同上，子回路而非全脑；翻转的全是贴着 0.8 判据的边缘情况",
-                  script="dodge/measure_perturb.js", result_file="results/dodge/perturb.json", log="§30.2"),
+             dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**）", status="partial",
+                  result="w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；"
+                         "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；除 w_syn −30%（保住 58%）外，"
+                         "其余四种扰动都保住 **≥99.7%** 的基线响应神经元",
+                  caveat="**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自多强」对不太上，"
+                         "原因未分辨。表 11B–F 的 182 行里只有 38–48 行带 flyid（其余是类型级汇总块）。"
+                         "第三条预测「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），**没有做**。"
+                         "另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475）",
+                  script="screen/robustness.py", result_file="results/screen/robustness/summary.json", log="§35",
+                  verify=[("perturbations.w-30.mn9_right", 34.5, 0.1),
+                          ("perturbations.glut_exc.n_active", 30475, 0)]),
              dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="not_done",
                   result="—", caveat="需要先把每种刺激标定到 MN9 = 40 Hz（论文口径），工期未估",
                   script=None, result_file=None, log="§附录·空白清单"),
