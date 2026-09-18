@@ -3,7 +3,7 @@
   "private": true,
   "description": "果蝇闪避游戏页的构建与测试依赖（浏览器测试用 puppeteer-core + 系统 Chrome，不下载 Chromium）",
   "scripts": {
-    "test": "node dodge/smoke_test.js && node vision/flyvis_parity.js && node vision/retina_parity.js && node vision/eye_e2e.js && node dodge/browser_test.js"
+    "test": "node dodge/smoke_test.js && node vision/flyvis_parity.js && node vision/retina_parity.js && node vision/eye_e2e.js && node dodge/browser_test.js && node dodge/eyecam_geom_test.js && node dodge/audit.js"
   },
   "devDependencies": {
     "puppeteer-core": "^23.0.0"
