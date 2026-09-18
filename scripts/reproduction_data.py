@@ -54,15 +54,22 @@ PAPERS = [
                           ("shuffle.sugar.比值", 0.043, 0.002)]),
              dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**）", status="partial",
                   result="w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；"
-                         "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；除 w_syn −30%（保住 58%）外，"
-                         "其余四种扰动都保住 **≥99.7%** 的基线响应神经元",
+                         "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 "
+                         "**57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +30% 保住 87%，其余三种 ≥99%",
                   caveat="**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自多强」对不太上，"
                          "原因未分辨。表 11B–F 的 182 行里只有 38–48 行带 flyid（其余是类型级汇总块）。"
                          "第三条预测「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），**没有做**。"
                          "另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475）",
                   script="screen/robustness.py", result_file="results/screen/robustness/summary.json", log="§35",
                   verify=[("perturbations.w-30.mn9_right", 34.5, 0.1),
-                          ("perturbations.glut_exc.n_active", 30475, 0)]),
+                          ("perturbations.glut_exc.n_active", 30475, 0),
+                          # 「保住多少基线响应者」正文里写错过一次（把 ≥99.7% 安到了全部四种扰动上，
+                          # 而抑制 +30% 只有 86.9%）。四个值全部钉死，手打的汇总再脱节就会被 --check 拦下。
+                          ("perturbations.w-30.frac_baseline_kept", 0.575, 0.002),
+                          ("perturbations.w+30.frac_baseline_kept", 1.0, 0.002),
+                          ("perturbations.inh-30.frac_baseline_kept", 0.998, 0.002),
+                          ("perturbations.inh+30.frac_baseline_kept", 0.869, 0.002),
+                          ("perturbations.glut_exc.frac_baseline_kept", 0.990, 0.002)]),
              dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="not_done",
                   result="—", caveat="需要先把每种刺激标定到 MN9 = 40 Hz（论文口径），工期未估",
                   script=None, result_file=None, log="§附录·空白清单"),
