@@ -686,7 +686,12 @@ code { font: 12px var(--mono); }
   // 默认 = 第 1/3 步的主设定：Ache 2019 编码（μ45°）+ 巨纤维 20 ms 平滑 + 真实逃逸飞行轨迹
   const ENC = { ache: { encoding: "ache2019", lplc2Mu: 45, gfTau: 0.02 }, legacy: { encoding: "legacy", gfTau: 0.08 } };
   const game = window.FlyDodgeGame.createGame(SUB, ConnectomeBrain, { seed: (Date.now() % 100000) + 1, ballSpeed: 60, mode: "auto",
-    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
+    // autoEvery 只在**页面上**放慢到约 30 秒一球（默认是 [1.4, 2.2]）。
+    // 不改默认值：autoplay.js / step1_encoding.js / step_v3.js / backward_v4.js 都按默认节奏
+    // 统计已发布的闪避率，改默认会让那些数字全部失效（与 pelletTypes 同样的处理）。
+    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true,
+           autoEvery: [26, 34],
+           pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
   // 递质标签：给「谷氨酸改兴奋性」那一档扰动用（论文补充表 11F）
   try { game.brain.setNT(JSON.parse(document.getElementById("sub-nt").textContent).nt); } catch (e) {}
   window.__game = game;      // 供 dodge/audit.js 核对场地边界等不变量
