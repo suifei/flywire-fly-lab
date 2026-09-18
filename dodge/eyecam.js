@@ -150,6 +150,24 @@ const FlyEyeCam = (() => {
       this.sky = new THREE.Color(opts.sky || "#9fb4c8");
       this.selfMeshes = opts.selfMeshes || [];
       this.n = lattice.length;
+      // 六边形邻居表：去马赛克要用。每个小眼只测一路（pale 测蓝 / yellow 测绿），
+      // 另一路靠邻居里另一型的平均估出来 —— 和拜耳滤镜的去马赛克是同一回事。
+      // **果蝇本身并没有在每个小眼上同时拿到两路**，这一步是显示用的插值。
+      {
+        const key = (u, v) => ((u + 32) << 6) | (v + 32);
+        const pos = new Map();
+        lattice.forEach(([u, v], i) => pos.set(key(u, v), i));
+        const NB = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+        this.nbr = lattice.map(([u, v]) => {
+          const out = [];
+          for (const [du, dv] of NB) {
+            const i = pos.get(key(u + du, v + dv));
+            if (i !== undefined) out.push(i);
+          }
+          return out;
+        });
+      }
+      this.demo = [new Float64Array(this.n * 2), new Float64Array(this.n * 2)];  // [G,B] 交错
       this.out = [new Float64Array(this.n), new Float64Array(this.n)];   // 彩色（G 或 B）
       this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7）
       this._uvMats = null;
@@ -242,7 +260,18 @@ const FlyEyeCam = (() => {
           uvv[j] = px[off] / 255;                            // R = 紫外
           col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
         }
-        this.draw.drawHex(canvases[e], col, this.geom, "mosaic", pale);
+        // 去马赛克：把每个小眼缺的那一路用邻居里另一型的平均补上
+        const dm = this.demo[e], nbr = this.nbr;
+        for (let j = 0; j < n; j++) {
+          const isP = pale[j];
+          let s2 = 0, c2 = 0;
+          for (const i of nbr[j]) if (!!pale[i] !== !!isP) { s2 += col[i]; c2++; }
+          const other = c2 ? s2 / c2 : col[j];
+          dm[j * 2] = isP ? other : col[j];       // G（yellow 直接测到）
+          dm[j * 2 + 1] = isP ? col[j] : other;   // B（pale 直接测到）
+        }
+        this.draw.drawHex(canvases[e], col, this.geom,
+                          this.demosaic ? "fly" : "mosaic", pale, dm);
       }
 
       renderer.setRenderTarget(prevTarget);
@@ -250,7 +279,8 @@ const FlyEyeCam = (() => {
       // 返回**副本**：this.out/this.uv 是复用缓冲区，直接返回引用的话
       // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
       return { color: this.out.map(a => Float64Array.from(a)),
-               uv: this.uv.map(a => Float64Array.from(a)) };
+               uv: this.uv.map(a => Float64Array.from(a)),
+               gb: this.demo.map(a => Float64Array.from(a)) };
     }
 
     /**
@@ -261,7 +291,7 @@ const FlyEyeCam = (() => {
      * 鱼眼逆映射 + 157° 透视投影 + ±63.1° 光轴 算出来的。
      * 正前方那条重叠带就是**双眼视区**，两侧是单眼区，背后是盲区。
      */
-    drawBrain(cv, readouts, mode) {
+    drawBrain(cv, readouts, mode, gbs) {
       const g = cv.getContext("2d"), W2 = cv.width, H2 = cv.height;
       g.clearRect(0, 0, W2, H2);
       const AZ = 155 * Math.PI / 180, EL = 90 * Math.PI / 180;
@@ -280,11 +310,18 @@ const FlyEyeCam = (() => {
         for (let j = 0; j < r.length; j++) {
           const t = (r[j] - lo) / rng;
           // 紫外没有对应的可见色，用紫罗兰表示；彩色路按 pale/yellow 分型
-          g.fillStyle = mode === "uv"
-            ? `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`
-            : (this.pale[j]
+          if (mode === "uv") {
+            g.fillStyle = `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`;
+          } else if (gbs) {
+            // 「果蝇色」：去马赛克后的绿/蓝两路，红给 0（果蝇几乎看不见红）
+            const G = Math.max(0, Math.min(1, (gbs[e][j * 2] - lo) / rng));
+            const B = Math.max(0, Math.min(1, (gbs[e][j * 2 + 1] - lo) / rng));
+            g.fillStyle = `rgb(${(40 * Math.min(G, B)) | 0},${(G * 255) | 0},${(B * 255) | 0})`;
+          } else {
+            g.fillStyle = this.pale[j]
               ? `rgb(${(t * 90) | 0},${(t * 150) | 0},${(t * 255) | 0})`
-              : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`);
+              : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`;
+          }
           g.beginPath(); g.arc(X(az[j]), Y(el[j]), rad, 0, 7); g.fill();
         }
       }

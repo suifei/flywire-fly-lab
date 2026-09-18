@@ -167,7 +167,7 @@ code { font: 12px var(--mono); }
 .eyegrid figcaption span { opacity:.6; font-size:11px; }
 
 /* 果蝇第一人称复眼视窗（舞台右上角） */
-.eyecam { position:absolute; top:46px; right:10px; z-index:4; padding:6px 7px 4px;
+.eyecam { position:absolute; top:46px; right:10px; z-index:4; pointer-events:none; padding:6px 7px 4px;
   background:rgba(10,12,16,.72); border:1px solid rgba(255,255,255,.14); border-radius:9px;
   backdrop-filter:blur(6px); pointer-events:none; }
 .eyecam .ec-row { display:flex; gap:6px; }
@@ -175,6 +175,8 @@ code { font: 12px var(--mono); }
 .eyecam .ec-row canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
 .eyecam figcaption { font-size:9px; opacity:.6; margin-top:1px; }
 #ecB, #ecUV { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
+.ec-sw { display:block; font-size:9px; opacity:.6; margin-top:3px; text-align:center; pointer-events:auto; cursor:pointer; }
+.ec-sw input { transform:scale(.8); vertical-align:middle; }
 .ec-scale { display:flex; justify-content:space-between; width:162px; font-size:8px; opacity:.45; margin-top:1px; }
 .eyecam small { display:block; font-size:9px; opacity:.55; margin-top:2px; text-align:center; }
 @media (max-width: 720px) { .eyecam canvas { width:56px; height:56px; } }
@@ -214,6 +216,7 @@ code { font: 12px var(--mono); }
           <div class="ec-scale"><span>左 90&deg;</span><span>前 0&deg;</span><span>右 90&deg;</span></div>
           <canvas id="ecUV" width="300" height="104"></canvas>
           <div class="ec-scale"><span>R7 紫外</span><span>手写反射率</span></div>
+          <label class="ec-sw"><input type="checkbox" id="ecDemo" checked> 去马赛克</label>
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
       </div>
@@ -387,6 +390,8 @@ code { font: 12px var(--mono); }
       <p class="sub"><b>舞台右上角那个小窗</b>是同一套东西的实时版：把 3D 世界从果蝇眼睛的位置再渲一遍（左右眼各偏前方 50&deg;），走同一张采样表成像。为了实时<b>跳过了 flyvis 和解码器</b>，只到「视网膜接收到什么」为止，每秒刷 3 次（读回 GPU 像素会打断渲染流水线）。渲染时会把果蝇自己的网格藏起来——摄像机在身体前方，不藏的话它自己的头会糊满半个视野。<br>
       <b>视野边缘不再是近似</b>：一开始用透视投影 + FlyGym 的鱼眼校正，但透视投影天生到不了 180&deg;，157&deg; 时边缘已经被拉得极扁，鱼眼公式还有个奇点。现在改成<b>立方体贴图</b>——六个 90&deg; 面覆盖整个球面，每个小眼按自己的视线方向精确采样，不需要任何畸变补偿。小眼方向按六边形点阵定义：半径 15、小眼间角 5.7&deg;，<b>单眼视野 171&deg;</b>，接近真果蝇（文献 ~160&ndash;180&deg;）。几何自检实测：9 个已知方位平均误差 <b>0.7&deg;</b>。<br>
       <b>紫外（R7）</b>那一路是<b>手写设定</b>：sRGB 渲染里没有紫外，所以给场景里每类物体指定了一个紫外反射率。依据是真实的紫外世界结构——自然界里天空是压倒性的紫外源、绝大多数表面紫外很暗，果蝇正是靠这个对比找开阔空间、判断上下。<b>但数值没有任何测量依据</b>，只是结构上说得通；上传的照片里更是完全没有紫外信息。<br>
+      <b>为什么看着一片绿</b>：一开始整场都用页面主题色（地板 #1a211e），绿蓝两通道只差 11%，果蝇眼里等于没有颜色；加上每个小眼只测一路，画面按感受器类型上色，70% 是 yellow 型 → 天生 70% 的格子是绿的。现在球场改成<b>真实配色</b>（木地板、白线、蓝红座椅），并做<b>去马赛克</b>——把每个小眼缺的那一路用邻居里另一型的平均补上，和拜耳滤镜同一回事（<b>果蝇本身并没有在每个小眼上同时拿到两路</b>，这是显示用的插值，可以关掉看原始马赛克）。<br>
+      改完实测：场景 G/B 从 36.6/32.5 变成 <b>76/49</b>，眼内 G/B = 0.310/0.205，41 个小眼偏蓝（蓝座椅）。<b>但整体仍然偏绿，而这是对的</b>——木地板是橙色，果蝇<b>没有红色感受器</b>，橙色只刺激它的绿通道、几乎不刺激蓝通道。<b>篮球场在果蝇眼里就是一片暗绿。</b><br>
       仍然是近似的：小眼间角取了常数 5.7&deg;（真果蝇从正前 ~4.5&deg; 到侧面 ~8&deg; 渐变）；天空是游戏的 CSS 渐变、不在 3D 场景里，离屏渲染时用舞台天空色补了个底。</p>
       <p class="sub" id="eNote"></p>
     </div>
@@ -1166,6 +1171,24 @@ const FlyEyeCam = (() => {
       this.sky = new THREE.Color(opts.sky || "#9fb4c8");
       this.selfMeshes = opts.selfMeshes || [];
       this.n = lattice.length;
+      // 六边形邻居表：去马赛克要用。每个小眼只测一路（pale 测蓝 / yellow 测绿），
+      // 另一路靠邻居里另一型的平均估出来 —— 和拜耳滤镜的去马赛克是同一回事。
+      // **果蝇本身并没有在每个小眼上同时拿到两路**，这一步是显示用的插值。
+      {
+        const key = (u, v) => ((u + 32) << 6) | (v + 32);
+        const pos = new Map();
+        lattice.forEach(([u, v], i) => pos.set(key(u, v), i));
+        const NB = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+        this.nbr = lattice.map(([u, v]) => {
+          const out = [];
+          for (const [du, dv] of NB) {
+            const i = pos.get(key(u + du, v + dv));
+            if (i !== undefined) out.push(i);
+          }
+          return out;
+        });
+      }
+      this.demo = [new Float64Array(this.n * 2), new Float64Array(this.n * 2)];  // [G,B] 交错
       this.out = [new Float64Array(this.n), new Float64Array(this.n)];   // 彩色（G 或 B）
       this.uv = [new Float64Array(this.n), new Float64Array(this.n)];    // 紫外（R7）
       this._uvMats = null;
@@ -1258,7 +1281,18 @@ const FlyEyeCam = (() => {
           uvv[j] = px[off] / 255;                            // R = 紫外
           col[j] = (pale[j] ? px[off + 2] : px[off + 1]) / 255;   // pale 取蓝、yellow 取绿
         }
-        this.draw.drawHex(canvases[e], col, this.geom, "mosaic", pale);
+        // 去马赛克：把每个小眼缺的那一路用邻居里另一型的平均补上
+        const dm = this.demo[e], nbr = this.nbr;
+        for (let j = 0; j < n; j++) {
+          const isP = pale[j];
+          let s2 = 0, c2 = 0;
+          for (const i of nbr[j]) if (!!pale[i] !== !!isP) { s2 += col[i]; c2++; }
+          const other = c2 ? s2 / c2 : col[j];
+          dm[j * 2] = isP ? other : col[j];       // G（yellow 直接测到）
+          dm[j * 2 + 1] = isP ? col[j] : other;   // B（pale 直接测到）
+        }
+        this.draw.drawHex(canvases[e], col, this.geom,
+                          this.demosaic ? "fly" : "mosaic", pale, dm);
       }
 
       renderer.setRenderTarget(prevTarget);
@@ -1266,7 +1300,8 @@ const FlyEyeCam = (() => {
       // 返回**副本**：this.out/this.uv 是复用缓冲区，直接返回引用的话
       // 调用方拿到的"上一帧"会被下一帧覆盖，差分恒为 0（几何自检就是这么挂的）。
       return { color: this.out.map(a => Float64Array.from(a)),
-               uv: this.uv.map(a => Float64Array.from(a)) };
+               uv: this.uv.map(a => Float64Array.from(a)),
+               gb: this.demo.map(a => Float64Array.from(a)) };
     }
 
     /**
@@ -1277,7 +1312,7 @@ const FlyEyeCam = (() => {
      * 鱼眼逆映射 + 157° 透视投影 + ±63.1° 光轴 算出来的。
      * 正前方那条重叠带就是**双眼视区**，两侧是单眼区，背后是盲区。
      */
-    drawBrain(cv, readouts, mode) {
+    drawBrain(cv, readouts, mode, gbs) {
       const g = cv.getContext("2d"), W2 = cv.width, H2 = cv.height;
       g.clearRect(0, 0, W2, H2);
       const AZ = 155 * Math.PI / 180, EL = 90 * Math.PI / 180;
@@ -1296,11 +1331,18 @@ const FlyEyeCam = (() => {
         for (let j = 0; j < r.length; j++) {
           const t = (r[j] - lo) / rng;
           // 紫外没有对应的可见色，用紫罗兰表示；彩色路按 pale/yellow 分型
-          g.fillStyle = mode === "uv"
-            ? `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`
-            : (this.pale[j]
+          if (mode === "uv") {
+            g.fillStyle = `rgb(${(t * 190) | 0},${(t * 90) | 0},${(t * 255) | 0})`;
+          } else if (gbs) {
+            // 「果蝇色」：去马赛克后的绿/蓝两路，红给 0（果蝇几乎看不见红）
+            const G = Math.max(0, Math.min(1, (gbs[e][j * 2] - lo) / rng));
+            const B = Math.max(0, Math.min(1, (gbs[e][j * 2 + 1] - lo) / rng));
+            g.fillStyle = `rgb(${(40 * Math.min(G, B)) | 0},${(G * 255) | 0},${(B * 255) | 0})`;
+          } else {
+            g.fillStyle = this.pale[j]
               ? `rgb(${(t * 90) | 0},${(t * 150) | 0},${(t * 255) | 0})`
-              : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`);
+              : `rgb(${(t * 110) | 0},${(t * 255) | 0},${(t * 120) | 0})`;
+          }
           g.beginPath(); g.arc(X(az[j]), Y(el[j]), rad, 0, 7); g.fill();
         }
       }
@@ -1506,7 +1548,7 @@ const FlyEye = (() => {
     const s = Math.min(w / (x1 - x0 + 2), h / (y1 - y0 + 2));
     return { P, x0, y0, x1, y1, s, ox: (w - (x1 - x0) * s) / 2, oy: (h - (y1 - y0) * s) / 2 };
   }
-  function drawHex(cv, vals, geom, mode, pale) {
+  function drawHex(cv, vals, geom, mode, pale, gb) {
     const g = cv.getContext("2d"), { P, x0, y0, s, ox, oy } = geom;
     g.clearRect(0, 0, cv.width, cv.height);
     let lo = Infinity, hi = -Infinity;
@@ -1525,7 +1567,12 @@ const FlyEye = (() => {
     const rng = hi - lo || 1, r = s * 0.62;
     for (let i = 0; i < P.length; i++) {
       const t = (vals[i] - lo) / rng;
-      if (mode === "mosaic") {
+      if (mode === "fly" && gb) {
+        // 「果蝇色」：去马赛克后的绿/蓝两路。红通道给 0 —— 果蝇几乎看不见红。
+        const G = Math.max(0, Math.min(1, (gb[i * 2] - lo) / rng));
+        const B = Math.max(0, Math.min(1, (gb[i * 2 + 1] - lo) / rng));
+        g.fillStyle = `rgb(${(40 * Math.min(G, B)) | 0},${(G * 255) | 0},${(B * 255) | 0})`;
+      } else if (mode === "mosaic") {
         // 彩色马赛克：pale 小眼（读蓝通道）画蓝，yellow（读绿）画绿。
         // 这是 FlyGym 真实的 pale/yellow 分型，比例 30/70，和真果蝇一致。
         const t2 = (vals[i] - lo) / rng;
@@ -1814,6 +1861,11 @@ function initFlyEye(assets) {
     }
     window.__eyeField = head => { if (!fieldOn || fieldOn.checked) field.update(head); };
 
+    const demoSw = $("ecDemo");
+    if (demoSw) {
+      cam.demosaic = demoSw.checked;
+      demoSw.addEventListener("change", () => { cam.demosaic = demoSw.checked; });
+    } else cam.demosaic = true;
     const note = $("ecNote");
     window.__eyeTick = (x, y, z, h) => {
       if (!cam.shouldUpdate(performance.now(), 3)) return;
@@ -1821,14 +1873,14 @@ function initFlyEye(assets) {
       if (!head) return;
       try {
         const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
     };
     if (note) note.textContent =
-      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 立方体贴图精确采样 · 3 fps`;
+      `果蝇视角 · 721 小眼/眼 · 171°/眼 · 3 fps`;
 
     // 几何自检用的钩子（dodge/eyecam_geom_test.js 会用）：
     // 能强制刷新一次，并拿到虚拟头部，这样测试可以把已知方位的物体
@@ -1837,7 +1889,7 @@ function initFlyEye(assets) {
       forceUpdate() {
         const head = pickHead(); if (!head) return null;
         const r = cam.update(head, [cvL, cvR]);
-        if (cvB && r) cam.drawBrain(cvB, r.color, "color");
+        if (cvB && r) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV && r) cam.drawBrain(cvUV, r.uv, "uv");
         if (window.__eyeField) window.__eyeField(head);
         return r;
@@ -2900,10 +2952,13 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     // 有球场之后就不画 5 mm 网格了 —— 它压在场地线上，噪点很重，
     // 而球场自己的线（中圈 1.8 m、限制区 5.8×4.9）已经能给出尺度参照。
     if (typeof FlyCourt !== "undefined") {
+      // 用**真实球场配色**而不是页面主题色：原来整场都是灰绿（地板 #1a211e，
+      // 绿蓝两通道只差 11%），果蝇眼里等于没有颜色。木地板偏红 → 在果蝇眼里
+      // 反而是暗的（它几乎看不见红），白线很亮，蓝红座椅一亮一暗 —— 这才有得看。
       courtGroup = FlyCourt.build(THREE, scene, {
-        floor: css("--floor"), line: css("--ink-2"), rig: css("--muted"),
-        board: css("--panel-2"), rim: css("--critical"),
-        seatA: css("--panel"), seatB: css("--panel-2"),
+        floor: "#b8763a", line: "#f2f2ee", rig: "#8a9196",
+        board: "#dfe6ea", rim: "#e0562a",
+        seatA: "#1f4fa8", seatB: "#b3322c",
       });
     }
     for (const p of parts) {
