@@ -393,6 +393,8 @@ code { font: 12px var(--mono); }
       <div id="reproCounts" class="lower" style="gap:10px"></div>
       <div class="tbl" style="margin-top:10px"><table id="tRepro"></table></div>
       <p class="sub" id="nRepro"></p>
+      <p style="margin-top:14px"><b>本项目自己的结果</b>——不是对某篇论文的复现，是这个项目自己做出来的结论，<b>阴性的也在里面</b>。</p>
+      <div class="tbl"><table id="tFindings"></table></div>
     </div>
     <div class="card" style="grid-column: 1 / -1">
       <h3>让果蝇看你的图</h3>
@@ -713,6 +715,13 @@ code { font: 12px var(--mono); }
       });
     }
     document.getElementById("tRepro").innerHTML = h;
+    // 本项目自己的结果（不是对论文的复现），同一份 JSON
+    if (R.findings && R.findings.length) {
+      let g = "<tr><th>问题</th><th>结果</th><th>脚本</th></tr>";
+      for (const f of R.findings)
+        g += `<tr><td>${md(f.what)}</td><td>${md(f.result)}</td><td><code>${esc(f.script)}</code></td></tr>`;
+      document.getElementById("tFindings").innerHTML = g;
+    }
     const np = R.papers.length, nc = R.total_claims;
     document.getElementById("nRepro").innerHTML =
       `${np} 篇来源、${nc} 条主张、${R.parameters.length} 个关键参数。`
