@@ -104,8 +104,51 @@
       this.rebuildWeights();
     }
 
+    // ── 论文式扰动（对应 Shiu 2024 补充表 1D 与 11B–F）────────────────────
+    // 11B/C  突触权重整体缩放       → setWeightScale
+    // 11D/E  抑制强度缩放（只动负权）→ setInhibScale
+    // 11F    谷氨酸改成兴奋性        → setGlutExcitatory（需要递质标签）
+    // 1D     打乱接线                → setShuffle
+    // 这些都在 rebuildWeights 里按固定顺序施加，顺序本身会影响结果，所以写死在这里。
+    setWeightScale(s) { this.wScale = s; this.rebuildWeights(); }
+    setInhibScale(s) { this.inhScale = s; this.rebuildWeights(); }
+    setGlutExcitatory(on) { this.glutExc = !!on; this.rebuildWeights(); }
+    /** 递质编码数组（与神经元同序）：0=ACh 1=Glut 2=GABA 3=DA 4=5HT 5=OA 6=未知 */
+    setNT(nt) { this.nt = nt; }
+    /**
+     * 打乱接线：保持每个神经元的**出度**和它那串权重不变，只把突触后靶点随机重排。
+     * **论文的打乱方式我们不知道**（补充表 1D 只给了结果，没给方法），所以这是我们
+     * 自己定义的一种打乱，用来演示"真实接线是否重要"这个定性问题，不声称与论文同法。
+     */
+    setShuffle(on, seed = 12345) {
+      if (!on) { this.postShuf = null; this.rebuildWeights(); return; }
+      const rnd = rng32(seed >>> 0);
+      const p = Int32Array.from(this.post);
+      for (let i = p.length - 1; i > 0; i--) {          // Fisher–Yates
+        const j = (rnd() * (i + 1)) | 0;
+        const t = p[i]; p[i] = p[j]; p[j] = t;
+      }
+      this.postShuf = p;
+      this.rebuildWeights();
+    }
+    /** 当前实际生效的突触后靶点数组 */
+    get postArr() { return this.postShuf || this.post; }
+
     rebuildWeights() {
       this.w.set(this.w0);
+      const ws = this.wScale, is = this.inhScale;
+      if (this.glutExc && this.nt) {                     // 谷氨酸能神经元的传出突触改为兴奋性
+        for (let i = 0; i < this.n; i++) {
+          if (this.nt[i] !== 1) continue;
+          for (let k = this.indptr[i]; k < this.indptr[i + 1]; k++) this.w[k] = Math.abs(this.w[k]);
+        }
+      }
+      if (is != null && is !== 1) {                      // 只缩放抑制（负权）
+        for (let k = 0; k < this.w.length; k++) if (this.w[k] < 0) this.w[k] *= is;
+      }
+      if (ws != null && ws !== 1) {                      // 整体缩放
+        for (let k = 0; k < this.w.length; k++) this.w[k] *= ws;
+      }
       for (const gname of this.silenced) {
         for (const i of this.groups[gname]) this.w.fill(0, this.indptr[i], this.indptr[i + 1]);
       }
@@ -116,7 +159,8 @@
 
     // 推进 nSteps 步；onSpike(i, step) 可选，用于实时 raster
     run(nSteps, onSpike) {
-      const { n, v, g, last, rfc, a, b, c, D, indptr, post, w, counts } = this;
+      const { n, v, g, last, rfc, a, b, c, D, indptr, w, counts } = this;
+      const post = this.postArr;   // 打乱接线时换成重排过的靶点数组
       const v0 = this.P.v0, vth = this.P.vth, vrst = this.P.vrst, kick = this.kick;
       const fired = this.fired;
       for (let k = 0; k < nSteps; k++) {

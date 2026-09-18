@@ -568,6 +568,25 @@
       S.hitFlash = Math.max(0, S.hitFlash - dt);
     };
 
+    // —— 论文式扰动（Shiu 2024 补充表 1D / 11B–F）的对外接口 ——
+    // 页面把它们做成滑块和按钮，玩家能直接看到"接线和参数到底重不重要"。
+    // 注意：这些是**定性演示**，不是复现论文的定量结果（论文在全脑上跑，这里是 4,599 个神经元的子回路；
+    // 而且打乱方式论文没给，见 brain.js 里 setShuffle 的说明）。
+    G.PERTURB = { weightScale: 1, inhibScale: 1, shuffle: false, glutExc: false };
+    G.setPerturb = (k, v) => {
+      if (!(k in G.PERTURB)) return;
+      G.PERTURB[k] = v;
+      if (k === "weightScale") brain.setWeightScale(v);
+      else if (k === "inhibScale") brain.setInhibScale(v);
+      else if (k === "glutExc") brain.setGlutExcitatory(v);
+      else if (k === "shuffle") brain.setShuffle(v, (opts.seed ?? 11) * 977 + 3);
+    };
+    G.resetPerturb = () => {
+      G.PERTURB = { weightScale: 1, inhibScale: 1, shuffle: false, glutExc: false };
+      brain.setShuffle(false); brain.setGlutExcitatory(false);
+      brain.setInhibScale(1); brain.setWeightScale(1);
+    };
+
     G.brain = brain; G.SUB = SUB;   // 供 dodge/audit.js 核对损毁是否真的切断了突触
     return G;
   }

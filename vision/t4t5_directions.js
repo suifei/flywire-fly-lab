@@ -19,8 +19,13 @@ const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const FlyVis = require(path.join(__dirname, "flyvis.js"));
 
-const net = FlyVis.load(fs.readFileSync(path.join(ROOT, "results/vision/flyvis_net.json"), "utf8"));
-const lat = net.lattice || JSON.parse(fs.readFileSync(path.join(ROOT, "results/vision/flyvis_net.json"), "utf8")).lattice;
+// 网络文件可由 FLYVIS_NET 指定（集成扫描用）。默认是权威的成员 000。
+const NETFILE = process.env.FLYVIS_NET
+  ? path.resolve(process.env.FLYVIS_NET)
+  : path.join(ROOT, "results/vision/flyvis_net.json");
+const netDocRaw = fs.readFileSync(NETFILE, "utf8");
+const net = FlyVis.load(netDocRaw);
+const lat = JSON.parse(netDocRaw).lattice;
 const N = lat.length;
 const pos = lat.map(([u, v]) => [u + v / 2, v * Math.sqrt(3) / 2]);
 
@@ -115,8 +120,9 @@ const out = { 说明: "漂移正弦光栅，空间周期 4 小眼、dt 5 ms、�
 // **非默认参数不许覆盖权威文件**：这一步踩过 —— 后来用 TF=2 / DT=0.033 跑参数扫描，
 // 把默认参数那次的结果覆盖了，报告里的数字和文件对不上（自查才发现）。
 // 权威文件只由默认参数产生，变体自动加后缀。
-const DEFAULT = (DT === 0.005) && (process.env.TF === undefined);
+const DEFAULT = (DT === 0.005) && (process.env.TF === undefined) && !process.env.FLYVIS_NET && !process.env.OUT_JSON;
 const suffix = DEFAULT ? "" : `_dt${Math.round(DT * 1000)}ms_tf${TFS.join("-")}`;
-const outFile = path.join(ROOT, `results/vision/t4t5_directions${suffix}.json`);
+const outFile = process.env.OUT_JSON ? path.resolve(process.env.OUT_JSON)
+                                     : path.join(ROOT, `results/vision/t4t5_directions${suffix}.json`);
 fs.writeFileSync(outFile, JSON.stringify(out, null, 1));
 console.log(`\n→ ${path.relative(ROOT, outFile)}${DEFAULT ? "（权威）" : "（参数变体，不覆盖权威文件）"}`);
