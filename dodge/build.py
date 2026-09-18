@@ -41,6 +41,16 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__V3__*/", (ROOT / "results/dodge/v3_results.json").read_text()),
                   ("/*__V4__*/", (ROOT / "results/dodge/v4_results.json").read_text()),
                   ("/*__V6__*/", (ROOT / "results/dodge/v6_results.json").read_text()),
+                  # 「让果蝇看你的图」：真实复眼几何 + flyvis 预训练视觉网络 + 六边形卷积解码器
+                  ("/*__FLYVIS_NET__*/", (ROOT / "results/vision/flyvis_net.json").read_text()),
+                  ("/*__RETINA_META__*/", (ROOT / "results/vision/retina.json").read_text()),
+                  ("/*__DECODERS__*/", (ROOT / "results/vision/decoders.json").read_text()),
+                  ("/*__RETINA_PNG_B64__*/",
+                   base64.b64encode((ROOT / "results/vision/retina_map.png").read_bytes()).decode()),
+                  ("/*__FLYVIS_JS__*/", (ROOT / "vision/flyvis.js").read_text()),
+                  ("/*__RETINA_JS__*/", (ROOT / "vision/retina.js").read_text()),
+                  ("/*__DECODER_JS__*/", (ROOT / "vision/decoder.js").read_text()),
+                  ("/*__EYE_JS__*/", (D / "eye.js").read_text()),
                   ("/*__BRAIN_JS__*/", (D / "brain.js").read_text()),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text())]:
     assert key in html, key
