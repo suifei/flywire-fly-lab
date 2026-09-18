@@ -18,11 +18,13 @@ const ROOT = path.resolve(__dirname, "..");
 const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/subcircuit_v2.json")));
 const { ConnectomeBrain } = require(path.join(ROOT, "dodge/brain.js"));
 const { createGame } = require(path.join(ROOT, "dodge/game_core.js"));
+const FLIGHT = JSON.parse(fs.readFileSync(path.join(ROOT, "results/flight/flight_clips.json")));
 
 const SEEDS = [1, 2, 3, 4, 5], T = 90, DT = 0.005;
 const ev = [];
 for (const seed of SEEDS) {
   const g = createGame(SUB, ConnectomeBrain, { seed, ballSpeed: 60, cfg: { takeoff: "clip" } });
+  g.setFlightClips(FLIGHT.clips);        // 不装片段的话 clip 起飞根本触发不了（第一版 0 次起飞就是这个原因）
   let gfCross = null, wasFlying = false;
   for (let i = 0; i < T / DT; i++) {
     g.step(DT);
