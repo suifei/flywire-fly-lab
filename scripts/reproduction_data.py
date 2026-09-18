@@ -233,6 +233,35 @@ FINDINGS = [
          caveat="球半径 2.5 mm、小眼间角 5.7° → 60 mm 外不到一个小眼。败因是分辨率与未补偿的自体运动，不是 LPLC2 模型。"
                 "所以做成可切换对照，不做默认前端",
          script="dodge/front_end_compare.js", result_file="results/vision/front_end_compare.json", log="§28.19"),
+    dict(id="dopamine", what="模型里有没有奖赏信号（吃到糖会不会分泌多巴胺）",
+         result="**没有**。不失控的糖刺激下 PAM 神经元放电 **0/307**；DAN 只在失控里放电，"
+                "而且 PPL1 > PAM，气味失控与糖失控完全一样",
+         caveat="所以这个 LIF 模型**不具备强化学习所需的奖赏信号**——不是「没测出来」，是结构上就没有",
+         script="dodge/v4_refs_analysis.py", result_file="results/v2_ref/v4_analysis.json", log="§11.1"),
+    dict(id="hub_cb0883", what="有没有「单独敲都没事、一起敲就断」的备份通路",
+         result="有，但是例外。把 312 个活跃神经元逐一与枢纽 CB0883 配对：**32 个协同（19 个留一稳定）**，"
+                "其中只有 **12 个**单敲比值 < 1、可解释为备份；**108 个是亚可加**（共用瓶颈）",
+         caveat="12 个备份里有 5 个就是糖味觉受体本身。CB0883 单独敲 0.76（算不上必需），"
+                "配上 Clavicle / G2N-1 就把 MN9 打到 0.24 —— **单个敲除筛选系统性看不见这一类**",
+         script="screen/hub_scan.py", result_file="results/screen/hub_scan_summary.json", log="§16.2"),
+    dict(id="olfaction", what="全脑模型能不能给出嗅觉转向信号", status_note="阴性",
+         result="**不能**。单侧气味刺激的下行神经元侧化指数 |LI| ≤ 0.05",
+         caveat="而且嗅觉刺激是**全或无的失控**：35 个 DM1 嗅觉受体神经元 10 Hz → 25 ms 内约 8,300 个神经元活跃。"
+                "右侧 ORN_DM1 对**左侧** DM1 投射神经元的突触反而更多（1,664 vs 1,288），侧向读出本身就被混淆。"
+                "游戏里的「闻着找」是**手写**的高斯气味场，不是连接组",
+         script="dodge/v4_olfaction_runaway.py", result_file="results/v2_ref/olfaction_runaway.json", log="§10.5 + §11.4"),
+    dict(id="banc_vnc", what="BANC 腹神经索能不能走出节律",
+         result="**不能**。节律功率约等于噪声；巨纤维驱动 **0 个**腿部运动神经元",
+         caveat="原因是 GF→TTMn 的**电突触在连接组里根本不存在**（只有化学突触）。"
+                "这条后来在全 MANC 上复核过（§12.3）：化学突触只给约 20 ms 瞬变，"
+                "要维持 TTMn 需手加约 1,500 个突触当量的耦合",
+         script="vnc/run_vnc.py", result_file="results/vnc/", log="§10.6 + §12.3"),
+    dict(id="call_protocol", what="敲除判定对口径有多敏感",
+         result="10 个实验类型里**恰好 2 个**（Roundup 与 Zorro）的判定随实现数与归一化口径翻转，其余 8 个四种口径一致",
+         caveat="这两个的比值全落在 **0.74–0.85**，紧贴 0.8 判据 —— 不是算错，是本来就在线上。"
+                "四种口径都得 6/10，但**答对的是哪 6 个**恰好互换一个。"
+                "引用这两个的比值必须同时说明实现数与归一化方式",
+         script="screen/recheck_calls.py", result_file="results/screen/recheck_calls.json", log="§31"),
     dict(id="ensemble", what="我们的视觉结论有多少是「那一个模型」的性质",
          result="50 个成员全跑：卷积前提 **50/50** 成立（唯一在集成层面稳的）；"
                 "而 LPLC2 三条判据全过只有 **8/49**，我们一直用的成员 000 正是其中之一",
