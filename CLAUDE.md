@@ -141,6 +141,18 @@ python vision/draw_eye.py loom_L       # render existing flyvis data as a compou
 node vision/flyvis_parity.js && node vision/retina_parity.js && node vision/eye_e2e.js
 node dodge/browser_test.js             # real Chrome; CI=1 makes a missing Chrome an error, not a skip
 node dodge/field_contrast.js           # are the visual-field sectors actually visible on the court floor?
+node vision/opsin_weights.js           # Govardovskii 2000 opsin template -> per-channel weights (results/vision/opsin_weights.json).
+#   Rh1 (R1-R6, the main flyvis input) was NOT modelled at all before 2026-09-18; eyecam now returns r16 alongside color/uv.
+node vision/t4t5_directions.js         # measure T4/T5 preferred directions in flyvis with drifting gratings (~2 min).
+#   MUST subtract the static-grating baseline (T4c/T4d/T5c/T5d have 0.15-0.36 tonic activity; skipping it put T4c's DSI at
+#   0.41 instead of 0.815). Result: preferred directions sit on the hex EDGE family (30+60k), NOT the vertex family;
+#   T4d and T5b are not direction-selective at all, so the literature a/b/c/d = four cardinal axes does NOT hold here.
+node vision/lplc2_test.js              # Klapoetke-style outward T4/T5 pooling vs looming/receding/translation.
+#   Use mean, never max (max picks up "the far rim of a shrinking disc recedes from me" false positives: ratio 0.76, inverted).
+node dodge/front_end_compare.js        # hand-written dtheta/dt front end vs pixels->flyvis->LPLC2, in the real game scene.
+#   Measures the self-motion noise floor SEPARATELY from the ball signal (mixing them lets takeoff slow-motion ruin the timing).
+python3 vision/lattice_anchor.py       # pin the flyvis<->FlyWire lattice orientation from anatomy (read-only, ~1 min, no scipy)
+python3 vision/lattice_compare.py      # compare the anchored mapping against the original 8 orientations (read-only)
 #   Eye-window frame rate: a synchronous readRenderTargetPixels costs ONE FIXED ~4-5 ms GPU round trip on this
 #   machine (M1 Pro / ANGLE Metal) - measured to be independent of face count (1 face 6.3 ms vs 6 faces 6.8),
 #   of pixels read (16x16 corner 7.5 vs full 192^2 6.3) and of cube size (192->48 does not get cheaper). So
@@ -337,4 +349,20 @@ The looming experiment writes a fixed `looming_intensity` into LPLC2 rates; no v
 - Brian2 in one process: building a second network needs `device.reinit(); device.activate()` first — `Screen.__init__` now does this automatically via a `_built_once` flag (hit when `segments.Repo.fill` was called twice in `water_hub_scan`).
 - Annotation-table positions (`pos_*`, `soma_*`) are voxel units at 4×4×40 nm; convert before computing distances.
 - Background Python jobs writing to a log file are block-buffered: progress lines (without `flush=True`) appear only at exit. Use `python -u` when you need live progress.
+- **The game's visual front end does not look at pixels** (report §28.19): `visualInput` in `game_core.js` reads each ball's
+  world coordinates and computes dtheta/dt, ignoring everything else in the scene. The real pixel path
+  (eyecam Rh1 -> flyvis -> LPLC2 pooling -> LC4/LPLC2) exists behind `G.setVisionOverride` and the page toggle
+  "只靠眼睛躲", default off. Measured: it is BLIND beyond 45 mm (reads exactly 0) and only clears the self-motion
+  noise floor inside 25 mm, while walking alone produces up to 126 Hz of spurious "looming". The ball is 2.5 mm and the
+  ommatidial spacing is 5.7 deg, so it spans less than ONE ommatidium beyond 60 mm - the limit is resolution plus
+  uncompensated optic flow, not the LPLC2 model.
+- **The flyvis<->FlyWire lattice orientation is now anchored by anatomy** (§28.20, `vision/lattice_anchor.py`): L-R axis from
+  the two optic-lobe centroids, ventral from brain centroid -> GNG centroid, A-P as their cross product (sign checked with
+  AL vs CX). Both eyes independently give +p at ~113 deg and +q at ~171 deg (anterior 0, dorsal 90), 58/52 deg apart.
+  Combined with the T4/T5 measurement this gives a ROTATION (phi = 277 deg, RMS 15.4 deg; the mirror hypothesis is rejected),
+  i.e. u = -p, v = -q. **It also exposed a defect in the old pipeline**: `normalize()` (PCA + per-axis std) stretches the
+  Codex hex basis angle from 60.0 to 122.6 deg on both sides, so no sign/swap combination can align it - the shape is already
+  wrong. The real eye is 1.66:1 elongated (785 columns), flyvis is a regular hexagon (721), so every mapping trades angle
+  fidelity against coverage; `connectome_from_flyvis.py` now also offers anchor x1.0 (exact angles, 38% of the periphery
+  clipped to the rim) and anchor x0.6 (isotropic, 5.8% clipped, 785 columns into 282).
 - Licensing: flybody flight data (figshare) is GPL-3.0+; flyvis MIT; flybody code Apache-2.0. Upstream Eon code is GPL-2.0-or-later; `code/paper-phil-drosophila/` is MIT; FlyGym/flybody are Apache-2.0. The FlyWire data license is unconfirmed, so treat it as CC-BY-NC.

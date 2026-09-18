@@ -112,5 +112,11 @@ for (const ty of SUB) {
 }
 const out = { 说明: "漂移正弦光栅，空间周期 4 小眼、dt 5 ms、后 0.6 s 平均，响应**减去静止光栅基线**；角度 = 点阵平面 atan2(hy,hx)",
               方向: ANGLES, 时间频率扫描: TFS, 定标: best, 全部: all };
-fs.writeFileSync(path.join(ROOT, "results/vision/t4t5_directions.json"), JSON.stringify(out, null, 1));
-console.log("\n→ results/vision/t4t5_directions.json");
+// **非默认参数不许覆盖权威文件**：这一步踩过 —— 后来用 TF=2 / DT=0.033 跑参数扫描，
+// 把默认参数那次的结果覆盖了，报告里的数字和文件对不上（自查才发现）。
+// 权威文件只由默认参数产生，变体自动加后缀。
+const DEFAULT = (DT === 0.005) && (process.env.TF === undefined);
+const suffix = DEFAULT ? "" : `_dt${Math.round(DT * 1000)}ms_tf${TFS.join("-")}`;
+const outFile = path.join(ROOT, `results/vision/t4t5_directions${suffix}.json`);
+fs.writeFileSync(outFile, JSON.stringify(out, null, 1));
+console.log(`\n→ ${path.relative(ROOT, outFile)}${DEFAULT ? "（权威）" : "（参数变体，不覆盖权威文件）"}`);
