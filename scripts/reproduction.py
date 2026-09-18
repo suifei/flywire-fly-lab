@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-from reproduction_data import PAPERS, PARAMETERS  # noqa: E402
+from reproduction_data import PAPERS, PARAMETERS, FINDINGS  # noqa: E402
 
 LABEL = {"reproduced": ("✅", "已复现"), "partial": ("🟡", "部分复现"),
          "negative": ("⬛", "阴性结果"), "not_done": ("⬜", "未做"), "blocked": ("🚫", "做不了")}
@@ -42,6 +42,11 @@ for p in PAPERS:
 for q in PARAMETERS:
     if q.get("script") and not (ROOT / q["script"]).exists():
         bad.append(f"参数 {q['name']}：script 不存在 → {q['script']}")
+for f_ in FINDINGS:
+    for k in ("script", "result_file"):
+        v = f_.get(k)
+        if v and not (ROOT / v).exists():
+            bad.append(f"本项目结果 {f_['id']}：{k} 不存在 → {v}")
 if bad:
     print("✗ 台账校验不通过：")
     for b in bad:
@@ -99,6 +104,16 @@ L += ["---", "", "## 关键参数", "",
       "| 参数 | 取值 | 来源 | 说明 |", "|---|---|---|---|"]
 for q in PARAMETERS:
     L.append(f"| `{q['name']}` | **{q['value']}** | {q['source']} | {q['note']} |")
+L += ["", "---", "", "## 本项目自己的结果", "",
+      "下面这些不是对某篇论文的复现，是这个项目自己做出来的结论——**阴性的也在里面**。", "",
+      "| 问题 | 结果 | 脚本 |", "|---|---|---|"]
+for f_ in FINDINGS:
+    L.append(f"| {f_['what']} | {f_['result']} | `{f_['script']}` |")
+L.append("")
+for f_ in FINDINGS:
+    if f_.get("caveat"):
+        L.append(f"- **{f_['what']}** — {f_['caveat']}" + (f"（日志 {f_['log']}）" if f_.get("log") else ""))
+
 L += ["", "---", "",
       "## 还没做的（按可行性排序）", ""]
 todo = [(p, c) for p in PAPERS for c in p["claims"] if c["status"] in ("not_done", "blocked")]
@@ -109,7 +124,7 @@ L.append("")
 
 (ROOT / "REPRODUCTION.md").write_text("\n".join(L))
 doc = dict(说明="复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
-           counts=n, total_claims=tot, papers=PAPERS, parameters=PARAMETERS)
+           counts=n, total_claims=tot, papers=PAPERS, parameters=PARAMETERS, findings=FINDINGS)
 (ROOT / "results/reproduction.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1))
 print(f"\n→ REPRODUCTION.md（{len('\n'.join(L))/1024:.1f} KB）")
 print("→ results/reproduction.json")
