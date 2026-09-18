@@ -1348,6 +1348,11 @@ code { font: 12px var(--mono); }
    "name": "lc4_gain",
    "value": "19.8",
    "source": "本项目标定（规则 A：200 Hz ÷ p95(expansion)）",
+   "code_check": [
+    "connectome_vision_loop.py",
+    "--lc4_gain\".*?default=([\\d.]+)",
+    "19.8"
+   ],
    "note": "手选的旧值 4000 是它的 **202 倍**；标定后 LC4 从 0/200 两个值变成 15 个分级取值",
    "script": "connectome_vision_loop.py",
    "log": "§27"
@@ -1356,6 +1361,11 @@ code { font: 12px var(--mono); }
    "name": "lplc2Mu（角大小高斯峰）",
    "value": "42°",
    "source": "Ache et al. 2019",
+   "code_check": [
+    "dodge/game_core.js",
+    "lplc2Mu:\\s*(\\d+)",
+    "42"
+   ],
    "note": "此前手选 45°；改动影响在噪声内",
    "script": "dodge/game_core.js",
    "log": "§32.1"
@@ -1364,6 +1374,11 @@ code { font: 12px var(--mono); }
    "name": "lplc2Sigma / lplc2Peak",
    "value": "15° / 200 Hz",
    "source": "**手选**",
+   "code_check": [
+    "dodge/game_core.js",
+    "lplc2Sigma:\\s*(\\d+),\\s*lplc2Peak:\\s*(\\d+)",
+    "15/200"
+   ],
    "note": "论文全文拿不到，这两个没有依据",
    "script": "dodge/game_core.js",
    "log": "§32.1"
@@ -1372,6 +1387,11 @@ code { font: 12px var(--mono); }
    "name": "小眼间角 Δφ",
    "value": "5.7°",
    "source": "FlyGym 规范 + 实测",
+   "code_check": [
+    "dodge/eyecam.js",
+    "DPHI\\s*=\\s*([\\d.]+)\\s*\\*\\s*Math\\.PI",
+    "5.7"
+   ],
    "note": "单眼视野 = 2×15×Δφ = 171°",
    "script": "dodge/eyecam.js",
    "log": "§28.11"
@@ -1380,6 +1400,11 @@ code { font: 12px var(--mono); }
    "name": "复眼光轴方位",
    "value": "±63.1°",
    "source": "MuJoCo 实测（此前假设 ±50°）",
+   "code_check": [
+    "dodge/eyecam.js",
+    "EYE_AZ\\s*=\\s*([\\d.]+)\\s*\\*\\s*Math\\.PI",
+    "63.1"
+   ],
    "note": "双眼重叠 44.8°、总视野 297.2°、背后盲区 62.8°",
    "script": "dodge/eyecam_geom_test.js",
    "log": "§28.9"
@@ -5383,7 +5408,12 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   // 默认 = 第 1/3 步的主设定：Ache 2019 编码（μ45°）+ 巨纤维 20 ms 平滑 + 真实逃逸飞行轨迹
   const ENC = { ache: { encoding: "ache2019", lplc2Mu: 45, gfTau: 0.02 }, legacy: { encoding: "legacy", gfTau: 0.08 } };
   const game = window.FlyDodgeGame.createGame(SUB, ConnectomeBrain, { seed: (Date.now() % 100000) + 1, ballSpeed: 60, mode: "auto",
-    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
+    // autoEvery 只在**页面上**放慢到约 30 秒一球（默认是 [1.4, 2.2]）。
+    // 不改默认值：autoplay.js / step1_encoding.js / step_v3.js / backward_v4.js 都按默认节奏
+    // 统计已发布的闪避率，改默认会让那些数字全部失效（与 pelletTypes 同样的处理）。
+    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true,
+           autoEvery: [26, 34],
+           pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
   // 递质标签：给「谷氨酸改兴奋性」那一档扰动用（论文补充表 11F）
   try { game.brain.setNT(JSON.parse(document.getElementById("sub-nt").textContent).nt); } catch (e) {}
   window.__game = game;      // 供 dodge/audit.js 核对场地边界等不变量
