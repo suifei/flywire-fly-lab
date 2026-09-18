@@ -587,6 +587,7 @@ code { font: 12px var(--mono); }
 <script>/*__FLYVIS_JS__*/</script>
 <script>/*__RETINA_JS__*/</script>
 <script>/*__DECODER_JS__*/</script>
+<script>/*__COURT_JS__*/</script>
 <script>/*__EYECAM_JS__*/</script>
 <script>/*__EYE_JS__*/</script>
 <script>/*__BRAIN_JS__*/</script>
@@ -609,6 +610,7 @@ code { font: 12px var(--mono); }
   const ENC = { ache: { encoding: "ache2019", lplc2Mu: 45, gfTau: 0.02 }, legacy: { encoding: "legacy", gfTau: 0.08 } };
   const game = window.FlyDodgeGame.createGame(SUB, ConnectomeBrain, { seed: (Date.now() % 100000) + 1, ballSpeed: 60, mode: "auto",
     cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
+  window.__game = game;      // 供 dodge/audit.js 核对场地边界等不变量
   const POSES = JSON.parse(document.getElementById("poses-data").textContent);
   const V3R = JSON.parse(document.getElementById("v3-data").textContent);
   const V4R = JSON.parse(document.getElementById("v4-data").textContent);
@@ -678,11 +680,11 @@ code { font: 12px var(--mono); }
   const camera = new THREE.PerspectiveCamera(42, 4 / 3, 0.1, 800);
   camera.up.set(0, 0, 1);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = !reduceMotion; controls.minDistance = 10; controls.maxDistance = 160;
+  controls.enableDamping = !reduceMotion; controls.minDistance = 10; controls.maxDistance = 420;   // 放到 420 才能看全球场（场地 320×172 + 观众席）
   controls.maxPolarAngle = Math.PI * 0.46;
   // 复眼视窗要从果蝇眼位再渲一遍同一个场景，所以把这几个对象露出来。
   // （视窗的装配在 bootFlyEye 里，那边等采样表 PNG 解码完才就绪。）
-  window.__flyScene = { THREE, renderer, scene, selfMeshes: [] };
+  window.__flyScene = { THREE, renderer, scene, camera, controls, selfMeshes: [] };
   const hemi = new THREE.HemisphereLight(0xffffff, 0x88928e, 0.95); scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-20, -30, 60); scene.add(sun);
   const HEMI0 = hemi.intensity, SUN0 = sun.intensity;
@@ -693,6 +695,9 @@ code { font: 12px var(--mono); }
   const floor = new THREE.Mesh(new THREE.CircleGeometry(600, 64), new THREE.MeshBasicMaterial());
   floor.position.z = -0.03; scene.add(floor);
   const gridGroup = new THREE.Group(); scene.add(gridGroup);
+  // 球场：按 1:50 缩小的篮球场（真实 28×15 m → 560×300 mm），带篮架和观众席。
+  // 纯场景装饰，不参与任何神经计算；边界逻辑在 game_core 的 CFG.courtW/H。
+  let courtGroup = null;
 
   const fly = new THREE.Group(); scene.add(fly);
   const body = new THREE.Group(); body.scale.setScalar(FLY_SCALE); fly.add(body);
@@ -890,9 +895,16 @@ code { font: 12px var(--mono); }
     readPalette();
     floor.material.color.set(css("--floor"));
     gridGroup.clear();
-    const minor = new THREE.GridHelper(600, 120, css("--grid"), css("--grid"));   // 5 mm
-    const major = new THREE.GridHelper(600, 24, css("--rule"), css("--rule"));    // 25 mm
-    for (const g of [minor, major]) { g.rotation.x = Math.PI / 2; gridGroup.add(g); }
+    if (courtGroup) { scene.remove(courtGroup.group); courtGroup = null; }
+    // 有球场之后就不画 5 mm 网格了 —— 它压在场地线上，噪点很重，
+    // 而球场自己的线（中圈 1.8 m、限制区 5.8×4.9）已经能给出尺度参照。
+    if (typeof FlyCourt !== "undefined") {
+      courtGroup = FlyCourt.build(THREE, scene, {
+        floor: css("--floor"), line: css("--ink-2"), rig: css("--muted"),
+        board: css("--panel-2"), rim: css("--critical"),
+        seatA: css("--panel"), seatB: css("--panel-2"),
+      });
+    }
     for (const p of parts) {
       const n = p.name, m = p.material; m.transparent = false; m.opacity = 1;
       if (/Eye$/.test(n)) m.color.set(css("--eye"));

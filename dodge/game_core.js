@@ -12,6 +12,9 @@
     // 所以不人为指定方向，躲不躲得开只取决于巨纤维放电的时机
     jumpDur: 0.3, jumpDist: 0, jumpHeight: 6, jumpCooldown: 0.9,
     ballR: 2.5, flyR: 1.4,
+    // 场地边界：按 1:87.5 缩小的篮球场（真实 28×15 m → 320×172 mm）。
+    // 纯场景设定，不参与任何神经计算；只决定果蝇能走到哪。
+    courtW: 320, courtH: 172, courtPad: 4,
     chunkSteps: 50,         // 5 ms 一块：块间更新视觉输入与身体
     emaTau: 0.08,
     gfTau: 0.08,            // 巨纤维读出的平滑时间常数（v2 用 0.02）
@@ -478,12 +481,25 @@
         const push = (S.jumpT >= 0 ? CFG.windFlyPush : CFG.windPush) * G.wind.speed * dt;
         S.x += Math.cos(G.wind.dir) * push; S.y += Math.sin(G.wind.dir) * push;
       }
+      // 关在场内：走、飞、被风吹，最后统一夹一次。
+      // 撞到边界就停在边上（不反弹）—— 反弹要改朝向，会污染"哪侧 DNa 活跃
+      // 就往哪侧转"的对照，那是这个游戏要测的东西。
+      if (CFG.courtW) {
+        const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
+        const cx = Math.max(-hw, Math.min(hw, S.x)), cy = Math.max(-hh, Math.min(hh, S.y));
+        if (cx !== S.x || cy !== S.y) { S.x = cx; S.y = cy; S.wall = (S.wall || 0) + dt; }
+        else S.wall = 0;
+      }
       if (S.jumpT >= 0) { S.state = "fly"; S.proboscis = 0; }
 
       // 球与判定
       for (const b of G.balls) {
         if (b.stopT === undefined || b.age < b.stopT) { b.x += b.vx * dt; b.y += b.vy * dt; }
         b.age += dt;
+        if (CFG.courtW && !b.done &&
+            (Math.abs(b.x) > CFG.courtW / 2 + 20 || Math.abs(b.y) > CFG.courtH / 2 + 20)) {
+          b.done = true; b.outcome = "out";        // 出界作废，不计入躲开/击中
+        }
         const d = Math.hypot(b.x - S.x, b.y - S.y);
         if (!b.done && d < CFG.ballR + CFG.flyR && S.z < CFG.ballR * 1.6) {
           b.done = true; b.outcome = "hit"; G.score.hit++; S.hitFlash = 0.5; G.onEvent && G.onEvent("hit", b);
