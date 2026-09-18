@@ -68,3 +68,10 @@ jobs:
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: node dodge/browser_test.js
+
+      - name: 复眼视野的几何自检（在已知方位放标记，核对它出现在哪）
+        # 只验"画布有内容"是不够的：鱼眼映射、光轴符号、方向表里任何一处搞反，
+        # 画面照样有内容，只是看到的世界是错的。2026-09-18 这个自检一次揪出 7 个错。
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: node dodge/eyecam_geom_test.js

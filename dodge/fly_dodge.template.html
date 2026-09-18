@@ -172,8 +172,10 @@ code { font: 12px var(--mono); }
   backdrop-filter:blur(6px); pointer-events:none; }
 .eyecam .ec-row { display:flex; gap:6px; }
 .eyecam figure { margin:0; text-align:center; }
-.eyecam canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
+.eyecam .ec-row canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
 .eyecam figcaption { font-size:9px; opacity:.6; margin-top:1px; }
+#ecB { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
+.ec-scale { display:flex; justify-content:space-between; width:162px; font-size:8px; opacity:.45; margin-top:1px; }
 .eyecam small { display:block; font-size:9px; opacity:.55; margin-top:2px; text-align:center; }
 @media (max-width: 720px) { .eyecam canvas { width:56px; height:56px; } }
 </style>
@@ -208,6 +210,8 @@ code { font: 12px var(--mono); }
             <figure><canvas id="ecL" width="150" height="150"></canvas><figcaption>左眼</figcaption></figure>
             <figure><canvas id="ecR" width="150" height="150"></canvas><figcaption>右眼</figcaption></figure>
           </div>
+          <canvas id="ecB" width="300" height="104"></canvas>
+          <div class="ec-scale"><span>左 90&deg;</span><span>前 0&deg;</span><span>右 90&deg;</span></div>
           <small id="ecNote">果蝇视角 · 721 小眼/眼</small>
         </div>
       </div>
@@ -259,6 +263,7 @@ code { font: 12px var(--mono); }
           <label class="k">环境</label>
           <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
           <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
+          <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>157°/眼 · 光轴 ±63.1° · 正前 30.8° 双眼重叠</small></label>
           <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
         </div>
         <div class="row">
