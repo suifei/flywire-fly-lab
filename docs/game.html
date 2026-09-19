@@ -389,7 +389,7 @@ code { font: 12px var(--mono); }
           <label class="k">环境</label>
           <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
           <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
-          <label class="toggle" title="把围栏也当成视觉物体喂进 LC4/LPLC2，让连接组自己决定转向还是起飞"><input type="checkbox" id="wallOn" checked> 看得见围栏 <small>实测：关掉时无球情况下 85.6% 的时间贴着墙</small></label>
+          <label class="toggle" title="手写近似：把围栏当成一个逼近物体算张角增长率，喂进 LC4/LPLC2。这一步是我们替它算的，不是它自己看出来的——下方卡片写了为什么还留着它"><input type="checkbox" id="wallOn" checked> 看得见围栏 <small>手写近似；关掉时无球情况下 92.8% 的时间贴着墙</small></label>
           <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>171°/眼 · 光轴 ±63.1° · 正前 44.8° 双眼重叠 · 背后 62.8° 盲区</small></label>
           <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
         </div>
@@ -505,6 +505,36 @@ code { font: 12px var(--mono); }
         ②「证明连接组真的在起作用」原本判闪避率，但打乱之后逐次是 0.07/0.79/0.43——<b>波动大到有一次跟没打乱差不多</b>，
         所以判据换成起跳次数（打乱后 18/5/0 次 vs 不干预 33/32/33，完全不重叠），这也更贴近机制：
         打乱先打断的是 looming → 巨纤维那一路。</p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1" id="cWall">
+      <h3>为什么果蝇会顶着围栏一直走——以及「只给物理量、不写判断逻辑」这条原则的代价</h3>
+      <p>有人看到果蝇走到场边会一直顶着围栏往前走。查下来<b>不是它认不出墙</b>：场地边界只是每一步末尾的
+        一次几何钳位，而手写的视觉前端<b>只读球的世界坐标</b>算张角增长率，场景里别的东西一概不看。
+        实测（无球、120 秒 × 3 种子）：<b>92.8% 的时间贴着墙，最长一次连续 111 秒。</b></p>
+      <p><b>那为什么不用摄像机？</b>——那条路本来就有：<code>eyecam</code> 用一台立方体贴图摄像机从果蝇头部
+        渲染<b>整个 3D 场景</b>，墙、看台、别的果蝇都在里面，以后往场里加任何物体也都会自动在里面。
+        左上角复眼视窗里那条新的横条就是<b>它的原始投影</b>（采样成 721 个小眼之前的样子）。
+        实测它<b>确实看得见墙</b>（静止时读数恒为 0，一走就有），<b>但</b>「朝墙走」（LPLC2 中位 34.2 Hz）
+        和「背墙走」（23.5 Hz）几乎分不开——<b>读到的主要是走路本身造成的全场光流</b>。
+        真果蝇有平衡棒与传出拷贝来抵消自体运动，这个模型里没有。</p>
+      <p><b>那就只给它物理量，让它自己决定。</b>这是最干净的做法，我们试了：触角碰到围栏 → 驱动机械感觉神经元。
+        结果是<b>果蝇完全没反应</b>（贴墙率一个百分点都没动）。原因在连接组里：游戏用的子回路里唯一的
+        机械感觉是触角 JO，而 <b>JO 只通到梳理指令 aDN1，根本不通到转向或逃逸</b>。</p>
+      <p><b>于是去全脑里查出路</b>（<code>dodge/sensor_reach.py</code>，只走 ≥3 突触的边）：
+        脑连接组里有 <b>305 个头部刚毛</b>（真正的触觉感受器）、29 个温度、74 个湿度，
+        而且它们到 DNa01/DNa02/巨纤维/MDN <b>只要 2–3 跳</b>。通路是有的，只是我们裁子回路时没把它们当输入。
+        重裁一版 <b>v3</b>（5,563 个神经元）把这三路加进去之后：</p>
+      <div class="tbl"><table id="tTouch"></table></div>
+      <p class="sub" id="touchNote"></p>
+      <p class="sub"><b>这就是那条原则的完整答案</b>：只给物理量、不写判断逻辑<b>是可行的</b>——
+        触感送到头部刚毛之后，果蝇走过的格子从 9 涨到 31.5、路程从 156 mm 涨到 603 mm，
+        <b>中间没有任何我们写的判断</b>。但前提是<b>子回路里真的有那条通路</b>；
+        送错地方（JO）就等于没给。游戏页现在仍然跑 v2 + 那个手写的「看得见围栏」，
+        是因为切到 v3 会让已经发布的任务关卡、突变体、敲除比值全部需要重测——这是工程取舍，不是科学结论。</p>
+      <p class="sub">还有一处是我们自己的指标错误，值得写出来：第一版用「贴墙时间占比」当指标，
+        而它<b>分不出「钉死在一点」和「贴着墙滑行」</b>——两种情况这个标志都为真。
+        按那个指标，触感「没用」（85.6% → 85.6%）；换成走过的格子数才看出来果蝇其实一直在沿墙移动。
+        <b>指标选错，阴性结果就是假的。</b></p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cGomoku">
       <h3>我能训练它下五子棋吗？能。但训练完必须回答一个问题</h3>
@@ -8065,6 +8095,204 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
  "fly_total_games": 80,
  "criterion_connectome_helps_play": true
 }</script>
+<script id="touch-data" type="application/json">{
+ "seconds_per_seed": 60,
+ "seeds": 2,
+ "note": "无球条件。触感 = 触角越过围栏时驱动该侧机械感觉神经元；v2 只有 JO，v3 有头部刚毛（TOUCH）。",
+ "arms": {
+  "v2 · 什么都不给": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v2 · 触感→JO": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0.8568,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v3 · 触感→头部刚毛": {
+   "runs": [
+    {
+     "cells": 29,
+     "pathLen": 550,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 34,
+     "pathLen": 657,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 31.5,
+    "pathLen": 603.5,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0.8568,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v3 · 什么都不给": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v2 · 围栏视觉（手写）": {
+   "runs": [
+    {
+     "cells": 18,
+     "pathLen": 1654,
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.65,
+     "touchFrac": 0,
+     "jump": 16,
+     "groom": 0
+    },
+    {
+     "cells": 14,
+     "pathLen": 1690,
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.8,
+     "touchFrac": 0,
+     "jump": 17,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 16,
+    "pathLen": 1672,
+    "stuckFrac": 0,
+    "maxStuckS": 0,
+    "meanWallDist": 72.725,
+    "touchFrac": 0,
+    "jump": 16.5,
+    "groom": 0
+   }
+  }
+ },
+ "v3_touch_helps": true,
+ "v3_base": {
+  "cells": 9,
+  "pathLen": 156,
+  "stuckFrac": 0.8556,
+  "maxStuckS": 51.34,
+  "meanWallDist": 8.73,
+  "touchFrac": 0,
+  "jump": 0,
+  "groom": 0
+ },
+ "v3_touch": {
+  "cells": 31.5,
+  "pathLen": 603.5,
+  "stuckFrac": 0.8556,
+  "maxStuckS": 51.34,
+  "meanWallDist": 8.73,
+  "touchFrac": 0.8568,
+  "jump": 0,
+  "groom": 0
+ }
+}</script>
 <script>// 五子棋规则引擎（15×15，含黑方禁手），与渲染无关，页面与 node 共用。
 //
 // 禁手按连珠（Renju）规则，只对**黑方**生效：
@@ -9656,6 +9884,21 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     const api = { tick, clickBoard, state: S };
     window.__gm = api;
     return api;
+  })();
+
+  // 触感实验表：数字来自 results/dodge/touch.json
+  (function buildTouchTable() {
+    const t = document.getElementById("tTouch"); if (!t) return;
+    let TC = null;
+    try { TC = JSON.parse(document.getElementById("touch-data").textContent); } catch (e) { return; }
+    t.innerHTML = "<tr><th>条件（无球）</th><th>走过的格子</th><th>路程 mm</th><th>贴墙时间</th><th>触到围栏</th><th>起跳</th></tr>" +
+      Object.entries(TC.arms).map(([k, v]) => {
+        const m = v.mean;
+        return `<tr${k.indexOf("头部刚毛") >= 0 ? ' class="em"' : ""}><td>${k}</td><td>${m.cells}</td><td>${m.pathLen}</td>` +
+          `<td>${(m.stuckFrac * 100).toFixed(1)}%</td><td>${(m.touchFrac * 100).toFixed(1)}%</td><td>${m.jump}</td></tr>`;
+      }).join("");
+    const n = document.getElementById("touchNote");
+    if (n) n.textContent = `每格 ${TC.seeds} 个种子 × ${TC.seconds_per_seed} 秒，场上无球。` + TC.note;
   })();
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）

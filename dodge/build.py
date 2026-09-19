@@ -69,6 +69,7 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__GOMOKU_READOUT__*/", (ROOT / "results/gomoku/readout.json").read_text()),
                   ("/*__GOMOKU_TRAIN__*/", (ROOT / "results/gomoku/train.json").read_text()),
                   ("/*__GOMOKU_PLAY__*/", (ROOT / "results/gomoku/play.json").read_text()),
+                  ("/*__TOUCH__*/", (ROOT / "results/dodge/touch.json").read_text()),
                   ("/*__GOMOKU_RULES_JS__*/", (ROOT / "gomoku/rules.js").read_text()),
                   ("/*__GOMOKU_TEACHER_JS__*/", (ROOT / "gomoku/teacher.js").read_text()),
                   ("/*__GOMOKU_FEATURES_JS__*/", (ROOT / "gomoku/features.js").read_text()),
