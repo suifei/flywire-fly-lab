@@ -1,4 +1,9 @@
-"""把子回路数据、步态数据和 brain.js 内联进 fly_dodge.template.html → results/dodge/fly_dodge.html"""
+"""把子回路数据、步态数据和 brain.js 内联进 fly_dodge.template.html → results/dodge/fly_dodge.html
+
+**2026-09-19 起页面用子回路 v3**（5,563 神经元，比 v2 多了触感 / 温度 / 湿度三路输入）。
+所有跟着子回路走的结果文件都取 _v3 那一份：任务关卡、突变体、胞体坐标、递质标签。
+v2 的对应文件全部留在原处备查，两版数值很接近（见 docs/log/report.md §41）。
+"""
 import base64
 import json
 from pathlib import Path
@@ -31,8 +36,8 @@ def lint(src):
 
 
 lint(html)
-for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.json").read_text()),
-                  ("/*__SUB_NT__*/", (ROOT / "results/dodge/subcircuit_nt.json").read_text()),
+for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v3.json").read_text()),
+                  ("/*__SUB_NT__*/", (ROOT / "results/dodge/subcircuit_nt_v3.json").read_text()),
                   ("/*__PERTURB__*/", (ROOT / "results/dodge/perturb.json").read_text()),
                   ("/*__REPRO__*/", (ROOT / "results/reproduction.json").read_text()),
                   ("/*__GAIT__*/", (ROOT / "results/dodge/gait.json").read_text()),
@@ -63,9 +68,9 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__BRAIN_JS__*/", (D / "brain.js").read_text()),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text()),
                   ("/*__MISSIONS_JS__*/", (D / "missions.js").read_text()),
-                  ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions.json").read_text()),
-                  ("/*__MUTANTS__*/", (ROOT / "results/dodge/mutants.json").read_text()),
-                  ("/*__SOMA__*/", (ROOT / "results/dodge/soma.json").read_text()),
+                  ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions_v3.json").read_text()),
+                  ("/*__MUTANTS__*/", (ROOT / "results/dodge/mutants_v3.json").read_text()),
+                  ("/*__SOMA__*/", (ROOT / "results/dodge/soma_v3.json").read_text()),
                   ("/*__GOMOKU_READOUT__*/", (ROOT / "results/gomoku/readout.json").read_text()),
                   ("/*__GOMOKU_TRAIN__*/", (ROOT / "results/gomoku/train.json").read_text()),
                   ("/*__GOMOKU_PLAY__*/", (ROOT / "results/gomoku/play.json").read_text()),

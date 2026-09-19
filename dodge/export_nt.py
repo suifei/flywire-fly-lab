@@ -11,6 +11,7 @@
 用法：python3 dodge/export_nt.py   → results/dodge/subcircuit_nt.json
 """
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -18,7 +19,9 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 CODE = {"acetylcholine": 0, "glutamate": 1, "gaba": 2, "dopamine": 3, "serotonin": 4, "octopamine": 5}
 
-sub = json.loads((ROOT / "results/dodge/subcircuit_v2.json").read_text())
+SUBNAME = os.environ.get("SUB", "subcircuit_v2")
+SUF = "" if SUBNAME == "subcircuit_v2" else "_" + SUBNAME.replace("subcircuit_", "")
+sub = json.loads((ROOT / f"results/dodge/{SUBNAME}.json").read_text())
 fids = [str(f) for f in sub["fids"]]
 ann = pd.read_csv(ROOT / "external/flywire_annotations/Supplemental_file1_neuron_annotations.tsv",
                   sep="\t", low_memory=False, usecols=["root_id", "top_nt"]).drop_duplicates("root_id")
@@ -35,5 +38,5 @@ for k, v in sorted(counts.items(), key=lambda x: -x[1]):
 
 out = {"说明": "与 subcircuit_v2.json 的 fids 同序；0=ACh 1=Glut 2=GABA 3=DA 4=5HT 5=OA 6=未知",
        "来源": "FlyWire 注释表 top_nt（预测值）", "n": len(fids), "counts": counts, "nt": nt}
-(ROOT / "results/dodge/subcircuit_nt.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
+(ROOT / f"results/dodge/subcircuit_nt{SUF}.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
 print(f"\n→ results/dodge/subcircuit_nt.json（{(ROOT / 'results/dodge/subcircuit_nt.json').stat().st_size / 1024:.1f} KB）")

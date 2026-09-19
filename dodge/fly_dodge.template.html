@@ -385,8 +385,11 @@ code { font: 12px var(--mono); }
         </div>
         <div class="row">
           <label class="k">环境</label>
+          <label class="toggle" title="场地中央放一个热源；温度直接喂进 29 个温度感受器"><input type="checkbox" id="heatOn"> 放热源 <small>实测要 400 Hz 才推得动</small></label>
+          <label class="toggle" title="场地中央放一片潮湿区；湿度直接喂进 74 个湿度感受器"><input type="checkbox" id="dampOn"> 放潮湿区 <small>实测推不动任何输出</small></label>
           <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
           <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
+          <label class="toggle" title="触角碰到围栏 → 头部刚毛机械感觉神经元。这是纯物理量，转不转、跳不跳完全由连接组决定"><input type="checkbox" id="touchOn" checked> 有触感 <small>触角碰到围栏 → 头部刚毛；实测走过的格子 9 → 31.5</small></label>
           <label class="toggle" title="手写近似：把围栏当成一个逼近物体算张角增长率，喂进 LC4/LPLC2。这一步是我们替它算的，不是它自己看出来的——下方卡片写了为什么还留着它"><input type="checkbox" id="wallOn" checked> 看得见围栏 <small>手写近似；关掉时无球情况下 92.8% 的时间贴着墙</small></label>
           <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>171°/眼 · 光轴 ±63.1° · 正前 44.8° 双眼重叠 · 背后 62.8° 盲区</small></label>
           <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
@@ -948,7 +951,7 @@ code { font: 12px var(--mono); }
     // autoEvery 只在**页面上**放慢到约 30 秒一球（默认是 [1.4, 2.2]）。
     // 不改默认值：autoplay.js / step1_encoding.js / step_v3.js / backward_v4.js 都按默认节奏
     // 统计已发布的闪避率，改默认会让那些数字全部失效（与 pelletTypes 同样的处理）。
-    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, wallVision: true,
+    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, wallVision: true, touch: true,
            autoEvery: [26, 34],
            pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
   // 递质标签：给「谷氨酸改兴奋性」那一档扰动用（论文补充表 11F）
@@ -2120,7 +2123,25 @@ code { font: 12px var(--mono); }
       box.append(lab);
     });
   })();
+  $("touchOn").onchange = e => { CFG.touch = e.target.checked; };
   $("wallOn").onchange = e => { CFG.wallVision = e.target.checked; };
+  // 温度 / 湿度：场地上放一个热源或一片潮湿区，果蝇所在位置的强度按高斯衰减直接喂进
+  // THERMO / HYGRO 神经元。**实测湿度推不动任何运动输出、温度要 400 Hz 以上**（见上方那张表），
+  // 所以这两个开关主要是让你看到「给了物理量不等于有行为」。
+  $("heatOn").onchange = e => {
+    game.clearFields();
+    if (e.target.checked) game.addField("heat", 0, 0, 55, 1.0);
+    $("coach").textContent = e.target.checked
+      ? "场地中央放了一个热源。温度是真的送进了 29 个温度感受器——但实测它要 400 Hz 以上才推得动运动输出，所以别指望它躲开。"
+      : "热源撤了。";
+  };
+  $("dampOn").onchange = e => {
+    game.clearFields();
+    if (e.target.checked) game.addField("damp", 0, 0, 55, 1.0);
+    $("coach").textContent = e.target.checked
+      ? "场地中央放了一片潮湿区。湿度送进了 74 个湿度感受器——实测它在这个子回路里推不动任何运动输出。"
+      : "潮湿区撤了。";
+  };
   $("windOn").onchange = e => { CFG.wind = e.target.checked; motes.visible = e.target.checked; $("windvane").hidden = !e.target.checked; };
   $("lightSlider").oninput = e => { CFG.light = +e.target.value / 100; $("lightTxt").textContent = e.target.value + "%"; applyLight(CFG.light); };
   // ── 论文式扰动（Shiu 2024 补充表 1D / 11B–F）──────────────────────────

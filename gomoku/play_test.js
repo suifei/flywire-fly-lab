@@ -14,20 +14,21 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
+const SUF = (process.env.SUB && process.env.SUB !== "subcircuit_v2") ? "_" + process.env.SUB.replace("subcircuit_", "") : "";
 const G = require("./rules.js");
 const T = require("./teacher.js");
 const FLY = require("./fly.js");
 const { ConnectomeBrain } = require(ROOT + "/dodge/brain.js");
 const NG = +(process.argv[2] || 30);
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
-const RO = JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/readout.json", "utf8"));
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json", "utf8"));
+const RO = JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/readout" + SUF + ".json", "utf8"));
 
 function rng32(seed) { let s = seed >>> 0;
   return () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
-const ROS = fs.existsSync(ROOT + "/results/gomoku/readout_shuffled.json")
-  ? JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/readout_shuffled.json", "utf8")) : null;
+const ROS = fs.existsSync(ROOT + "/results/gomoku/readout_shuffled" + SUF + ".json")
+  ? JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/readout_shuffled" + SUF + ".json", "utf8")) : null;
 const flyI = FLY.makePlayer(SUB, ConnectomeBrain, RO);
 // 打乱脑：**连接组打乱 + 在打乱特征上单独训练的读出**。两边都换掉才是干净的对照。
 const flyS = ROS ? FLY.makePlayer(SUB, ConnectomeBrain, ROS, { shuffle: true }) : null;
@@ -82,7 +83,7 @@ out.fly_total_games = NG * 4;
 // 事先写死的判据：如果打乱脑打随机也赢得差不多，那连接组对棋力没有贡献
 out.criterion_connectome_helps_play = flyS
   ? (out.vs_random.fly_intact - out.vs_random.fly_shuffled) > NG * 2 * 0.15 : null;
-fs.writeFileSync(ROOT + "/results/gomoku/play.json", JSON.stringify(out, null, 1));
+fs.writeFileSync(ROOT + "/results/gomoku/play" + SUF + ".json", JSON.stringify(out, null, 1));
 console.log(`\n打随机：真实接线 ${out.vs_random.fly_intact}/${out.vs_random.of}` +
   (flyS ? `，打乱接线 ${out.vs_random.fly_shuffled}/${out.vs_random.of}` : "") +
   `　打老师：${out.vs_teacher.fly_intact}/${out.vs_teacher.of}`);

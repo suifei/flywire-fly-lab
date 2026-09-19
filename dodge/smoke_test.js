@@ -47,7 +47,10 @@ ok("模板字符串里无 markdown ** **（textContent 会显示星号）", md.l
 
 // ── 2. 大脑引擎与游戏逻辑真的能跑 ──────────────────────────────
 section("引擎运行");
-const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/subcircuit_v2.json"), "utf8"));
+// 跟着 build.py 走：页面用哪一版子回路，冒烟测试就测哪一版（2026-09-19 起是 v3）
+const SUBNAME = (fs.readFileSync(path.join(ROOT, "dodge/build.py"), "utf8")
+  .match(/__SUBCIRCUIT__\*\/", \(ROOT \/ "results\/dodge\/(subcircuit_v\d)\.json"/) || [, "subcircuit_v2"])[1];
+const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge", SUBNAME + ".json"), "utf8"));
 const { ConnectomeBrain } = require(path.join(ROOT, "dodge/brain.js"));
 const { createGame } = require(path.join(ROOT, "dodge/game_core.js"));
 const g = createGame(SUB, ConnectomeBrain, { seed: 7, mode: "click",
@@ -60,7 +63,7 @@ for (let i = 0; i < 300; i++) {
   g.step(0.005);
   if (i > 150) spikes += g.readout().mn9;
 }
-ok("子回路加载", SUB.meta.n > 0, `${SUB.meta.n} 个神经元、${SUB.meta.n_edges} 条连接`);
+ok("子回路加载（" + SUBNAME + "）", SUB.meta.n > 0, `${SUB.meta.n} 个神经元、${SUB.meta.n_edges} 条连接`);
 ok("糖刺激能驱动 MN9", spikes / 149 > 20, `MN9 ${(spikes / 149).toFixed(1)} Hz`);
 ok("神经元开关可用", g.NEURONS.length > 0 && typeof g.setNeuronLesion === "function",
    `${g.NEURONS.length} 个真实神经元`);

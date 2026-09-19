@@ -15,12 +15,13 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
+const SUF = (process.env.SUB && process.env.SUB !== "subcircuit_v2") ? "_" + process.env.SUB.replace("subcircuit_", "") : "";
 const G = require("./rules.js");
 const F = require("./features.js");
 const { ConnectomeBrain } = require(ROOT + "/dodge/brain.js");
 const ARM = process.argv[2] || "intact";          // intact | shuffled | topo（真实接线 + 保拓扑编码）
 const HZ = +(process.argv[3] || 400), MS = +(process.argv[4] || 100);
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json", "utf8"));
 const DS = JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/dataset.json", "utf8"));
 
 const brain = new ConnectomeBrain(SUB, 11);
@@ -43,8 +44,8 @@ for (let s = 0; s < DS.n; s++) {
   for (let k = 0; k < cols.length; k++) buf.writeFloatLE(cnt[cols[k]], (s * cols.length + k) * 4);
   if (s % 500 === 0) process.stdout.write(`\r  ${s}/${DS.n}  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
 }
-fs.writeFileSync(ROOT + `/results/gomoku/feat_${ARM}.bin`, buf);
-fs.writeFileSync(ROOT + `/results/gomoku/feat_${ARM}.json`, JSON.stringify(
+fs.writeFileSync(ROOT + `/results/gomoku/feat_${ARM}${SUF}.bin`, buf);
+fs.writeFileSync(ROOT + `/results/gomoku/feat_${ARM}${SUF}.json`, JSON.stringify(
   { arm: ARM, hz: HZ, ms: MS, rows: DS.n, cols: cols.length, col_idx: cols,
     n_inputs_excluded: map.inputs.length, seconds: +((Date.now() - t0) / 1000).toFixed(1) }, null, 1));
-console.log(`\n→ results/gomoku/feat_${ARM}.bin （${(buf.length / 1e6).toFixed(1)} MB，${((Date.now() - t0) / 1000).toFixed(0)} s）`);
+console.log(`\n→ results/gomoku/feat_${ARM}${SUF}.bin （${(buf.length / 1e6).toFixed(1)} MB，${((Date.now() - t0) / 1000).toFixed(0)} s）`);

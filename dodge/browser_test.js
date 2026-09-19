@@ -237,6 +237,29 @@ function chromePath() {
     const brains = await page.evaluate(() => window.__comp.list.map(c => c.brain.n));
     return moved === 2 ? `2 只都在走，各自 ${brains[0]} 神经元` : `只有 ${moved} 只在动`;
   });
+  await step("页面跑的是子回路 v3 且触感已接通", async () => {
+    const r = await page.evaluate(() => {
+      const g = window.__game;
+      const hasTouch = !!(g.brain.groups.TOUCH_left || []).length;
+      return { n: g.brain.n, hasTouch, touchOn: g.CFG.touch,
+               inputs: Object.keys(JSON.parse(document.getElementById("sub-data").textContent).meta.inputs || {}) };
+    });
+    return (r.n > 5000 && r.hasTouch && r.touchOn)
+      ? `${r.n} 神经元，输入 ${r.inputs.join("/")}` : `n=${r.n} hasTouch=${r.hasTouch} touchOn=${r.touchOn}`;
+  });
+  await step("放热源后温度真的送进了温度感受器", async () => {
+    await page.click("#heatOn");
+    await new Promise(r => setTimeout(r, 1200));
+    const r = await page.evaluate(() => {
+      const g = window.__game;
+      // 把果蝇挪到热源上量一次
+      g.S.x = 0; g.S.y = 0;
+      for (let i = 0; i < 20; i++) g.step();
+      return { thermo: g.field ? +g.field.thermo.toFixed(2) : null, fields: g.fields.length };
+    });
+    await page.click("#heatOn");
+    return (r.fields === 1 && r.thermo > 0.5) ? `热源上温度读数 ${r.thermo}` : `fields=${r.fields} thermo=${r.thermo}`;
+  });
   let uiBad = 0;
   for (const [name, v] of ui) {
     // 失败词要写全：2026-09-19 "6 秒内一子未落" 被当成通过，因为它不以任何一个前缀开头

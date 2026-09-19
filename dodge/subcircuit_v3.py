@@ -126,6 +126,18 @@ def cmd_export(a):
     print(f"wmin={a.wmin} K={a.K}：{sc.n:,} 个神经元、{len(sc.pre):,} 条边（v2 同参数是 4,599 / 338,837），{time.time() - t0:.0f}s")
     for g in sc.input_names:
         print(f"  {g:8s} 左 {len(sc.groups[g + '_left']):5d}  右 {len(sc.groups[g + '_right']):5d}")
+    # validation：页面的「子回路 vs 全脑」那张图直接读它。v3 的对照数据由
+    # `python dodge/subcircuit_v3.py compare` 写到 results/dodge_ref/subcircuit_v3_vs_v2.csv，
+    # 这里把 v3 那几行取出来，字段名与 v2 保持一致（cond / mae_hz / sub_* / ref_*）。
+    validation = []
+    cmp_path = ROOT / "results/dodge_ref/subcircuit_v3_vs_v2.csv"
+    if cmp_path.exists():
+        dv = pd.read_csv(cmp_path).query("which == 'v3'")
+        refs = {k: v2.full_ref(ann, k, f) for k, (_, f) in v2.REFS.items()}
+        for r in dv.to_dict("records"):
+            row = {k: v for k, v in r.items() if k in ("cond", "mae_hz", "pattern_match") or k.startswith("sub_")}
+            row.update({f"ref_{k}": round(v, 2) for k, v in refs[r["cond"]].items()})
+            validation.append(row)
     meta = ann.reindex([int(f) for f in sc.fids])
     out = dict(meta=dict(wmin=a.wmin, K=a.K, n=int(sc.n), n_edges=int(len(sc.pre)), version=3,
                          params=v1.P,
@@ -141,7 +153,7 @@ def cmd_export(a):
                hops_in=[int(h) if np.isfinite(h) else -1 for h in sc.hops_in],
                hops_out=[int(h) if np.isfinite(h) else -1 for h in sc.hops_out],
                indptr=v1.b64(sc.indptr.astype(np.int32)), post=v1.b64(sc.post.astype(np.int32)),
-               w=v1.b64(sc.w.astype(np.float32)))
+               w=v1.b64(sc.w.astype(np.float32)), validation=validation)
     p = ROOT / "results/dodge/subcircuit_v3.json"
     p.write_text(json.dumps(out, separators=(",", ":")))
     print(f"→ {p}  {p.stat().st_size / 1e6:.1f} MB")
