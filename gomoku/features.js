@@ -48,8 +48,12 @@
   }
 
   // 跑一局位置：复位 → 注入 → 跑 msRun 毫秒 → 返回每个神经元的脉冲计数
+  // opt.seed：给定时先重播随机流——同一个棋盘永远给出同一份特征。
+  // **这不是作弊**：水库计算要求水库是个确定性函数，否则读出层学到的只是噪声。
+  // 不给 seed 就是原来的随机行为（游戏里就该是随机的）。
   function featuresOf(brain, map, board, me, opt = {}) {
     const ms = opt.ms ?? 100, hz = opt.hz ?? 160;
+    if (opt.seed !== undefined && brain.reseed) brain.reseed(opt.seed);
     brain.reset();
     const r = ratesFor(map, board, me, hz);
     const idxs = [], vals = [];

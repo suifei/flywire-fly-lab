@@ -199,19 +199,27 @@ code { font: 12px var(--mono); }
 .eyegrid figcaption span { opacity:.6; font-size:11px; }
 
 /* 果蝇第一人称复眼视窗（舞台右上角） */
-.eyecam { position:absolute; top:46px; right:10px; z-index:4; pointer-events:none; padding:6px 7px 4px;
-  background:rgba(10,12,16,.72); border:1px solid rgba(255,255,255,.14); border-radius:9px;
-  backdrop-filter:blur(6px); pointer-events:none; }
+/* 复眼视窗浮在 3D 场景上，背景是什么颜色不由我们决定（球场是暖褐色），
+   所以这里的文字一律**写死浅色**并压深底板，不能靠 opacity 撞运气——
+   2026-09-19 用户反馈：在球场底色上这些字基本看不见。
+   另外面板必须**限宽**：底部那行说明原来不换行，会把整块面板撑得很宽。 */
+.eyecam { position:absolute; top:46px; right:10px; z-index:4; pointer-events:none; padding:6px 7px 5px;
+  width:max-content; max-width:min(178px, 42vw);
+  background:rgba(6,9,12,.86); border:1px solid rgba(255,255,255,.22); border-radius:9px;
+  backdrop-filter:blur(7px); box-shadow:0 4px 16px rgba(0,0,0,.35); color:#e9efed; }
 .eyecam .ec-row { display:flex; gap:6px; }
 .eyecam figure { margin:0; text-align:center; }
 .eyecam .ec-row canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
-.eyecam figcaption { font-size:9px; opacity:.6; margin-top:1px; }
+.eyecam figcaption { font-size:9.5px; color:#cfdad6; margin-top:1px; }
 #ecB, #ecUV { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
-.ec-ce { display:block; color:#7fd1b9; font-variant-numeric:tabular-nums; min-height:1em; }
-.ec-sw { display:block; font-size:9px; opacity:.6; margin-top:3px; text-align:center; pointer-events:auto; cursor:pointer; }
-.ec-sw input { transform:scale(.8); vertical-align:middle; }
-.ec-scale { display:flex; justify-content:space-between; width:162px; font-size:8px; opacity:.45; margin-top:1px; }
-.eyecam small { display:block; font-size:9px; opacity:.55; margin-top:2px; text-align:center; }
+.ec-ce { display:block; color:#8fe3c9; font-variant-numeric:tabular-nums; min-height:1em; font-size:9.5px;
+  text-align:center; text-wrap:pretty; }
+.ec-sw { display:block; font-size:9.5px; color:#dbe5e2; margin-top:3px; text-align:center; pointer-events:auto; cursor:pointer; }
+.ec-sw input { transform:scale(.8); vertical-align:middle; accent-color:#4aa3e0; }
+.ec-scale { display:flex; justify-content:space-between; width:162px; font-size:8.5px; color:#a8b6b2; margin-top:1px; }
+/* 底部说明：换行显示，不许撑宽面板 */
+.eyecam small { display:block; font-size:9.5px; color:#c3cfcb; margin-top:3px; text-align:center;
+  max-width:162px; white-space:normal; overflow-wrap:anywhere; line-height:1.35; }
 @media (max-width: 720px) { .eyecam canvas { width:56px; height:56px; } }
 </style>
 
