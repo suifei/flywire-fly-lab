@@ -102,7 +102,11 @@
     brain.setOpto(on, hz);
     const steps = Math.round(ms / brain.dt);
     const counts = new Float32Array(brain.n);
-    brain.run(steps, i => { counts[i]++; });
+    // opt.onSpike：页面把下棋这只果蝇的放电接到实时 spike 图上（每一步都真的在放电，
+    // 只是集中在"思考"那 100 ms 里）。不传就不额外开销。
+    const cb = opt.onSpike;
+    if (cb) brain.run(steps, i => { counts[i]++; cb(i); });
+    else brain.run(steps, i => { counts[i]++; });
     brain.setOpto([], 0);
     return counts;
   }
