@@ -249,6 +249,8 @@ python screen/sufficiency.py run|analyze    # Fig 2A：101 个 SEZ 类型的伸�
 #   **必须开 RFC_GATE**：候选是中间神经元，不逐段门控不应期会污染全脑动力学
 python screen/jon_ce_f.py run|analyze       # Fig 5G：aBN1 只认 JO-CE 不认 JO-F（1 块，~1 min）
 python screen/shuffle_full.py run --n 10 && python screen/shuffle_full.py analyze   # 补充表 1D 全脑打乱（11 次建模，~11 min）
+python3 scripts/audit_report.py         # 把报告 §37–41 的关键数字回查结果文件（只读，CI 里也跑）
+#   与 vision/check_report_numbers.py 分工：那个查 §28.16–28.20（视觉），这个查筛选 / 触感 / 五子棋
 python screen/audit.py [--fill]         # data audit: re-enumerates every segment the §14/16/19 analyses need and reports gaps (read-only unless --fill); 13,515 segments, currently 0 missing
 #   NOTE: audit.py covers only the §14/16/19 analyses. Total segments on disk across all screens is 24,250 / 14.68 h (deduped by key) —
 #   recount with `python screen/compute_ledger.py` (read-only, ~1 min; the old figure came from an ad-hoc shell loop
