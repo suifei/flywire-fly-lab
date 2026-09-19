@@ -1,0 +1,147 @@
+{
+ "source": "results/v2_ref/rerun_diff.csv",
+ "note": "只读重算，零新仿真。GF_L/GF_R 用注释表 side；每个条件 2–4 个独立试次",
+ "criterion": "looming 组每个条件、每一侧、每个试次的巨纤维发放都 > 其他组的最大值 ⇒ 论文主张在本模型里不成立",
+ "criterion_written_after_seeing_data": true,
+ "looming": {
+  "LC4_L_100": {
+   "GF_L": {
+    "n": 4,
+    "mean": 86.0,
+    "sd": 8.16,
+    "min": 74.0,
+    "max": 92.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 48.0,
+    "sd": 4.32,
+    "min": 44.0,
+    "max": 54.0
+   }
+  },
+  "LOOM_L_100": {
+   "GF_L": {
+    "n": 4,
+    "mean": 145.5,
+    "sd": 3.42,
+    "min": 142.0,
+    "max": 150.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 101.0,
+    "sd": 2.58,
+    "min": 98.0,
+    "max": 104.0
+   }
+  },
+  "LOOM_L_40": {
+   "GF_L": {
+    "n": 4,
+    "mean": 92.5,
+    "sd": 7.55,
+    "min": 86.0,
+    "max": 100.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 78.5,
+    "sd": 4.12,
+    "min": 74.0,
+    "max": 84.0
+   }
+  },
+  "LOOM_R_100": {
+   "GF_L": {
+    "n": 4,
+    "mean": 93.0,
+    "sd": 2.0,
+    "min": 92.0,
+    "max": 96.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 165.5,
+    "sd": 5.26,
+    "min": 160.0,
+    "max": 170.0
+   }
+  },
+  "LPLC2_L_100": {
+   "GF_L": {
+    "n": 4,
+    "mean": 112.5,
+    "sd": 3.0,
+    "min": 110.0,
+    "max": 116.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 97.5,
+    "sd": 1.0,
+    "min": 96.0,
+    "max": 98.0
+   }
+  },
+  "FRONT_LOOM": {
+   "GF_L": {
+    "n": 4,
+    "mean": 153.5,
+    "sd": 1.91,
+    "min": 152.0,
+    "max": 156.0
+   },
+   "GF_R": {
+    "n": 4,
+    "mean": 172.5,
+    "sd": 5.0,
+    "min": 170.0,
+    "max": 180.0
+   }
+  }
+ },
+ "n_looming_conditions": 6,
+ "n_other_conditions": 28,
+ "n_other_strictly_zero": 27,
+ "other_by_pathway": {
+  "味觉": {
+   "n_conditions": 6,
+   "max_hz": 0.0
+  },
+  "气味": {
+   "n_conditions": 14,
+   "max_hz": 4.0
+  },
+  "JO": {
+   "n_conditions": 2,
+   "max_hz": 0.0
+  },
+  "LC16": {
+   "n_conditions": 6,
+   "max_hz": 0.0
+  }
+ },
+ "other_nonzero": {
+  "DM1_L_20_silB": {
+   "GF_R": {
+    "n": 4,
+    "mean": 2.0,
+    "sd": 1.63,
+    "min": 0.0,
+    "max": 4.0
+   }
+  }
+ },
+ "looming_min_hz": 44.0,
+ "other_max_hz": 4.0,
+ "dose": {
+  "LOOM_L_40_GF_L": 92.5,
+  "LOOM_L_100_GF_L": 145.5
+ },
+ "single_type": {
+  "LC4_L_100_GF_L": 86.0,
+  "LPLC2_L_100_GF_L": 112.5
+ },
+ "paper_claim_holds_in_model": false
+}

@@ -1153,9 +1153,9 @@ code { font: 12px var(--mono); }
  "counts": {
   "reproduced": 23,
   "partial": 5,
-  "negative": 1,
+  "negative": 2,
   "not_done": 1,
-  "blocked": 2
+  "blocked": 1
  },
  "total_claims": 32,
  "papers": [
@@ -1891,12 +1891,64 @@ code { font: 12px var(--mono); }
     {
      "id": "gf_not_looming",
      "what": "巨纤维**不**响应逼近刺激（逃逸另有一条下行通路）",
-     "status": "blocked",
-     "result": "—",
-     "caveat": "**这条与我们游戏的设计直接冲突**：游戏就是用巨纤维（DNp01）越阈来触发起飞的。但这不是简单的对错——文献本身有张力：Fotowat 2009 测到巨纤维对 looming 不放电（白眼果蝇 7 只全部如此，Dα7 突变体仍以 81–89% 概率逃逸）；而 Ache et al. 2019（我们编码所依据的那篇）恰恰是在讲 LC4/LPLC2 怎么把 looming 编码进巨纤维。von Reyn et al. 2014 的解释是**两种逃逸模式**：巨纤维负责「短模式」（牺牲稳定性换速度），而 Fotowat 用的慢逼近（l/|v| 10–80 ms）引发的是先抬翅的「长模式」，那条不需要巨纤维。**我们的模型里没有这两种模式之分**，也没有抬翅，所以这条无法在现有模型上判对错——要复现它得先把长/短模式和抬翅建进去",
-     "script": null,
-     "result_file": null,
-     "log": "§43"
+     "status": "negative",
+     "result": "**在这个连接组模型里不成立，而且差距悬殊**。全脑里刺激 LC4/LPLC2 的 6 个条件，巨纤维发放 **44–180 Hz**（每个条件 4 个独立试次里最低的一次也有 44 Hz）；刺激其他通路的 28 个条件（糖、苦、JO、LC16、气味）巨纤维最高 **4 Hz**，其中 27 个是严格的 0。有剂量关系（同侧巨纤维：40 Hz 刺激 → 92.5 Hz，100 Hz → 145.5 Hz），LC4 单独（86.0）与 LPLC2 单独（112.5）都能驱动",
+     "caveat": "**量的不是论文原话**：论文是在体记录 + 真实视觉刺激，我们是直接给 LC4/LPLC2 注入泊松放电，跳过了视网膜到小叶的全部视觉处理。所以结论只到「这张接线图 + LIF 参数下，LC4/LPLC2 群体放电会强力、专一地驱动巨纤维」——站在 Ache 2019 一边、与 Fotowat 2009 的在体结果相反。判据是看过参考表之后才写的（如实标注），但 44 对 4 Hz 的差距下判据怎么定结论都一样。只读重算、零新仿真。**这条与我们游戏的设计直接冲突**：游戏就是用巨纤维（DNp01）越阈来触发起飞的。但这不是简单的对错——文献本身有张力：Fotowat 2009 测到巨纤维对 looming 不放电（白眼果蝇 7 只全部如此，Dα7 突变体仍以 81–89% 概率逃逸）；而 Ache et al. 2019（我们编码所依据的那篇）恰恰是在讲 LC4/LPLC2 怎么把 looming 编码进巨纤维。von Reyn et al. 2014 的解释是**两种逃逸模式**：巨纤维负责「短模式」（牺牲稳定性换速度），而 Fotowat 用的慢逼近（l/|v| 10–80 ms）引发的是先抬翅的「长模式」，那条不需要巨纤维。**我们的模型里没有这两种模式之分**，也没有抬翅，所以「长模式不需要巨纤维」这一半仍然测不了——要测它得先把长/短模式和抬翅建进去",
+     "script": "dodge/gf_looming_check.py",
+     "result_file": "results/dodge/gf_looming_check.json",
+     "log": "§43 + §45",
+     "verify": [
+      [
+       "looming_min_hz",
+       44.0,
+       0
+      ],
+      [
+       "other_max_hz",
+       4.0,
+       0
+      ],
+      [
+       "n_looming_conditions",
+       6,
+       0
+      ],
+      [
+       "n_other_conditions",
+       28,
+       0
+      ],
+      [
+       "n_other_strictly_zero",
+       27,
+       0
+      ],
+      [
+       "dose.LOOM_L_40_GF_L",
+       92.5,
+       0.05
+      ],
+      [
+       "dose.LOOM_L_100_GF_L",
+       145.5,
+       0.05
+      ],
+      [
+       "single_type.LC4_L_100_GF_L",
+       86.0,
+       0.05
+      ],
+      [
+       "single_type.LPLC2_L_100_GF_L",
+       112.5,
+       0.05
+      ],
+      [
+       "paper_claim_holds_in_model",
+       false,
+       0
+      ]
+     ]
     }
    ]
   },
