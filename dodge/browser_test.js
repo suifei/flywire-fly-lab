@@ -175,6 +175,24 @@ function chromePath() {
     const on = await page.evaluate(() => Object.entries(window.__game.neuronLesion).filter(([, v]) => v).map(([k]) => k));
     return on.length === 0 ? true : "残留：" + on.join("+");
   });
+  await step("脑图画布真的画出了神经元", async () => {
+    const r = await page.evaluate(() => {
+      const c = document.getElementById("brainCv");
+      if (!c || !c.width) return { ok: false, why: "画布没有尺寸" };
+      const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+      let n = 0, s = 0, s2 = 0;
+      for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3; n++; s += v; s2 += v * v; }
+      const m = s / n; return { ok: true, sd: Math.sqrt(Math.max(0, s2 / n - m * m)), n };
+    });
+    return r.ok ? (r.sd > 2 ? `像素标准差 ${r.sd.toFixed(1)}` : `画面是纯色（标准差 ${r.sd.toFixed(1)}）`) : r.why;
+  });
+  await step("脑图的神经元数与子回路一致", async () => {
+    const r = await page.evaluate(() => {
+      const s = JSON.parse(document.getElementById("soma-data").textContent);
+      return { n: s.n, sub: window.__game.brain.n, soma: s.n_from_soma };
+    });
+    return r.n === r.sub ? `${r.n} 个（其中 ${r.soma} 个是真胞体坐标）` : `脑图 ${r.n} vs 子回路 ${r.sub}`;
+  });
   let uiBad = 0;
   for (const [name, v] of ui) {
     const ok = v === true || (typeof v === "string" && !v.startsWith("异常") && !v.startsWith("只") && !v.startsWith("没有") && !v.startsWith("残留") && !v.startsWith("文本"));

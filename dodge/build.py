@@ -64,7 +64,8 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text()),
                   ("/*__MISSIONS_JS__*/", (D / "missions.js").read_text()),
                   ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions.json").read_text()),
-                  ("/*__MUTANTS__*/", (ROOT / "results/dodge/mutants.json").read_text())]:
+                  ("/*__MUTANTS__*/", (ROOT / "results/dodge/mutants.json").read_text()),
+                  ("/*__SOMA__*/", (ROOT / "results/dodge/soma.json").read_text())]:
     assert key in html, key
     html = html.replace(key, esc(text))
 out = ROOT / "results/dodge/fly_dodge.html"
