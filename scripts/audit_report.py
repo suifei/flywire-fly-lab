@@ -88,6 +88,19 @@ CHECKS = [
     # ── §41 子回路 v3 ─────────────────────────────────────────────────
     ("§41 v3 神经元数", r"\| v3 \| ([\d,]+) \| 432,437",
      lambda: jget("results/dodge/sensor_drive.json", "n"), 0),
+    # ── §44 不跳也规划方向（阴性） ────────────────────────────────────
+    ("§44 起飞次数", r"共 \*\*(\d+) 次起飞\*\*",
+     lambda: jget("results/dodge/takeoff_planning.json", "takeoffs"), 0),
+    ("§44 A 背离比例", r"\| A 起飞前 200 ms \| 98\.7% \| \*\*([\d.]+)%\*\*",
+     lambda: jget("results/dodge/takeoff_planning.json", "pre_takeoff", "frac_away") * 100, 0.05),
+    ("§44 B 背离比例", r"\| B 最终没起飞 \| 98\.8% \| \*\*([\d.]+)%\*\*",
+     lambda: jget("results/dodge/takeoff_planning.json", "no_takeoff", "frac_away") * 100, 0.05),
+    ("§44 正面 A 分箱", r"\| 0–15°（正面） \| \*\*([\d.]+)%\*\*",
+     lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "frac") * 100, 0.05),
+    ("§44 正面 B 分箱", r"\| 0–15°（正面） \| \*\*[\d.]+%\*\* \| \*\*([\d.]+)%\*\*",
+     lambda: jget("results/dodge/takeoff_planning.json", "no_bins", 0, "frac") * 100, 0.05),
+    ("§44 正面分箱样本数", r"它偏离 50% 太远（n = ([\d,]+)）",
+     lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "n"), 0),
 ]
 
 bad, ok = [], 0
@@ -112,4 +125,4 @@ for b in bad:
     print("  ✗ " + b)
 if bad:
     sys.exit(1)
-print("✓ 报告 §37–43 的关键数字与结果文件全部一致")
+print("✓ 报告 §37–44 的关键数字与结果文件全部一致")
