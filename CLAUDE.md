@@ -143,6 +143,22 @@ python dodge/collect_v4_results.py && python3 dodge/build.py  # page inlines res
 # v6: physics world + real-neuron knockouts + water (docs/log/report.md §25)
 conda activate flygym && python connectome_vision_loop.py --duration 1.0 --frontend-only   # ~1 min, 831 MB → results/connectome_loop_frontend_looming/
 python vision/frontend_check.py results/connectome_loop_frontend_looming/log.csv   # applies report §26's 4 pre-declared criteria mechanically
+```bash
+# v7/v8：五子棋、触感、脑图、同伴果蝇（docs/log/report.md §38）
+node gomoku/make_dataset.js 500 0.3          # 老师自对弈 → results/gomoku/dataset.json（12,270 局面，按整局切分）
+node gomoku/extract_features.js intact|shuffled|topo 400 100   # 水库特征（各 ~10 min，173 MB）
+#   **必须固定泊松随机流的种子**（featuresOf 的 opt.seed）：不固定时同一棋盘每次特征都不同，读出层只能拟合噪声
+conda activate flygym && python gomoku/train_readout.py   # 四臂岭回归 + 导出 readout.json / readout_shuffled.json
+#   **sd 不能四舍五入到 4 位**：1,861/3,537 个从不放电的神经元 sd=1e-6 会被舍成 0，浏览器里除零 → NaN → 一子不落
+node gomoku/play_test.js 20                  # 真下 160 局（含打乱脑对照），~6 min → results/gomoku/play.json
+python dodge/export_soma.py                  # 4,599 个真实胞体坐标（体素 4×4×40 nm → µm）→ soma.json，页面脑图用
+python dodge/sensor_reach.py                 # 各感觉通道到运动输出的最短跳数（只读，~2 min）→ sensor_reach.json
+cd dodge && python subcircuit_v3.py export --wmin 3 --K 3   # 加 TOUCH/THERMO/HYGRO 三路输入，5,563 神经元
+node dodge/touch_test.js 120 3               # 「只给物理量」这条原则的实测（v2 vs v3）→ results/dodge/touch.json
+node dodge/wall_test.js 120 3                # 手写围栏视觉的效果 → results/dodge/wall.json
+node dodge/wall_vision_test.js               # 像素路径看不看得见墙（真 Chrome）→ results/dodge/wall_vision.json
+```
+
 node dodge/mission_test.js 60 3             # v7 任务模式自检：每关跑「不干预」与「参考解」各 3 种子 → results/dodge/missions.json（~9 min）
 #   **通过线照这份实测定**，不是先编故事；七关必须全部「参考解全过、不干预全不过」，否则 exit 1
 node dodge/mutant_test.js 60 3             # 盲盒突变体：10 个真实神经元敲除的行为可诊断性（~7 min）→ results/dodge/mutants.json
@@ -409,6 +425,19 @@ The looming experiment writes a fixed `looming_intensity` into LPLC2 rates; no v
 - **游戏里的新玩法必须先测再定规则**：`dodge/mission_test.js` 每关跑「不干预」与「参考解」两遍，
   通过线照实测分布定；`dodge/mutant_test.js` 先回答"这些敲除行为上看得见吗"（答案是 7/10）。
   一关如果不干预也能过，它就没在考任何东西；参考解如果过不了，那关就是不可能完成的。
+- **游戏里的「感觉输入」是按物体列表算的，不是按画面**：`visualInput` 只读球的世界坐标，
+  所以往场景里加任何东西它都看不见（围栏就是这样被漏掉的，实测 92.8% 的时间贴着墙）。
+  真正按画面来的那条路径（eyecam 的 CubeCamera → 721 小眼 → flyvis → LPLC2）**本来就有**，
+  但实测它**分不出「朝墙走」与「背墙走」**（中位 34.2 vs 23.5 Hz）——它不补偿自体运动，
+  走路本身的全场光流就把信号淹了。§28.19 的「45 mm 外全瞎」只对 2.5 mm 的球成立，对墙不成立。
+- **「只给物理量、不写判断逻辑」可行，但前提是子回路里真有那条通路**（§38.3）：
+  把触感送到 v2 唯一的机械感觉 JO 上**完全无效**（JO 只通到梳理）；全脑查证头部刚毛到转向/逃逸
+  只要 **2 跳**，重裁含刚毛的 v3 之后同样的触感让走过的格子 9 → 31.5。
+  **加新感觉通道前先用 `dodge/sensor_reach.py` 查跳数**，不然物理量送进去没有落点。
+- **指标选错，阴性结果就是假的**（§38.3）：「贴墙时间占比」分不出「钉死在一点」与「贴着墙滑行」，
+  按它触感「没用」；换成走过的格子数才看出果蝇一直在沿墙移动。
+- **把连接组接进游戏 + 训练一个读出层，本身不能证明连接组在起作用**（§38.4）：
+  五子棋上真实接线 top1 0.0244、打乱接线 0.018、直接看棋盘 0.174。**必须跑打乱对照**。
 - **`node --check` 和 smoke 的模板静态检查都盖不住页面内联脚本的语法错误**：2026-09-19 少写一个
   右括号，两条静态检查与 smoke 全过，直到三分钟的浏览器测试才报 `missing ) after argument list`。
   `smoke_test.js` 现在会把内联 `<script>` 逐块 `new vm.Script()` 检查（重新注入 bug 验证过）。
