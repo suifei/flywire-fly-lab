@@ -322,6 +322,20 @@ PARAMETERS = [
 
 # ── 本项目自己的结果（不是对某篇论文的复现，但同样是"我们知道什么"）──────────
 FINDINGS = [
+    dict(id="shuffle_controls", what="我们自己用过的每一处「打乱连接组」对照，打乱之后网络还活着吗",
+         status="reproduced",
+         result="**三处都不是空对照**。全脑 346 → **61** 个活跃神经元（18%）；"
+                "游戏子回路 60 s 起跳 32.7 → **2.0** 次；"
+                "五子棋水库**反而更活跃**——每个局面活跃神经元 1795 → **3055**",
+         caveat="起因是 §42：别人那条实验的打乱臂读出完全不放电，判据因此是空的。"
+                "这条教训回头套自己身上才不是双标。"
+                "五子棋那一行还顺带解释了 §41.6 的翻盘：打乱脑下棋「更强」很可能只是因为"
+                "**它给读出层的特征更丰富**（打乱破坏抑制的特异性 → 整体更易兴奋），而不是它更懂棋",
+         script="scripts/check_shuffle_controls.py", result_file="results/shuffle_controls.json", log="§42.1",
+         verify=[("full_brain.shuffled_active_median", 61, 0), ("all_alive", True, 0),
+                 ("gomoku.shuffled.mean_active_per_position", 3055.2, 0.1),
+                 ("gomoku.intact.mean_active_per_position", 1795.3, 0.1),
+                 ("game_subcircuit.shuffled_jump", 2.0, 0.05)]),
     dict(id="gomoku_reservoir", what="把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
          status="negative",
          result="**没有，而且两版子回路上都一样**。脑里一个突触都不训练、只训练一层线性读出："

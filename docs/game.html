@@ -1923,13 +1923,40 @@ code { font: 12px var(--mono); }
     },
     {
      "id": "odor_valence",
-     "what": "气味效价实验",
+     "what": "气味效价实验（作者 README 自报 6/6）",
      "status": "partial",
-     "result": "6 条里复现 **4 条**",
-     "caveat": null,
-     "script": "external/Fly-Brain-AI/plastic-fly/experiments/odor_valence.py",
-     "result_file": null,
-     "log": "§10.5"
+     "result": "6 条判据里通过 **4 条**，但**扣掉空对照后实质只有 2 条**。失败的两条都在 DM1（吸引）：转向对比 +0.0010（要求 < 0）、以及它自己的打乱对照（真实 0.0010 vs 打乱 0.0011）",
+     "caveat": "**3 条判据是「真实 vs 打乱连接组」，而打乱臂的读出完全不放电**（读出均值 0.0 Hz、活跃 0 个，24 个 checkpoint 全部如此）——对照组直接死掉，任何非零效应都能通过，这种判据是空的。另外查了一个我们自己的猜测并**否掉**：失败不是因为 DM1 引发全脑失控——DM1 与 DM5 的读出活动几乎一样（16.7 vs 16.2 Hz）。（只看得到解码器读出那约 350 个神经元，不能据此排除全脑层面的失控。）所有真实条件的 turn_drive 中位都是 **−0.10**，被一个共同偏置主导",
+     "script": "fba_odor_recheck.py",
+     "result_file": "results/fba_odor_valence/recheck.json",
+     "log": "§10.5 + §42",
+     "verify": [
+      [
+       "passed",
+       4,
+       0
+      ],
+      [
+       "effective_passed",
+       2,
+       0
+      ],
+      [
+       "q2_shuffled_control.shuffled_readout_active",
+       0.0,
+       0.01
+      ],
+      [
+       "q1_dm1_vs_dm5.dm1_readout_hz",
+       16.667,
+       0.01
+      ],
+      [
+       "q1_dm1_vs_dm5.dm5_readout_hz",
+       16.176,
+       0.01
+      ]
+     ]
     },
     {
      "id": "turn_sign",
@@ -2040,6 +2067,43 @@ code { font: 12px var(--mono); }
   }
  ],
  "findings": [
+  {
+   "id": "shuffle_controls",
+   "what": "我们自己用过的每一处「打乱连接组」对照，打乱之后网络还活着吗",
+   "status": "reproduced",
+   "result": "**三处都不是空对照**。全脑 346 → **61** 个活跃神经元（18%）；游戏子回路 60 s 起跳 32.7 → **2.0** 次；五子棋水库**反而更活跃**——每个局面活跃神经元 1795 → **3055**",
+   "caveat": "起因是 §42：别人那条实验的打乱臂读出完全不放电，判据因此是空的。这条教训回头套自己身上才不是双标。五子棋那一行还顺带解释了 §41.6 的翻盘：打乱脑下棋「更强」很可能只是因为**它给读出层的特征更丰富**（打乱破坏抑制的特异性 → 整体更易兴奋），而不是它更懂棋",
+   "script": "scripts/check_shuffle_controls.py",
+   "result_file": "results/shuffle_controls.json",
+   "log": "§42.1",
+   "verify": [
+    [
+     "full_brain.shuffled_active_median",
+     61,
+     0
+    ],
+    [
+     "all_alive",
+     true,
+     0
+    ],
+    [
+     "gomoku.shuffled.mean_active_per_position",
+     3055.2,
+     0.1
+    ],
+    [
+     "gomoku.intact.mean_active_per_position",
+     1795.3,
+     0.1
+    ],
+    [
+     "game_subcircuit.shuffled_jump",
+     2.0,
+     0.05
+    ]
+   ]
+  },
   {
    "id": "gomoku_reservoir",
    "what": "把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
