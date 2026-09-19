@@ -18,7 +18,9 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
-const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/subcircuit_v2.json")));
+// 子回路用 SUB 环境变量切换（默认 v2）；输出文件名跟着走，免得覆盖已发布的 v2 数字
+const SUF = (process.env.SUB && process.env.SUB !== "subcircuit_v2") ? "_" + process.env.SUB.replace("subcircuit_", "") : "";
+const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json")));
 const { ConnectomeBrain } = require(path.join(ROOT, "dodge/brain.js"));
 const { createGame } = require(path.join(ROOT, "dodge/game_core.js"));
 
@@ -87,6 +89,6 @@ for (const pr of probe.NEURON_PAIRS) {
                    expected: +(ra * rb).toFixed(3), delta: +((1 - both) - (1 - ra * rb)).toFixed(3) });
   console.log(`配对 ${a}+${b}：各自 ${ra.toFixed(2)}/${rb.toFixed(2)} → 一起 ${both.toFixed(2)}（独立预期 ${(ra * rb).toFixed(2)}）`);
 }
-const dst = path.join(ROOT, "results/dodge/neuron_ratios.json");
+const dst = path.join(ROOT, "results/dodge/neuron_ratios" + SUF + ".json");
 fs.writeFileSync(dst, JSON.stringify(out, null, 1));
 console.log("\n写入", dst);

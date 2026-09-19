@@ -5756,6 +5756,9 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     // 碰到之后转不转、跳不跳、还是去梳理，完全由连接组决定。
     // 默认关，理由同 wallVision：已发布的对局数字都是在没有它的条件下测的。
     touch: false, touchRate: 200, antennaLen: 1.6,
+    // 温度 / 湿度场：G.fields 里每个源 {type:"heat"|"damp", x, y, sigma, strength}
+    // 强度 1.0 对应 fieldRate Hz。同样是**物理量**，没有任何"太热就走开"之类的规则。
+    fieldRate: 200,
     odorNav: false, odorSigma: 15, odorTurn: 120, odorMin: 0.01, antennaAhead: 1.0, antennaSep: 0.6, pelletAround: 25,
   };
   const TG = ["DNa01_left", "DNa01_right", "DNa02_left", "DNa02_right", "DNp01_left", "DNp01_right"];
@@ -5957,6 +5960,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     };
 
     // —— 风：随机游走的风场（强度 0–1、方向），每步更新 ——
+    G.fields = [];                    // 温度 / 湿度源；G.addField / G.clearFields
     G.wallTheta = {};                 // 四面墙上一帧的张角，用来算 dθ/dt
     G.wind = { speed: CFG.windSpeed, dir: CFG.windDir, joL: 0, joR: 0 };
     function windStep(dt) {
@@ -5972,6 +5976,11 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     G.addPelletAhead = (type, ahead = CFG.pelletAhead, lateral = 0) => {
       const S = G.S; return G.addPellet(S.x + Math.cos(S.h) * ahead - Math.sin(S.h) * lateral, S.y + Math.sin(S.h) * ahead + Math.cos(S.h) * lateral, type);
     };
+    G.addField = (type, x, y, sigma = 40, strength = 1) => {
+      const f = { id: G.nextId++, type, x, y, sigma, strength };
+      G.fields.push(f); G.onEvent && G.onEvent("field", f); return f;
+    };
+    G.clearFields = () => { for (const f of G.fields) G.onEvent && G.onEvent("removeField", f); G.fields.length = 0; };
     G.addDust = (side) => { const d = { id: G.nextId++, side }; G.dust.push(d); G.score.dust++; G.onEvent && G.onEvent("dust", d); return d; };
 
     // o.strike = true：“扑击”型威胁 —— 瞄准果蝇发射时的当前位置（不带提前量），到达该点后停住 o.hold 秒再消失
@@ -6143,6 +6152,30 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
         }
       }
       G.touch = { L: touchL, R: touchR };
+
+      // —— 温度与湿度（2026-09-19 加）：世界里的**物理场**，同样不写任何判断逻辑 ——
+      // 场地上可以放热源与水洼；果蝇所在位置的温度 / 湿度按距离衰减，直接换算成
+      // THERMO / HYGRO 神经元的泊松频率。**热了要不要走开、湿了要不要靠近，全由连接组决定。**
+      // 需要子回路 v3（v2 里没有这两组感受器，给了也没有落点——这一点在 §38.3 里实测过）。
+      // 换算（Hz per 单位强度）是手选的：没有该模型下的温度/湿度定标数据。
+      let thermo = 0, hygro = 0;
+      if (has("THERMO_left") || has("HYGRO_left")) {
+        for (const f of G.fields) {
+          const d = Math.hypot(f.x - S.x, f.y - S.y);
+          const g2 = Math.exp(-(d * d) / (2 * f.sigma * f.sigma));
+          if (f.type === "heat") thermo += f.strength * g2;
+          else if (f.type === "damp") hygro += f.strength * g2;
+        }
+      }
+      G.field = { thermo, hygro };
+      if (has("THERMO_left")) {
+        const t = Math.min(CFG.fieldRate, thermo * CFG.fieldRate);
+        brain.setRate("THERMO_left", t); brain.setRate("THERMO_right", t);
+      }
+      if (has("HYGRO_left")) {
+        const h2 = Math.min(CFG.fieldRate, hygro * CFG.fieldRate);
+        brain.setRate("HYGRO_left", h2); brain.setRate("HYGRO_right", h2);
+      }
       G.gust = { sugar, bitter, water };
       brain.setRate("SUGAR_left", sugar); brain.setRate("SUGAR_right", sugar);
       brain.setRate("BITTER_left", bitter); brain.setRate("BITTER_right", bitter);
@@ -9020,7 +9053,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   let spikeBuf = [], brainBuf = [];
   game.onSpike = i => { spikeBuf.push(i); brainBuf.push(i); };
   let palette = {};
-  const readPalette = () => { palette = Object.fromEntries(["--left", "--right", "--gf", "--inter", "--panel-2", "--muted", "--sugar", "--bitter", "--water", "--rule", "--ink-2"].map(k => [k, css(k)])); };
+  const readPalette = () => { palette = Object.fromEntries(["--left", "--right", "--gf", "--inter", "--panel-2", "--muted", "--sugar", "--bitter", "--water", "--rule", "--ink-2", "--grid", "--ink"].map(k => [k, css(k)])); };
 
   // ——— three.js ———
   const stage = $("stage");
@@ -9379,6 +9412,7 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     const lit = new Float32Array(N);
     const ctx = cv.getContext("2d");
     let yaw = 0, pitch = -0.25, dragging = null, view = "front";
+    let _sx = null, _sy = null, _sp = null;
     cv.addEventListener("pointerdown", e => { dragging = [e.clientX, e.clientY, yaw, pitch]; cv.setPointerCapture(e.pointerId); });
     cv.addEventListener("pointermove", e => {
       if (!dragging) return;
@@ -9403,22 +9437,43 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       brainBuf.length = 0;
       const decay = $("brTrail").checked ? Math.exp(-dt / 0.35) : Math.exp(-dt / 0.06);
       const cw = cv.width, ch = cv.height;
-      ctx.fillStyle = palette["--panel-2"] || "#eee";
+      // 底板比面板再深/浅一档，进一步拉开与点的对比
+      ctx.fillStyle = palette["--grid"] || palette["--panel-2"] || "#eee";
       ctx.fillRect(0, 0, cw, ch);
       const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
-      const R = Math.min(cw, ch) * 0.42, ox = cw / 2, oy = ch / 2;
+      // **每帧自动适配**：先把所有点投影出来量一次包围盒，再缩放居中。
+      // 原来用固定的 0.42×min(宽,高)，旋转到某些角度时脑子只占画面一小角、还偏在一边。
+      const SX = _sx || (_sx = new Float32Array(N)), SY = _sy || (_sy = new Float32Array(N)),
+            SP2 = _sp || (_sp = new Float32Array(N));
+      let x0 = 1e9, x1m = -1e9, y0 = 1e9, y1m = -1e9;
+      for (let i = 0; i < N; i++) {
+        const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
+        const xa = x * cy + z * sy, z1 = -x * sy + z * cy;
+        const ya = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+        const persp = 1 / (1 + z2 * 0.25);
+        const sx2 = xa * persp, sy2 = ya * persp;
+        SX[i] = sx2; SY[i] = sy2; SP2[i] = persp;
+        if (sx2 < x0) x0 = sx2; if (sx2 > x1m) x1m = sx2;
+        if (sy2 < y0) y0 = sy2; if (sy2 > y1m) y1m = sy2;
+      }
+      const pad = 0.94;
+      const R = Math.min(cw / Math.max(x1m - x0, 1e-6), ch / Math.max(y1m - y0, 1e-6)) * pad;
+      const ox = cw / 2 - (x0 + x1m) / 2 * R, oy = ch / 2 + (y0 + y1m) / 2 * R;
       // 先画暗的，再画亮的，免得亮点被盖住
       const order = [];
       for (let i = 0; i < N; i++) order.push(i);
       order.sort((a, b) => lit[a] - lit[b]);
       for (const i of order) {
-        const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
-        const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
-        const y1 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
-        const persp = 1 / (1 + z2 * 0.25);
-        const px = ox + x1 * R * persp, py = oy - y1 * R * persp;
+        const persp = SP2[i];
+        const px = ox + SX[i] * R, py = oy - SY[i] * R;
         const L = lit[i];
-        if (L < 0.02) { ctx.fillStyle = palette["--rule"] || "#ccc"; ctx.globalAlpha = 0.35 * persp; ctx.fillRect(px, py, dpr, dpr); }
+        // 静息点用 --ink-2：它**跟随主题反转**（亮色主题下是深墨、暗色主题下是浅灰），
+        // 所以两种主题下都和面板底色拉得开。原来用 --rule（分隔线灰）几乎看不见。
+        if (L < 0.02) {
+          ctx.fillStyle = palette["--ink-2"] || "#555"; ctx.globalAlpha = 0.5 * persp;
+          const r0 = Math.max(1, dpr * 0.9);
+          ctx.fillRect(px - r0 / 2, py - r0 / 2, r0, r0);
+        }
         else {
           ctx.globalAlpha = Math.min(1, 0.35 + L);
           ctx.fillStyle = palette[colKey[i]] || palette["--ink-2"];
