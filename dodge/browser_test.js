@@ -211,6 +211,40 @@ function chromePath() {
     if (!(r.n > 0)) return "7 秒内一子未落";
     return r.sd > 2 ? `已落 ${r.n} 子，棋盘画布标准差 ${r.sd.toFixed(1)}` : `落了 ${r.n} 子但画布是纯色`;
   });
+  await step("五子棋：黑白是两只独立的果蝇", async () => {
+    const r = await page.evaluate(() => {
+      const SUBd = JSON.parse(document.getElementById("sub-data").textContent);
+      const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
+      const G = window.Gomoku;
+      const mk = (seed, fs2) => window.GomokuFly.makePlayer(SUBd, window.FlyDodgeBrain.ConnectomeBrain, RO,
+        { seed, featSeed: fs2 });
+      const a = mk(11, 777), b2 = mk(23, 20260919);
+      let diff = 0;
+      for (let t = 0; t < 6; t++) {
+        const bd = G.newBoard();
+        for (let k = 0; k < 20; k++) { const m = (t * 37 + k * 11) % 225; if (!bd[m]) bd[m] = 1 + (k % 2); }
+        if (a.think(bd, 1).move !== b2.think(bd, 1).move) diff++;
+      }
+      return { diff };
+    });
+    return r.diff > 0 ? `6 个局面里有 ${r.diff} 个选点不同` : "两只给出的着法完全一样（不是两个个体）";
+  });
+  await step("五子棋：立体模式棋盘在视野里", async () => {
+    await page.click("#gmView3d");
+    await new Promise(r => setTimeout(r, 2500));
+    const r = await page.evaluate(() => {
+      const c = document.getElementById("gmStage");
+      const ctx = c.getContext("2d");
+      const w = c.width, h = c.height;
+      // 棋盘是暖木色：数一数画面左 2/3 里有多少"偏黄"的像素，太少说明棋盘跑出视野了
+      const d = ctx.getImageData(0, 0, Math.floor(w * 0.66), h).data;
+      let wood = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) { n++; if (d[i] > 120 && d[i] > d[i + 2] + 30) wood++; }
+      return { frac: wood / n };
+    });
+    await page.click("#gmView2d");
+    return r.frac > 0.25 ? `左侧 2/3 里木色占比 ${(r.frac * 100).toFixed(0)}%` : `棋盘不在视野里（木色占比只有 ${(r.frac * 100).toFixed(0)}%）`;
+  });
   await step("五子棋：立体模式能切换并渲染", async () => {
     await page.click("#gmView3d");
     await new Promise(r => setTimeout(r, 2500));

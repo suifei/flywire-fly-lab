@@ -583,6 +583,10 @@ code { font: 12px var(--mono); }
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
       <p class="sub"><b>棋盘在上面的主画面里</b>——把「主画面」切到「五子棋」，球场就整个换成棋盘。
+        「果蝇自对弈」是<b>两只真的果蝇在下</b>：黑白各一份独立的 5,563 神经元大脑，
+        连接组完全相同（同一份 FlyWire 子回路），差别只在<b>泊松输入的随机流种子</b>——
+        就像两只同基因型的果蝇：线路一样，放电不一样。实测同一个局面下，它们有约四成的时候选点不同；
+        不给不同种子的话两只会给出完全相同的着法，「两只」就没有意义了。
         切过去时<b>球场那只果蝇会被完全冻结</b>：不跑大脑、不动身体、不发球，三维场景也停止渲染
         （这也是帧率最高的一档）。同时左边那三块面板——实时 spike、下行神经元、感觉输入——
         <b>全部切到正在下棋的这一只</b>身上，它有自己独立的一份 5,563 神经元大脑。
@@ -11769,16 +11773,28 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
     let player = null;
     const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK,
-                over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0 };
+                over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0, thinker: G5.BLACK };
 
     const say = t => { $("gmPill").textContent = t; };
-    // 下棋这只果蝇的放电直接喂给页面的实时 spike 图与脑图——和球场那只用的是同两个缓冲，
-    // 所以切过去之后左边看到的就是**正在思考的这一只**。
+    // **黑白各一只果蝇，各自一份独立的 5,563 神经元大脑。**
+    // 两只的连接组完全相同（同一份 FlyWire 子回路），差别只在**泊松输入的随机流种子**——
+    // 就像两只同基因型的果蝇：线路一样，放电不一样，于是选的点也不一样。
+    // 不给不同种子的话两只会对同一个局面给出完全相同的着法，"两只"就没有意义了。
+    const SEEDS = { black: 777, white: 20260919 };
+    const players = { black: null, white: null };
     const ensurePlayer = () => {
-      if (!player && RO && RO.W)
-        player = F5.makePlayer(SUB, ConnectomeBrain, RO,
-          { onSpike: i => { if (window.__stageMode === "gomoku") { spikeBuf.push(i); brainBuf.push(i); } } });
+      if (!RO || !RO.W) return;
+      for (const side of ["black", "white"]) {
+        if (players[side]) continue;
+        players[side] = F5.makePlayer(SUB, ConnectomeBrain, RO, {
+          seed: side === "black" ? 11 : 23,
+          featSeed: SEEDS[side],
+          onSpike: i => { if (window.__stageMode === "gomoku") { spikeBuf.push(i); brainBuf.push(i); } },
+        });
+      }
+      player = players.black;
     };
+    const playerFor = turn => (turn === G5.BLACK ? players.black : players.white) || players.black;
 
     // —— 布局：棋盘按画布短边居中，留出右侧信息栏 ——
     function layout() {
@@ -11898,11 +11914,15 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       line("第 " + n + " 手");
       if (!S.over && S.on) line(S.turn === G5.BLACK ? "● 轮到黑" : "○ 轮到白");
       if (S.last >= 0) line("最后一手 " + String.fromCharCode(65 + S.last % G5.N) + (((S.last / G5.N) | 0) + 1));
-      if (S.thinkMs) line("果蝇思考 " + S.thinkMs.toFixed(0) + " ms");
+      if (S.thinkMs) line((S.thinker === G5.WHITE ? "白蝇" : "黑蝇") + "思考 " + S.thinkMs.toFixed(0) + " ms");
+      if (S.mode === "self") line("两只果蝇对战", palette["--muted"]);
       y += 6;
       ctx.font = "11px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
       ctx.fillStyle = palette["--muted"] || "#888";
-      for (const t of ["果蝇每一步真跑一遍", SUB.meta.n.toLocaleString() + " 个神经元", "禁手由规则引擎判定"]) {
+      const lines2 = S.mode === "self"
+        ? ["黑白各一只果蝇", "各自一份 " + SUB.meta.n.toLocaleString() + " 神经元大脑", "连接组相同，泊松种子不同"]
+        : ["果蝇每一步真跑一遍", SUB.meta.n.toLocaleString() + " 个神经元", "禁手由规则引擎判定"];
+      for (const t of lines2) {
         ctx.fillText(t, x, y); y += 15;
       }
     }
@@ -11923,6 +11943,9 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       const dl = new THREE.DirectionalLight(0xffffff, 0.7); dl.position.set(120, -160, 260); sc.add(dl);
       const board = B3.build(THREE, sc, { boardWood: "#caa06a", boardLine: "#4a3620", pole: "#efe6d8",
         stoneBlack: "#16181a", stoneWhite: "#f4f6f4", mark: "#e0562a" });
+      // **归零**：board3d 默认把棋盘摆在球场旁边（x=210），那是它原来的用途。
+      // 这里是独立场景、相机看原点，不归零棋盘就整个跑到画面外（用户反馈"偏离了视野中心"）。
+      board.group.position.set(0, 0, 0);
       R3 = { c, renderer, scene: sc, cam, board, yaw: 0, pitch: 0.95, dist: 330, fliers: [] };
       return R3;
     }
@@ -11932,10 +11955,22 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       if (!W || !H) return;
       if (cv.width !== W) { cv.width = W; cv.height = H; }
       if (r.c.width !== W || r.c.height !== H) r.renderer.setSize(W, H, false);
-      r.cam.aspect = W / Math.max(H, 1); r.cam.updateProjectionMatrix();
+      r.cam.aspect = W / Math.max(H, 1);
+      r.cam.updateProjectionMatrix();
       const d = r.dist;
       r.cam.position.set(Math.sin(r.yaw) * Math.cos(r.pitch) * d, -Math.cos(r.yaw) * Math.cos(r.pitch) * d, Math.sin(r.pitch) * d);
       r.cam.lookAt(0, 0, 0);
+      // **和平面模式对齐**：2D 把棋盘整体左移给右侧信息栏留位，立体模式原来没留，
+      // 棋盘顶在画布正中被信息栏压住（用户反馈"偏离了视野中心"）。
+      // 做法是把相机和它的注视点一起沿"相机右方向"平移——纯平移，不动投影矩阵。
+      // 平移量按目标平面上的可视宽度换算，所以任何窗口尺寸下棋盘都落在同一比例位置。
+      const visH = 2 * d * Math.tan(r.cam.fov * Math.PI / 360);
+      const pan = visH * r.cam.aspect * 0.14;
+      const right = new THREE.Vector3();
+      r.cam.getWorldDirection(right);
+      right.cross(r.cam.up).normalize().multiplyScalar(pan);
+      r.cam.position.add(right);
+      r.cam.lookAt(right.x, right.y, right.z);
       for (let k = r.fliers.length - 1; k >= 0; k--) {
         const f = r.fliers[k]; f.t += dt;
         const u = Math.min(1, f.t / f.dur);
@@ -12013,8 +12048,9 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       say("已悔棋");
     }
     function agentMove(who) {
-      if (who === "teacher" || !player) return T5.best(S.board, S.turn).move;
-      return player.think(S.board, S.turn).move;
+      const p = playerFor(S.turn);
+      if (who === "teacher" || !p) return T5.best(S.board, S.turn).move;
+      return p.think(S.board, S.turn).move;
     }
     let timer = 0;
     function tick(dt) {
@@ -12025,7 +12061,8 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
       timer -= dt; if (timer > 0) return;
       if (S.mode === "human" && S.turn === G5.BLACK) { say("轮到你（黑）"); return; }
       const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
-      say(who === "fly" ? "果蝇在想…" : "老师在想…");
+      const thinkingSide = S.turn;
+      say(who === "fly" ? ((S.turn === G5.BLACK ? "黑蝇" : "白蝇") + "在想…") : "老师在想…");
       S.busy = true;
       setTimeout(() => {
         ensurePlayer();
@@ -12033,7 +12070,9 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
         const mv = agentMove(who);
         if (who === "fly") {
           S.thinkMs = performance.now() - t0;
-          if (player && player.lastStats) { GMSTATS.rates = player.lastStats.rates; GMSTATS.drive = player.lastStats.drive; GMSTATS.t = performance.now(); }
+          S.thinker = thinkingSide;
+          const p = playerFor(thinkingSide);
+          if (p && p.lastStats) { GMSTATS.rates = p.lastStats.rates; GMSTATS.drive = p.lastStats.drive; GMSTATS.t = performance.now(); }
         }
         play(mv);
         S.busy = false; timer = 0.25;
