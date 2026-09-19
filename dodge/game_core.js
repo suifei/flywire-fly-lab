@@ -82,6 +82,9 @@
     // 碰到之后转不转、跳不跳、还是去梳理，完全由连接组决定。
     // 默认关，理由同 wallVision：已发布的对局数字都是在没有它的条件下测的。
     touch: false, touchRate: 200, antennaLen: 1.6,
+    // 温度 / 湿度场：G.fields 里每个源 {type:"heat"|"damp", x, y, sigma, strength}
+    // 强度 1.0 对应 fieldRate Hz。同样是**物理量**，没有任何"太热就走开"之类的规则。
+    fieldRate: 200,
     odorNav: false, odorSigma: 15, odorTurn: 120, odorMin: 0.01, antennaAhead: 1.0, antennaSep: 0.6, pelletAround: 25,
   };
   const TG = ["DNa01_left", "DNa01_right", "DNa02_left", "DNa02_right", "DNp01_left", "DNp01_right"];
@@ -283,6 +286,7 @@
     };
 
     // —— 风：随机游走的风场（强度 0–1、方向），每步更新 ——
+    G.fields = [];                    // 温度 / 湿度源；G.addField / G.clearFields
     G.wallTheta = {};                 // 四面墙上一帧的张角，用来算 dθ/dt
     G.wind = { speed: CFG.windSpeed, dir: CFG.windDir, joL: 0, joR: 0 };
     function windStep(dt) {
@@ -298,6 +302,11 @@
     G.addPelletAhead = (type, ahead = CFG.pelletAhead, lateral = 0) => {
       const S = G.S; return G.addPellet(S.x + Math.cos(S.h) * ahead - Math.sin(S.h) * lateral, S.y + Math.sin(S.h) * ahead + Math.cos(S.h) * lateral, type);
     };
+    G.addField = (type, x, y, sigma = 40, strength = 1) => {
+      const f = { id: G.nextId++, type, x, y, sigma, strength };
+      G.fields.push(f); G.onEvent && G.onEvent("field", f); return f;
+    };
+    G.clearFields = () => { for (const f of G.fields) G.onEvent && G.onEvent("removeField", f); G.fields.length = 0; };
     G.addDust = (side) => { const d = { id: G.nextId++, side }; G.dust.push(d); G.score.dust++; G.onEvent && G.onEvent("dust", d); return d; };
 
     // o.strike = true：“扑击”型威胁 —— 瞄准果蝇发射时的当前位置（不带提前量），到达该点后停住 o.hold 秒再消失
@@ -469,6 +478,30 @@
         }
       }
       G.touch = { L: touchL, R: touchR };
+
+      // —— 温度与湿度（2026-09-19 加）：世界里的**物理场**，同样不写任何判断逻辑 ——
+      // 场地上可以放热源与水洼；果蝇所在位置的温度 / 湿度按距离衰减，直接换算成
+      // THERMO / HYGRO 神经元的泊松频率。**热了要不要走开、湿了要不要靠近，全由连接组决定。**
+      // 需要子回路 v3（v2 里没有这两组感受器，给了也没有落点——这一点在 §38.3 里实测过）。
+      // 换算（Hz per 单位强度）是手选的：没有该模型下的温度/湿度定标数据。
+      let thermo = 0, hygro = 0;
+      if (has("THERMO_left") || has("HYGRO_left")) {
+        for (const f of G.fields) {
+          const d = Math.hypot(f.x - S.x, f.y - S.y);
+          const g2 = Math.exp(-(d * d) / (2 * f.sigma * f.sigma));
+          if (f.type === "heat") thermo += f.strength * g2;
+          else if (f.type === "damp") hygro += f.strength * g2;
+        }
+      }
+      G.field = { thermo, hygro };
+      if (has("THERMO_left")) {
+        const t = Math.min(CFG.fieldRate, thermo * CFG.fieldRate);
+        brain.setRate("THERMO_left", t); brain.setRate("THERMO_right", t);
+      }
+      if (has("HYGRO_left")) {
+        const h2 = Math.min(CFG.fieldRate, hygro * CFG.fieldRate);
+        brain.setRate("HYGRO_left", h2); brain.setRate("HYGRO_right", h2);
+      }
       G.gust = { sugar, bitter, water };
       brain.setRate("SUGAR_left", sugar); brain.setRate("SUGAR_right", sugar);
       brain.setRate("BITTER_left", bitter); brain.setRate("BITTER_right", bitter);

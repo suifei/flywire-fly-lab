@@ -12,10 +12,12 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
+// 子回路用 SUB 环境变量切换（默认 v2）；输出文件名跟着走，免得覆盖已发布的 v2 数字
+const SUF = (process.env.SUB && process.env.SUB !== "subcircuit_v2") ? "_" + process.env.SUB.replace("subcircuit_", "") : "";
 const { ConnectomeBrain } = require("./brain.js");
 const { createGame } = require("./game_core.js");
 const { MISSIONS, applyKeys } = require("./missions.js");
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json", "utf8"));
 const CLIPS = JSON.parse(fs.readFileSync(ROOT + "/results/flight/flight_clips.json", "utf8")).clips;
 const T = +(process.argv[2] || 60), SEEDS = +(process.argv[3] || 3);
 // 页面默认档位：Ache 2019 编码 + 真实逃逸飞行片段；关卡可以用 cfg 覆盖
@@ -81,6 +83,6 @@ for (const m of MISSIONS) {
 }
 const bad = out.missions.filter(m => !m.discriminating);
 out.all_discriminating = bad.length === 0;
-fs.writeFileSync(ROOT + "/results/dodge/missions.json", JSON.stringify(out, null, 1));
+fs.writeFileSync(ROOT + "/results/dodge/missions" + SUF + ".json", JSON.stringify(out, null, 1));
 console.log(`\n用时 ${((Date.now() - t0) / 1000).toFixed(0)} s，写入 results/dodge/missions.json`);
 if (bad.length) { console.log("没有区分度的关卡：" + bad.map(m => m.title).join("、")); process.exit(1); }

@@ -21,7 +21,7 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const { ConnectomeBrain } = require("./brain.js");
 const { createGame } = require("./game_core.js");
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json", "utf8"));
 const CLIPS = JSON.parse(fs.readFileSync(ROOT + "/results/flight/flight_clips.json", "utf8")).clips;
 const T = +(process.argv[2] || 120), SEEDS = +(process.argv[3] || 3);
 

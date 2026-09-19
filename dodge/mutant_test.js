@@ -16,9 +16,11 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
+// 子回路用 SUB 环境变量切换（默认 v2）；输出文件名跟着走，免得覆盖已发布的 v2 数字
+const SUF = (process.env.SUB && process.env.SUB !== "subcircuit_v2") ? "_" + process.env.SUB.replace("subcircuit_", "") : "";
 const { ConnectomeBrain } = require("./brain.js");
 const { createGame } = require("./game_core.js");
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/" + (process.env.SUB || "subcircuit_v2") + ".json", "utf8"));
 const CLIPS = JSON.parse(fs.readFileSync(ROOT + "/results/flight/flight_clips.json", "utf8")).clips;
 const T = +(process.argv[2] || 60), SEEDS = +(process.argv[3] || 3);
 const KEYS = ["Roundup", "G2N-1", "Clavicle", "CB0277", "CB0051", "Zorro", "Phantom", "Rattle", "CB0883", "aBN1"];
@@ -73,5 +75,5 @@ for (const key of KEYS) {
   console.log(`${key.padEnd(12)}${tells.length ? "可诊断：" + tells.map(t => t.metric + " 偏" + t.dir).join("、") : "行为上看不出来"}`);
 }
 out.n_diagnosable = out.mutants.filter(m => m.diagnosable).length;
-fs.writeFileSync(ROOT + "/results/dodge/mutants.json", JSON.stringify(out, null, 1));
+fs.writeFileSync(ROOT + "/results/dodge/mutants" + SUF + ".json", JSON.stringify(out, null, 1));
 console.log(`\n${out.n_diagnosable}/${KEYS.length} 个能从行为看出来。用时 ${((Date.now() - t0) / 1000).toFixed(0)} s → results/dodge/mutants.json`);

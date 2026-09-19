@@ -84,6 +84,38 @@ class SubcircuitV3(v2.SubcircuitV2):
         self.wmin, self.K = wmin, K
 
 
+def cmd_compare(a):
+    """与 v2 用同一批全脑参考实验对照——换了子回路就必须重新验一遍保真度，
+    否则「页面切到 v3」等于悄悄换掉了所有已发布数字的底座。"""
+    ann = load_ann()
+    comp = pd.read_csv(v1.PATH_COMP, index_col=0)
+    fids = comp.index.to_numpy(np.int64); fid2i = {int(f): i for i, f in enumerate(fids)}
+    con = pd.read_parquet(v1.PATH_CON, columns=["Presynaptic_Index", "Postsynaptic_Index", "Connectivity", "Excitatory x Connectivity"])
+    refs = {k: v2.full_ref(ann, k, f) for k, (_, f) in v2.REFS.items()}
+    rows = []
+    for cls, tag in ((v2.SubcircuitV2, "v2"), (SubcircuitV3, "v3")):
+        t0 = time.time(); sc = cls(ann, fids, fid2i, con, a.wmin, a.K)
+        print(f"\n### {tag}  wmin={a.wmin} K={a.K}: {sc.n} 神经元, {len(sc.w)} 连接 ({time.time() - t0:.1f}s)", flush=True)
+        for name, (rates, _) in v2.REFS.items():
+            sub, tot, _ = sc.simulate_groups(rates, 0.5, trials=4, seed=1)
+            ref = refs[name]
+            keys = [k for k in ref if (ref[k] > 1 or sub[k] > 1)]
+            mae = float(np.mean([abs(sub[k] - ref[k]) for k in ref]))
+            sign_ok = all((sub[k] > 5) == (ref[k] > 5) for k in ref)
+            rows.append(dict(which=tag, n=sc.n, cond=name, mae_hz=round(mae, 2), pattern_match=bool(sign_ok),
+                             **{f"sub_{k}": round(v, 2) for k, v in sub.items()}))
+            short = lambda k: k.replace("_left", "L").replace("_right", "R")
+            print(f"  {name:13s} {'✓' if sign_ok else '✗'} MAE {mae:5.1f} | " +
+                  "  ".join(f"{short(k)} {ref[k]:.0f}→{sub[k]:.0f}" for k in keys), flush=True)
+    df = pd.DataFrame(rows)
+    out = ROOT / "results/dodge_ref/subcircuit_v3_vs_v2.csv"
+    df.to_csv(out, index=False)
+    for tag in ("v2", "v3"):
+        d = df[df.which == tag]
+        print(f"\n{tag}：模式一致 {int(d.pattern_match.sum())}/{len(d)} 个条件，平均 MAE {d.mae_hz.mean():.2f} Hz")
+    print("写入", out)
+
+
 def cmd_export(a):
     ann = load_ann()
     comp = pd.read_csv(v1.PATH_COMP, index_col=0)
@@ -118,4 +150,6 @@ def cmd_export(a):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
     e = sub.add_parser("export"); e.add_argument("--wmin", type=int, default=3); e.add_argument("--K", type=int, default=3)
-    a = ap.parse_args(); cmd_export(a)
+    c = sub.add_parser("compare"); c.add_argument("--wmin", type=int, default=3); c.add_argument("--K", type=int, default=3)
+    a = ap.parse_args()
+    {"export": cmd_export, "compare": cmd_compare}[a.cmd](a)
