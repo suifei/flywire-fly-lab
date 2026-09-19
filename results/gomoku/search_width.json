@@ -1,0 +1,35 @@
+{
+ "note": "同一张表、同一个引擎，每步 2 万节点的预算（确定性，不受机器负载影响）；每组 100 局",
+ "rows": [
+  {
+   "K_a": 6,
+   "K_b": 10,
+   "win": 62,
+   "loss": 38,
+   "draw": 0,
+   "games": 100,
+   "mean_depth_a": 4.9,
+   "mean_depth_b": 4.45
+  },
+  {
+   "K_a": 4,
+   "K_b": 6,
+   "win": 60,
+   "loss": 40,
+   "draw": 0,
+   "games": 100,
+   "mean_depth_a": 5.55,
+   "mean_depth_b": 5.15
+  },
+  {
+   "K_a": 5,
+   "K_b": 6,
+   "win": 46,
+   "loss": 54,
+   "draw": 0,
+   "games": 100,
+   "mean_depth_a": 5.47,
+   "mean_depth_b": 5.09
+  }
+ ]
+}

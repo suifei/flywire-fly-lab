@@ -1,0 +1,39 @@
+{
+ "design": {
+  "freq_hz": 150,
+  "R": 3,
+  "n_ce": 69,
+  "n_f": 60,
+  "criterion": "aBN1：JO-CE > 10.0 Hz 且 JO-F < 5.0 Hz（论文表 8：50.77 / 1.23）",
+  "stim_list": "官方 notebook Figure 5b"
+ },
+ "abn1": {
+  "ours_ce": 52.0,
+  "ours_f": 1.67,
+  "paper_ce": 50.77,
+  "paper_f": 1.23
+ },
+ "criterion_A_ce_responds": true,
+ "criterion_B_f_does_not": true,
+ "both_pass": true,
+ "vector": {
+  "n_all": 406,
+  "n_nonstim": 277,
+  "CE": {
+   "pearson": 0.998,
+   "spearman": 0.964,
+   "respond_jaccard": 0.897,
+   "pearson_nonstim": 0.999,
+   "spearman_nonstim": 0.98,
+   "respond_jaccard_nonstim": 0.87
+  },
+  "F": {
+   "pearson": 0.999,
+   "spearman": 0.979,
+   "respond_jaccard": 0.939,
+   "pearson_nonstim": 0.999,
+   "spearman_nonstim": 0.992,
+   "respond_jaccard_nonstim": 0.846
+  }
+ }
+}

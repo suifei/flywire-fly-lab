@@ -144,13 +144,22 @@ python dodge/collect_v4_results.py && python3 dodge/build.py  # page inlines res
 conda activate flygym && python connectome_vision_loop.py --duration 1.0 --frontend-only   # ~1 min, 831 MB → results/connectome_loop_frontend_looming/
 python vision/frontend_check.py results/connectome_loop_frontend_looming/log.csv   # applies report §26's 4 pre-declared criteria mechanically
 ```bash
-# v7/v8：五子棋、触感、脑图、同伴果蝇（docs/log/report.md §38）
-node gomoku/make_dataset.js 500 0.3          # 老师自对弈 → results/gomoku/dataset.json（12,270 局面，按整局切分）
-node gomoku/extract_features.js intact|shuffled|topo 400 100   # 水库特征（各 ~10 min，173 MB）
-#   **必须固定泊松随机流的种子**（featuresOf 的 opt.seed）：不固定时同一棋盘每次特征都不同，读出层只能拟合噪声
-conda activate flygym && python gomoku/train_readout.py   # 四臂岭回归 + 导出 readout.json / readout_shuffled.json
-#   **sd 不能四舍五入到 4 位**：1,861/3,537 个从不放电的神经元 sd=1e-6 会被舍成 0，浏览器里除零 → NaN → 一子不落
-node gomoku/play_test.js 20                  # 真下 160 局（含打乱脑对照），~6 min → results/gomoku/play.json
+# 五子棋 v2：线型版（docs/log/report.md §46）。**v1（整盘棋铺进脑子）的全部数字作废**，脚本保留只为留档：
+#   make_dataset.js / extract_features.js / train_readout.py / play_test.js / fly.js / teacher.js
+# 线型 = 候选点某个方向两侧各 4 格，每格 ∈ {空, 我方, 对方, 边界}；合法线型恰好 14,641 种，果蝇脑把每一种都跑一遍
+SEED=777 node gomoku/line_features.js intact|shuffled 160 300 1   # 14,641 种线型 × 300 ms（~25–45 min/份，60 MB）→ linefeat_<arm>_s<seed>.bin
+#   训练种子 777–782、测试种子 783–785，两个臂共 18 份。每个进程 ~90 MB，可以 6 个并行（不是全脑 Brian2，不受"一次一个仿真"限制）
+for k in 0 1 2 3 4; do node gomoku/make_dataset2.js $k 5 800 & done; wait; node gomoku/make_dataset2.js merge   # 800 局、21,015 局面、深度 1–6 与 8 的标签（~55 min）
+for k in 0 1 2; do node gomoku/replay_outcomes.js $k 3 & done; wait; node gomoku/replay_outcomes.js merge       # 补终局胜负（重放并逐局面核对）
+node gomoku/import_wine.js                   # 外部考卷：external/gomoku_wine（HuggingFace Karesis/Gomoku，MIT）→ ds_wine，**只考不训**
+node gomoku/play_lines.js --dump-cls         # 老师的线型类别表 → ds2/teacher_cls.json（训练脚本的阶段一要用）
+conda activate flygym && python -u gomoku/train_lines.py --steps 300 --l2 1e-4 1e-3   # 六个臂 ~35 min，1.6 GB → train_lines.json + linetable_<arm>.json
+node gomoku/play_lines.js 20                 # 所有臂同一个引擎，差别只在价值表 → play_lines.json（含深度 8 的老师，~1 h）
+node gomoku/selfplay_rl.js 80 48 0.05 0.5    # 阶段三：自对弈强化（三因子规则，δ 在连接组外面算）→ rl.json（~5 min）
+node gomoku/collect_lines.js && node gomoku/export_page.js && python3 dodge/build.py   # 汇总 → lines_summary.json / page_tables.json → 页面
+node gomoku/test_engine.js                   # **改了 gomoku/ 或 brain.js 之后必跑**：6 项回归，每项对应一个真出过的 bug
+#   自我迭代（不用手写老师）：node gomoku/make_exit_dataset.js linetable_fly_intact.json exit1 <k> 6 600 ；merge exit1 ；
+#     python gomoku/train_lines.py --ds exit1 --arms fly_intact --init-from linetable_fly_intact.json --tag _exit1
 python dodge/export_soma.py                  # 4,599 个真实胞体坐标（体素 4×4×40 nm → µm）→ soma.json，页面脑图用
 python dodge/sensor_reach.py                 # 各感觉通道到运动输出的最短跳数（只读，~2 min）→ sensor_reach.json
 cd dodge && python subcircuit_v3.py export --wmin 3 --K 3   # 加 TOUCH/THERMO/HYGRO 三路输入，5,563 神经元
@@ -443,11 +452,27 @@ The looming experiment writes a fixed `looming_intensity` into LPLC2 rates; no v
   （0.0 Hz / 0 个活跃，24 个 checkpoint 全部如此）——对照组死了，任何非零效应都能通过。
   所以那条的诚实分数是「原始 4/6，实质 2/6」。§34 记过相近的坑（打乱同时改变了整个运动），
   这次是更极端的版本。`fba_odor_recheck.py` 是只读的复查脚本。
-- **把连接组接进游戏 + 训练一个读出层，本身不能证明连接组在起作用**（§38.4 + §41.6）：
-  五子棋上真实接线 top1 0.021、打乱接线 0.019、直接看棋盘 0.175，**两版子回路上都一样**。
-  **必须跑打乱对照**。而且对局胜率那条一度给出相反信号（v2 上真实 33/40 vs 打乱 24/40，
-  越过了事先定的线），换到 v3 重跑就翻盘（26/40 vs 40/40，正面交锋 0:40）——
-  **每组只有 20 局，不可重复**。判据越过线不等于结论成立，换个底座再跑一次才算。
+- **把连接组接进游戏 + 训练一个读出层，本身不能证明连接组在起作用——必须跑打乱对照**（§38.4 + §41.6 + §46）。
+  **但 §38.4 / §41.6 里五子棋 v1 的全部数字作废**（top1 0.021 / 0.019 / 0.175、26/40、0:40 那些）：
+  2026-09-19 查出 `brain.setOpto` 换一批神经元时**不清上一批的 stimProb**，输入一个接一个地叠上去。
+  `gomoku/test_engine.js` 每次都把旧行为重演一遍存证（`results/gomoku/opto_leak.json`）：线型 A 单独是 252 个脉冲，
+  先喂过 B 再喂 A 得到 1,901 个，逐神经元与真正的 A 相差 1,665。v1 的每个棋盘喂进去几乎是同一个输入，读出层学的是噪声。
+  游戏不受影响（`game_core` 每步用 `setRate` 整组重写输入；修复前后 7 个任务 + 10 个突变体的结果逐项相同）。
+  **教训：阴性结果也要先排除"实验本身坏了"。** 一个"几乎等于随机"的结果，第一反应应该是查输入有没有真的送进去，
+  而不是写结论。当时连"不同局面的特征是否不同"都没看过——300 种线型只给出 17 种不同的特征，一眼就能看出来。
+- **五子棋 v2 里踩过的五个坑**（§46，每一个都有实测数字）：
+  ① **两张表不可识别**：进攻线型与防守线型一一对应（互换视角），读出层只能约束 `a[c] + d[swap(c)]` 这个和。
+     单看进攻表「成五」均值 −0.68、「无」+0.17。只学一张进攻价值表，防守 = λ × 对手的进攻价值。
+  ② **对数尺度的量不能直接相加**：一条活四线 + 三条空线的和，小于四条活二线。落子分必须是「每条线取指数再相加」
+     （log-sum-exp）。用老师自己的分值取对数、按直接相加去下，只看 1 步对旧老师 1–15。
+  ③ **着法标签只约束出现过的线型**：训练局面里只出现过 6,266 / 14,641 种，其余的价值随意漂移，
+     搜索一走进没见过的局面就崩（成五类均值被学成 −6.67）。先蒸馏整张评分表（阶段一），再用着法标签微调并加锚定。
+  ④ **读出层会吃泊松噪声**：单种子 60 ms 窗，换种子掉 32 个百分点；300 ms 掉 17；3 种子平均掉 5.3；
+     训练时每步随机抽 3 个种子取平均（噪声增广）才降到 2.6。**事先写好的判据 D 就是为了抓这个**，代价是一致率少 3 个点。
+  ⑤ **线型窗口只看两侧各 4 格**：「中心 + 一侧 4 子」在窗口里是五连，第 5 格外还有黑子就是长连禁手。
+     黑方的五连要再问一次规则引擎。由 3,000 个随机局面的合法性测试抓到；必败局面也得走出合法着法。
+- **棋力主要来自搜索深度，不是来自果蝇**（§46）：果蝇的价值表放进只懂规则的搜索，与老师自己的分值表相当；
+  每多搜一步耗时 ×3.2（深度 8 ≈ 1–2 s，10 ≈ 8–12 s，12 ≈ 37 s）。页面上把这句话写明白，不要让"果蝇会下棋"被读成"果蝇在思考"。
 - **换子回路等于换掉所有已发布数字的底座**（§41）：2026-09-19 页面从 v2 切到 v3，
   重测了保真度、敲除比值、七关任务、突变体、整条五子棋管线。
   相关脚本都加了 `SUB` 环境变量与文件名后缀（`missions_v3.json` 等），v2 的结果原地保留。

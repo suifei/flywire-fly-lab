@@ -1,0 +1,56 @@
+{
+ "note": "老师的 ln(分值+1) 表 + 独立高斯噪声；R² 指加噪后的表对原表的决定系数；每个 R² 两份噪声各 20 局",
+ "depth": 4,
+ "opponent": "老师 v2 深度 4",
+ "lam": 0.4,
+ "rows": [
+  {
+   "r2": 1,
+   "win": 18,
+   "loss": 22,
+   "draw": 0,
+   "games": 40,
+   "win_rate": 0.45
+  },
+  {
+   "r2": 0.97,
+   "win": 18,
+   "loss": 22,
+   "draw": 0,
+   "games": 40,
+   "win_rate": 0.45
+  },
+  {
+   "r2": 0.95,
+   "win": 12,
+   "loss": 28,
+   "draw": 0,
+   "games": 40,
+   "win_rate": 0.3
+  },
+  {
+   "r2": 0.92,
+   "win": 12,
+   "loss": 28,
+   "draw": 0,
+   "games": 40,
+   "win_rate": 0.3
+  },
+  {
+   "r2": 0.85,
+   "win": 8,
+   "loss": 31,
+   "draw": 1,
+   "games": 40,
+   "win_rate": 0.2
+  },
+  {
+   "r2": 0.75,
+   "win": 3,
+   "loss": 37,
+   "draw": 0,
+   "games": 40,
+   "win_rate": 0.075
+  }
+ ]
+}

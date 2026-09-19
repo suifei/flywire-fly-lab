@@ -211,23 +211,26 @@ function chromePath() {
     if (!(r.n > 0)) return "7 秒内一子未落";
     return r.sd > 2 ? `已落 ${r.n} 子，棋盘画布标准差 ${r.sd.toFixed(1)}` : `落了 ${r.n} 子但画布是纯色`;
   });
-  await step("五子棋：黑白是两只独立的果蝇", async () => {
+  await step("五子棋：真脑现场重跑与价值表一致", async () => {
     const r = await page.evaluate(() => {
       const SUBd = JSON.parse(document.getElementById("sub-data").textContent);
-      const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
-      const G = window.Gomoku;
-      const mk = (seed, fs2) => window.GomokuFly.makePlayer(SUBd, window.FlyDodgeBrain.ConnectomeBrain, RO,
-        { seed, featSeed: fs2 });
-      const a = mk(11, 777), b2 = mk(23, 20260919);
-      let diff = 0;
-      for (let t = 0; t < 6; t++) {
-        const bd = G.newBoard();
-        for (let k = 0; k < 20; k++) { const m = (t * 37 + k * 11) % 225; if (!bd[m]) bd[m] = 1 + (k % 2); }
-        if (a.think(bd, 1).move !== b2.think(bd, 1).move) diff++;
-      }
-      return { diff };
+      const PT = JSON.parse(document.getElementById("gomoku-readout").textContent);
+      const G = window.Gomoku, p = window.GomokuFly2.makeLinePlayer(SUBd, window.FlyDodgeBrain.ConnectomeBrain, PT.black, { seed: 11 });
+      const b = G.newBoard(); [[7, 7, 1], [8, 7, 2], [7, 8, 1], [8, 8, 2], [7, 6, 1]].forEach(([x, y, c]) => { b[G.idx(x, y)] = c; });
+      const c = p.choose(b, 2, { depth: 4, vcf: true }), st = p.inspect(b, 2, c.move);
+      return { move: c.move, block: G.idx(7, 5), block2: G.idx(7, 9), runs: st.liveCheck.runs, diff: st.liveCheck.max_rel_diff, depth: c.depth, how: c.how };
     });
-    return r.diff > 0 ? `6 个局面里有 ${r.diff} 个选点不同` : "两只给出的着法完全一样（不是两个个体）";
+    if (!(r.diff < 1e-3)) return `真脑现场重算与表对不上：最大相对偏差 ${r.diff}`;
+    if (r.move !== r.block && r.move !== r.block2) return `黑方竖着活三，白蝇没去挡（走了 ${r.move}）`;
+    return `白蝇挡住了黑的活三；真脑重跑 ${r.runs} 次，与表的最大相对偏差 ${r.diff.toExponential(1)}`;
+  });
+  await step("五子棋：想几步可选，搜索在 Worker 里不卡界面", async () => {
+    const r = await page.evaluate(async () => {
+      const g = window.__gm; document.querySelector('#gmDepthSeg button[data-d="8"]').click();
+      const d8 = g.state.depth; document.querySelector('#gmDepthSeg button[data-d="4"]').click();
+      return { d8, d4: g.state.depth, worker: g.workerState() };
+    });
+    return (r.d8 === 8 && r.d4 === 4) ? `深度可切换（8 → 4）；Worker ${r.worker === true ? "已启用" : r.worker === false ? "不可用，已退回主线程" : "尚未启动"}` : JSON.stringify(r);
   });
   await step("五子棋：立体模式棋盘在视野里", async () => {
     await page.click("#gmView3d");

@@ -1,0 +1,254 @@
+{
+ "design": {
+  "target_mn9": 40.0,
+  "freqs": [
+   10,
+   20,
+   40,
+   60,
+   80,
+   120,
+   160,
+   220
+  ],
+  "R": 6,
+  "stim_list": "notebook",
+  "grn_counts": {
+   "sugar": 21,
+   "water": 18,
+   "bitter": 20,
+   "ir94e": 18
+  },
+  "note": "苦 / Ir94e 用官方 notebook（figures.ipynb Figure 3）的名单中在 v783 里的那些；糖 21 个与水 18 个沿用 §14 / §19"
+ },
+ "calibration": {
+  "sugar": {
+   "kind": "driver",
+   "target": 40.0,
+   "freqs": [
+    10,
+    20,
+    40,
+    60,
+    80,
+    120,
+    160,
+    220
+   ],
+   "mn9": [
+    0.0,
+    0.0,
+    2.67,
+    35.67,
+    57.0,
+    83.0,
+    83.33,
+    93.0
+   ],
+   "chosen_fi": 3,
+   "chosen_hz": 60,
+   "chosen_mn9": 35.67
+  },
+  "water": {
+   "kind": "driver",
+   "target": 40.0,
+   "freqs": [
+    10,
+    20,
+    40,
+    60,
+    80,
+    120,
+    160,
+    220
+   ],
+   "mn9": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    11.0,
+    38.33
+   ],
+   "chosen_fi": 7,
+   "chosen_hz": 220,
+   "chosen_mn9": 38.33
+  },
+  "bitter": {
+   "kind": "suppressor",
+   "target": 1.0,
+   "on_top_of": "sugar",
+   "sugar_hz": 60,
+   "freqs": [
+    10,
+    20,
+    40,
+    60,
+    80,
+    120,
+    160,
+    220
+   ],
+   "mn9": [
+    35.67,
+    26.0,
+    14.33,
+    4.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "chosen_fi": 4,
+   "chosen_hz": 80,
+   "chosen_mn9": 0.0
+  },
+  "ir94e": {
+   "kind": "suppressor",
+   "target": 1.0,
+   "on_top_of": "sugar",
+   "sugar_hz": 60,
+   "freqs": [
+    10,
+    20,
+    40,
+    60,
+    80,
+    120,
+    160,
+    220
+   ],
+   "mn9": [
+    37.67,
+    22.0,
+    5.0,
+    1.0,
+    0.33,
+    0.0,
+    0.33,
+    0.0
+   ],
+   "chosen_fi": 3,
+   "chosen_hz": 60,
+   "chosen_mn9": 1.0
+  }
+ },
+ "conditions": {
+  "Sugar_only": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.994,
+   "spearman_nonstim": 0.962,
+   "respond_jaccard_nonstim": 0.93,
+   "ours_mn9": 35.33,
+   "paper_mn9": 40.83,
+   "n_active": 357,
+   "n_compared": 542,
+   "both_respond": 312,
+   "pearson": 0.995
+  },
+  "Water_only": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.999,
+   "spearman_nonstim": 0.94,
+   "respond_jaccard_nonstim": 0.866,
+   "ours_mn9": 38.33,
+   "paper_mn9": 40.4,
+   "n_active": 345,
+   "n_compared": 542,
+   "both_respond": 304,
+   "pearson": 0.999
+  },
+  "Bitter_only": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.987,
+   "spearman_nonstim": 0.921,
+   "respond_jaccard_nonstim": 0.688,
+   "ours_mn9": 0.0,
+   "paper_mn9": 0.0,
+   "n_active": 49,
+   "n_compared": 542,
+   "both_respond": 42,
+   "pearson": 0.997
+  },
+  "Ir94e_only": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.985,
+   "spearman_nonstim": 0.714,
+   "respond_jaccard_nonstim": 0.217,
+   "ours_mn9": 0.0,
+   "paper_mn9": 0.0,
+   "n_active": 34,
+   "n_compared": 542,
+   "both_respond": 33,
+   "pearson": 0.991
+  },
+  "Sugar_Bitter": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.987,
+   "spearman_nonstim": 0.916,
+   "respond_jaccard_nonstim": 0.772,
+   "ours_mn9": 0.17,
+   "paper_mn9": 1.33,
+   "n_active": 259,
+   "n_compared": 542,
+   "both_respond": 230,
+   "pearson": 0.994
+  },
+  "Sugar_Ir94e": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.963,
+   "spearman_nonstim": 0.848,
+   "respond_jaccard_nonstim": 0.754,
+   "ours_mn9": 0.83,
+   "paper_mn9": 1.12,
+   "n_active": 255,
+   "n_compared": 542,
+   "both_respond": 216,
+   "pearson": 0.95
+  },
+  "Water_Bitter": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.991,
+   "spearman_nonstim": 0.813,
+   "respond_jaccard_nonstim": 0.685,
+   "ours_mn9": 18.83,
+   "paper_mn9": 10.07,
+   "n_active": 296,
+   "n_compared": 542,
+   "both_respond": 250,
+   "pearson": 0.996
+  },
+  "Water_Ir94e": {
+   "n_nonstim": 466,
+   "pearson_nonstim": 0.978,
+   "spearman_nonstim": 0.708,
+   "respond_jaccard_nonstim": 0.68,
+   "ours_mn9": 10.67,
+   "paper_mn9": 2.26,
+   "n_active": 205,
+   "n_compared": 542,
+   "both_respond": 158,
+   "pearson": 0.975
+  }
+ },
+ "interaction": {
+  "Sugar_Bitter": {
+   "ours_ratio": 0.005,
+   "paper_ratio": 0.033
+  },
+  "Sugar_Ir94e": {
+   "ours_ratio": 0.023,
+   "paper_ratio": 0.028
+  },
+  "Water_Bitter": {
+   "ours_ratio": 0.491,
+   "paper_ratio": 0.249
+  },
+  "Water_Ir94e": {
+   "ours_ratio": 0.278,
+   "paper_ratio": 0.056
+  }
+ }
+}

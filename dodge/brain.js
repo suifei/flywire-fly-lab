@@ -86,6 +86,11 @@
     // 只会写 stimProb，永远不会真的放电。传 hz = 0 关掉。
     // 与官方 poi() 一致：被驱动的神经元不应期置 0。
     setOpto(idx, hz) {
+      // **先把上一批的刺激清掉**。2026-09-19 查五子棋为什么学不会时发现：原来这里只写新的一批，
+      // 旧的一批 stimProb 永远留着——连续喂 A、B、A 三个输入，第二次 A 的响应与 B 逐位相同
+      //（总脉冲 405 → 3103 → 3103）。五子棋 v1 的全部训练特征都是这样被污染的。
+      // 游戏里没暴露，是因为 game_core 每一步都用 setRate 把输入组整组重写。
+      if (this.optoIdx) for (const i of this.optoIdx) this.stimProb[i] = 0;
       this.optoIdx = Int32Array.from(idx || []);
       this.optoProb = (Math.max(0, hz) * this.dt) / 1000;
       for (const i of this.optoIdx) this.stimProb[i] = this.optoProb;

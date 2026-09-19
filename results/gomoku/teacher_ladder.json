@@ -1,0 +1,62 @@
+{
+ "reference": "老师 v2 深度 3",
+ "pairs": 15,
+ "rows": [
+  {
+   "depth": 1,
+   "win": 8,
+   "loss": 20,
+   "draw": 2,
+   "games": 30,
+   "seconds": 2.9
+  },
+  {
+   "depth": 2,
+   "win": 10,
+   "loss": 20,
+   "draw": 0,
+   "games": 30,
+   "seconds": 1.2
+  },
+  {
+   "depth": 4,
+   "win": 19,
+   "loss": 11,
+   "draw": 0,
+   "games": 30,
+   "seconds": 7.3
+  },
+  {
+   "depth": 5,
+   "win": 21,
+   "loss": 9,
+   "draw": 0,
+   "games": 30,
+   "seconds": 13.9
+  },
+  {
+   "depth": 6,
+   "win": 19,
+   "loss": 11,
+   "draw": 0,
+   "games": 30,
+   "seconds": 37
+  },
+  {
+   "depth": 7,
+   "win": 26,
+   "loss": 4,
+   "draw": 0,
+   "games": 30,
+   "seconds": 96.1
+  },
+  {
+   "depth": 8,
+   "win": 28,
+   "loss": 2,
+   "draw": 0,
+   "games": 30,
+   "seconds": 293.3
+  }
+ ]
+}

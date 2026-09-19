@@ -1,0 +1,23 @@
+不敲          sugarFeedS 4.34  waterFeedS 1.66  waterMn9Peak 28.27  groom 8.33  jump 33  dodgeRate 1
+Roundup     sugarFeedS 0  waterFeedS 0  waterMn9Peak 0  groom 8.33  jump 33  dodgeRate 1
+G2N-1       sugarFeedS 4.42  waterFeedS 2.07  waterMn9Peak 31.5  groom 8.33  jump 33  dodgeRate 1
+Clavicle    sugarFeedS 5.29  waterFeedS 0  waterMn9Peak 0  groom 8.33  jump 33  dodgeRate 1
+CB0277      sugarFeedS 5.14  waterFeedS 2.39  waterMn9Peak 35.13  groom 8.33  jump 33  dodgeRate 1
+CB0051      sugarFeedS 5.49  waterFeedS 0  waterMn9Peak 0  groom 8.33  jump 33  dodgeRate 1
+Zorro       sugarFeedS 6.18  waterFeedS 1.28  waterMn9Peak 74.8  groom 8.33  jump 33  dodgeRate 1
+Phantom     sugarFeedS 4.93  waterFeedS 3.25  waterMn9Peak 58.77  groom 8.33  jump 33  dodgeRate 1
+Rattle      sugarFeedS 5.12  waterFeedS 1.98  waterMn9Peak 33.43  groom 8.33  jump 33  dodgeRate 1
+CB0883      sugarFeedS 4.74  waterFeedS 2.01  waterMn9Peak 33.4  groom 8.33  jump 33  dodgeRate 1
+aBN1        sugarFeedS 5.26  waterFeedS 1.91  waterMn9Peak 28.43  groom 0  jump 33  dodgeRate 1
+Roundup     可诊断：sugarFeedS 偏低、waterFeedS 偏低、waterMn9Peak 偏低
+G2N-1       行为上看不出来
+Clavicle    可诊断：waterFeedS 偏低、waterMn9Peak 偏低
+CB0277      可诊断：waterMn9Peak 偏高
+CB0051      可诊断：waterFeedS 偏低、waterMn9Peak 偏低
+Zorro       可诊断：sugarFeedS 偏高
+Phantom     可诊断：waterMn9Peak 偏高
+Rattle      行为上看不出来
+CB0883      可诊断：waterMn9Peak 偏高
+aBN1        可诊断：groom 偏低
+
+8/10 个能从行为看出来。用时 849 s → results/dodge/mutants_v3.json

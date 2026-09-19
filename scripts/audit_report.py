@@ -118,6 +118,17 @@ CHECKS = [
      lambda: jget("results/dodge/takeoff_planning.json", "front_table", "pre", "dnaL_threatL"), 0),
     ("§44.1 P(左DNa|威胁在左)", r"威胁在左时左 DNa 更强的概率 \*\*([\d.]+)%\*\*",
      lambda: jget("results/dodge/takeoff_planning.json", "front_table", "pre", "frac_dnaL_given_threatL") * 100, 0.05),
+    # ── §46 五子棋 v2（整节由 render_report46.py 渲染；这里抽查几处，防有人手改）──────────
+    ("§46 果蝇脑一致率", r"\| 果蝇脑 · 真实连接组 \| \d+ \| [\d.]+ \| [\d.]+% \| ([\d.]+)% \|",
+     lambda: jget("results/gomoku/train_lines.json", "arms", "fly_intact", "test_top1") * 100, 0.05),
+    ("§46 打乱接线一致率", r"\| 果蝇脑 · 打乱接线 \| \d+ \| [\d.]+ \| [\d.]+% \| ([\d.]+)% \|",
+     lambda: jget("results/gomoku/train_lines.json", "arms", "fly_shuffled", "test_top1") * 100, 0.05),
+    ("§46 重演旧 bug 的脉冲数", r"\*\*先喂过 B 再喂 A，得到 ([\d,]+) 个\*\*",
+     lambda: jget("results/gomoku/opto_leak.json", "old_behaviour", "A_after_B"), 0),
+    ("§46 强化对监督版胜局", r"想 4 步对监督版 \*\*(\d+)–\d+",
+     lambda: jget("results/gomoku/rl.json", "final", "d4_vs_supervised_d4", "win"), 0),
+    ("§46 训练局面里出现过的线型", r"只出现过 \*\*([\d,]+) / 14,641\*\* 种",
+     lambda: jget("results/gomoku/dataset_summary.json", "patterns_seen_in_dataset"), 0),
     ("§44 正面分箱样本数", r"它偏离 50% 太远（n = ([\d,]+)）",
      lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "n"), 0),
 ]
@@ -144,4 +155,4 @@ for b in bad:
     print("  ✗ " + b)
 if bad:
     sys.exit(1)
-print("✓ 报告 §37–45 的关键数字与结果文件全部一致")
+print("✓ 报告 §37–46 的关键数字与结果文件全部一致")

@@ -1,0 +1,15 @@
+{
+ "note": "A、B 是两种线型；40 ms、种子 777、160 Hz。old_behaviour = 重演修复前的行为（先喂过 B 再喂 A，B 的刺激没清掉）",
+ "fixed": {
+  "A_first": 252,
+  "B": 1577,
+  "A_again": 252,
+  "abs_diff_A_first_vs_again": 0
+ },
+ "old_behaviour": {
+  "A_after_B": 1901,
+  "abs_diff_vs_true_A": 1665,
+  "abs_diff_vs_B": 508,
+  "identical_to_B": false
+ }
+}
