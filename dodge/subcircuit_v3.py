@@ -1,0 +1,121 @@
+"""子回路 v3：把**触感、温度、湿度**也接成输入。
+
+起因（2026-09-19 用户提出的原则）：「果蝇看到的任何物体都该由它大脑自行决策，
+我们绝不写死判断逻辑，只负责提供必需的物理量」。
+
+按这条原则做的第一次尝试失败了：给「触角碰到围栏 → JO」之后果蝇**完全没反应**
+（贴墙率 85.6% → 85.6%），因为 JO 在 v2 子回路里只通到梳理指令 aDN1。
+
+`dodge/sensor_reach.py` 随后在**全脑**上查清了原因与出路：脑连接组里有
+**头部刚毛 305 个（真正的触觉感受器）、温度 29 个、湿度 74 个**，
+而且它们到 DNa01/DNa02/DNp01/MDN **只要 2–3 跳**——通路是有的，
+只是 v2 裁子回路时没把它们当输入，于是物理量送进去没有落点。
+
+v3 就是把这三类加进输入组重裁一版。**选择规则、wmin/K、模型全部沿用 v2**，只是输入变多。
+
+新增输入组（按注释表的 cell_sub_class / cell_class 选，不是 cell_type）：
+  TOUCH_*   head bristle      头部刚毛机械感觉 —— 真正的「碰到东西」
+  THERMO_*  thermosensory     温度
+  HYGRO_*   hygrosensory      湿度
+
+用法（brain-fly-cpu 或 flygym）：python dodge/subcircuit_v3.py export --wmin 3 --K 3
+输出 results/dodge/subcircuit_v3.json
+"""
+import argparse
+import json
+import time
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import scipy.sparse as sp
+
+import subcircuit as v1
+import subcircuit_v2 as v2
+
+ROOT = Path(__file__).resolve().parent.parent
+# 新增的三类：按 cell_sub_class（触感）与 cell_class（温湿度）选
+SUBCLASS_INPUTS = {"TOUCH": ["head bristle"]}
+CLASS_INPUTS = {"THERMO": ["thermosensory"], "HYGRO": ["hygrosensory"]}
+
+
+def load_ann():
+    ann = pd.read_csv(v1.PATH_ANN, sep="\t", low_memory=False,
+                      usecols=["root_id", "cell_type", "cell_sub_class", "cell_class", "side", "super_class"])
+    return ann.drop_duplicates("root_id").set_index("root_id")
+
+
+class SubcircuitV3(v2.SubcircuitV2):
+    def __init__(self, ann, fids, fid2i, con, wmin, K):
+        n = len(fids)
+        def pick(mask, side):
+            m = mask & (ann.side == side)
+            return sorted(fid2i[int(r)] for r in ann.index[m] if int(r) in fid2i)
+        self.groups_full = {}
+        for g, types in {**v2.INPUT_TYPES, **v2.TARGET_TYPES}.items():
+            for side in v2.SIDES:
+                self.groups_full[f"{g}_{side}"] = pick(ann.cell_type.isin(types), side)
+        for g, subs in SUBCLASS_INPUTS.items():
+            for side in v2.SIDES:
+                self.groups_full[f"{g}_{side}"] = pick(ann.cell_sub_class.isin(subs), side)
+        for g, cls in CLASS_INPUTS.items():
+            for side in v2.SIDES:
+                self.groups_full[f"{g}_{side}"] = pick(ann.cell_class.isin(cls), side)
+        self.input_names = list(v2.INPUT_TYPES) + list(SUBCLASS_INPUTS) + list(CLASS_INPUTS)
+        S = sorted({i for g in self.input_names for s in v2.SIDES for i in self.groups_full[f"{g}_{s}"]})
+        T = sorted({i for g in v2.TARGET_TYPES for s in v2.SIDES for i in self.groups_full[f"{g}_{s}"]})
+        pre, post = con.Presynaptic_Index.to_numpy(), con.Postsynaptic_Index.to_numpy()
+        strong = con.Connectivity.to_numpy() >= wmin
+        A = sp.csr_matrix((np.ones(strong.sum(), np.float32), (pre[strong], post[strong])), shape=(n, n))
+        dS, dT = v1.bfs_hops(A, S), v1.bfs_hops(A.T.tocsr(), T)
+        sel = np.union1d(np.where(dS + dT <= K)[0], np.array(S + T))
+        self.sel = sel
+        loc = np.full(n, -1); loc[sel] = np.arange(len(sel))
+        e = (loc[pre] >= 0) & (loc[post] >= 0)
+        self.pre, self.post = loc[pre[e]], loc[post[e]]
+        self.w = con["Excitatory x Connectivity"].to_numpy()[e].astype(np.float32) * v1.P["w_syn"]
+        order = np.argsort(self.pre, kind="stable")
+        self.pre, self.post, self.w = self.pre[order], self.post[order], self.w[order]
+        self.indptr = np.searchsorted(self.pre, np.arange(len(sel) + 1)).astype(np.int32)
+        self.n = len(sel)
+        self.groups = {k: loc[v].tolist() for k, v in self.groups_full.items()}
+        self.fids = fids[sel]
+        self.hops_in, self.hops_out = dS[sel], dT[sel]
+        self.wmin, self.K = wmin, K
+
+
+def cmd_export(a):
+    ann = load_ann()
+    comp = pd.read_csv(v1.PATH_COMP, index_col=0)
+    fids = comp.index.to_numpy(np.int64); fid2i = {int(f): i for i, f in enumerate(fids)}
+    con = pd.read_parquet(v1.PATH_CON, columns=["Presynaptic_Index", "Postsynaptic_Index", "Connectivity", "Excitatory x Connectivity"])
+    t0 = time.time()
+    sc = SubcircuitV3(ann, fids, fid2i, con, a.wmin, a.K)
+    print(f"wmin={a.wmin} K={a.K}：{sc.n:,} 个神经元、{len(sc.pre):,} 条边（v2 同参数是 4,599 / 338,837），{time.time() - t0:.0f}s")
+    for g in sc.input_names:
+        print(f"  {g:8s} 左 {len(sc.groups[g + '_left']):5d}  右 {len(sc.groups[g + '_right']):5d}")
+    meta = ann.reindex([int(f) for f in sc.fids])
+    out = dict(meta=dict(wmin=a.wmin, K=a.K, n=int(sc.n), n_edges=int(len(sc.pre)), version=3,
+                         params=v1.P,
+                         inputs={g: (SUBCLASS_INPUTS.get(g) or CLASS_INPUTS.get(g) or v2.INPUT_TYPES[g])
+                                 for g in sc.input_names},
+                         targets=v2.TARGET_TYPES,
+                         note="v3 在 v2 基础上加了 TOUCH（头部刚毛）/ THERMO（温度）/ HYGRO（湿度）三路输入；"
+                              "选择规则与 v2 完全相同",
+                         source="FlyWire v783 + flywire_annotations"),
+               groups=sc.groups, fids=[str(f) for f in sc.fids],
+               types=meta.cell_type.fillna("?").tolist(), sides=meta.side.fillna("?").tolist(),
+               supers=meta.super_class.fillna("?").tolist(),
+               hops_in=[int(h) if np.isfinite(h) else -1 for h in sc.hops_in],
+               hops_out=[int(h) if np.isfinite(h) else -1 for h in sc.hops_out],
+               indptr=v1.b64(sc.indptr.astype(np.int32)), post=v1.b64(sc.post.astype(np.int32)),
+               w=v1.b64(sc.w.astype(np.float32)))
+    p = ROOT / "results/dodge/subcircuit_v3.json"
+    p.write_text(json.dumps(out, separators=(",", ":")))
+    print(f"→ {p}  {p.stat().st_size / 1e6:.1f} MB")
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
+    e = sub.add_parser("export"); e.add_argument("--wmin", type=int, default=3); e.add_argument("--K", type=int, default=3)
+    a = ap.parse_args(); cmd_export(a)

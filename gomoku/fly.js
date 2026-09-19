@@ -21,7 +21,10 @@
       think(board, me) {
         const cnt = F.featuresOf(brain, map, board, me, { hz: readout.hz, ms: readout.ms, seed: opt.featSeed ?? 777 });
         const x = new Float64Array(D + 1);
-        for (let k = 0; k < D; k++) x[k] = (Math.sqrt(cnt[cols[k]]) - mu[k]) / sd[k];
+        // sd 可能是 0：那些神经元在训练集里从来不放电，导出时又被四舍五入成 0。
+        // 不兜住的话这里会除出 Infinity → 整个分数向量变 NaN → 一个合法着都选不出来
+        //（2026-09-19 实测：move 恒为 −1，棋盘上一子未落）。
+        for (let k = 0; k < D; k++) { const d = sd[k] || 1e-6; x[k] = (Math.sqrt(cnt[cols[k]]) - mu[k]) / d; }
         x[D] = 1;
         const s = new Float64Array(G.SIZE);
         for (let k = 0; k <= D; k++) {
@@ -30,14 +33,22 @@
           for (let m = 0; m < G.SIZE; m++) s[m] += v * row[m];
         }
         const scores = new Float64Array(G.SIZE).fill(-Infinity);
-        let bi = -1, bs = -Infinity;
+        let bi = -1, bs = -Infinity, nan = 0;
         for (let i = 0; i < G.SIZE; i++) {
           if (board[i] !== G.EMPTY) continue;
           if (me === G.BLACK && G.forbidden(board, i % G.N, (i / G.N) | 0)) continue;
+          if (!Number.isFinite(s[i])) { nan++; continue; }
           scores[i] = s[i];
           if (s[i] > bs) { bs = s[i]; bi = i; }
         }
-        return { move: bi, scores, raw: s };
+        if (bi < 0) {                                    // 兜底：读出层给不出有限分数时随便挑个合法点，但要说出来
+          for (let i = 0; i < G.SIZE; i++) {
+            if (board[i] !== G.EMPTY) continue;
+            if (me === G.BLACK && G.forbidden(board, i % G.N, (i / G.N) | 0)) continue;
+            bi = i; break;
+          }
+        }
+        return { move: bi, scores, raw: s, nan };
       },
     };
   }

@@ -72,6 +72,16 @@
     // —— v4：手写嗅觉导航（非连接组；全脑模型给不出气味侧化，见 docs/log/report.md 11.4）——
     // 颗粒散发高斯气味场；左右触角各采一次浓度，浓度 > odorMin 时按 sign(左 − 右) 以 odorTurn 转向，叠加在 DNa 转向上；
     // 已经尝过（碰过）的颗粒不再吸引。odorNav 为 true 时自动放的颗粒改放在 pelletAround mm 外的随机方位。
+    // 围栏视觉（见 visualInput 里的长注释）：wallSpan 是墙在视野里的"有效宽度"（手选），
+    // wallSee 是多远之外就不再当成逼近物（手选），wallGain 是相对球的增益（手选）。
+    // 这三个都是手写参数，没有文献值——真果蝇对墙的反应没有可用的定标数据。
+    // **默认关**：autoplay.js / step1 / step_v3 / backward_v4 已发布的闪避率都是在"看不见墙"
+    // 的条件下测的，改默认值会让那些数字全部失效（与 pelletTypes 同样的处理）。页面把它打开。
+    wallVision: false, wallSpan: 40, wallSee: 60, wallGain: 1.0,
+    // 触感：触角碰到围栏 → 该侧 JO。这是**物理量**，不是判断逻辑——
+    // 碰到之后转不转、跳不跳、还是去梳理，完全由连接组决定。
+    // 默认关，理由同 wallVision：已发布的对局数字都是在没有它的条件下测的。
+    touch: false, touchRate: 200, antennaLen: 1.6,
     odorNav: false, odorSigma: 15, odorTurn: 120, odorMin: 0.01, antennaAhead: 1.0, antennaSep: 0.6, pelletAround: 25,
   };
   const TG = ["DNa01_left", "DNa01_right", "DNa02_left", "DNa02_right", "DNp01_left", "DNp01_right"];
@@ -273,6 +283,7 @@
     };
 
     // —— 风：随机游走的风场（强度 0–1、方向），每步更新 ——
+    G.wallTheta = {};                 // 四面墙上一帧的张角，用来算 dθ/dt
     G.wind = { speed: CFG.windSpeed, dir: CFG.windDir, joL: 0, joR: 0 };
     function windStep(dt) {
       if (!CFG.wind) { G.wind.speed = 0; G.wind.joL = G.wind.joR = 0; return; }
@@ -367,6 +378,45 @@
         if (bearing < 15) { lc4R += lc4; lpR += lp; l16R += l16; }
         if (lc4 + lp > threatDrive) { threatDrive = lc4 + lp; threat = Math.atan2(ry, rx); }  // 世界坐标方位
       }
+      // 围栏也是一个视觉物体（2026-09-19 加）。
+      // 在这之前，墙**根本没有接进任何感觉通路**——视觉前端只读球的世界坐标，
+      // 边界只是 step() 末尾的一次几何钳位，于是果蝇会顶着围栏一直走。
+      // 这里不给它加"避障规则"，而是把墙按同一套手写前端算成逼近物体：
+      // 取最近的那面墙，视线方向上的张角 θ = 2·atan(wallSpan/2 ÷ 距离)，
+      // 再走和球完全相同的 LC4/LPLC2 编码，让连接组自己决定转还是跳。
+      // 依据：LC4/LPLC2 对**任何**逼近物体反应，不只对球（Ache 2019 / Klapoetke 2017）。
+      // 与球的区别只有一点必须说明：墙是**静止**的，"逼近"来自果蝇自己在走——
+      // 这正是报告 §28.19 里量过的"自体运动造成的假逼近"，那里是噪声，这里是信号。
+      if (CFG.wallVision && CFG.courtW) {
+        const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
+        // 四面墙各取最近点（在墙上、与果蝇最近的那个点）
+        for (const [wx, wy] of [[hw, S.y], [-hw, S.y], [S.x, hh], [S.x, -hh]]) {
+          const rx = wx - S.x, ry = wy - S.y;
+          const d = Math.max(Math.hypot(rx, ry), 0.5);
+          if (d > CFG.wallSee) continue;                              // 太远就看不出它在逼近
+          const fx = ch * rx - sh * ry, fy = sh * rx + ch * ry;
+          const bearing = Math.atan2(fy, fx) * 180 / Math.PI;
+          if (Math.abs(bearing) > 100) continue;                      // 背后的墙不算
+          const theta = 2 * Math.atan(CFG.wallSpan / 2 / d);
+          const key = "w" + (wx === S.x ? (wy > 0 ? "T" : "B") : (wx > 0 ? "R" : "L"));
+          const prev = G.wallTheta[key];
+          G.wallTheta[key] = theta;
+          if (prev === undefined) continue;
+          const dtheta = (theta - prev) / dt;
+          if (dtheta <= 0) continue;
+          let lc4, lp;
+          if (CFG.encoding === "ache2019") {
+            const thetaDeg = theta * 180 / Math.PI, velDeg = dtheta * 180 / Math.PI;
+            lc4 = CFG.lc4Slope * velDeg;
+            lp = CFG.lplc2Peak * Math.exp(-((thetaDeg - CFG.lplc2Mu) ** 2) / (2 * CFG.lplc2Sigma ** 2));
+          } else { lc4 = lp = CFG.loomGain * dtheta; }
+          lc4 *= CFG.wallGain; lp *= CFG.wallGain;
+          const l16 = CFG.lc16Slope * dtheta * 180 / Math.PI * CFG.wallGain;
+          if (bearing > -15) { lc4L += lc4; lpL += lp; l16L += l16; }
+          if (bearing < 15) { lc4R += lc4; lpR += lp; l16R += l16; }
+          if (lc4 + lp > threatDrive) { threatDrive = lc4 + lp; threat = Math.atan2(ry, rx); }
+        }
+      }
       // 光照增益（手写）：暗处对比度低，逼近检测变弱
       const gain = CFG.lightFloor + (1 - CFG.lightFloor) * Math.max(0, Math.min(1, CFG.light));
       lc4L *= gain; lc4R *= gain; lpL *= gain; lpR *= gain; l16L *= gain; l16R *= gain;
@@ -399,6 +449,26 @@
           }
         }
       }
+      // —— 触感（2026-09-19 加）：世界里的**物理接触**，不是我们写的判断 ——
+      // 原则：我们只负责把物理量送到真实的感受器上，转不转、跳不跳由连接组自己决定。
+      // 几何：两根触角在体轴 ±35°、前伸 antennaAhead mm；哪根触角越过围栏，哪侧就被压住。
+      // **必须说明的近似**：JO（Johnston's organ）是触角的机械感觉器，真果蝇用它感知
+      // 气流 / 重力 / 声音；真正的"碰到东西"走的是刚毛与腿部机械感觉，**那些神经元不在这个
+      // 4,599 神经元的子回路里**（子回路是按 LC4/LPLC2/LC16/味觉/JO 这几路输入裁的）。
+      // 所以这里是拿触角机械感觉近似触碰感觉，不是它的本职。要做对得重裁一版子回路。
+      let touchL = 0, touchR = 0;
+      if (CFG.touch && CFG.courtW && S.z <= 0.01) {
+        const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
+        for (const [side, a] of [["L", 0.61], ["R", -0.61]]) {
+          const ax = S.x + Math.cos(S.h + a) * CFG.antennaLen, ay = S.y + Math.sin(S.h + a) * CFG.antennaLen;
+          const over = Math.max(Math.abs(ax) - hw, Math.abs(ay) - hh);   // > 0 = 这根触角压在围栏上
+          if (over > 0) {
+            const v = Math.min(1, over / CFG.antennaLen) * CFG.touchRate;
+            if (side === "L") touchL = v; else touchR = v;
+          }
+        }
+      }
+      G.touch = { L: touchL, R: touchR };
       G.gust = { sugar, bitter, water };
       brain.setRate("SUGAR_left", sugar); brain.setRate("SUGAR_right", sugar);
       brain.setRate("BITTER_left", bitter); brain.setRate("BITTER_right", bitter);
@@ -413,7 +483,13 @@
         wL = drive * rel(0.61); wR = drive * rel(-0.61);
       }
       G.wind.joL = wL; G.wind.joR = wR;
-      G.joInput = { L: Math.min(CFG.joRate, (dl ? CFG.joRate : 0) + wL), R: Math.min(CFG.joRate, (dr ? CFG.joRate : 0) + wR) };
+      // 触感送到哪里：子回路 v3 有**头部刚毛**（TOUCH，真正的触觉感受器）就送那里；
+      // 只有 v2 的话退回触角 JO —— 但 JO 在 v2 里只通到梳理指令，实测对绕开围栏毫无作用
+      // （贴墙 85.6% → 85.6%），这正是"没有通路就没有行为"。
+      const hasTouch = has("TOUCH_left");
+      G.joInput = { L: Math.min(CFG.joRate, (dl ? CFG.joRate : 0) + wL + (hasTouch ? 0 : touchL)),
+                    R: Math.min(CFG.joRate, (dr ? CFG.joRate : 0) + wR + (hasTouch ? 0 : touchR)) };
+      if (hasTouch) { brain.setRate("TOUCH_left", touchL); brain.setRate("TOUCH_right", touchR); }
       brain.setRate("JO_left", G.joInput.L); brain.setRate("JO_right", G.joInput.R);
     }
 

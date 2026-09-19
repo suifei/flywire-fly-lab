@@ -21,6 +21,36 @@
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }
 
+  // 「保拓扑」分配表：按输入神经元的**真实胞体位置**在 x–y 平面上排序，
+  // 让棋盘上相邻的格子落到空间上相邻的神经元。
+  // 为什么要有这一版：随机分配把棋盘的邻接关系全打散了，果蝇没有任何理由能算出「连成五」——
+  // 那样得到的阴性结果是我们自己造成的，不能算数。这一版给它一个公平的机会。
+  function makeTopoMap(SUB, soma) {
+    const inputs = [];
+    for (const g of INPUT_GROUPS) for (const i of (SUB.groups[g] || [])) inputs.push(i);
+    // 胞体坐标投到 x–y（y 取反 = 背侧向上），按 y 分带、带内按 x 排 —— 得到一个二维扫描序
+    const pts = inputs.map(i => ({ i, x: soma.xyz[i][0], y: -soma.xyz[i][1] }));
+    const rows = Math.round(Math.sqrt(pts.length * (G.N / G.N)));      // 近似方阵
+    pts.sort((a, b) => a.y - b.y);
+    const perBand = Math.ceil(pts.length / rows);
+    const order = [];
+    for (let r = 0; r < rows; r++) {
+      const band = pts.slice(r * perBand, (r + 1) * perBand).sort((a, b) => a.x - b.x);
+      for (const p of band) order.push(p.i);
+    }
+    // 把这个扫描序按同样的二维顺序铺到 15×15 的格子上，每格分到 order 里连续的一小段；
+    // 我方 / 对方两个通道**共用同一批神经元的两半**，这样"同一个格子"在空间上也是同一块。
+    const chan = Array.from({ length: G.SIZE * 2 }, () => []);
+    const perCell = Math.floor(order.length / G.SIZE);
+    for (let c = 0; c < G.SIZE; c++) {
+      const seg = order.slice(c * perCell, (c + 1) * perCell);
+      const h = Math.ceil(seg.length / 2);
+      chan[c * 2] = seg.slice(0, h);
+      chan[c * 2 + 1] = seg.slice(h);
+    }
+    return { inputs, chan, nCh: G.SIZE * 2, topo: true, perCell };
+  }
+
   // 固定的「格子×通道 → 输入神经元」分配表。种子写死，页面与训练必须一致。
   function makeMap(SUB, seed = 20260919) {
     const inputs = [];
@@ -68,7 +98,7 @@
     return counts;
   }
 
-  const API = { INPUT_GROUPS, makeMap, ratesFor, featuresOf };
+  const API = { INPUT_GROUPS, makeMap, makeTopoMap, ratesFor, featuresOf };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.GomokuFeatures = API;
 })(typeof window !== "undefined" ? window : globalThis);

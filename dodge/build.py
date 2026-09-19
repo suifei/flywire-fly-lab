@@ -65,7 +65,14 @@ for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v2.js
                   ("/*__MISSIONS_JS__*/", (D / "missions.js").read_text()),
                   ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions.json").read_text()),
                   ("/*__MUTANTS__*/", (ROOT / "results/dodge/mutants.json").read_text()),
-                  ("/*__SOMA__*/", (ROOT / "results/dodge/soma.json").read_text())]:
+                  ("/*__SOMA__*/", (ROOT / "results/dodge/soma.json").read_text()),
+                  ("/*__GOMOKU_READOUT__*/", (ROOT / "results/gomoku/readout.json").read_text()),
+                  ("/*__GOMOKU_TRAIN__*/", (ROOT / "results/gomoku/train.json").read_text()),
+                  ("/*__GOMOKU_RULES_JS__*/", (ROOT / "gomoku/rules.js").read_text()),
+                  ("/*__GOMOKU_TEACHER_JS__*/", (ROOT / "gomoku/teacher.js").read_text()),
+                  ("/*__GOMOKU_FEATURES_JS__*/", (ROOT / "gomoku/features.js").read_text()),
+                  ("/*__GOMOKU_FLY_JS__*/", (ROOT / "gomoku/fly.js").read_text()),
+                  ("/*__GOMOKU_BOARD3D_JS__*/", (ROOT / "gomoku/board3d.js").read_text())]:
     assert key in html, key
     html = html.replace(key, esc(text))
 out = ROOT / "results/dodge/fly_dodge.html"

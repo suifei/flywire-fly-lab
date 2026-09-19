@@ -1,0 +1,148 @@
+{
+ "seconds_per_seed": 120,
+ "seeds": 3,
+ "note": "贴墙 = game_core 里 S.wall > 0（那一步被边界钳位过）。两种场景各测：有球（默认自动发球）与无球。",
+ "arms": {
+  "有球_看不见墙": {
+   "runs": [
+    {
+     "stuckFrac": 0.0482,
+     "maxStuckS": 1.55,
+     "meanWallDist": 39.52,
+     "jump": 67,
+     "dodge": 56,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0.0316,
+     "maxStuckS": 1.72,
+     "meanWallDist": 48.91,
+     "jump": 66,
+     "dodge": 62,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0.0712,
+     "maxStuckS": 2.61,
+     "meanWallDist": 30.37,
+     "jump": 65,
+     "dodge": 57,
+     "hit": 0
+    }
+   ],
+   "mean": {
+    "stuckFrac": 0.0503,
+    "maxStuckS": 1.96,
+    "meanWallDist": 39.6,
+    "jump": 66
+   }
+  },
+  "有球_看得见墙": {
+   "runs": [
+    {
+     "stuckFrac": 0.0143,
+     "maxStuckS": 0.96,
+     "meanWallDist": 53.46,
+     "jump": 69,
+     "dodge": 58,
+     "hit": 2
+    },
+    {
+     "stuckFrac": 0.0553,
+     "maxStuckS": 2.46,
+     "meanWallDist": 45.28,
+     "jump": 66,
+     "dodge": 53,
+     "hit": 1
+    },
+    {
+     "stuckFrac": 0.0877,
+     "maxStuckS": 2,
+     "meanWallDist": 25.36,
+     "jump": 68,
+     "dodge": 46,
+     "hit": 0
+    }
+   ],
+   "mean": {
+    "stuckFrac": 0.0524,
+    "maxStuckS": 1.8067,
+    "meanWallDist": 41.3667,
+    "jump": 67.6667
+   }
+  },
+  "无球_看不见墙": {
+   "runs": [
+    {
+     "stuckFrac": 0.9278,
+     "maxStuckS": 111.33,
+     "meanWallDist": 4.36,
+     "jump": 0,
+     "dodge": 0,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0.9278,
+     "maxStuckS": 111.33,
+     "meanWallDist": 4.36,
+     "jump": 0,
+     "dodge": 0,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0.9278,
+     "maxStuckS": 111.33,
+     "meanWallDist": 4.36,
+     "jump": 0,
+     "dodge": 0,
+     "hit": 0
+    }
+   ],
+   "mean": {
+    "stuckFrac": 0.9278,
+    "maxStuckS": 111.33,
+    "meanWallDist": 4.36,
+    "jump": 0
+   }
+  },
+  "无球_看得见墙": {
+   "runs": [
+    {
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.62,
+     "jump": 36,
+     "dodge": 0,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.6,
+     "jump": 37,
+     "dodge": 0,
+     "hit": 0
+    },
+    {
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.62,
+     "jump": 36,
+     "dodge": 0,
+     "hit": 0
+    }
+   ],
+   "mean": {
+    "stuckFrac": 0,
+    "maxStuckS": 0,
+    "meanWallDist": 72.6133,
+    "jump": 36.3333
+   }
+  }
+ },
+ "improvement_no_balls": {
+  "stuckFrac": 0.9278,
+  "maxStuckS": 111.33
+ },
+ "works": true
+}

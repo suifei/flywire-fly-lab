@@ -9,6 +9,9 @@
   fly_intact    真实 FlyWire 连接组的下游神经元发放计数（3,537 维）
   fly_shuffled  **打乱接线**后的同一套（保出度与权重、只重排靶点）——网络规模与动力学一样，只有接线不同
   board_raw     直接用棋盘编码（450 维），完全不经过任何网络
+  fly_topo      真实连接组，但棋盘按输入神经元的**真实胞体位置**铺（相邻格子 → 空间相邻的神经元）。
+                随机分配把棋盘的邻接关系打散了，果蝇没理由算得出"连成五"——那样的阴性结果是我们自己造成的。
+                这一臂是给它的公平机会。
   board+fly     两者拼在一起——**最锋利的一条**：如果它不比 board_raw 强，
                 那这颗脑子在棋盘之外没提供任何东西
 
@@ -145,7 +148,7 @@ def main():
     B = board_features(ds)
     keep["board_raw"] = run_arm("board_raw", B, Y, best, legal, tr, te, out["arms"])
     XI = None
-    for arm in ("intact", "shuffled"):
+    for arm in ("intact", "shuffled", "topo"):
         f = GD / f"feat_{arm}.bin"
         if not f.exists():
             print(f"  （缺 {f.name}，跳过）"); continue
@@ -181,7 +184,10 @@ def main():
         meta = json.loads((GD / "feat_intact.json").read_text())
         (GD / "readout.json").write_text(json.dumps(dict(
             arm="intact", alpha=rec["alpha"], test=rec["test"], hz=meta["hz"], ms=meta["ms"],
-            col_idx=meta["col_idx"], mu=[round(float(x), 4) for x in mu], sd=[round(float(x), 4) for x in sd],
+            # sd 不能四舍五入到 4 位：从不放电的神经元 sd = 1e-6，舍完变成 0，
+            # 浏览器那边除零 → NaN → 一个合法着都选不出来（2026-09-19 实测踩过）
+            col_idx=meta["col_idx"], mu=[round(float(x), 4) for x in mu],
+            sd=[float(f"{float(x):.6g}") for x in sd],
             W=[[round(float(v), 5) for v in row] for row in W]), separators=(",", ":")))
         print("→ results/gomoku/readout.json")
     print("\n" + json.dumps({k: v for k, v in out.items() if k.startswith("criterion") or k.startswith("intact")},

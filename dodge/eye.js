@@ -547,6 +547,7 @@ function initFlyEye(assets) {
     // 25 mm 以内才把球从自体运动的噪声里分出来 —— 而走路本身就能造出 126 Hz 的假"逼近"。
     // 开着会掉帧（每次约 12 ms：双眼 flyvis 6.8 ms + LPLC2 汇集 1.9 ms + 成像 2.9 ms）。
     const ceSw = $("ceOn"), ceTxt = $("ceTxt");
+    const cvPrj = document.getElementById("ecPrj");
     let ce = null, ceLast = performance.now();
     const ceOff = () => { if (window.__game) window.__game.setVisionOverride(null);
                           if (ceTxt) ceTxt.textContent = ""; };
@@ -577,6 +578,8 @@ function initFlyEye(assets) {
         if (!r) { if (window.__eyeField) window.__eyeField(head); return; }
         if (cvB) cam.drawBrain(cvB, r.color, "color", cam.demosaic ? r.gb : null);
         if (cvUV) cam.drawBrain(cvUV, r.uv, "uv", cam.demosaic ? r.gb : null);
+        // 原始投影：摄像机到底拍到了什么（采样成小眼之前）。墙、看台、别的果蝇都在里面。
+        if (cvPrj && !cvPrj.closest("[hidden]")) cam.drawProjection(cvPrj, head, "rgb");
         if (window.__eyeField) window.__eyeField(head);
       }
       catch (err) { window.__eyeTick = null; box.hidden = true; }
