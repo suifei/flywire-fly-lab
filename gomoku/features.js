@@ -12,8 +12,17 @@
 (function (root) {
   const G = typeof module !== "undefined" && module.exports ? require("./rules.js") : root.Gomoku;
 
-  const INPUT_GROUPS = ["LC4_left", "LC4_right", "LPLC2_left", "LPLC2_right", "LC16_left", "LC16_right",
-                        "SUGAR_left", "SUGAR_right", "BITTER_left", "BITTER_right", "JO_left", "JO_right"];
+  // 输入组从 SUB.meta.inputs 里读（v3 比 v2 多了 TOUCH/THERMO/HYGRO）。
+  // **必须按实际子回路取**：写死成 v2 那 12 组的话，v3 的三路新输入会被当成"下游神经元"
+  // 留在特征里——它们在下棋时恒为 0，虽不致命，但口径就不干净了。
+  const FALLBACK_GROUPS = ["LC4", "LPLC2", "LC16", "SUGAR", "BITTER", "JO"];
+  const inputGroupsOf = SUB => {
+    const names = Object.keys((SUB.meta && SUB.meta.inputs) || {});
+    const base = names.length ? names : FALLBACK_GROUPS;
+    const out = [];
+    for (const b of base) for (const side of ["left", "right"]) if (SUB.groups[b + "_" + side]) out.push(b + "_" + side);
+    return out;
+  };
 
   function rng32(seed) {
     let s = seed >>> 0;
@@ -27,7 +36,7 @@
   // 那样得到的阴性结果是我们自己造成的，不能算数。这一版给它一个公平的机会。
   function makeTopoMap(SUB, soma) {
     const inputs = [];
-    for (const g of INPUT_GROUPS) for (const i of (SUB.groups[g] || [])) inputs.push(i);
+    for (const g of inputGroupsOf(SUB)) for (const i of (SUB.groups[g] || [])) inputs.push(i);
     // 胞体坐标投到 x–y（y 取反 = 背侧向上），按 y 分带、带内按 x 排 —— 得到一个二维扫描序
     const pts = inputs.map(i => ({ i, x: soma.xyz[i][0], y: -soma.xyz[i][1] }));
     const rows = Math.round(Math.sqrt(pts.length * (G.N / G.N)));      // 近似方阵
@@ -54,7 +63,7 @@
   // 固定的「格子×通道 → 输入神经元」分配表。种子写死，页面与训练必须一致。
   function makeMap(SUB, seed = 20260919) {
     const inputs = [];
-    for (const g of INPUT_GROUPS) for (const i of (SUB.groups[g] || [])) inputs.push(i);
+    for (const g of inputGroupsOf(SUB)) for (const i of (SUB.groups[g] || [])) inputs.push(i);
     const rand = rng32(seed);
     const perm = inputs.slice();
     for (let i = perm.length - 1; i > 0; i--) { const j = (rand() * (i + 1)) | 0; [perm[i], perm[j]] = [perm[j], perm[i]]; }
@@ -98,7 +107,7 @@
     return counts;
   }
 
-  const API = { INPUT_GROUPS, makeMap, makeTopoMap, ratesFor, featuresOf };
+  const API = { inputGroupsOf, makeMap, makeTopoMap, ratesFor, featuresOf };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.GomokuFeatures = API;
 })(typeof window !== "undefined" ? window : globalThis);

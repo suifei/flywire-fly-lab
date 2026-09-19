@@ -7,7 +7,7 @@
  * 那这关就是不可能完成的。两头都要有数。missions.js 里的通过线就是照这份实测定的。
  *
  * 用法：node dodge/mission_test.js [每局秒数=60] [种子数=3]
- * 输出：results/dodge/missions.json（页面从这里读，不手抄数字）
+ * 输出：results/dodge/missions.json（页面从这里读，不手抄数字）；SUB=subcircuit_v3 时写 missions_v3.json
  */
 const fs = require("fs");
 const path = require("path");
@@ -84,5 +84,5 @@ for (const m of MISSIONS) {
 const bad = out.missions.filter(m => !m.discriminating);
 out.all_discriminating = bad.length === 0;
 fs.writeFileSync(ROOT + "/results/dodge/missions" + SUF + ".json", JSON.stringify(out, null, 1));
-console.log(`\n用时 ${((Date.now() - t0) / 1000).toFixed(0)} s，写入 results/dodge/missions.json`);
+console.log(`\n用时 ${((Date.now() - t0) / 1000).toFixed(0)} s，写入 results/dodge/missions${SUF}.json`);
 if (bad.length) { console.log("没有区分度的关卡：" + bad.map(m => m.title).join("、")); process.exit(1); }

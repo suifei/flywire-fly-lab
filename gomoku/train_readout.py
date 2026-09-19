@@ -32,8 +32,11 @@ from pathlib import Path
 
 import numpy as np
 
+import os
 ROOT = Path(__file__).resolve().parent.parent
 GD = ROOT / "results" / "gomoku"
+# 子回路用 SUB 环境变量切换（默认 v2）；特征与输出文件名都带后缀，免得两版互相覆盖
+SUF = ("_" + os.environ["SUB"].replace("subcircuit_", "")) if os.environ.get("SUB", "subcircuit_v2") != "subcircuit_v2" else ""
 N = 15
 SIZE = N * N
 ALPHAS = [1e1, 1e2, 1e3, 1e4, 1e5]
@@ -72,8 +75,8 @@ def board_features(ds):
 
 
 def fly_features(arm, n):
-    meta = json.loads((GD / f"feat_{arm}.json").read_text())
-    X = np.fromfile(GD / f"feat_{arm}.bin", np.float32).reshape(meta["rows"], meta["cols"])
+    meta = json.loads((GD / f"feat_{arm}{SUF}.json").read_text())
+    X = np.fromfile(GD / f"feat_{arm}{SUF}.bin", np.float32).reshape(meta["rows"], meta["cols"])
     assert meta["rows"] == n, (meta["rows"], n)
     return X, meta
 
@@ -149,7 +152,7 @@ def main():
     keep["board_raw"] = run_arm("board_raw", B, Y, best, legal, tr, te, out["arms"])
     XI = None
     for arm in ("intact", "shuffled", "topo"):
-        f = GD / f"feat_{arm}.bin"
+        f = GD / f"feat_{arm}{SUF}.bin"
         if not f.exists():
             print(f"  （缺 {f.name}，跳过）"); continue
         X, meta = fly_features(arm, ds["n"])
@@ -177,15 +180,15 @@ def main():
         d3 = a["board+fly"]["best"]["test"]["top1"] - a["board_raw"]["best"]["test"]["top1"]
         out["boardfly_minus_board"] = round(d3, 4)
         out["criterion_C_brain_adds_on_top"] = bool(d3 > 0.01)
-    (GD / "train.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
+    (GD / f"train{SUF}.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
     # 权重导出：真实接线**与打乱接线各存一份**。
     # 打乱那一份不是备份，是对局时的对照——只有让"打乱脑"也真的下几盘，
     # 才能回答"连接组对下棋有没有贡献"这个问题（读出层的 top1 只说明学到多少，不等于棋力）。
-    for armk, fname in (("fly_intact", "readout.json"), ("fly_shuffled", "readout_shuffled.json")):
+    for armk, fname in (("fly_intact", f"readout{SUF}.json"), ("fly_shuffled", f"readout_shuffled{SUF}.json")):
         if armk not in keep:
             continue
         W, rec, mu, sd = keep[armk]
-        meta = json.loads((GD / f"feat_{armk.split('_')[1]}.json").read_text())
+        meta = json.loads((GD / f"feat_{armk.split('_')[1]}{SUF}.json").read_text())
         (GD / fname).write_text(json.dumps(dict(
             arm=armk.split("_")[1], alpha=rec["alpha"], test=rec["test"], hz=meta["hz"], ms=meta["ms"],
             # sd 不能四舍五入到 4 位：从不放电的神经元 sd = 1e-6，舍完变成 0，

@@ -10,6 +10,7 @@
 用法（任一有 pandas 的环境）：python dodge/export_soma.py → results/dodge/soma.json
 """
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +18,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 ANNOT = ROOT / "external" / "flywire_annotations" / "Supplemental_file1_neuron_annotations.tsv"
-SUB = json.loads((ROOT / "results/dodge/subcircuit_v2.json").read_text())
+SUBNAME = os.environ.get("SUB", "subcircuit_v2")          # 子回路用 SUB 环境变量切换
+SUF = "" if SUBNAME == "subcircuit_v2" else "_" + SUBNAME.replace("subcircuit_", "")
+SUB = json.loads((ROOT / f"results/dodge/{SUBNAME}.json").read_text())
 VOX = np.array([4e-3, 4e-3, 40e-3])            # 体素 → 微米
 
 ann = pd.read_csv(ANNOT, sep="\t", low_memory=False,
@@ -50,7 +53,7 @@ out = dict(
     side=[("L" if s == "left" else "R" if s == "right" else "?") for s in sub["side"].astype(str)],
     cell_type=[("" if pd.isna(v) else str(v)) for v in sub["cell_type"].to_numpy()],
 )
-p = ROOT / "results/dodge/soma.json"
+p = ROOT / f"results/dodge/soma{SUF}.json"
 p.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
 print(f"{out['n']} 个神经元：{out['n_from_soma']} 个有胞体坐标、{out['n_from_pos']} 个退回代表点、{out['n_missing']} 个缺失")
 print(f"包围盒（µm）{out['bbox']}")

@@ -11,7 +11,7 @@
  * 判「可诊断」：某个指标与「不敲」的三次区间**完全不重叠**（保守，不做统计检验，n=3）。
  *
  * 用法：node dodge/mutant_test.js [每局秒数=60] [种子数=3]
- * 输出：results/dodge/mutants.json
+ * 输出：results/dodge/mutants.json；SUB=subcircuit_v3 时写 mutants_v3.json
  */
 const fs = require("fs");
 const path = require("path");
@@ -76,4 +76,4 @@ for (const key of KEYS) {
 }
 out.n_diagnosable = out.mutants.filter(m => m.diagnosable).length;
 fs.writeFileSync(ROOT + "/results/dodge/mutants" + SUF + ".json", JSON.stringify(out, null, 1));
-console.log(`\n${out.n_diagnosable}/${KEYS.length} 个能从行为看出来。用时 ${((Date.now() - t0) / 1000).toFixed(0)} s → results/dodge/mutants.json`);
+console.log(`\n${out.n_diagnosable}/${KEYS.length} 个能从行为看出来。用时 ${((Date.now() - t0) / 1000).toFixed(0)} s → results/dodge/mutants${SUF}.json`);
