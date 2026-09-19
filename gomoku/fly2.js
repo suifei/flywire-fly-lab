@@ -110,27 +110,32 @@
       },
       // 现场核对（分步）：把这一步的 8 条线放进真实的果蝇脑里重跑，与表逐个比对。
       // 生成器每跑完一条线型就 yield 一次，页面可以一帧跑一条，不卡界面。同一种线型本局已核对过就直接用缓存。
-      *inspectGen(board, me, move) {
+      // o.maxNew：这一步最多现场重跑几种**还没核对过**的线型（多视角时每种要跑 视角数 × 种子数 次，页面上限量；不给 = 全部）。
+      //          按"对这一步的落子分贡献大小"排序，先核对最要紧的。没核对的线型照常列出，只是没有 *_live。
+      *inspectGen(board, me, move, o = {}) {
         const rates = {}, drive = {}, lines = [];
+        let budget = o.maxNew ?? Infinity;
         const acc = { runs: 0, cached: 0, spk: {}, driven: new Set() };
         let maxDiff = 0;
         if (move >= 0) {
           const x = move % G.N, y = (move / G.N) | 0;
+          const todo = [];
           for (let d = 0; d < 4; d++) {
             const code = L.codeAt(board, x, y, d, me), sw = T2.SWAP[code];
             const row = { dir: d, att_code: code, def_code: sw, att: tab.att[code], def: tab.def[sw], att_show: L.show(code), def_show: L.show(sw) };
-            if (live) for (const [kind, c, key] of [["att", code, "att_live"], ["def", sw, "def_live"]]) {
-              if (liveCache.has(c)) { row[key] = toValue(liveCache.get(c), kind); acc.cached++; }
-              else { const v = liveRaw(c, acc); liveCache.set(c, v); row[key] = toValue(v, kind); yield { done: false, runs: acc.runs, line: row, kind }; }
-              const ref = kind === "att" ? row.att : row.def;
-              maxDiff = Math.max(maxDiff, Math.abs(row[key] - ref) / Math.max(1e-9, Math.abs(ref)));
-            }
-            lines.push(row);
+            lines.push(row); todo.push([row, "att", code, "att_live", row.att], [row, "def", sw, "def_live", row.def]);
+          }
+          todo.sort((p, q) => q[4] - p[4]);                        // 贡献大的先核对
+          if (live) for (const [row, kind, c, key, ref] of todo) {
+            if (liveCache.has(c)) { row[key] = toValue(liveCache.get(c), kind); acc.cached++; }
+            else if (budget > 0) { budget--; const v = liveRaw(c, acc); liveCache.set(c, v); row[key] = toValue(v, kind); yield { done: false, runs: acc.runs, line: row, kind }; }
+            else { acc.skipped = (acc.skipped || 0) + 1; continue; }
+            maxDiff = Math.max(maxDiff, Math.abs(row[key] - ref) / Math.max(1e-9, Math.abs(ref)));
           }
         }
         let liveCheck = null;
         if (live && move >= 0) {
-          liveCheck = { runs: acc.runs, cached: acc.cached, max_rel_diff: maxDiff };
+          liveCheck = { runs: acc.runs, cached: acc.cached, skipped: acc.skipped || 0, max_rel_diff: maxDiff };
           const secs = Math.max(acc.runs, 1) * tableJson.ms / 1000;
           for (const g of READ) { const nG = (SUB.groups[g] || []).length; rates[g] = nG && acc.runs ? (acc.spk[g] || 0) / nG / secs : 0; }
           for (const g of ING) for (const side of ["left", "right"]) { const key = g + "_" + side, idx = SUB.groups[key] || [];

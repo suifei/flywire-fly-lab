@@ -158,6 +158,14 @@ node gomoku/play_lines.js 20                 # 所有臂同一个引擎，差别
 node gomoku/selfplay_rl.js 80 48 0.05 0.5    # 阶段三：自对弈强化（三因子规则，δ 在连接组外面算）→ rl.json（~5 min）
 node gomoku/collect_lines.js && node gomoku/export_page.js && python3 dodge/build.py   # 汇总 → lines_summary.json / page_tables.json → 页面
 node gomoku/test_engine.js                   # **改了 gomoku/ 或 brain.js 之后必跑**：6 项回归，每项对应一个真出过的 bug
+node gomoku/side_experiments.js ladder|noise|forms|width|vcf|timing   # 旁证实验，各写一个 JSON（timing 受机器负载影响：先 pkill -STOP 别的任务再跑）
+python3 scripts/render_report46.py           # 日志 §46 是**渲染**出来的（数字全部取自 lines_summary.json）；重跑流水线后再渲染一遍，不要手改那一节
+#   多视角（VIEW=2,3,4 换「通道→神经元」的分配表）：bash scratch/queue_views.sh 排队提取（48 份 ≈ 6 h，6 个并行），
+#     训练时 --feat-sets "" _v2b1 _v3b1 _v4b1 横向拼接。单视角换种子 R² 0.834，两个视角 0.878（two_views.json）。
+#     **分时间段（bins=3）不要用**：维度 ×3 但全是噪声，样本内 R² 0.976、换种子 0.386。
+#   比较两个引擎 / 两张表：至少 100 局，用节点预算（think 的 maxNodes）而不是时间预算——40 局的标准差 8 个百分点，分不开 15 个点；
+#     时间预算受机器负载影响。这次因为看了 40 局就差点写下「阶段二微调让搜索变弱」的错误结论。
+#   selfplay_rl.js 会**写正式文件名**（rl.json、linetable_*_rl.json）；试跑请带 RL_TAG=_tmp。
 #   自我迭代（不用手写老师）：node gomoku/make_exit_dataset.js linetable_fly_intact.json exit1 <k> 6 600 ；merge exit1 ；
 #     python gomoku/train_lines.py --ds exit1 --arms fly_intact --init-from linetable_fly_intact.json --tag _exit1
 python dodge/export_soma.py                  # 4,599 个真实胞体坐标（体素 4×4×40 nm → µm）→ soma.json，页面脑图用

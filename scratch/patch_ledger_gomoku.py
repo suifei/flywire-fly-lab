@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent; R = ROOT / "results/gomoku"
 J = lambda f: json.loads((R / f).read_text())
 T = J("train_lines.json"); A = T["arms"]; P = J("play_lines.json"); RL = J("rl.json"); RS = J("rl_small.json"); OL = J("opto_leak.json")
-SC = json.loads((ROOT / "results/shuffle_controls.json").read_text()); DS = J("dataset_summary.json"); TN = J("table_noise.json"); SW = J("search_width.json")
+SC = json.loads((ROOT / "results/shuffle_controls.json").read_text()); DS = J("dataset_summary.json"); TN = J("table_noise.json"); SW = J("search_width.json"); DT = J("depth_timing.json")
 fi, fs_, rw, rr, ft, tt = (A[k] for k in ("fly_intact", "fly_shuffled", "raw24", "rand_relu", "free_table", "teacher_table"))
 pct = lambda v: f"{v * 100:.1f}%"; wl = lambda r: f"{r['win']}–{r['loss']}" + (f"–{r['draw']}" if r.get("draw") else "")
 E = P["engine"]["fly_intact"]; HH = P["head_to_head"]; cA, cA2, cC2 = P["criterion_A"], P["criterion_A2"], P["criterion_C2"]
@@ -54,7 +54,7 @@ new = f'''    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋�
                 "想 10 步：对搜 6 步 {wl(E['d10']['teacher2_d6'])}、对搜 8 步 **{wl(E['d10']['teacher2_d8'])}**。只凭直觉：对随机 {wl(E['d1']['random'])}、对旧老师 {wl(E['d1']['old_teacher'])}",
          caveat="判据 A（直觉对旧老师 ≥ 50%）{'成立' if cA['passed'] else '**不成立**'}（{pct(cA['vs_old_teacher'])}）；A2（想 6 步对老师搜 4 步 ≥ 50%）{'成立' if cA2['passed'] else '不成立'}（{pct(cA2['d6_vs_teacher2_d4'])}）。"
                 "**棋力主要来自搜索深度，不是来自果蝇**：向前推演是 alpha-beta 做的，搜索只懂规则（成五、必须挡五、禁手）、不含棋形分值；"
-                "每多搜一步节点数约 ×2.2。每组 40 局（深度 8 的老师 20 局），标准差约 8 个百分点。"
+                "每多搜一步节点数约 ×{DT['nodes_growth_per_ply']}（`depth_timing.json`：深度 14 要 {[r for r in DT['rows'] if r['depth'] == 14][0]['seconds']} 秒）。每组 40 局（深度 8 的老师 20 局），标准差约 8 个百分点。"
                 "表的精度也值棋力（给老师的表加噪声到 R² 0.85，同深度胜率从 {pct(TN['rows'][0]['win_rate'])} 掉到 {pct([r for r in TN['rows'] if r['r2'] == 0.85][0]['win_rate'])}），但这颗脑子可靠的精度上限在 R² ≈ 0.85–0.88",
          script="gomoku/play_lines.js", result_file="results/gomoku/play_lines.json", log="§46.6",
          verify=[("engine.fly_intact.d6.old_teacher.win", {E['d6']['old_teacher']['win']}, 0), ("engine.fly_intact.d6.teacher2_d4.win", {E['d6']['teacher2_d4']['win']}, 0),
