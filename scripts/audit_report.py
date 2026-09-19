@@ -99,6 +99,17 @@ CHECKS = [
      lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "frac") * 100, 0.05),
     ("§44 正面 B 分箱", r"\| 0–15°（正面） \| \*\*[\d.]+%\*\* \| \*\*([\d.]+)%\*\*",
      lambda: jget("results/dodge/takeoff_planning.json", "no_bins", 0, "frac") * 100, 0.05),
+    # ── §45 巨纤维对逼近的响应（阴性） ────────────────────────────────
+    ("§45 looming 最低", r"looming 组 6 个条件里\*\*最低的一次是 (\d+) Hz\*\*",
+     lambda: jget("results/dodge/gf_looming_check.json", "looming_min_hz"), 0),
+    ("§45 其他最高", r"其他 28 个条件里\*\*最高的一次是 (\d+) Hz\*\*",
+     lambda: jget("results/dodge/gf_looming_check.json", "other_max_hz"), 0),
+    ("§45 严格为零的条件数", r"28 个里有 (\d+) 个是严格的 0",
+     lambda: jget("results/dodge/gf_looming_check.json", "n_other_strictly_zero"), 0),
+    ("§45 LOOM_L_100 左", r"\| LOOM_L_100（左侧，100 Hz） \| ([\d.]+) ±",
+     lambda: jget("results/dodge/gf_looming_check.json", "looming", "LOOM_L_100", "GF_L", "mean"), 0.05),
+    ("§45 只刺激 LC4", r"\| LC4_L_100（只刺激 LC4） \| ([\d.]+) ±",
+     lambda: jget("results/dodge/gf_looming_check.json", "looming", "LC4_L_100", "GF_L", "mean"), 0.05),
     ("§44 正面分箱样本数", r"它偏离 50% 太远（n = ([\d,]+)）",
      lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "n"), 0),
 ]
@@ -125,4 +136,4 @@ for b in bad:
     print("  ✗ " + b)
 if bad:
     sys.exit(1)
-print("✓ 报告 §37–44 的关键数字与结果文件全部一致")
+print("✓ 报告 §37–45 的关键数字与结果文件全部一致")
