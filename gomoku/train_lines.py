@@ -152,7 +152,8 @@ def feats(arm):
         tr_ = np.mean(raw[:args.deploy_k], axis=0)
         te_ = np.mean([load_feat(a, s) for s in args.test_seeds], axis=0)
         mu = allm[:, keep].mean(0); sd = allm[:, keep].std(0) + 1e-6
-        per = [torch.from_numpy((r[:, keep] - mu) / sd) for r in raw]
+        per = [torch.from_numpy(((r[:, keep] - mu) / sd).astype(np.float16)) for r in raw]   # 半精度存：4 个视角 × 6 个种子用 float32 要 2.6 GB
+        del raw
     else:
         if arm == "raw24": tr_ = raw24(); keep = np.ones(24, bool)
         else:
@@ -197,7 +198,9 @@ def train(arm, l2, steps):
         rng = np.random.default_rng(7)
         def draw():                                                            # 噪声增广：随机抽 K 个训练种子取平均
             idx = rng.choice(len(per), size=args.deploy_k, replace=False)
-            return torch.cat([torch.stack([per[i] for i in idx]).mean(0), ONES], 1)
+            acc = per[idx[0]].float()
+            for i in idx[1:]: acc = acc + per[i].float()
+            return torch.cat([acc / len(idx), ONES], 1)
         if args.init == "distill":                                             # 阶段一：岭回归闭式解（增广时把 8 次抽样叠起来一起解）
             reg = 10.0 * torch.eye(D + 1); reg[D, D] = 0
             if per:

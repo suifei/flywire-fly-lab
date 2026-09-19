@@ -6,7 +6,7 @@
   {
    "depth": 2,
    "nodes": 53,
-   "seconds": 0
+   "seconds": 0.01
   },
   {
    "depth": 4,
@@ -29,14 +29,21 @@
   {
    "depth": 10,
    "nodes": 141103,
-   "seconds": 1.44,
+   "seconds": 1.43,
    "nodes_ratio_per_ply": 2.82
   },
   {
    "depth": 12,
    "nodes": 360832,
-   "seconds": 3.77,
+   "seconds": 3.73,
    "nodes_ratio_per_ply": 1.6
+  },
+  {
+   "depth": 14,
+   "nodes": 1504713,
+   "seconds": 16.43,
+   "nodes_ratio_per_ply": 2.04
   }
- ]
+ ],
+ "nodes_growth_per_ply": 2.35
 }

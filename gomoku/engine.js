@@ -22,8 +22,12 @@
     RUN[c] = n; SWAP[c] = L.swap(c);
   }
   // Zobrist
-  const ZOB = [new Uint32Array(SIZE), new Uint32Array(SIZE), new Uint32Array(SIZE)];
-  { let s = 0x9e3779b9; const r = () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s; }; for (let c = 1; c <= 2; c++) for (let i = 0; i < SIZE; i++) ZOB[c][i] = r(); }
+  // 两组独立的 32 位 Zobrist 数，拼成 52 位的键（32 + 19 + 1 位，< 2^53，双精度能精确表示）。只用 32 位时，一次几十万节点的搜索里碰撞概率不低（生日界约 6.5 万条），
+  // 碰撞 = 读到别的局面的旧结果。opt.hash32 = true 保留旧行为，只为对比。
+  const ZOB = [new Uint32Array(SIZE), new Uint32Array(SIZE), new Uint32Array(SIZE)], ZOB2 = [new Uint32Array(SIZE), new Uint32Array(SIZE), new Uint32Array(SIZE)];
+  { let s = 0x9e3779b9; const r = () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s; };
+    for (let c = 1; c <= 2; c++) for (let i = 0; i < SIZE; i++) ZOB[c][i] = r();
+    for (let c = 1; c <= 2; c++) for (let i = 0; i < SIZE; i++) ZOB2[c][i] = r(); }
 
   // 禁手规则里的「三」「四」：落子后这条线上再下一子能成五 = 四；再下一子能成活四 = 活三。按定义递归算，不用任何分值。
   let _shape = null;
@@ -43,11 +47,11 @@
   }
 
   function makeEngine(att, lam, opt = {}) {
-    const tempo = opt.tempo ?? 1.2, PVS = opt.pvs !== false;
+    const tempo = opt.tempo ?? 1.2, PVS = opt.pvs !== false, HASH32 = !!opt.hash32;
     const b = new Uint8Array(SIZE), near = new Uint8Array(SIZE);
     const codeB = new Uint16Array(SIZE * 4);                   // 每个点、每个方向：黑方视角的线型编码
     const aB = new Float64Array(SIZE), aW = new Float64Array(SIZE), fB = new Uint8Array(SIZE), fW = new Uint8Array(SIZE);
-    let SB = 0, SW = 0, hash = 0, stones = 0, nodes = 0, deadline = Infinity, maxNodes = Infinity, aborted = false, Kdeep = null, KdeepFrom = 99;
+    let SB = 0, SW = 0, hash = 0, hash2 = 0, stones = 0, nodes = 0, deadline = Infinity, maxNodes = Infinity, aborted = false, Kdeep = null, KdeepFrom = 99;
     const TT = new Map(), history = new Float64Array(SIZE * 3), scoreBuf = new Float64Array(SIZE);
     const SHAPE = opt.shape || defaultShape();                  // 线型 → 落子后这条线是否成「活三 / 四」（规则事实，用于禁手预筛）
 
@@ -74,18 +78,18 @@
     }
     function place(p, c) {
       if (near[p] > 0) { SB -= aB[p]; SW -= aW[p]; }
-      b[p] = c; hash ^= ZOB[c][p]; stones++;
+      b[p] = c; hash ^= ZOB[c][p]; hash2 ^= ZOB2[c][p]; stones++;
       bumpNear(p, 1); touchLines(p);
     }
     function undo(p) {
-      const c = b[p]; b[p] = EMPTY; hash ^= ZOB[c][p]; stones--;
+      const c = b[p]; b[p] = EMPTY; hash ^= ZOB[c][p]; hash2 ^= ZOB2[c][p]; stones--;
       bumpNear(p, -1);
       const x = p % N, y = (p / N) | 0; for (let d = 0; d < 4; d++) codeB[p * 4 + d] = L.codeAt(b, x, y, d, BLACK); recompute(p);
       touchLines(p);
       if (near[p] > 0) { SB += aB[p]; SW += aW[p]; }
     }
     function setBoard(board) {
-      b.fill(0); near.fill(0); SB = SW = 0; hash = 0; stones = 0; TT.clear(); history.fill(0);
+      b.fill(0); near.fill(0); SB = SW = 0; hash = 0; hash2 = 0; stones = 0; TT.clear(); history.fill(0);
       for (let q = 0; q < SIZE; q++) { const x = q % N, y = (q / N) | 0; for (let d = 0; d < 4; d++) codeB[q * 4 + d] = L.codeAt(b, x, y, d, BLACK); recompute(q); }
       for (let q = 0; q < SIZE; q++) if (board[q]) place(q, board[q]);
     }
@@ -135,7 +139,7 @@
 
     function negamax(me, depth, alpha, beta, ply, K) {
       if (++nodes > maxNodes || ((nodes & 1023) === 0 && Date.now() > deadline)) { aborted = true; return 0; }
-      const key = hash * 4 + me, tt = TT.get(key), a0 = alpha;
+      const key = HASH32 ? (hash >>> 0) * 4 + me : ((hash >>> 0) * 524288 + ((hash2 >>> 0) & 0x7FFFF)) * 2 + (me - 1), tt = TT.get(key), a0 = alpha;
       let ttMove = -1;
       if (tt) { ttMove = tt.m; if (tt.d >= depth) { if (tt.f === 0) return tt.v; if (tt.f === 1 && tt.v >= beta) return tt.v; if (tt.f === 2 && tt.v <= alpha) return tt.v; } }
       const g = gen(me, (Kdeep && ply >= KdeepFrom) ? Kdeep : K, ttMove);

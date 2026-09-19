@@ -34,9 +34,10 @@ if (cmd === "ladder") {
   const F2 = require("./fly2.js"), j = JSON.parse(fs.readFileSync(`${R}/linetable_fly_intact.json`, "utf8")), e = E.makeEngine(F2.loadTable(j).att, j.lam);
   const b = G.newBoard(); [[7, 7, 1], [8, 8, 2], [7, 8, 1]].forEach(([x, y, c]) => { b[G.idx(x, y)] = c; });
   const out = { position: "开局 3 子，白先", table: "fly_intact", note: "用时受机器负载影响；节点数是确定的", rows: [] };
-  for (const d of [2, 4, 6, 8, 10, 12]) { const r = e.think(b, 2, { depth: d, budgetMs: 240000 }); if (r.depth < d) { out.rows.push({ depth: d, finished: false }); break; }
+  for (const d of [2, 4, 6, 8, 10, 12, 14]) { const r = e.think(b, 2, { depth: d, budgetMs: 600000 }); if (r.depth < d) { out.rows.push({ depth: d, finished: false }); break; }
     out.rows.push({ depth: d, nodes: r.nodes, seconds: +(r.ms / 1000).toFixed(2) }); console.log(`深度 ${d}：${r.nodes} 节点，${(r.ms / 1000).toFixed(2)} s`); }
   for (let k = 1; k < out.rows.length; k++) if (out.rows[k].nodes) out.rows[k].nodes_ratio_per_ply = +Math.sqrt(out.rows[k].nodes / out.rows[k - 1].nodes).toFixed(2);
+  const done = out.rows.filter(r => r.nodes); out.nodes_growth_per_ply = +Math.pow(done[done.length - 1].nodes / done[0].nodes, 1 / (done[done.length - 1].depth - done[0].depth)).toFixed(2);   // 几何平均
   save("depth_timing.json", out);
 } else if (cmd === "forms") {
   const att = new Float32Array(L.NCODE); for (const c of codes) att[c] = logv(c);

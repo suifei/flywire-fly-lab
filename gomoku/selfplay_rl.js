@@ -22,6 +22,7 @@ const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, ".."), R = ROOT + "/results/gomoku";
 const G = require("./rules.js"), L = require("./lines.js"), T2 = require("./teacher2.js"), A = require("./arena.js"), E = require("./engine.js");
 const ITERS = +(process.argv[2] || 80), GAMES = +(process.argv[3] || 48), LR = +(process.argv[4] || 0.05), TEMP = +(process.argv[5] || 0.5);
+if (ITERS < 1) { console.error("轮数必须 ≥ 1（0 轮会把一张没训练过的表写到正式文件名上——2026-09-20 自检时干过一次）"); process.exit(1); }
 const ARM = process.env.ARM || "fly_intact", RL_TAG = process.env.RL_TAG || "";   // RL_TAG 非空 = 探索性的另一组超参，不覆盖主结果
 
 const tab = JSON.parse(fs.readFileSync(`${R}/linetable_${ARM}.json`, "utf8"));
@@ -32,9 +33,14 @@ const w = new Float64Array(D + 1); f32(tab.w_a).forEach((v, k) => { w[k] = v; })
 const rowOf = new Int32Array(L.NCODE).fill(-1); codes.forEach((c, k) => { rowOf[c] = k; });
 // Φ̄：训练种子的试次平均（√计数），标准化
 const arm = ARM.split("_")[1], PHI = new Float32Array(NP * D);
+// 特征可以由几个视角横向拼成（tab.views）；keep 是拼接后的列号
+const views = (tab.views && tab.views.length) ? tab.views : [{ view: 1, bins: tab.bins || 1 }];
+const tagOf = v => ((v.view === 1 && v.bins === 1) ? "" : `_v${v.view}b${v.bins}`);
 for (const seed of tab.seeds) {
-  const m = JSON.parse(fs.readFileSync(`${R}/linefeat_${arm}_s${seed}.json`, "utf8")), raw = fs.readFileSync(`${R}/linefeat_${arm}_s${seed}.bin`);
-  for (let r = 0; r < NP; r++) for (let k = 0; k < D; k++) PHI[r * D + k] += Math.sqrt(raw[r * m.cols + keep[k]]) / tab.seeds.length;
+  const parts = views.map(v => { const m = JSON.parse(fs.readFileSync(`${R}/linefeat_${arm}${tagOf(v)}_s${seed}.json`, "utf8")); return { cols: m.cols, raw: fs.readFileSync(`${R}/linefeat_${arm}${tagOf(v)}_s${seed}.bin`) }; });
+  const start = []; let acc0 = 0; for (const p of parts) { start.push(acc0); acc0 += p.cols; }
+  const where = keep.map(c => { let i = parts.length - 1; while (c < start[i]) i--; return [i, c - start[i]]; });
+  for (let r = 0; r < NP; r++) for (let k = 0; k < D; k++) { const [i, c] = where[k]; PHI[r * D + k] += Math.sqrt(parts[i].raw[r * parts[i].cols + c]) / tab.seeds.length; }
 }
 for (let r = 0; r < NP; r++) for (let k = 0; k < D; k++) PHI[r * D + k] = (PHI[r * D + k] - mu[k]) / sd[k];
 function attFrom(w) { const att = new Float32Array(L.NCODE); for (let r = 0; r < NP; r++) { let a = w[D]; const o = r * D; for (let k = 0; k < D; k++) a += PHI[o + k] * w[k]; att[codes[r]] = Math.exp(Math.min(a, 30)); } return att; }

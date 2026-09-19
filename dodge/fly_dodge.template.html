@@ -329,7 +329,7 @@ code { font: 12px var(--mono); }
               <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
               <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
             </div>
-            <div class="seg" role="group" aria-label="果蝇想几步" id="gmDepthSeg" title="直觉 = 只看落子分；其余 = 用同一张线型价值表向前搜这么多步。实测中位用时：8 步 0.3 秒、10 步 1 秒、12 步 5 秒、14 步约半分钟。搜索在后台线程里跑，不卡界面">
+            <div class="seg" role="group" aria-label="果蝇想几步" id="gmDepthSeg" title="直觉 = 只看落子分；其余 = 用同一张线型价值表向前搜这么多步。搜索在后台线程里跑，不卡界面">
               <button data-d="1" aria-pressed="false">直觉</button>
               <button data-d="4" aria-pressed="false">4</button>
               <button data-d="6" aria-pressed="false">6</button>
@@ -2040,7 +2040,7 @@ code { font: 12px var(--mono); }
         line((f.nodes ? f.nodes.toLocaleString() + " 个局面 · " : "") + (f.ms / 1000).toFixed(f.ms < 1000 ? 2 : 1) + " s", palette["--muted"]);
       }
       if (S.phase) line(S.phase, palette["--gf"]);
-      if (S.check) line("真脑重跑 " + S.check.runs + " 次" + (S.check.cached ? " · 复用 " + S.check.cached + " 条" : ""), palette["--muted"]),
+      if (S.check) line("真脑重跑 " + S.check.runs + " 次" + (S.check.cached ? " · 复用 " + S.check.cached + " 条" : "") + (S.check.skipped ? " · 未核 " + S.check.skipped : ""), palette["--muted"]),
                    line("与表的偏差 " + S.check.max_rel_diff.toExponential(1), palette["--muted"]);
       if (S.mode === "self") line("两只果蝇对战", palette["--muted"]);
       y += 6;
@@ -2201,7 +2201,9 @@ code { font: 12px var(--mono); }
         if (!S.busy || !S.on) return;                            // 期间被重置或切走了
         S.info = c; S.thinkMs = c.ms; S.thinker = side;
         const p = playerFor(side);
-        if (S.liveCheck && p && p.live && c.move >= 0) checker = { gen: p.inspectGen(board, side, c.move), move: c.move };
+        // 多视角的表每种线型要跑 视角数 × 种子数 次：每步最多新核对 2 种最要紧的线型（已核对过的直接复用），其余留给后面的步
+        const nRuns = (PT.black.views ? PT.black.views.length : 1) * (PT.black.seeds ? PT.black.seeds.length : 1);
+        if (S.liveCheck && p && p.live && c.move >= 0) checker = { gen: p.inspectGen(board, side, c.move, { maxNew: nRuns > 3 ? 2 : 8 }), move: c.move };
         else { S.check = null; finishMove(c.move); }
       });
     }
@@ -2259,6 +2261,9 @@ code { font: 12px var(--mono); }
       const set = (id, t) => { const e2 = document.getElementById(id); if (e2) e2.textContent = t; };
       if (TR.class_counts) set("gmNPat", TR.class_counts.reduce((x, y) => x + y, 0).toLocaleString());
       if (TR.dataset) set("gmNSeen", TR.dataset.patterns_seen_in_dataset.toLocaleString());
+      if (TR.depth_timing) { const rows = TR.depth_timing.rows.filter(r => r.seconds !== undefined && r.depth >= 8), seg = document.getElementById("gmDepthSeg");   // 用时提示从实测文件来，不写死
+        if (seg) seg.title += "。实测用时（开局局面，单线程）：" + rows.map(r => r.depth + " 步 " + (r.seconds < 1 ? r.seconds.toFixed(2) : r.seconds.toFixed(1)) + " 秒").join("、") +
+          "；每多搜一步节点数约 ×" + TR.depth_timing.nodes_growth_per_ply; }
       if (TR.opto_leak) { const o = TR.opto_leak; set("gmLeak", `重演一遍旧行为：线型 A 单独喂进去是 ${o.fixed.A_first} 个脉冲；先喂过线型 B（${o.fixed.B} 个）再喂 A，得到的是 ${o.old_behaviour.A_after_B.toLocaleString()} 个，` +
         `逐个神经元与真正的 A 相差 ${o.old_behaviour.abs_diff_vs_true_A.toLocaleString()}。`); }
       if (TR.train) set("gmNPos", `${(TR.train.n_train + TR.train.n_val + TR.train.n_test).toLocaleString()} 个局面，按整局切分，测试 ${TR.train.n_test.toLocaleString()} 个`);
