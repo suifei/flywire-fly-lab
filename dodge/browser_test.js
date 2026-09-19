@@ -193,9 +193,29 @@ function chromePath() {
     });
     return r.n === r.sub ? `${r.n} 个（其中 ${r.soma} 个是真胞体坐标）` : `脑图 ${r.n} vs 子回路 ${r.sub}`;
   });
+  await step("五子棋：开局后棋盘出现且果蝇能落子", async () => {
+    await page.click("#gmSelf");
+    await new Promise(r => setTimeout(r, 6000));
+    const r = await page.evaluate(() => {
+      const g = window.__gm; if (!g) return { ok: false, why: "没有五子棋模块" };
+      const n = g.state.board.filter(v => v !== 0).length;
+      return { ok: true, n, turn: g.state.turn };
+    });
+    return r.ok ? (r.n > 0 ? `已落 ${r.n} 子` : "6 秒内一子未落") : r.why;
+  });
+  await step("五子棋禁手规则可用", async () => {
+    const r = await page.evaluate(() => {
+      const G = window.Gomoku, b = G.newBoard();
+      [[5, 5], [6, 5], [7, 5], [8, 5], [9, 5]].forEach(([x, y]) => { b[G.idx(x, y)] = G.BLACK; });
+      return { overline: G.forbidden(b, 10, 5), legal: G.forbidden(b, 10, 8) };
+    });
+    return r.overline === "长连" && r.legal === null ? "长连判出、正常点放行" : `长连=${r.overline} 正常点=${r.legal}`;
+  });
   let uiBad = 0;
   for (const [name, v] of ui) {
-    const ok = v === true || (typeof v === "string" && !v.startsWith("异常") && !v.startsWith("只") && !v.startsWith("没有") && !v.startsWith("残留") && !v.startsWith("文本"));
+    // 失败词要写全：2026-09-19 "6 秒内一子未落" 被当成通过，因为它不以任何一个前缀开头
+    const BAD = ["异常", "只", "没有", "残留", "文本", "6 秒内", "画面是", "脑图 ", "长连="];
+    const ok = v === true || (typeof v === "string" && !BAD.some(b2 => v.startsWith(b2)));
     console.log(`  ${ok ? "✓" : "✗"} ${name}${typeof v === "string" ? "  " + v : ""}`);
     if (!ok) uiBad++;
   }

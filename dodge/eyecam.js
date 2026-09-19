@@ -414,6 +414,59 @@ const FlyEyeCam = (() => {
      * 鱼眼逆映射 + 157° 透视投影 + ±63.1° 光轴 算出来的。
      * 正前方那条重叠带就是**双眼视区**，两侧是单眼区，背后是盲区。
      */
+    /**
+     * 把立方体贴图按**经纬展开**画到画布上——也就是"果蝇头上那台摄像机到底拍到了什么"。
+     *
+     * 为什么要有这个（2026-09-19 用户提的问题）：页面上那两块六边形是**已经采样成 721 个小眼**
+     * 之后的样子，看不出摄像机本身拍到了什么；于是很自然会以为"墙没有进入视觉"。
+     * 其实 CubeCamera 是从果蝇头部渲染**整个 3D 场景**的——墙、球场、看台、别的果蝇全在里面，
+     * 以后往场里加任何物体也都会自动在里面。这个视图就是那份原始图像。
+     *
+     * 展开方式：横轴方位角 −180°…+180°（0 = 正前），纵轴仰角 −90°…+90°，
+     * 每个像素按该方向去立方体贴图里取值（和小眼采样走的是同一个 cubeLookup）。
+     * 通道：渲染时 R 通道装的是紫外，所以这里显示成 (G, B) 两路真实颜色 + 可选紫外。
+     * @param {HTMLCanvasElement} cv 目标画布
+     * @param {object} headObj 果蝇头部（取世界朝向）
+     * @param {string} mode "rgb" 显示绿/蓝两路，"uv" 显示紫外
+     */
+    drawProjection(cv, headObj, mode = "rgb") {
+      const { THREE } = this;
+      if (!this.px || !headObj) return;
+      const size = this.size;
+      const W = cv.width, H = cv.height;
+      const ctx = cv.getContext("2d");
+      const img = ctx.createImageData(W, H);
+      const q = headObj.getWorldQuaternion(this._pq || (this._pq = new THREE.Quaternion()));
+      const v = this._pv || (this._pv = new THREE.Vector3());
+      for (let y = 0; y < H; y++) {
+        const el = (0.5 - y / (H - 1)) * Math.PI;            // +90°（上）… −90°（下）
+        const ce = Math.cos(el), se = Math.sin(el);
+        for (let x = 0; x < W; x++) {
+          const az = (x / (W - 1) - 0.5) * 2 * Math.PI;      // −180°…+180°，0 = 正前
+          // 果蝇本地坐标：+x 前、+y 左、+z 上
+          v.set(ce * Math.cos(az), ce * Math.sin(az), se).applyQuaternion(q);
+          const off = cubeLookup(v.x, v.y, v.z, size) * 4;
+          const o = (y * W + x) * 4;
+          const U = this.px[off], G = this.px[off + 1], B = this.px[off + 2];
+          if (mode === "uv") { img.data[o] = U; img.data[o + 1] = U * 0.35; img.data[o + 2] = U; }
+          else { img.data[o] = Math.round(G * 0.35 + B * 0.2); img.data[o + 1] = G; img.data[o + 2] = B; }
+          img.data[o + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      // 叠一层刻度：双眼光轴 ±63.1°、单眼视野 ±85.5°、正前 0°
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1;
+      ctx.font = "9px ui-monospace, monospace"; ctx.fillStyle = "rgba(255,255,255,.75)";
+      for (const [deg, lab] of [[-63.1, "右轴"], [0, "前"], [63.1, "左轴"]]) {
+        const x = Math.round((deg / 360 + 0.5) * (W - 1));
+        ctx.beginPath(); ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, H); ctx.stroke();
+        ctx.fillText(lab, Math.min(W - 18, x + 2), 9);
+      }
+      ctx.beginPath(); ctx.moveTo(0, H / 2 + .5); ctx.lineTo(W, H / 2 + .5); ctx.stroke();
+      ctx.restore();
+    }
+
     drawBrain(cv, readouts, mode, gbs) {
       const g = cv.getContext("2d"), W2 = cv.width, H2 = cv.height;
       g.clearRect(0, 0, W2, H2);

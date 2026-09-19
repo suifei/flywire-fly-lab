@@ -18,14 +18,17 @@ const ROOT = path.resolve(__dirname, "..");
 const G = require("./rules.js");
 const F = require("./features.js");
 const { ConnectomeBrain } = require(ROOT + "/dodge/brain.js");
-const ARM = process.argv[2] || "intact";
+const ARM = process.argv[2] || "intact";          // intact | shuffled | topo（真实接线 + 保拓扑编码）
 const HZ = +(process.argv[3] || 400), MS = +(process.argv[4] || 100);
 const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v2.json", "utf8"));
 const DS = JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/dataset.json", "utf8"));
 
 const brain = new ConnectomeBrain(SUB, 11);
 if (ARM === "shuffled") brain.setShuffle(true, 20260919);
-const map = F.makeMap(SUB);
+const map = ARM === "topo"
+  ? F.makeTopoMap(SUB, JSON.parse(fs.readFileSync(ROOT + "/results/dodge/soma.json", "utf8")))
+  : F.makeMap(SUB);
+if (map.topo) console.log(`保拓扑编码：每格 ${map.perCell} 个神经元（按真实胞体位置的二维扫描序分配）`);
 const isIn = new Uint8Array(SUB.meta.n); map.inputs.forEach(i => { isIn[i] = 1; });
 const cols = []; for (let i = 0; i < SUB.meta.n; i++) if (!isIn[i]) cols.push(i);
 console.log(`${ARM}：${DS.n} 个局面 × ${cols.length} 个下游神经元（总 ${SUB.meta.n}，剔除 ${map.inputs.length} 个输入）`);

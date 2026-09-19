@@ -1,0 +1,198 @@
+{
+ "seconds_per_seed": 60,
+ "seeds": 2,
+ "note": "无球条件。触感 = 触角越过围栏时驱动该侧机械感觉神经元；v2 只有 JO，v3 有头部刚毛（TOUCH）。",
+ "arms": {
+  "v2 · 什么都不给": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v2 · 触感→JO": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0.8568,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v3 · 触感→头部刚毛": {
+   "runs": [
+    {
+     "cells": 29,
+     "pathLen": 550,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 34,
+     "pathLen": 657,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0.8568,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 31.5,
+    "pathLen": 603.5,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0.8568,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v3 · 什么都不给": {
+   "runs": [
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    },
+    {
+     "cells": 9,
+     "pathLen": 156,
+     "stuckFrac": 0.8556,
+     "maxStuckS": 51.34,
+     "meanWallDist": 8.73,
+     "touchFrac": 0,
+     "jump": 0,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 9,
+    "pathLen": 156,
+    "stuckFrac": 0.8556,
+    "maxStuckS": 51.34,
+    "meanWallDist": 8.73,
+    "touchFrac": 0,
+    "jump": 0,
+    "groom": 0
+   }
+  },
+  "v2 · 围栏视觉（手写）": {
+   "runs": [
+    {
+     "cells": 18,
+     "pathLen": 1654,
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.65,
+     "touchFrac": 0,
+     "jump": 16,
+     "groom": 0
+    },
+    {
+     "cells": 14,
+     "pathLen": 1690,
+     "stuckFrac": 0,
+     "maxStuckS": 0,
+     "meanWallDist": 72.8,
+     "touchFrac": 0,
+     "jump": 17,
+     "groom": 0
+    }
+   ],
+   "mean": {
+    "cells": 16,
+    "pathLen": 1672,
+    "stuckFrac": 0,
+    "maxStuckS": 0,
+    "meanWallDist": 72.725,
+    "touchFrac": 0,
+    "jump": 16.5,
+    "groom": 0
+   }
+  }
+ },
+ "v3_touch_helps": true,
+ "v3_base": {
+  "cells": 9,
+  "pathLen": 156,
+  "stuckFrac": 0.8556,
+  "maxStuckS": 51.34,
+  "meanWallDist": 8.73,
+  "touchFrac": 0,
+  "jump": 0,
+  "groom": 0
+ },
+ "v3_touch": {
+  "cells": 31.5,
+  "pathLen": 603.5,
+  "stuckFrac": 0.8556,
+  "maxStuckS": 51.34,
+  "meanWallDist": 8.73,
+  "touchFrac": 0.8568,
+  "jump": 0,
+  "groom": 0
+ }
+}

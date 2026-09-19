@@ -212,6 +212,8 @@ code { font: 12px var(--mono); }
 .eyecam .ec-row canvas { display:block; width:78px; height:78px; background:#05070a; border-radius:5px; }
 .eyecam figcaption { font-size:9.5px; color:#cfdad6; margin-top:1px; }
 #ecB, #ecUV { display:block; width:162px; height:56px; margin-top:4px; background:#05070a; border-radius:5px; }
+#ecPrj { display:block; width:162px; height:48px; margin-top:4px; background:#05070a; border-radius:5px; }
+.ec-note2 { display:block; font-size:8.5px; color:#a8b6b2; line-height:1.3; max-width:162px; margin-top:1px; }
 .ec-ce { display:block; color:#8fe3c9; font-variant-numeric:tabular-nums; min-height:1em; font-size:9.5px;
   text-align:center; text-wrap:pretty; }
 .ec-sw { display:block; font-size:9.5px; color:#dbe5e2; margin-top:3px; text-align:center; pointer-events:auto; cursor:pointer; }
@@ -267,6 +269,9 @@ code { font: 12px var(--mono); }
             <figure><canvas id="ecL" width="150" height="150"></canvas><figcaption>左眼</figcaption></figure>
             <figure><canvas id="ecR" width="150" height="150"></canvas><figcaption>右眼</figcaption></figure>
           </div>
+          <canvas id="ecPrj" width="300" height="88"></canvas>
+          <div class="ec-scale"><span>后 180&deg;</span><span>前 0&deg;</span><span>后 180&deg;</span></div>
+          <small class="ec-note2">摄像机原始投影（采样成小眼之前）——墙、看台、别的果蝇都在里面</small>
           <canvas id="ecB" width="300" height="104"></canvas>
           <div class="ec-scale"><span>左 90&deg;</span><span>前 0&deg;</span><span>右 90&deg;</span></div>
           <canvas id="ecUV" width="300" height="104"></canvas>
@@ -309,6 +314,17 @@ code { font: 12px var(--mono); }
           <label class="k" title="给真实神经元一段泊松驱动（与论文 poi() 同一机制：被驱动神经元不应期置 0）；强度与时长手选">光遗传</label>
           <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
           <span class="pill" id="optoPill" hidden></span>
+        </div>
+        <div class="row" id="gomokuRow">
+          <label class="k" title="场边的 3D 棋盘：果蝇用真实连接组 + 一层线性读出来选点">五子棋</label>
+          <div class="seg" role="group">
+            <button id="gmOff" aria-pressed="true">关</button>
+            <button id="gmHuman" aria-pressed="false">我 vs 果蝇</button>
+            <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
+            <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
+          </div>
+          <button class="btn" id="gmNew">新局</button>
+          <span class="pill" id="gmPill" hidden></span>
         </div>
         <div class="row" id="mutRow">
           <label class="k" title="随机敲掉一个真实神经元但不告诉你是哪个；靠行为把它诊断出来">盲盒突变体</label>
@@ -365,6 +381,7 @@ code { font: 12px var(--mono); }
           <label class="k">环境</label>
           <label class="toggle"><input type="checkbox" id="windOn"> 起风 <small>驱动 JO-C/E 风觉神经元</small></label>
           <label class="toggle" style="gap:8px">阳光 <input type="range" id="lightSlider" min="0" max="100" value="100" style="width:100px"><small id="lightTxt">100%</small></label>
+          <label class="toggle" title="把围栏也当成视觉物体喂进 LC4/LPLC2，让连接组自己决定转向还是起飞"><input type="checkbox" id="wallOn" checked> 看得见围栏 <small>实测：关掉时无球情况下 85.6% 的时间贴着墙</small></label>
           <label class="toggle"><input type="checkbox" id="fieldOn" checked> 画出视野 <small>171°/眼 · 光轴 ±63.1° · 正前 44.8° 双眼重叠 · 背后 62.8° 盲区</small></label>
           <label class="toggle"><input type="checkbox" id="saysOn" checked> 显示果蝇在想什么 <small>由放电读出</small></label>
         </div>
@@ -480,6 +497,30 @@ code { font: 12px var(--mono); }
         ②「证明连接组真的在起作用」原本判闪避率，但打乱之后逐次是 0.07/0.79/0.43——<b>波动大到有一次跟没打乱差不多</b>，
         所以判据换成起跳次数（打乱后 18/5/0 次 vs 不干预 33/32/33，完全不重叠），这也更贴近机制：
         打乱先打断的是 looming → 巨纤维那一路。</p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1" id="cGomoku">
+      <h3>我能训练它下五子棋吗？能。但训练完必须回答一个问题</h3>
+      <p>场边有一张 3D 棋盘，你可以和果蝇下五子棋（含黑方禁手：长连、四四、三三）。
+        果蝇的每一步都<b>真跑一遍 4,599 个神经元</b>：棋盘 → 真实感觉神经元的泊松驱动 → 100 ms →
+        下游发放计数 → <b>一层线性读出</b> → 225 个格子的分数。<b>脑子里一个突触都没有被训练</b>，
+        被训练的只有最后那层线性读出（岭回归）。</p>
+      <p><b>但"训练一个读出层"正是那三个刷屏项目被批评的地方</b>——读出层足够灵活，
+        连接组到底有没有在起作用就说不清了。所以我们把同一套训练在四组特征上各做了一遍，
+        这才是做这件事的全部意义：</p>
+      <div class="tbl"><table id="tGomoku"></table></div>
+      <p class="sub" id="gmNote"></p>
+      <p class="sub"><b>结论是阴性的，而且很干净</b>：果蝇脑的测试 top1 只有 <b>0.025</b>，
+        只比随机猜（0.017）高一点；<b>打乱接线之后成绩几乎一样</b>（0.018）——说明真实接线没有贡献；
+        而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
+        把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
+        连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
+      <p class="sub"><b>为什么这是个有意义的阴性结果</b>：它说明"把连接组接进游戏 + 训练一个读出层"这件事，
+        本身<b>不能证明连接组在起作用</b>——必须跑打乱对照。我们跑了，结果是不起作用。
+        果蝇脑不是一个好用的"水库"：它稀疏放电（4,599 个里只有约 500 个响应）、
+        而且完全没有为棋盘这种任务准备的结构。<b>这不丢人，这是能被证伪的科学</b>。</p>
+      <p class="sub">诚实清单：棋盘格子→神经元的映射是任意的（固定随机种子）；禁手与合法性由规则引擎判定，不是果蝇；
+        为了让水库成为确定性函数，特征提取时固定了泊松随机流的种子（不固定的话同一个棋盘每次给的特征都不同，
+        读出层只能去拟合噪声——第一版就是这样，训练 0.194 / 测试 0.021）。</p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cMutants">
       <h3>盲盒突变体：十个敲除里，只有七个能从行为上看出来</h3>
@@ -801,6 +842,13 @@ code { font: 12px var(--mono); }
 <script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
 <script id="mutants-data" type="application/json">/*__MUTANTS__*/</script>
 <script id="soma-data" type="application/json">/*__SOMA__*/</script>
+<script id="gomoku-readout" type="application/json">/*__GOMOKU_READOUT__*/</script>
+<script id="gomoku-train" type="application/json">/*__GOMOKU_TRAIN__*/</script>
+<script>/*__GOMOKU_RULES_JS__*/</script>
+<script>/*__GOMOKU_TEACHER_JS__*/</script>
+<script>/*__GOMOKU_FEATURES_JS__*/</script>
+<script>/*__GOMOKU_FLY_JS__*/</script>
+<script>/*__GOMOKU_BOARD3D_JS__*/</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -821,7 +869,7 @@ code { font: 12px var(--mono); }
     // autoEvery 只在**页面上**放慢到约 30 秒一球（默认是 [1.4, 2.2]）。
     // 不改默认值：autoplay.js / step1_encoding.js / step_v3.js / backward_v4.js 都按默认节奏
     // 统计已发布的闪避率，改默认会让那些数字全部失效（与 pelletTypes 同样的处理）。
-    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true,
+    cfg: { ...ENC.ache, takeoff: "clip", autoPellets: true, autoDust: true, wallVision: true,
            autoEvery: [26, 34],
            pelletTypes: ["sugar", "bitter", "mixed", "water"] } });
   // 递质标签：给「谷氨酸改兴奋性」那一档扰动用（论文补充表 11F）
@@ -1364,6 +1412,7 @@ code { font: 12px var(--mono); }
     down = null;
     const r = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    if (window.__gm && window.__gm.clickBoard(e)) return;          // 五子棋模式下先给棋盘
     ray.setFromCamera(ndc, camera);
     if (ray.ray.intersectPlane(plane, hit3)) game.launch(hit3.x, hit3.y);
   });
@@ -1601,6 +1650,153 @@ code { font: 12px var(--mono); }
         ? "七关全部满足「参考解全过、不干预全不过」。" : "有关卡不满足这一条，见上表。");
   })();
 
+  // ── 五子棋：场边 3D 棋盘 + 果蝇当棋子 ──────────────────────────────
+  // 果蝇怎么选点：棋盘 → 真实神经元的泊松驱动 → 4,599 个神经元跑 100 ms →
+  // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
+  // **结果是阴性的，页面下方那张表原样写着**：它几乎没学会（测试 top1 0.025，
+  // 直接看棋盘是 0.174），而且打乱接线成绩一样——所以这里主要是个"可玩的对照实验"。
+  const GM = (() => {
+    const G5 = window.Gomoku, T5 = window.GomokuTeacher, F5 = window.GomokuFly, B3 = window.GomokuBoard3D;
+    if (!G5 || !B3) return null;
+    const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
+    const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
+    let board3d = null, player = null;
+    const S = { on: false, mode: "human", board: G5.newBoard(), turn: G5.BLACK, over: null, busy: false, couriers: [] };
+
+    const say = t => { const p = $("gmPill"); p.hidden = false; p.textContent = t; };
+    function ensure() {
+      if (!board3d) board3d = B3.build(THREE, scene, {
+        boardWood: "#caa06a", boardLine: "#4a3620", pole: "#efe6d8",
+        stoneBlack: "#16181a", stoneWhite: "#f4f6f4", mark: "#e0562a" });
+      if (!player && RO && RO.W) player = F5.makePlayer(SUB, ConnectomeBrain, RO);
+      board3d.group.visible = true;
+    }
+    // 一只信使果蝇飞到格子上插旗（装饰；真正的落子在上面一行就已经定了）
+    function courier(i, c) {
+      const to = board3d.worldOf(i);
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.9, 2.2, 4, 8)
+        : new THREE.SphereGeometry(1.2, 8, 6), new THREE.MeshLambertMaterial({ color: css("--body") }));
+      body.rotation.z = Math.PI / 2; g.add(body);
+      for (const sgn of [1, -1]) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.1),
+          new THREE.MeshLambertMaterial({ color: css("--muted"), transparent: true, opacity: .45, side: THREE.DoubleSide }));
+        w.position.set(-0.2, sgn * 1.0, 0.5); g.add(w);
+      }
+      g.position.set(game.S.x, game.S.y, 6);
+      scene.add(g);
+      S.couriers.push({ g, t: 0, dur: 0.7, from: g.position.clone(), to, cell: i, color: c });
+    }
+    function stepCouriers(dt) {
+      for (let k = S.couriers.length - 1; k >= 0; k--) {
+        const c = S.couriers[k];
+        c.t += dt;
+        const u = Math.min(1, c.t / c.dur);
+        c.g.position.lerpVectors(c.from, c.to, u);
+        c.g.position.z += Math.sin(Math.PI * u) * 28;          // 飞一道弧
+        c.g.rotation.x += dt * 30;
+        if (u >= 1) { scene.remove(c.g); S.couriers.splice(k, 1); board3d.place(c.cell, c.color); board3d.markAt(c.cell); }
+      }
+    }
+    function play(i) {
+      if (S.over || i < 0 || S.board[i] !== G5.EMPTY) return false;
+      if (S.turn === G5.BLACK && G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) { say("那是禁手"); return false; }
+      S.board[i] = S.turn;
+      courier(i, S.turn);
+      if (G5.wins(S.board, i % G5.N, (i / G5.N) | 0, S.turn)) {
+        S.over = S.turn;
+        say((S.turn === G5.BLACK ? "黑" : "白") + "胜");
+        $("coach").textContent = (S.turn === G5.BLACK ? "黑棋" : "白棋") + "五连——"
+          + (S.mode === "human" ? "" : "这一局两边都是果蝇。");
+        return true;
+      }
+      S.turn = S.turn === G5.BLACK ? G5.WHITE : G5.BLACK;
+      return true;
+    }
+    function agentMove(who) {
+      if (who === "teacher") return T5.best(S.board, S.turn).move;
+      if (!player) return T5.best(S.board, S.turn).move;
+      return player.think(S.board, S.turn).move;               // 真跑一遍连接组
+    }
+    let timer = 0;
+    function tick(dt) {
+      if (!S.on) return;
+      stepCouriers(dt);
+      if (S.over || S.busy || S.couriers.length) return;
+      timer -= dt;
+      if (timer > 0) return;
+      const humanTurn = S.mode === "human" && S.turn === G5.BLACK;
+      if (humanTurn) { say("轮到你（黑）"); return; }
+      const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
+      say(who === "fly" ? "果蝇在想…" : "老师在想…");
+      S.busy = true;
+      setTimeout(() => {
+        const mv = agentMove(who);
+        play(mv);
+        S.busy = false; timer = 0.35;
+        if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "黑（果蝇）" : "白"));
+      }, 0);
+    }
+    function reset() {
+      S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false;
+      if (board3d) { board3d.clear(); board3d.markAt(null); }
+      for (const c of S.couriers) scene.remove(c.g);
+      S.couriers.length = 0;
+      say(S.mode === "human" ? "轮到你（黑）" : "开始");
+    }
+    function setMode(m) {
+      S.mode = m; S.on = m !== "off";
+      if (S.on) { ensure(); reset(); } else if (board3d) board3d.group.visible = false;
+      $("gmPill").hidden = !S.on;
+      segSet([$("gmOff"), $("gmHuman"), $("gmSelf"), $("gmTeach")],
+             { off: $("gmOff"), human: $("gmHuman"), self: $("gmSelf"), teach: $("gmTeach") }[m]);
+      if (S.on) $("coach").textContent = m === "human"
+        ? "点棋盘落子（你执黑）。果蝇的每一步都真跑一遍 4,599 个神经元——但它下得很烂，下面那张表写着为什么。"
+        : "两边都是果蝇（或老师）。看它们下。";
+    }
+    // 点棋盘落子：把射线打到棋盘平面上
+    function clickBoard(e) {
+      if (!S.on || S.mode !== "human" || S.turn !== G5.BLACK || S.over) return false;
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hits = ray.intersectObject(board3d.group, true);
+      if (!hits.length) return false;
+      const p = board3d.group.worldToLocal(hits[0].point.clone());
+      const S0 = board3d.cell, span = board3d.span;
+      const x = Math.round((p.x + span / 2) / S0), y = Math.round((span / 2 - p.y) / S0);
+      if (x < 0 || x >= G5.N || y < 0 || y >= G5.N) return false;
+      play(G5.idx(x, y));
+      return true;
+    }
+    $("gmOff").onclick = () => setMode("off");
+    $("gmHuman").onclick = () => setMode("human");
+    $("gmSelf").onclick = () => setMode("self");
+    $("gmTeach").onclick = () => setMode("teach");
+    $("gmNew").onclick = () => { if (S.on) reset(); };
+    // 训练对照表
+    (function buildTrainTable() {
+      const t = document.getElementById("tGomoku"); if (!t || !TR.arms) return;
+      const NAME = { board_raw: "直接看棋盘（不经过任何网络）", fly_intact: "果蝇脑 · 真实连接组",
+                     fly_shuffled: "果蝇脑 · 打乱接线", fly_topo: "果蝇脑 · 真实连接组 + 保拓扑编码",
+                     "board+fly": "棋盘 + 果蝇脑 拼在一起" };
+      const rows = Object.entries(TR.arms).filter(([k]) => NAME[k]).map(([k, v]) =>
+        `<tr${k === "board_raw" ? ' class="em"' : ""}><td>${NAME[k]}</td><td>${v.dim}</td>` +
+        `<td>${v.best.test.top1}</td><td>${v.best.test.top5}</td><td>${v.best.test.median_r ?? "—"}</td>` +
+        `<td>${v.best.train.top1}</td></tr>`).join("");
+      t.innerHTML = "<tr><th>用什么特征训练读出层</th><th>维数</th><th>测试 top1</th><th>top5</th>" +
+        "<th>中位 r</th><th>训练 top1</th></tr>" +
+        `<tr><td>随机猜（候选点均匀）</td><td>—</td><td>${TR.random_baseline_top1}</td><td>—</td><td>—</td><td>—</td></tr>` + rows;
+      const n = document.getElementById("gmNote");
+      if (n) n.textContent = `${TR.n} 个局面、${TR.n_games} 局自对弈，按整局切分（训练 ${TR.n_train} / 测试 ${TR.n_test}）。` +
+        `判据：${TR.criterion}　结论：A ${TR.criterion_A_connectome_matters ? "被否" : "成立——真实接线没有贡献"}；` +
+        `B ${TR.criterion_B_brain_adds ? "被否" : "成立——这颗脑子不如直接看棋盘"}。`;
+    })();
+    const api = { tick, clickBoard, state: S };
+    window.__gm = api;
+    return api;
+  })();
+
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
   const PEERS = [
     ["doomfly", "nftechie", "360★ · MIT", "全 MaleCNS 接 ViZDoom：3,335 个 R1–R6 亮度输入 + 811 个 R8 颜色输入；DNp20 左右差转向、DNpe017 前进与开火；另有 4,184 条 KC→MBON 的多巴胺门控可塑性",
@@ -1652,6 +1848,7 @@ code { font: 12px var(--mono); }
       box.append(lab);
     });
   })();
+  $("wallOn").onchange = e => { CFG.wallVision = e.target.checked; };
   $("windOn").onchange = e => { CFG.wind = e.target.checked; motes.visible = e.target.checked; $("windvane").hidden = !e.target.checked; };
   $("lightSlider").oninput = e => { CFG.light = +e.target.value / 100; $("lightTxt").textContent = e.target.value + "%"; applyLight(CFG.light); };
   // ── 论文式扰动（Shiu 2024 补充表 1D / 11B–F）──────────────────────────
@@ -2267,6 +2464,7 @@ code { font: 12px var(--mono); }
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
       BRAIN.draw(Math.min(0.1, dtReal));
+      if (GM) GM.tick(Math.min(0.1, dtReal));
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
       window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);
