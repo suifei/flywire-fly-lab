@@ -28,7 +28,7 @@ df["映射"] = df.apply(label, axis=1)
 STIM = {"loom_L": "逼近", "loom_R": "逼近(右)", "recede_L": "远离",
         "translate_near_L": "近距平移", "translate_far_L": "远距平移"}
 # 刺激名写错会让 C2/C3 静默变成 NaN/False（这个坑刚踩过：trans_near_L vs translate_near_L）。
-# CLAUDE.md 记过这类失败：分析不能在数据缺失时悄悄降级。
+# AGENTS.md 记过这类失败：分析不能在数据缺失时悄悄降级。
 seen = set(df.stim)
 missing = [s for s in STIM if s not in seen]
 extra = [s for s in seen if s not in STIM]

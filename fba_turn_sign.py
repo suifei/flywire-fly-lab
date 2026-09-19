@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """把挂了很久的一条定论清掉：Fly-Brain-AI 的 turn_drive 符号到底朝哪边？
 
-背景（CLAUDE.md 里记为"未定论"）：
+背景（AGENTS.md 里记为"未定论"）：
   作者的 `interfaces.py` 与论文草稿都说 `turn_drive > 0` 表示**向右**，并报告"对侧逃逸"。
   但 `LocomotionBridge` 的代码是 `left_scale = 1 - 0.3*max(0, turn_drive)` ——
   正值缩小**左腿**幅度，身体应当转**左**。我们上一轮只用 1 个种子测过一次

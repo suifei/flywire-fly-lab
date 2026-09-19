@@ -163,7 +163,7 @@ class Screen:
         src_idx, src_steps, self.n_src = patterns(len(self.sugar))
         b2.set_device("cpp_standalone", build_on_run=False, directory=str(BUILD))
         b2.prefs.devices.cpp_standalone.openmp_threads = 0
-        b2.prefs.devices.cpp_standalone.extra_make_args_unix = ["-j4"]   # 见 CLAUDE.md：不限并行的 make 曾导致死机
+        b2.prefs.devices.cpp_standalone.extra_make_args_unix = ["-j4"]   # 见 AGENTS.md：不限并行的 make 曾导致死机
         b2.defaultclock.dt = DT_MS * ms
         seg_dt = SEG_STEPS * DT_MS * ms
         params = dict(default_params)
