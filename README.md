@@ -75,13 +75,13 @@ JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的
 ## 快速开始
 
 ```bash
-# 1. 环境（三个 conda 环境不能合并，见 CLAUDE.md）
+# 1. 环境（三个 conda 环境不能合并，见 AGENTS.md）
 bash setup.sh cpu        # brain-fly-cpu：Brian2 + numpy 1.26
 bash setup.sh flygym     # flygym：FlyGym 2.1 + torch
 
 # 2. 获取上游项目（本仓库不再分发它们，见 DATA_LICENSE.md 第 4 节）
 git clone https://github.com/eonsystemspbc/fly-brain external/fly-brain
-# FlyWire 注释表、Shiu 补充材料等的获取方式见 CLAUDE.md
+# FlyWire 注释表、Shiu 补充材料等的获取方式见 AGENTS.md
 
 # 3. 最小实验：刺激糖味觉神经元，看伸喙运动神经元 MN9
 conda activate brain-fly-cpu
@@ -92,7 +92,7 @@ python run_experiment.py --preset sugar --t_run 1
 python3 dodge/build.py && open results/dodge/fly_dodge.html
 ```
 
-完整命令清单（虚拟敲除筛选、腹神经索、视觉管线、"果蝇说中文"等）见 [`CLAUDE.md`](CLAUDE.md)。
+完整命令清单（虚拟敲除筛选、腹神经索、视觉管线、"果蝇说中文"等）见 [`AGENTS.md`](AGENTS.md)。
 
 ## 目录
 
@@ -106,7 +106,7 @@ python3 dodge/build.py && open results/dodge/fly_dodge.html
 | `language/` | "果蝇说中文"：12 个词的解码器 + 脑机接口压力测试 |
 | `flight/` | flybody 飞行控制器回放，导出真实逃逸飞行轨迹 |
 | `docs/log/report.md` | **完整报告**，约 6.5 万字，含全部结果、阴性结果与错误账本 |
-| `CLAUDE.md` | 工程笔记：环境、命令、内存安全规则、领域陷阱 |
+| `AGENTS.md` | 工程笔记：环境、命令、内存安全规则、领域陷阱 |
 
 ## 许可
 

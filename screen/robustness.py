@@ -135,9 +135,9 @@ def cmd_analyze():
     N = len(fids)
     # MN9 的注释 cell_type 是 **CB0701**，不是 "MN9"（按类型名查会查到空，第一版就是这么挂的）。
     # 论文补充表 11B 直接给了两个 ID 与命名：MN9_r / MN9_l。沿用论文的命名，
-    # 注意 CLAUDE.md 记过：官方 notebook 的左右命名与注释表的 side 相反。
+    # 注意 AGENTS.md 记过：官方 notebook 的左右命名与注释表的 side 相反。
     # 论文表 11B 给的 MN9_l = 720575940645521262 是 **v630 的 ID，在 v783 里已变更**，
-    # 模型里查不到（CLAUDE.md 记过：论文 Fig 1F 的 200 个里 184 个未变）。
+    # 模型里查不到（AGENTS.md 记过：论文 Fig 1F 的 200 个里 184 个未变）。
     # 按 cell_type=CB0701 找到 v783 的对侧同型：720575940618238523（side=left）。
     # 注意官方 notebook 的左右命名与注释表 side 相反，所以这里按**注释表 side** 命名，
     # 并在输出里同时给出论文的 MN9_r / MN9_l 对照值。

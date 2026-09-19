@@ -8,7 +8,7 @@
 //   1. `basis` 说明这一关靠的是**连接组**还是**手写规则**；
 //   2. `refKeys` 是参考解。`node dodge/mission_test.js` 实测「不干预」与「参考解」两种情况，
 //      **通过线是照那份实测分布定的**——先测再定线，不是先编故事。每条线旁边都写着实测值。
-//   3. 不许为了让某一关好看去改 game_core 里的规则（这条在 CLAUDE.md 里已经写了一年）。
+//   3. 不许为了让某一关好看去改 game_core 里的规则（这条在 AGENTS.md 里已经写了一年）。
 (function (root) {
   const rate = s => (s.dodge + s.hit) ? s.dodge / (s.dodge + s.hit) : null;
 

@@ -2,8 +2,9 @@
 """
 把果蝇“第一句话”原样发给 Claude Opus 5，用本机 Claude Code 的登录配置（claude -p），不另配 API key。
   * 提示词 = results/language/first_sentence.json 里的 sentence，一字不改；
-  * 在项目目录之外新建的空临时目录里运行（Claude Code 会从运行目录往上找 CLAUDE.md；
-    第一次放在项目内的空文件夹里，结果读到了本项目的 CLAUDE.md，回复被污染，存档在 claude_reply_contaminated.json），
+  * 在项目目录之外新建的空临时目录里运行（Claude Code 会从运行目录往上找项目说明文件；
+    第一次放在项目内的空文件夹里，结果读到了本项目的说明文件，回复被污染，存档在 claude_reply_contaminated.json。
+    当时那个文件叫 CLAUDE.md，2026-09-19 改名为 AGENTS.md——两个名字 Claude Code 都会读，所以这条坑照旧），
     只加载用户级设置（--setting-sources user），关掉所有工具；
   * 系统提示词换成一句中性的“你是 Claude。”，否则会带上 Claude Code 默认的编程助手设定；
   * 不保存会话（--no-session-persistence），输出 JSON 原样存档。

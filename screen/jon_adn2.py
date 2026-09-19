@@ -125,7 +125,7 @@ def main():
 
     # 集中度，口径同 §22.2。**aDN1 与 aDN2 必须在同一批被打分的神经元上算**——
     # §24.3 的 aDN1 集中度只覆盖 304 个打过分的神经元，直接拿来和这里比是错的
-    # （CLAUDE.md 记过这一条）。所以这里两个读出都在同一集合上重算。
+    # （AGENTS.md 记过这一条）。所以这里两个读出都在同一集合上重算。
     active = sorted({int(n) for r in range(R_A) for n in np.nonzero(base[r])[0]} - {i1, i2})
 
     def ratio1(sil):
