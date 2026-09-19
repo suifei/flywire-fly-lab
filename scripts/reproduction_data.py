@@ -265,9 +265,23 @@ PAPERS = [
              dict(id="looming_loop", what="Brian2 全脑 ↔ FlyGym 闭环的 looming 实验", status="reproduced",
                   result="复现成功，峰值内存 **4.3 GB**（其 README 说约 8 GB）",
                   caveat=None, script="fba_export_replay.py", result_file="results/fba_replay/replay.json", log="§4.1"),
-             dict(id="odor_valence", what="气味效价实验", status="partial",
-                  result="6 条里复现 **4 条**", caveat=None,
-                  script="external/Fly-Brain-AI/plastic-fly/experiments/odor_valence.py", result_file=None, log="§10.5"),
+             dict(id="odor_valence", what="气味效价实验（作者 README 自报 6/6）", status="partial",
+                  result="6 条判据里通过 **4 条**，但**扣掉空对照后实质只有 2 条**。"
+                         "失败的两条都在 DM1（吸引）：转向对比 +0.0010（要求 < 0）、"
+                         "以及它自己的打乱对照（真实 0.0010 vs 打乱 0.0011）",
+                  caveat="**3 条判据是「真实 vs 打乱连接组」，而打乱臂的读出完全不放电**"
+                         "（读出均值 0.0 Hz、活跃 0 个，24 个 checkpoint 全部如此）——"
+                         "对照组直接死掉，任何非零效应都能通过，这种判据是空的。"
+                         "另外查了一个我们自己的猜测并**否掉**：失败不是因为 DM1 引发全脑失控——"
+                         "DM1 与 DM5 的读出活动几乎一样（16.7 vs 16.2 Hz）。"
+                         "（只看得到解码器读出那约 350 个神经元，不能据此排除全脑层面的失控。）"
+                         "所有真实条件的 turn_drive 中位都是 **−0.10**，被一个共同偏置主导",
+                  script="fba_odor_recheck.py", result_file="results/fba_odor_valence/recheck.json",
+                  log="§10.5 + §42",
+                  verify=[("passed", 4, 0), ("effective_passed", 2, 0),
+                          ("q2_shuffled_control.shuffled_readout_active", 0.0, 0.01),
+                          ("q1_dm1_vs_dm5.dm1_readout_hz", 16.667, 0.01),
+                          ("q1_dm1_vs_dm5.dm5_readout_hz", 16.176, 0.01)]),
              dict(id="turn_sign", what="turn_drive 的符号（文档说正值向右，代码却是向左）", status="reproduced",
                   result="**代码对、文档错**：`turn_drive > 0` 让身体转**左**。3 个种子全部一致——"
                          "左注入 +0.352、右注入 −0.533；相对对照的净侧移 +4.82 mm（偏左）vs −1.60 mm（偏右）。"
