@@ -82,7 +82,9 @@ jobs:
         run: python3 scripts/reproduction.py --check
 
       - name: 报告数字与结果文件一致（防手抄）
-        run: python3 vision/check_report_numbers.py
+        run: |
+          python3 vision/check_report_numbers.py        # §28.16–28.20（视觉那几节）
+          python3 scripts/audit_report.py               # §37–41（筛选 / 触感 / 五子棋那几节）
 
       - name: 视野扇区在地板上的对比度（防「和地板同色 = 等于没画」）
         # 右眼扇区曾是金黄 0xe8b339，和地板 #b8763a 同色相；阳光 100% 时地板
