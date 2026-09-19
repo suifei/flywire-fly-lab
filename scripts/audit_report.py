@@ -70,6 +70,21 @@ CHECKS = [
      lambda: jget("results/gomoku/play_v3.json", "vs_random", "fly_intact"), 0),
     ("五子棋 v2 打随机（真实）", r"\| 子回路 v2 \| \*\*(\d+)/40\*\* \|",
      lambda: jget("results/gomoku/play.json", "vs_random", "fly_intact"), 0),
+    # ── §43 Fotowat 2009 的角度阈值 ───────────────────────────────────
+    ("§43 8mm 变异系数", r"\*\*17\.0° / 17\.2° / 17\.8°，变异系数只有 ([\d.]+)%",
+     lambda: jget("results/dodge/looming_threshold.json", "by_radius", 1, "theta_cv") * 100, 0.05),
+    ("§43 2.5mm 变异系数", r"\*\*变异系数 ([\d.]+)% → 判据 A 不成立\*\*",
+     lambda: jget("results/dodge/looming_threshold.json", "by_radius", 0, "theta_cv") * 100, 0.05),
+    ("§43 8mm 阈值均值", r"我们 ([\d.]+)°，论文 54°",
+     lambda: jget("results/dodge/looming_threshold.json", "by_radius", 1, "theta_mean"), 0.05),
+    # ── §42 气味效价复查 ──────────────────────────────────────────────
+    ("§42 实质通过数", r"原始 4/6，扣掉空对照后实质 (\d)/6",
+     lambda: jget("results/fba_odor_valence/recheck.json", "effective_passed"), 0),
+    ("§42 DM1 读出 Hz", r"\*\*(16\.7) Hz vs 16\.2 Hz\*\*",
+     lambda: jget("results/fba_odor_valence/recheck.json", "q1_dm1_vs_dm5", "dm1_readout_hz"), 0.05),
+    # ── §42.1 自查打乱对照 ────────────────────────────────────────────
+    ("§42.1 五子棋打乱活跃数", r"每个局面 (\d+) 个活跃神经元 vs 完整的",
+     lambda: jget("results/shuffle_controls.json", "gomoku", "shuffled", "mean_active_per_position"), 1.0),
     # ── §41 子回路 v3 ─────────────────────────────────────────────────
     ("§41 v3 神经元数", r"\| v3 \| ([\d,]+) \| 432,437",
      lambda: jget("results/dodge/sensor_drive.json", "n"), 0),
@@ -97,4 +112,4 @@ for b in bad:
     print("  ✗ " + b)
 if bad:
     sys.exit(1)
-print("✓ 报告 §37–41 的关键数字与结果文件全部一致")
+print("✓ 报告 §37–43 的关键数字与结果文件全部一致")

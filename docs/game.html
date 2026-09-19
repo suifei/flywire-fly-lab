@@ -1142,12 +1142,12 @@ code { font: 12px var(--mono); }
  "说明": "复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
  "counts": {
   "reproduced": 23,
-  "partial": 4,
+  "partial": 5,
   "negative": 0,
   "not_done": 1,
-  "blocked": 1
+  "blocked": 2
  },
- "total_claims": 29,
+ "total_claims": 31,
  "papers": [
   {
    "key": "shiu2024",
@@ -1790,6 +1790,61 @@ code { font: 12px var(--mono); }
        1
       ]
      ]
+    }
+   ]
+  },
+  {
+   "key": "fotowat2009",
+   "cite": "Fotowat, Fayyazuddin, Bellen & Gabbiani 2009, J Neurophysiol 102:875-885",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3817277/",
+   "note": "逼近刺激引发的逃逸：固定角度阈值 + 一条非巨纤维的下行通路（全文可得，用户提供）",
+   "claims": [
+    {
+     "id": "angular_threshold",
+     "what": "起飞发生在张角达到固定阈值之后（与逼近快慢无关）",
+     "status": "partial",
+     "result": "**定性成立、定量差 3 倍**。用 8 mm 的刺激时三档球速（l/|v| = 229/133/84 ms）的起飞张角是 **17.0° / 17.2° / 17.8°**，变异系数只有 **2.3%**——确实是固定角度阈值；「逼近越慢越早起飞」的相关 **0.999**。但阈值本身是 **17.3°**，论文是 **54°（SD 5°）**",
+     "caveat": "**默认的 2.5 mm 球测不出这条规律**（变异系数 38.5%）——因为那时 54° 对应距离只有 **4.9 mm**，而接触距离就是 3.9 mm，论文的阈值在那个场景里等于「已经贴到脸上」。换 8 mm 刺激（54° 对应 15.7 mm）规律才显出来。还有一个自带偏置要说明：Ache 2019 编码里 LPLC2 是角尺寸的高斯（峰 42°），所以「在固定张角起飞」有一部分是编码带来的；非平凡的是**阈值与速度无关到 2.3%** 这个程度。扫过 lc4Slope（0→0.5）完全不影响阈值，说明不是角速度项的问题；抬高巨纤维阈值到 220 Hz 能把张角推到 22°，但起飞次数从 62 掉到 4，再高就完全不起飞了",
+     "script": "dodge/looming_threshold.js",
+     "result_file": "results/dodge/looming_threshold.json",
+     "log": "§43",
+     "verify": [
+      [
+       "by_radius.1.theta_cv",
+       0.0231,
+       0.002
+      ],
+      [
+       "by_radius.1.theta_mean",
+       17.33,
+       0.05
+      ],
+      [
+       "by_radius.0.theta_cv",
+       0.3854,
+       0.002
+      ],
+      [
+       "by_radius.1.criterion_A",
+       true,
+       0
+      ],
+      [
+       "by_radius.1.criterion_B",
+       true,
+       0
+      ]
+     ]
+    },
+    {
+     "id": "gf_not_looming",
+     "what": "巨纤维**不**响应逼近刺激（逃逸另有一条下行通路）",
+     "status": "blocked",
+     "result": "—",
+     "caveat": "**这条与我们游戏的设计直接冲突**：游戏就是用巨纤维（DNp01）越阈来触发起飞的。但这不是简单的对错——文献本身有张力：Fotowat 2009 测到巨纤维对 looming 不放电（白眼果蝇 7 只全部如此，Dα7 突变体仍以 81–89% 概率逃逸）；而 Ache et al. 2019（我们编码所依据的那篇）恰恰是在讲 LC4/LPLC2 怎么把 looming 编码进巨纤维。von Reyn et al. 2014 的解释是**两种逃逸模式**：巨纤维负责「短模式」（牺牲稳定性换速度），而 Fotowat 用的慢逼近（l/|v| 10–80 ms）引发的是先抬翅的「长模式」，那条不需要巨纤维。**我们的模型里没有这两种模式之分**，也没有抬翅，所以这条无法在现有模型上判对错——要复现它得先把长/短模式和抬翅建进去",
+     "script": null,
+     "result_file": null,
+     "log": "§43"
     }
    ]
   },
