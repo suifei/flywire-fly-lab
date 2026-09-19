@@ -51,9 +51,14 @@
       this.fired = new Int32Array(this.n);
       this.nFired = 0;
       this.random = rng32(seed);
+      this._seed0 = seed >>> 0;
       this.silenced = new Set();
       this.reset();
     }
+
+    // 把泊松输入的随机流重新播种：同一个输入在同一个种子下给出**逐位相同**的结果。
+    // 五子棋那套"水库"用得到——否则同一个棋盘每次跑出来的特征都不一样，读出层只能去拟合噪声。
+    reseed(seed) { this.random = rng32((seed >>> 0) || this._seed0); }
 
     reset() {
       this.v.fill(this.P.v0); this.g.fill(0); this.last.fill(-1e9); this.step = 0;

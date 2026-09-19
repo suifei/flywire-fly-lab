@@ -35,7 +35,8 @@ const t0 = Date.now();
 for (let s = 0; s < DS.n; s++) {
   const smp = DS.samples[s];
   const bd = new Uint8Array(Buffer.from(smp.board, "base64"));
-  const cnt = F.featuresOf(brain, map, bd, smp.me, { hz: HZ, ms: MS });
+  // 固定种子：同一个局面永远给出同一份特征（水库必须是确定性函数，否则读出层在拟合噪声）
+  const cnt = F.featuresOf(brain, map, bd, smp.me, { hz: HZ, ms: MS, seed: 777 });
   for (let k = 0; k < cols.length; k++) buf.writeFloatLE(cnt[cols[k]], (s * cols.length + k) * 4);
   if (s % 500 === 0) process.stdout.write(`\r  ${s}/${DS.n}  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
 }
