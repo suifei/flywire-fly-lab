@@ -68,25 +68,24 @@ PAPERS = [
                   verify=[("pearson_intact_vs_paper", 0.992, 0.0005), ("n_down", 12, 0), ("n_total", 13, 0),
                           ("mn9_r.ours_intact", 62.667, 0.02), ("mn9_r.ours_shuf_mean", 0.0, 0.001),
                           ("design.n_shuffles", 10, 0)]),
-             dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**）", status="partial",
-                  result="w_syn −30% 下 MN9_r = **34.5 Hz**（论文表 11B **33.47**，差 3%）、+30% 下 **96.7**（论文 96.13）；"
-                         "**抑制 −50% 下 MN9_r = 154.7**（论文表 11D 143.93）、+50% 下 **36.2**（论文 19.07）；"
-                         "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 "
-                         "**57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +50% 保住 77%",
-                  caveat="**抑制的幅度是 ±50% 不是 ±30%**——表 11A 的分节标题写着 Decrease/Increase Inhibition 50%，"
-                         "而 11D/11E 那两张表自己的表头不带幅度。第一版照着 w_syn 那两节的 30% 想当然写成了 ±30%，"
-                         "2026-09-19 查表 11A 时发现；改成 ±50% 后两个抑制条件都更接近论文（−50%：154.7 vs 126.3 更接近 143.9；"
-                         "+50%：36.2 vs 59.5 更接近 19.1）。"
-                         "**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自强弱」对不太上。"
-                         "表 11B–F 的 182 行里只有 38–48 行带 flyid。另有一个论文没报告的现象："
-                         "**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475），所以那一列的 MN9 也对不上（115.5 vs 28.4）",
-                  script="screen/robustness.py", result_file="results/screen/robustness/summary.json", log="§35 + §38.1",
-                  verify=[("perturbations.w-30.mn9_right", 34.5, 0.1),
-                          ("perturbations.inh-50.mn9_right", 154.67, 0.1),
-                          ("perturbations.inh+50.mn9_right", 36.17, 0.1),
-                          ("perturbations.glut_exc.n_active", 30475, 0),
-                          ("perturbations.w-30.frac_baseline_kept", 0.5748, 0.002),
-                          ("perturbations.inh+50.frac_baseline_kept", 0.772, 0.002)]),
+             dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**，三条预测全做）", status="reproduced",
+                  result="**第三条预测也做了**（每种扰动下重做整轮敲除筛选，6,494 段 / 3 h）："
+                         "与默认判定一致的个数 **[8, 6, 8, 8, 7]**，论文是 **[8, 7, 8, 7, 7]**——"
+                         "**5 个里 3 个完全吻合，其余差 1，平均绝对差 0.4**。"
+                         "前两条：w_syn −30% 下 MN9_r **34.5 Hz**（论文 33.47）、+30% **96.7**（96.13）、"
+                         "抑制 −50% **154.7**（143.93）、+50% **36.2**（19.07）；「同侧 MN9 比对侧弱」**6/6 成立**",
+                  caveat="**论文对每种扰动重新标定了刺激频率**（表 11A 的 Experiment 一列：115 / 30 / 30 / 100 / 45 Hz），"
+                         "不是在同一强度下比较——突触弱了就把输入调高。漏掉这一点会全盘对不上。"
+                         "**抑制的幅度是 ±50% 不是 ±30%**（分节标题里写着，11D/11E 表头不带幅度；第一版想当然了）。"
+                         "翻转最多的是 **Zorro（5 个扰动里翻了 4 次）与 Rattle（3 次）**——"
+                         "与 §16 「只有 Zorro 和 Roundup 的判定随口径翻转」一致。"
+                         "**逐个神经元的发放率相关只有 r = 0.26–0.47**；谷氨酸改兴奋性让全脑失控（活跃 421 → 30,475）",
+                  script="screen/robust_knockout.py", result_file="results/screen/robust_knockout/summary.json",
+                  log="§35 + §38.1 + §39",
+                  verify=[("ours_consistent.0", 8, 0), ("ours_consistent.1", 6, 0), ("ours_consistent.2", 8, 0),
+                          ("ours_consistent.3", 8, 0), ("ours_consistent.4", 7, 0),
+                          ("mean_abs_diff", 0.4, 0.001),
+                          ("conditions.baseline.n_scored", 183, 0)]),
              dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="reproduced",
                   result="8 个条件全跑（全脑，各 6 个实现），刺激名单用**官方 notebook 的**。"
                          "剔除全部被刺激 GRN 后的 466 个神经元上，与论文发放率的 Pearson **0.963–0.999**；"

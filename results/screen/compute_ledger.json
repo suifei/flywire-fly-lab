@@ -57,18 +57,58 @@
    "wall_h": 1.991,
    "name": "JON 论文名单（24.2 + 24.3 节，含集中度段）",
    "sec_per_segment": 2.04
+  },
+  {
+   "files": 8,
+   "rows": 48,
+   "segments": 6,
+   "wall_h": 0.103,
+   "name": "参数稳健性 · 前两条预测（35 + 38.1 节）",
+   "sec_per_segment": 61.8
+  },
+  {
+   "files": 275,
+   "rows": 5351,
+   "segments": 4662,
+   "wall_h": 3.361,
+   "name": "参数稳健性 · 第三条预测：每种扰动重做整轮敲除（39 节）",
+   "sec_per_segment": 2.6
+  },
+  {
+   "files": 25,
+   "rows": 261,
+   "segments": 171,
+   "wall_h": 0.289,
+   "name": "四味交互 ST4 + Fig 3 剂量网格（37.1 + 37.2 节）",
+   "sec_per_segment": 6.08
+  },
+  {
+   "files": 31,
+   "rows": 606,
+   "segments": 606,
+   "wall_h": 0.356,
+   "name": "Fig 2A 伸喙充分性（37.4 节）",
+   "sec_per_segment": 2.11
+  },
+  {
+   "files": 1,
+   "rows": 6,
+   "segments": 6,
+   "wall_h": 0.011,
+   "name": "Fig 5G JO-CE / JO-F（37.5 节）",
+   "sec_per_segment": 6.6
   }
  ],
- "total_files": 953,
- "total_rows": 18863,
- "total_segments": 18799,
- "total_wall_h": 10.56,
- "sec_per_segment": 2.02,
- "duplicate_rows": 64,
- "fly_brain_time_h": 5.22,
+ "total_files": 1293,
+ "total_rows": 25135,
+ "total_segments": 24250,
+ "total_wall_h": 14.68,
+ "sec_per_segment": 2.18,
+ "duplicate_rows": 885,
+ "fly_brain_time_h": 6.74,
  "上一版账本": {
-  "total_segments": 17628,
-  "差": 1171,
+  "total_segments": 18799,
+  "差": 5451,
   "说明": "上一版是报告正文里的临时 shell 循环生成的，会随时过期"
  }
 }
