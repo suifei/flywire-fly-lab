@@ -178,18 +178,22 @@ def main():
         out["boardfly_minus_board"] = round(d3, 4)
         out["criterion_C_brain_adds_on_top"] = bool(d3 > 0.01)
     (GD / "train.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
-    # 页面用的权重：只存最好的那一臂（真实连接组）
-    if "fly_intact" in keep:
-        W, rec, mu, sd = keep["fly_intact"]
-        meta = json.loads((GD / "feat_intact.json").read_text())
-        (GD / "readout.json").write_text(json.dumps(dict(
-            arm="intact", alpha=rec["alpha"], test=rec["test"], hz=meta["hz"], ms=meta["ms"],
+    # 权重导出：真实接线**与打乱接线各存一份**。
+    # 打乱那一份不是备份，是对局时的对照——只有让"打乱脑"也真的下几盘，
+    # 才能回答"连接组对下棋有没有贡献"这个问题（读出层的 top1 只说明学到多少，不等于棋力）。
+    for armk, fname in (("fly_intact", "readout.json"), ("fly_shuffled", "readout_shuffled.json")):
+        if armk not in keep:
+            continue
+        W, rec, mu, sd = keep[armk]
+        meta = json.loads((GD / f"feat_{armk.split('_')[1]}.json").read_text())
+        (GD / fname).write_text(json.dumps(dict(
+            arm=armk.split("_")[1], alpha=rec["alpha"], test=rec["test"], hz=meta["hz"], ms=meta["ms"],
             # sd 不能四舍五入到 4 位：从不放电的神经元 sd = 1e-6，舍完变成 0，
             # 浏览器那边除零 → NaN → 一个合法着都选不出来（2026-09-19 实测踩过）
             col_idx=meta["col_idx"], mu=[round(float(x), 4) for x in mu],
             sd=[float(f"{float(x):.6g}") for x in sd],
             W=[[round(float(v), 5) for v in row] for row in W]), separators=(",", ":")))
-        print("→ results/gomoku/readout.json")
+        print(f"→ results/gomoku/{fname}")
     print("\n" + json.dumps({k: v for k, v in out.items() if k.startswith("criterion") or k.startswith("intact")},
                             ensure_ascii=False))
     print("→ results/gomoku/train.json")

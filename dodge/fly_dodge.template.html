@@ -315,6 +315,14 @@ code { font: 12px var(--mono); }
           <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
           <span class="pill" id="optoPill" hidden></span>
         </div>
+        <div class="row" id="compRow">
+          <label class="k" title="每多一只就多跑一份 4,599 个神经元的网络，帧率会掉">同伴果蝇</label>
+          <button class="btn" id="cpAdd">+ 加一只</button>
+          <button class="btn" id="cpDel">− 去一只</button>
+          <button class="btn" id="cpClear">全部撤走</button>
+          <span class="pill" id="cpPill">0 只</span>
+          <small style="color:var(--muted)">每只都有自己独立的一份真实连接组大脑；只接了视觉→转向/起飞这一路</small>
+        </div>
         <div class="row" id="gomokuRow">
           <label class="k" title="场边的 3D 棋盘：果蝇用真实连接组 + 一层线性读出来选点">五子棋</label>
           <div class="seg" role="group">
@@ -514,6 +522,15 @@ code { font: 12px var(--mono); }
         而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
+      <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
+      <div class="tbl"><table id="tGomokuPlay"></table></div>
+      <p class="sub" id="gmPlayNote"></p>
+      <p class="sub"><b>两个判据给出了不同答案，两个都写在这里</b>：按「打随机的胜率」看，真实接线 33/40
+        比打乱接线 24/40 高 22.5 个百分点，越过了事先定的 15 pp 线，判「连接组对棋力有贡献」<b>成立</b>；
+        但两者<b>正面交锋是 18/40（约五五开）</b>，而且 40 局里<b>执白的一方赢了 38 局</b>——
+        先后手效应（黑方有禁手）远大于两个脑的差别。所以诚实的说法是：
+        <b>真实接线可能比打乱版少犯一点错，但这点差别小到被先后手淹没</b>，
+        而两者都被那个几十行的启发式老师 <b>0:40</b> 完胜，平均 8–9 手就输。</p>
       <p class="sub"><b>为什么这是个有意义的阴性结果</b>：它说明"把连接组接进游戏 + 训练一个读出层"这件事，
         本身<b>不能证明连接组在起作用</b>——必须跑打乱对照。我们跑了，结果是不起作用。
         果蝇脑不是一个好用的"水库"：它稀疏放电（4,599 个里只有约 500 个响应）、
@@ -844,11 +861,13 @@ code { font: 12px var(--mono); }
 <script id="soma-data" type="application/json">/*__SOMA__*/</script>
 <script id="gomoku-readout" type="application/json">/*__GOMOKU_READOUT__*/</script>
 <script id="gomoku-train" type="application/json">/*__GOMOKU_TRAIN__*/</script>
+<script id="gomoku-play" type="application/json">/*__GOMOKU_PLAY__*/</script>
 <script>/*__GOMOKU_RULES_JS__*/</script>
 <script>/*__GOMOKU_TEACHER_JS__*/</script>
 <script>/*__GOMOKU_FEATURES_JS__*/</script>
 <script>/*__GOMOKU_FLY_JS__*/</script>
 <script>/*__GOMOKU_BOARD3D_JS__*/</script>
+<script>/*__COMPANIONS_JS__*/</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -1650,6 +1669,55 @@ code { font: 12px var(--mono); }
         ? "七关全部满足「参考解全过、不干预全不过」。" : "有关卡不满足这一条，见上表。");
   })();
 
+  // ── 同伴果蝇：每只一份独立的真实连接组大脑 ──────────────────────────
+  // 诚实说明：同伴只接了「视觉 → 转向 / 起飞」这一路，不吃不梳理——那些通路在它们身上
+  // 没有接输入，不是被简化掉了。外形用简化网格（真身模型只给主角），大脑是真的。
+  const COMP = (() => {
+    if (typeof FlyCompanions === "undefined") return null;
+    const list = [];
+    function mesh() {
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 7),
+        new THREE.MeshLambertMaterial({ color: css("--body") }));
+      body.scale.set(1.7, 0.85, 0.75); body.castShadow = true; g.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 6),
+        new THREE.MeshLambertMaterial({ color: css("--eye") }));
+      head.position.x = 1.9; g.add(head);
+      for (const sgn of [1, -1]) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.3),
+          new THREE.MeshLambertMaterial({ color: css("--muted"), transparent: true, opacity: .32, side: THREE.DoubleSide }));
+        w.position.set(-0.6, sgn * 1.1, 0.6); w.rotation.x = 0.2 * sgn; g.add(w);
+      }
+      g.scale.setScalar(FLY_SCALE * 0.8);
+      scene.add(g);
+      return g;
+    }
+    const pill = () => { $("cpPill").textContent = list.length + " 只"; };
+    function add() {
+      if (list.length >= 6) return;
+      const c = FlyCompanions.create(SUB, ConnectomeBrain, game, 100 + list.length * 7 + ((Math.random() * 1000) | 0));
+      c.mesh = mesh();
+      list.push(c); pill();
+      $("coach").textContent = `场上现在有 ${list.length + 1} 只果蝇，每只都在你的浏览器里跑自己的一份 ${SUB.meta.n.toLocaleString()} 神经元网络。`;
+    }
+    function del() { const c = list.pop(); if (c) scene.remove(c.mesh); pill(); }
+    function clear() { while (list.length) del(); }
+    function step() { for (const c of list) c.step(); }
+    function draw() {
+      for (const c of list) {
+        const S = c.S;
+        c.mesh.position.set(S.x, S.y, S.z + 1.2);
+        c.mesh.rotation.set(0, 0, S.h);
+        c.mesh.children[2].rotation.y = Math.sin(S.phase * 3 + performance.now() * 0.05) * 0.5;
+        c.mesh.children[3].rotation.y = -Math.sin(S.phase * 3 + performance.now() * 0.05) * 0.5;
+      }
+    }
+    $("cpAdd").onclick = add; $("cpDel").onclick = del; $("cpClear").onclick = clear;
+    const api = { step, draw, list, add, del };
+    window.__comp = api;
+    return api;
+  })();
+
   // ── 五子棋：场边 3D 棋盘 + 果蝇当棋子 ──────────────────────────────
   // 果蝇怎么选点：棋盘 → 真实神经元的泊松驱动 → 4,599 个神经元跑 100 ms →
   // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
@@ -1774,6 +1842,22 @@ code { font: 12px var(--mono); }
     $("gmSelf").onclick = () => setMode("self");
     $("gmTeach").onclick = () => setMode("teach");
     $("gmNew").onclick = () => { if (S.on) reset(); };
+    // 对局结果表
+    (function buildPlayTable() {
+      const t = document.getElementById("tGomokuPlay"); if (!t) return;
+      let PL = null;
+      try { PL = JSON.parse(document.getElementById("gomoku-play").textContent); } catch (e) { return; }
+      const NM = { fly_intact: "果蝇 · 真实连接组", fly_shuffled: "果蝇 · 打乱接线",
+                   teacher: "启发式老师", random: "随机走子" };
+      t.innerHTML = "<tr><th>黑方</th><th>白方</th><th>黑胜</th><th>白胜</th><th>平均手数</th></tr>" +
+        PL.results.map(r => `<tr><td>${NM[r.black] || r.black}</td><td>${NM[r.white] || r.white}</td>` +
+          `<td>${r.black_win}</td><td>${r.white_win}</td><td>${r.mean_ply}</td></tr>`).join("");
+      const n = document.getElementById("gmPlayNote");
+      if (n) n.textContent = `每组 ${PL.n_games_per_pair} 局。打随机：真实接线 ${PL.vs_random.fly_intact}/${PL.vs_random.of}，` +
+        `打乱接线 ${PL.vs_random.fly_shuffled}/${PL.vs_random.of}；打老师 ${PL.vs_teacher.fly_intact}/${PL.vs_teacher.of}；` +
+        `真实 vs 打乱正面交锋 ${PL.head_to_head.fly_intact}/${PL.head_to_head.of}。`;
+    })();
+
     // 训练对照表
     (function buildTrainTable() {
       const t = document.getElementById("tGomoku"); if (!t || !TR.arms) return;
@@ -2458,13 +2542,14 @@ code { font: 12px var(--mono); }
     if (!paused) {
       carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
-      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); carry -= game.chunkDt; n++; }
+      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); if (COMP) COMP.step(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
       BRAIN.draw(Math.min(0.1, dtReal));
       if (GM) GM.tick(Math.min(0.1, dtReal));
+      if (COMP) COMP.draw();
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
       window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);

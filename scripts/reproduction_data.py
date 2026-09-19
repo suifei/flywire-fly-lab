@@ -309,6 +309,54 @@ PARAMETERS = [
 
 # ── 本项目自己的结果（不是对某篇论文的复现，但同样是"我们知道什么"）──────────
 FINDINGS = [
+    dict(id="gomoku_reservoir", what="把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
+         status="negative",
+         result="**没有**。脑里一个突触都不训练、只训练一层线性读出：真实连接组测试 top1 **0.025**，"
+                "**打乱接线 0.018**（差 0.007），而直接看棋盘 **0.174**（7 倍）。拼接反而更差（0.081）。"
+                "连「保拓扑编码」（按真实胞体位置铺棋盘）也救不回来（0.025）",
+         caveat="12,270 个局面、500 局自对弈、按整局切分。只用了线性读出——更强的读出可能挖出更多，"
+                "但那正是 Mineault 批评的「读出层足够灵活就能学会任何东西」。"
+                "棋盘→神经元的映射是任意的；禁手由规则引擎判定，不是果蝇。"
+                "**这条阴性结果的意义**：「把连接组接进游戏 + 训练读出层」本身不能证明连接组在起作用，必须跑打乱对照",
+         script="gomoku/train_readout.py", result_file="results/gomoku/train.json", log="§38.4",
+         # 对局结果单独一条，见下方 gomoku_play
+         verify=[("arms.fly_intact.best.test.top1", 0.0244, 0.0005),
+                 ("arms.fly_shuffled.best.test.top1", 0.018, 0.0005),
+                 ("arms.board_raw.best.test.top1", 0.1745, 0.0005),
+                 ("random_baseline_top1", 0.0171, 0.0005)]),
+    dict(id="gomoku_play", what="让真实脑与打乱脑真下 40 局，棋力上分得开吗",
+         status="partial",
+         result="**分得开一点点，但被先后手淹没**。打随机：真实接线 **33/40**、打乱接线 **24/40**"
+                "（差 22.5 pp，越过事先定的 15 pp 线）；但两者**正面交锋 18/40（约五五开）**，"
+                "且 40 局里**执白的一方赢了 38 局**。两者都被启发式老师 **0:40** 完胜，平均 8–9 手就输",
+         caveat="**两个判据给出不同答案，都写出来**：按打随机的胜率判「连接组有贡献」成立，"
+                "按正面交锋判不成立。先后手效应（黑方有禁手）远大于两个脑的差别。"
+                "每组 20 局，n 很小；读出层 top1 上（0.0244 vs 0.018）本来就看不出差别，与对局结论一致",
+         script="gomoku/play_test.js", result_file="results/gomoku/play.json", log="§38.4",
+         verify=[("vs_random.fly_intact", 33, 0), ("vs_random.fly_shuffled", 24, 0),
+                 ("head_to_head.fly_intact", 18, 0), ("vs_teacher.fly_intact", 0, 0)]),
+    dict(id="touch_pathway", what="「只给物理量、不写判断逻辑」能让果蝇自己绕开围栏吗",
+         status="reproduced",
+         result="**能，但前提是子回路里真有那条通路**。触感送到触角 JO（v2 唯一的机械感觉）**完全无效**"
+                "——JO 只通到梳理指令；重裁含**头部刚毛**的子回路 v3 后，同样的触感让走过的格子从 "
+                "**9 涨到 31.5**、路程 **156 → 603 mm**，中间没有任何我们写的判断逻辑。"
+                "全脑查证：头部刚毛（305 个）到转向/逃逸只要 **2 跳**",
+         caveat="指标换过一次：第一版用「贴墙时间占比」，它**分不出「钉死在一点」和「贴着墙滑行」**，"
+                "按那个指标触感「没用」（85.6% → 85.6%）。指标选错，阴性结果就是假的。"
+                "另外 FlyWire 是**脑**的连接组，腿部与刚毛的机械感觉大部分在腹神经索里，不在这份数据中",
+         script="dodge/touch_test.js", result_file="results/dodge/touch.json", log="§38.3",
+         verify=[("arms.v3 · 触感→头部刚毛.mean.cells", 31.5, 0.6),
+                 ("arms.v3 · 什么都不给.mean.cells", 9, 0.6),
+                 ("arms.v2 · 触感→JO.mean.cells", 9, 0.6)]),
+    dict(id="wall_vision", what="像素路径看得见围栏吗（架构质疑：手写前端只看球）",
+         status="partial",
+         result="**看得见，但分不出来**。静止时读数恒为 0；朝墙走 LPLC2 中位 **34.2**、p95 140.6，"
+                "而**背墙走**是 23.5 / 111.4——两者几乎重叠。所以缺陷不是「墙没接进去」，"
+                "而是这套 LPLC2 汇集**不对自体运动做补偿**，走路本身就制造假逼近",
+         caveat="§28.19 的「45 mm 外全瞎」是对 **2.5 mm 的球**说的，对墙不成立（墙是整面）。"
+                "真果蝇有平衡棒与传出拷贝来抵消自体运动，我们的模型里没有",
+         script="dodge/wall_vision_test.js", result_file="results/dodge/wall_vision.json", log="§38.2",
+         verify=[("criterion_peak_above_control", True, 0), ("control_p95", 111.4, 0.2)]),
     dict(id="subcircuit_vs_full", what="4,599 个神经元的子回路能多大程度代表全脑",
          result="敲除模式整体重现：糖 Pearson **+0.75**、水 **+0.89**（n=10，同一口径两边各测一次）",
          caveat="单个神经元会失真。最典型是 CB0883：全脑里是枢纽（单敲 0.76、配对 0.24），子回路里**完全无作用**（1.07）——"

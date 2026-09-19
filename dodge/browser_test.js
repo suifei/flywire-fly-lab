@@ -211,6 +211,16 @@ function chromePath() {
     });
     return r.overline === "长连" && r.legal === null ? "长连判出、正常点放行" : `长连=${r.overline} 正常点=${r.legal}`;
   });
+  await step("同伴果蝇：加两只之后各自有独立大脑并在动", async () => {
+    await page.click("#cpAdd"); await page.click("#cpAdd");
+    const before = await page.evaluate(() => window.__comp ? window.__comp.list.map(c => [c.S.x, c.S.y]) : null);
+    await new Promise(r => setTimeout(r, 2500));
+    const after = await page.evaluate(() => window.__comp ? window.__comp.list.map(c => [c.S.x, c.S.y]) : null);
+    if (!before || before.length !== 2) return "没有同伴模块或数量不对";
+    const moved = before.filter((p, i) => Math.hypot(after[i][0] - p[0], after[i][1] - p[1]) > 1).length;
+    const brains = await page.evaluate(() => window.__comp.list.map(c => c.brain.n));
+    return moved === 2 ? `2 只都在走，各自 ${brains[0]} 神经元` : `只有 ${moved} 只在动`;
+  });
   let uiBad = 0;
   for (const [name, v] of ui) {
     // 失败词要写全：2026-09-19 "6 秒内一子未落" 被当成通过，因为它不以任何一个前缀开头

@@ -315,6 +315,14 @@ code { font: 12px var(--mono); }
           <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
           <span class="pill" id="optoPill" hidden></span>
         </div>
+        <div class="row" id="compRow">
+          <label class="k" title="每多一只就多跑一份 4,599 个神经元的网络，帧率会掉">同伴果蝇</label>
+          <button class="btn" id="cpAdd">+ 加一只</button>
+          <button class="btn" id="cpDel">− 去一只</button>
+          <button class="btn" id="cpClear">全部撤走</button>
+          <span class="pill" id="cpPill">0 只</span>
+          <small style="color:var(--muted)">每只都有自己独立的一份真实连接组大脑；只接了视觉→转向/起飞这一路</small>
+        </div>
         <div class="row" id="gomokuRow">
           <label class="k" title="场边的 3D 棋盘：果蝇用真实连接组 + 一层线性读出来选点">五子棋</label>
           <div class="seg" role="group">
@@ -514,6 +522,15 @@ code { font: 12px var(--mono); }
         而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
+      <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
+      <div class="tbl"><table id="tGomokuPlay"></table></div>
+      <p class="sub" id="gmPlayNote"></p>
+      <p class="sub"><b>两个判据给出了不同答案，两个都写在这里</b>：按「打随机的胜率」看，真实接线 33/40
+        比打乱接线 24/40 高 22.5 个百分点，越过了事先定的 15 pp 线，判「连接组对棋力有贡献」<b>成立</b>；
+        但两者<b>正面交锋是 18/40（约五五开）</b>，而且 40 局里<b>执白的一方赢了 38 局</b>——
+        先后手效应（黑方有禁手）远大于两个脑的差别。所以诚实的说法是：
+        <b>真实接线可能比打乱版少犯一点错，但这点差别小到被先后手淹没</b>，
+        而两者都被那个几十行的启发式老师 <b>0:40</b> 完胜，平均 8–9 手就输。</p>
       <p class="sub"><b>为什么这是个有意义的阴性结果</b>：它说明"把连接组接进游戏 + 训练一个读出层"这件事，
         本身<b>不能证明连接组在起作用</b>——必须跑打乱对照。我们跑了，结果是不起作用。
         果蝇脑不是一个好用的"水库"：它稀疏放电（4,599 个里只有约 500 个响应）、
@@ -1257,15 +1274,25 @@ code { font: 12px var(--mono); }
      "id": "robustness",
      "what": "参数稳健性（补充表 11A–F，**全脑**）",
      "status": "partial",
-     "result": "w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 **57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +30% 保住 87%，其余三种 ≥99%",
-     "caveat": "**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自多强」对不太上，原因未分辨。表 11B–F 的 182 行里只有 38–48 行带 flyid（其余是类型级汇总块）。第三条预测「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），**没有做**。另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475）",
+     "result": "w_syn −30% 下 MN9_r = **34.5 Hz**（论文表 11B **33.47**，差 3%）、+30% 下 **96.7**（论文 96.13）；**抑制 −50% 下 MN9_r = 154.7**（论文表 11D 143.93）、+50% 下 **36.2**（论文 19.07）；「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 **57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +50% 保住 77%",
+     "caveat": "**抑制的幅度是 ±50% 不是 ±30%**——表 11A 的分节标题写着 Decrease/Increase Inhibition 50%，而 11D/11E 那两张表自己的表头不带幅度。第一版照着 w_syn 那两节的 30% 想当然写成了 ±30%，2026-09-19 查表 11A 时发现；改成 ±50% 后两个抑制条件都更接近论文（−50%：154.7 vs 126.3 更接近 143.9；+50%：36.2 vs 59.5 更接近 19.1）。**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自强弱」对不太上。表 11B–F 的 182 行里只有 38–48 行带 flyid。另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475），所以那一列的 MN9 也对不上（115.5 vs 28.4）",
      "script": "screen/robustness.py",
      "result_file": "results/screen/robustness/summary.json",
-     "log": "§35",
+     "log": "§35 + §38.1",
      "verify": [
       [
        "perturbations.w-30.mn9_right",
        34.5,
+       0.1
+      ],
+      [
+       "perturbations.inh-50.mn9_right",
+       154.67,
+       0.1
+      ],
+      [
+       "perturbations.inh+50.mn9_right",
+       36.17,
        0.1
       ],
       [
@@ -1275,27 +1302,12 @@ code { font: 12px var(--mono); }
       ],
       [
        "perturbations.w-30.frac_baseline_kept",
-       0.575,
+       0.5748,
        0.002
       ],
       [
-       "perturbations.w+30.frac_baseline_kept",
-       1.0,
-       0.002
-      ],
-      [
-       "perturbations.inh-30.frac_baseline_kept",
-       0.998,
-       0.002
-      ],
-      [
-       "perturbations.inh+30.frac_baseline_kept",
-       0.869,
-       0.002
-      ],
-      [
-       "perturbations.glut_exc.frac_baseline_kept",
-       0.99,
+       "perturbations.inh+50.frac_baseline_kept",
+       0.772,
        0.002
       ]
      ]
@@ -1961,6 +1973,119 @@ code { font: 12px var(--mono); }
   }
  ],
  "findings": [
+  {
+   "id": "gomoku_reservoir",
+   "what": "把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
+   "status": "negative",
+   "result": "**没有**。脑里一个突触都不训练、只训练一层线性读出：真实连接组测试 top1 **0.025**，**打乱接线 0.018**（差 0.007），而直接看棋盘 **0.174**（7 倍）。拼接反而更差（0.081）。连「保拓扑编码」（按真实胞体位置铺棋盘）也救不回来（0.025）",
+   "caveat": "12,270 个局面、500 局自对弈、按整局切分。只用了线性读出——更强的读出可能挖出更多，但那正是 Mineault 批评的「读出层足够灵活就能学会任何东西」。棋盘→神经元的映射是任意的；禁手由规则引擎判定，不是果蝇。**这条阴性结果的意义**：「把连接组接进游戏 + 训练读出层」本身不能证明连接组在起作用，必须跑打乱对照",
+   "script": "gomoku/train_readout.py",
+   "result_file": "results/gomoku/train.json",
+   "log": "§38.4",
+   "verify": [
+    [
+     "arms.fly_intact.best.test.top1",
+     0.0244,
+     0.0005
+    ],
+    [
+     "arms.fly_shuffled.best.test.top1",
+     0.018,
+     0.0005
+    ],
+    [
+     "arms.board_raw.best.test.top1",
+     0.1745,
+     0.0005
+    ],
+    [
+     "random_baseline_top1",
+     0.0171,
+     0.0005
+    ]
+   ]
+  },
+  {
+   "id": "gomoku_play",
+   "what": "让真实脑与打乱脑真下 40 局，棋力上分得开吗",
+   "status": "partial",
+   "result": "**分得开一点点，但被先后手淹没**。打随机：真实接线 **33/40**、打乱接线 **24/40**（差 22.5 pp，越过事先定的 15 pp 线）；但两者**正面交锋 18/40（约五五开）**，且 40 局里**执白的一方赢了 38 局**。两者都被启发式老师 **0:40** 完胜，平均 8–9 手就输",
+   "caveat": "**两个判据给出不同答案，都写出来**：按打随机的胜率判「连接组有贡献」成立，按正面交锋判不成立。先后手效应（黑方有禁手）远大于两个脑的差别。每组 20 局，n 很小；读出层 top1 上（0.0244 vs 0.018）本来就看不出差别，与对局结论一致",
+   "script": "gomoku/play_test.js",
+   "result_file": "results/gomoku/play.json",
+   "log": "§38.4",
+   "verify": [
+    [
+     "vs_random.fly_intact",
+     33,
+     0
+    ],
+    [
+     "vs_random.fly_shuffled",
+     24,
+     0
+    ],
+    [
+     "head_to_head.fly_intact",
+     18,
+     0
+    ],
+    [
+     "vs_teacher.fly_intact",
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "touch_pathway",
+   "what": "「只给物理量、不写判断逻辑」能让果蝇自己绕开围栏吗",
+   "status": "reproduced",
+   "result": "**能，但前提是子回路里真有那条通路**。触感送到触角 JO（v2 唯一的机械感觉）**完全无效**——JO 只通到梳理指令；重裁含**头部刚毛**的子回路 v3 后，同样的触感让走过的格子从 **9 涨到 31.5**、路程 **156 → 603 mm**，中间没有任何我们写的判断逻辑。全脑查证：头部刚毛（305 个）到转向/逃逸只要 **2 跳**",
+   "caveat": "指标换过一次：第一版用「贴墙时间占比」，它**分不出「钉死在一点」和「贴着墙滑行」**，按那个指标触感「没用」（85.6% → 85.6%）。指标选错，阴性结果就是假的。另外 FlyWire 是**脑**的连接组，腿部与刚毛的机械感觉大部分在腹神经索里，不在这份数据中",
+   "script": "dodge/touch_test.js",
+   "result_file": "results/dodge/touch.json",
+   "log": "§38.3",
+   "verify": [
+    [
+     "arms.v3 · 触感→头部刚毛.mean.cells",
+     31.5,
+     0.6
+    ],
+    [
+     "arms.v3 · 什么都不给.mean.cells",
+     9,
+     0.6
+    ],
+    [
+     "arms.v2 · 触感→JO.mean.cells",
+     9,
+     0.6
+    ]
+   ]
+  },
+  {
+   "id": "wall_vision",
+   "what": "像素路径看得见围栏吗（架构质疑：手写前端只看球）",
+   "status": "partial",
+   "result": "**看得见，但分不出来**。静止时读数恒为 0；朝墙走 LPLC2 中位 **34.2**、p95 140.6，而**背墙走**是 23.5 / 111.4——两者几乎重叠。所以缺陷不是「墙没接进去」，而是这套 LPLC2 汇集**不对自体运动做补偿**，走路本身就制造假逼近",
+   "caveat": "§28.19 的「45 mm 外全瞎」是对 **2.5 mm 的球**说的，对墙不成立（墙是整面）。真果蝇有平衡棒与传出拷贝来抵消自体运动，我们的模型里没有",
+   "script": "dodge/wall_vision_test.js",
+   "result_file": "results/dodge/wall_vision.json",
+   "log": "§38.2",
+   "verify": [
+    [
+     "criterion_peak_above_control",
+     true,
+     0
+    ],
+    [
+     "control_p95",
+     111.4,
+     0.2
+    ]
+   ]
+  },
   {
    "id": "subcircuit_vs_full",
    "what": "4,599 个神经元的子回路能多大程度代表全脑",
@@ -7854,6 +7979,92 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
  "boardfly_minus_board": -0.094,
  "criterion_C_brain_adds_on_top": false
 }</script>
+<script id="gomoku-play" type="application/json">{
+ "n_games_per_pair": 20,
+ "readout_test_top1": 0.0244,
+ "results": [
+  {
+   "black": "fly_intact",
+   "white": "random",
+   "black_win": 16,
+   "white_win": 4,
+   "draw": 0,
+   "mean_ply": 104.1
+  },
+  {
+   "black": "random",
+   "white": "fly_intact",
+   "black_win": 3,
+   "white_win": 17,
+   "draw": 0,
+   "mean_ply": 90.3
+  },
+  {
+   "black": "fly_intact",
+   "white": "teacher",
+   "black_win": 0,
+   "white_win": 20,
+   "draw": 0,
+   "mean_ply": 9
+  },
+  {
+   "black": "teacher",
+   "white": "fly_intact",
+   "black_win": 20,
+   "white_win": 0,
+   "draw": 0,
+   "mean_ply": 8
+  },
+  {
+   "black": "fly_shuffled",
+   "white": "random",
+   "black_win": 9,
+   "white_win": 11,
+   "draw": 0,
+   "mean_ply": 95.8
+  },
+  {
+   "black": "random",
+   "white": "fly_shuffled",
+   "black_win": 5,
+   "white_win": 15,
+   "draw": 0,
+   "mean_ply": 80.5
+  },
+  {
+   "black": "fly_intact",
+   "white": "fly_shuffled",
+   "black_win": 0,
+   "white_win": 20,
+   "draw": 0,
+   "mean_ply": 73.7
+  },
+  {
+   "black": "fly_shuffled",
+   "white": "fly_intact",
+   "black_win": 2,
+   "white_win": 18,
+   "draw": 0,
+   "mean_ply": 92.4
+  }
+ ],
+ "vs_random": {
+  "fly_intact": 33,
+  "fly_shuffled": 24,
+  "of": 40
+ },
+ "vs_teacher": {
+  "fly_intact": 0,
+  "of": 40
+ },
+ "head_to_head": {
+  "fly_intact": 18,
+  "of": 40
+ },
+ "fly_total_wins": 33,
+ "fly_total_games": 80,
+ "criterion_connectome_helps_play": true
+}</script>
 <script>// 五子棋规则引擎（15×15，含黑方禁手），与渲染无关，页面与 node 共用。
 //
 // 禁手按连珠（Renju）规则，只对**黑方**生效：
@@ -8297,6 +8508,141 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
   const API = { build, CFG };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.GomokuBoard3D = API;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>// 同伴果蝇：场上再放几只，**每一只都有自己独立的一份真实连接组大脑**（同一个 4,599 神经元子回路）。
+//
+// 诚实说明：同伴只接了「视觉 → 转向 / 起飞」这一路（LC4/LPLC2 → DNa01/02、DNp01），
+// 不吃、不梳理、不后退——那些通路在它们身上没有接输入，不是被简化掉了。
+// 球与围栏用的是和主角**完全相同**的手写前端（game_core 里那套 dθ/dt）。
+// 代价是算力：每多一只就多跑一份 4,599 神经元的网络，页面帧率会掉。
+(function (root) {
+  const TG = ["DNa01_left", "DNa01_right", "DNa02_left", "DNa02_right", "DNp01_left", "DNp01_right"];
+
+  function rng32(seed) {
+    let s = seed >>> 0;
+    return () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  function create(SUB, BrainClass, game, seed) {
+    const CFG = game.CFG;
+    const brain = new BrainClass(SUB, seed * 13 + 5);
+    const rand = rng32(seed * 77 + 3);
+    const targetOf = new Int8Array(SUB.meta.n).fill(-1);
+    TG.forEach((g, k) => (SUB.groups[g] || []).forEach(i => { targetOf[i] = k; }));
+    const ema = new Float32Array(TG.length), counts = new Float32Array(TG.length);
+    const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
+    const S = { x: (rand() * 2 - 1) * hw * 0.7, y: (rand() * 2 - 1) * hh * 0.7, h: rand() * 6.283,
+                z: 0, phase: rand() * 10, jumpT: -1, cooldown: 0, jumpDir: 0, state: "walk",
+                speed: 0, omega: 0, wall: 0 };
+    const wallTheta = {};
+    const ballTheta = new Map();
+
+    function sense(dt) {
+      let lc4L = 0, lc4R = 0, lpL = 0, lpR = 0, threat = null, threatDrive = 0;
+      const ch = Math.cos(-S.h), sh = Math.sin(-S.h);
+      const enc = (theta, dtheta) => {
+        if (CFG.encoding === "ache2019") {
+          const td = theta * 180 / Math.PI, vd = dtheta * 180 / Math.PI;
+          return [CFG.lc4Slope * vd, CFG.lplc2Peak * Math.exp(-((td - CFG.lplc2Mu) ** 2) / (2 * CFG.lplc2Sigma ** 2))];
+        }
+        const v = CFG.loomGain * dtheta; return [v, v];
+      };
+      const seen = new Set();
+      for (const b of game.balls) {
+        seen.add(b.id);
+        const rx = b.x - S.x, ry = b.y - S.y;
+        const fx = ch * rx - sh * ry, fy = sh * rx + ch * ry;
+        const d = Math.max(Math.hypot(fx, fy), CFG.ballR + 0.01);
+        const theta = 2 * Math.atan(CFG.ballR / d);
+        const prev = ballTheta.get(b.id);
+        ballTheta.set(b.id, theta);
+        if (prev === undefined) continue;
+        const dtheta = (theta - prev) / dt;
+        if (dtheta <= 0 || theta < 0.05) continue;
+        const bearing = Math.atan2(fy, fx) * 180 / Math.PI;
+        if (Math.abs(bearing) > 165) continue;
+        const [lc4, lp] = enc(theta, dtheta);
+        if (bearing > -15) { lc4L += lc4; lpL += lp; }
+        if (bearing < 15) { lc4R += lc4; lpR += lp; }
+        if (lc4 + lp > threatDrive) { threatDrive = lc4 + lp; threat = Math.atan2(ry, rx); }
+      }
+      for (const id of [...ballTheta.keys()]) if (!seen.has(id)) ballTheta.delete(id);
+      if (CFG.wallVision) {
+        for (const [wx, wy] of [[hw, S.y], [-hw, S.y], [S.x, hh], [S.x, -hh]]) {
+          const rx = wx - S.x, ry = wy - S.y, d = Math.max(Math.hypot(rx, ry), 0.5);
+          if (d > CFG.wallSee) continue;
+          const fx = ch * rx - sh * ry, fy = sh * rx + ch * ry;
+          const bearing = Math.atan2(fy, fx) * 180 / Math.PI;
+          if (Math.abs(bearing) > 100) continue;
+          const theta = 2 * Math.atan(CFG.wallSpan / 2 / d);
+          const key = "w" + (wx === S.x ? (wy > 0 ? "T" : "B") : (wx > 0 ? "R" : "L"));
+          const prev = wallTheta[key]; wallTheta[key] = theta;
+          if (prev === undefined) continue;
+          const dtheta = (theta - prev) / dt;
+          if (dtheta <= 0) continue;
+          let [lc4, lp] = enc(theta, dtheta);
+          lc4 *= CFG.wallGain; lp *= CFG.wallGain;
+          if (bearing > -15) { lc4L += lc4; lpL += lp; }
+          if (bearing < 15) { lc4R += lc4; lpR += lp; }
+          if (lc4 + lp > threatDrive) { threatDrive = lc4 + lp; threat = Math.atan2(ry, rx); }
+        }
+      }
+      S.threatDir = threat;
+      const gain = CFG.lightFloor + (1 - CFG.lightFloor) * Math.max(0, Math.min(1, CFG.light));
+      const m = CFG.loomMax, c = v => Math.min(m, Math.max(0, v * gain));
+      brain.setRate("LC4_left", c(lc4L)); brain.setRate("LPLC2_left", c(lpL));
+      brain.setRate("LC4_right", c(lc4R)); brain.setRate("LPLC2_right", c(lpR));
+    }
+
+    function step() {
+      const dt = game.chunkDt;
+      sense(dt);
+      counts.fill(0);
+      brain.run(CFG.chunkSteps, i => { const k = targetOf[i]; if (k >= 0) counts[k]++; });
+      const k = dt / (CFG.emaTau + dt), kg = dt / (CFG.gfTau + dt);
+      for (let i = 0; i < TG.length; i++) {
+        const hz = counts[i] / Math.max(1, (SUB.groups[TG[i]] || []).length) / dt;
+        ema[i] += (i >= 4 ? kg : k) * (hz - ema[i]);
+      }
+      const dnaL = ema[0] + ema[2], dnaR = ema[1] + ema[3], gf = (ema[4] + ema[5]) / 2;
+      if (S.cooldown > 0) S.cooldown -= dt;
+      if (S.jumpT >= 0) {
+        S.jumpT += dt;
+        const dur = CFG.flyDur, u = Math.min(1, S.jumpT / dur);
+        S.z = CFG.flyHeight * Math.sin(Math.PI * u);
+        S.h = S.jumpDir;
+        S.x += Math.cos(S.jumpDir) * CFG.flySpeed * dt;
+        S.y += Math.sin(S.jumpDir) * CFG.flySpeed * dt;
+        if (u >= 1) { S.jumpT = -1; S.z = 0; S.cooldown = CFG.jumpCooldown; }
+        S.state = "fly"; S.speed = 0; S.omega = 0;
+      } else if (gf > CFG.gfThreshold && S.cooldown <= 0) {
+        // 起飞方向：背离最强的逼近刺激（Card & Dickinson 2008；与主角的"真实逃逸飞行"同一条规则，
+        // 只是同伴用的是简化的直线飞走，不放飞行片段）。
+        // **这一条是必要的，不是装饰**：只做原地垂直跳的话，落回原处仍然对着墙——
+        // 实测同伴贴墙时间 15%（ache2019）/ 24.8%（legacy）。
+        S.jumpT = 0; S.state = "fly";
+        S.jumpDir = S.threatDir == null ? S.h + Math.PI : S.threatDir + Math.PI;
+      } else {
+        S.state = "walk";
+        const omega = Math.max(-CFG.turnMax, Math.min(CFG.turnMax, game.mapSign * CFG.turnGain * (dnaL - dnaR))) * Math.PI / 180;
+        S.omega = omega; S.h += omega * dt;
+        S.speed = CFG.walkSpeed;
+        S.x += Math.cos(S.h) * S.speed * dt; S.y += Math.sin(S.h) * S.speed * dt;
+        S.phase += S.speed * dt;
+      }
+      const cx = Math.max(-hw, Math.min(hw, S.x)), cy = Math.max(-hh, Math.min(hh, S.y));
+      if (cx !== S.x || cy !== S.y) { S.x = cx; S.y = cy; S.wall += dt; } else S.wall = 0;
+      return S;
+    }
+
+    return { S, brain, step, readout: () => ({ dnaL: ema[0] + ema[2], dnaR: ema[1] + ema[3], gf: (ema[4] + ema[5]) / 2 }) };
+  }
+
+  const API = { create };
+  if (typeof module !== "undefined" && module.exports) module.exports = API;
+  else root.FlyCompanions = API;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
@@ -9100,6 +9446,55 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
         ? "七关全部满足「参考解全过、不干预全不过」。" : "有关卡不满足这一条，见上表。");
   })();
 
+  // ── 同伴果蝇：每只一份独立的真实连接组大脑 ──────────────────────────
+  // 诚实说明：同伴只接了「视觉 → 转向 / 起飞」这一路，不吃不梳理——那些通路在它们身上
+  // 没有接输入，不是被简化掉了。外形用简化网格（真身模型只给主角），大脑是真的。
+  const COMP = (() => {
+    if (typeof FlyCompanions === "undefined") return null;
+    const list = [];
+    function mesh() {
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 7),
+        new THREE.MeshLambertMaterial({ color: css("--body") }));
+      body.scale.set(1.7, 0.85, 0.75); body.castShadow = true; g.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 6),
+        new THREE.MeshLambertMaterial({ color: css("--eye") }));
+      head.position.x = 1.9; g.add(head);
+      for (const sgn of [1, -1]) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.3),
+          new THREE.MeshLambertMaterial({ color: css("--muted"), transparent: true, opacity: .32, side: THREE.DoubleSide }));
+        w.position.set(-0.6, sgn * 1.1, 0.6); w.rotation.x = 0.2 * sgn; g.add(w);
+      }
+      g.scale.setScalar(FLY_SCALE * 0.8);
+      scene.add(g);
+      return g;
+    }
+    const pill = () => { $("cpPill").textContent = list.length + " 只"; };
+    function add() {
+      if (list.length >= 6) return;
+      const c = FlyCompanions.create(SUB, ConnectomeBrain, game, 100 + list.length * 7 + ((Math.random() * 1000) | 0));
+      c.mesh = mesh();
+      list.push(c); pill();
+      $("coach").textContent = `场上现在有 ${list.length + 1} 只果蝇，每只都在你的浏览器里跑自己的一份 ${SUB.meta.n.toLocaleString()} 神经元网络。`;
+    }
+    function del() { const c = list.pop(); if (c) scene.remove(c.mesh); pill(); }
+    function clear() { while (list.length) del(); }
+    function step() { for (const c of list) c.step(); }
+    function draw() {
+      for (const c of list) {
+        const S = c.S;
+        c.mesh.position.set(S.x, S.y, S.z + 1.2);
+        c.mesh.rotation.set(0, 0, S.h);
+        c.mesh.children[2].rotation.y = Math.sin(S.phase * 3 + performance.now() * 0.05) * 0.5;
+        c.mesh.children[3].rotation.y = -Math.sin(S.phase * 3 + performance.now() * 0.05) * 0.5;
+      }
+    }
+    $("cpAdd").onclick = add; $("cpDel").onclick = del; $("cpClear").onclick = clear;
+    const api = { step, draw, list, add, del };
+    window.__comp = api;
+    return api;
+  })();
+
   // ── 五子棋：场边 3D 棋盘 + 果蝇当棋子 ──────────────────────────────
   // 果蝇怎么选点：棋盘 → 真实神经元的泊松驱动 → 4,599 个神经元跑 100 ms →
   // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
@@ -9224,6 +9619,22 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     $("gmSelf").onclick = () => setMode("self");
     $("gmTeach").onclick = () => setMode("teach");
     $("gmNew").onclick = () => { if (S.on) reset(); };
+    // 对局结果表
+    (function buildPlayTable() {
+      const t = document.getElementById("tGomokuPlay"); if (!t) return;
+      let PL = null;
+      try { PL = JSON.parse(document.getElementById("gomoku-play").textContent); } catch (e) { return; }
+      const NM = { fly_intact: "果蝇 · 真实连接组", fly_shuffled: "果蝇 · 打乱接线",
+                   teacher: "启发式老师", random: "随机走子" };
+      t.innerHTML = "<tr><th>黑方</th><th>白方</th><th>黑胜</th><th>白胜</th><th>平均手数</th></tr>" +
+        PL.results.map(r => `<tr><td>${NM[r.black] || r.black}</td><td>${NM[r.white] || r.white}</td>` +
+          `<td>${r.black_win}</td><td>${r.white_win}</td><td>${r.mean_ply}</td></tr>`).join("");
+      const n = document.getElementById("gmPlayNote");
+      if (n) n.textContent = `每组 ${PL.n_games_per_pair} 局。打随机：真实接线 ${PL.vs_random.fly_intact}/${PL.vs_random.of}，` +
+        `打乱接线 ${PL.vs_random.fly_shuffled}/${PL.vs_random.of}；打老师 ${PL.vs_teacher.fly_intact}/${PL.vs_teacher.of}；` +
+        `真实 vs 打乱正面交锋 ${PL.head_to_head.fly_intact}/${PL.head_to_head.of}。`;
+    })();
+
     // 训练对照表
     (function buildTrainTable() {
       const t = document.getElementById("tGomoku"); if (!t || !TR.arms) return;
@@ -9908,13 +10319,14 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     if (!paused) {
       carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
-      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); carry -= game.chunkDt; n++; }
+      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); if (COMP) COMP.step(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
       BRAIN.draw(Math.min(0.1, dtReal));
       if (GM) GM.tick(Math.min(0.1, dtReal));
+      if (COMP) COMP.draw();
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
       window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);

@@ -26,9 +26,14 @@ function rng32(seed) { let s = seed >>> 0;
   return () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
+const ROS = fs.existsSync(ROOT + "/results/gomoku/readout_shuffled.json")
+  ? JSON.parse(fs.readFileSync(ROOT + "/results/gomoku/readout_shuffled.json", "utf8")) : null;
 const flyI = FLY.makePlayer(SUB, ConnectomeBrain, RO);
+// 打乱脑：**连接组打乱 + 在打乱特征上单独训练的读出**。两边都换掉才是干净的对照。
+const flyS = ROS ? FLY.makePlayer(SUB, ConnectomeBrain, ROS, { shuffle: true }) : null;
 const AGENTS = {
   fly_intact: (b, c) => flyI.think(b, c).move,
+  fly_shuffled: (b, c) => (flyS ? flyS.think(b, c).move : -1),
   teacher: (b, c) => T.best(b, c).move,
   random: (() => { const r = rng32(4242);
     return (b, c) => { const m = G.legalMoves(b, c); return m.length ? m[(r() * m.length) | 0] : -1; }; })(),
@@ -52,6 +57,8 @@ function game(a, b, seed) {
 
 const pairs = [["fly_intact", "random"], ["random", "fly_intact"],
                ["fly_intact", "teacher"], ["teacher", "fly_intact"]];
+if (flyS) pairs.push(["fly_shuffled", "random"], ["random", "fly_shuffled"],
+                     ["fly_intact", "fly_shuffled"], ["fly_shuffled", "fly_intact"]);
 const out = { n_games_per_pair: NG, readout_test_top1: RO.test.top1, results: [] };
 const t0 = Date.now();
 for (const [A, B] of pairs) {
@@ -65,9 +72,20 @@ for (const [A, B] of pairs) {
   out.results.push(rec);
   console.log(`黑 ${A.padEnd(12)} vs 白 ${B.padEnd(12)}  ${wa}:${wb}（和 ${dr}），平均 ${rec.mean_ply} 手`);
 }
-const fw = out.results.filter(r => r.black === "fly_intact").reduce((a, r) => a + r.black_win, 0)
-         + out.results.filter(r => r.white === "fly_intact").reduce((a, r) => a + r.white_win, 0);
-out.fly_total_wins = fw;
+const winsOf = (who, vs) => out.results.filter(r => (r.black === who && r.white === vs) || (r.white === who && r.black === vs))
+  .reduce((a, r) => a + (r.black === who ? r.black_win : r.white_win), 0);
+out.vs_random = { fly_intact: winsOf("fly_intact", "random"), fly_shuffled: flyS ? winsOf("fly_shuffled", "random") : null, of: NG * 2 };
+out.vs_teacher = { fly_intact: winsOf("fly_intact", "teacher"), of: NG * 2 };
+if (flyS) out.head_to_head = { fly_intact: winsOf("fly_intact", "fly_shuffled"), of: NG * 2 };
+out.fly_total_wins = out.vs_random.fly_intact + out.vs_teacher.fly_intact;
 out.fly_total_games = NG * 4;
+// 事先写死的判据：如果打乱脑打随机也赢得差不多，那连接组对棋力没有贡献
+out.criterion_connectome_helps_play = flyS
+  ? (out.vs_random.fly_intact - out.vs_random.fly_shuffled) > NG * 2 * 0.15 : null;
 fs.writeFileSync(ROOT + "/results/gomoku/play.json", JSON.stringify(out, null, 1));
-console.log(`\n果蝇总战绩 ${fw}/${NG * 4}；用时 ${((Date.now() - t0) / 1000).toFixed(0)} s → results/gomoku/play.json`);
+console.log(`\n打随机：真实接线 ${out.vs_random.fly_intact}/${out.vs_random.of}` +
+  (flyS ? `，打乱接线 ${out.vs_random.fly_shuffled}/${out.vs_random.of}` : "") +
+  `　打老师：${out.vs_teacher.fly_intact}/${out.vs_teacher.of}`);
+if (flyS) console.log(`真实 vs 打乱 正面交锋：${out.head_to_head.fly_intact}/${out.head_to_head.of}　` +
+  `判据（连接组对棋力有贡献）${out.criterion_connectome_helps_play ? "成立" : "不成立"}`);
+console.log(`用时 ${((Date.now() - t0) / 1000).toFixed(0)} s → results/gomoku/play.json`);
