@@ -310,44 +310,34 @@ PARAMETERS = [
 FINDINGS = [
     dict(id="gomoku_reservoir", what="把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
          status="negative",
-         result="**没有**。脑里一个突触都不训练、只训练一层线性读出：真实连接组测试 top1 **0.025**，"
-                "**打乱接线 0.018**（差 0.007），而直接看棋盘 **0.174**（7 倍）。拼接反而更差（0.081）。"
-                "连「保拓扑编码」（按真实胞体位置铺棋盘）也救不回来（0.025）",
+         result="**没有，而且两版子回路上都一样**。脑里一个突触都不训练、只训练一层线性读出："
+                "子回路 v3 上真实连接组测试 top1 **0.0213**、**打乱接线 0.0190**（差 0.0023），"
+                "而直接看棋盘 **0.1745**（8 倍）；拼接反而更差（0.0786）。"
+                "v2 上是 0.0244 / 0.0178 / 0.1745——**同一个结论重复了一次**。"
+                "连「保拓扑编码」（按真实胞体位置铺棋盘）也救不回来（v2 上 0.0248）",
          caveat="12,270 个局面、500 局自对弈、按整局切分。只用了线性读出——更强的读出可能挖出更多，"
                 "但那正是 Mineault 批评的「读出层足够灵活就能学会任何东西」。"
                 "棋盘→神经元的映射是任意的；禁手由规则引擎判定，不是果蝇。"
                 "**这条阴性结果的意义**：「把连接组接进游戏 + 训练读出层」本身不能证明连接组在起作用，必须跑打乱对照",
-         script="gomoku/train_readout.py", result_file="results/gomoku/train.json", log="§38.4",
-         # 对局结果单独一条，见下方 gomoku_play
-         verify=[("arms.fly_intact.best.test.top1", 0.0244, 0.0005),
-                 ("arms.fly_shuffled.best.test.top1", 0.018, 0.0005),
+         script="gomoku/train_readout.py", result_file="results/gomoku/train_v3.json", log="§38.4 + §41",
+         verify=[("arms.fly_intact.best.test.top1", 0.0213, 0.0005),
+                 ("arms.fly_shuffled.best.test.top1", 0.019, 0.0005),
                  ("arms.board_raw.best.test.top1", 0.1745, 0.0005),
                  ("random_baseline_top1", 0.0171, 0.0005)]),
     dict(id="gomoku_play", what="让真实脑与打乱脑真下 40 局，棋力上分得开吗",
-         status="partial",
-         result="**分得开一点点，但被先后手淹没**。打随机：真实接线 **33/40**、打乱接线 **24/40**"
-                "（差 22.5 pp，越过事先定的 15 pp 线）；但两者**正面交锋 18/40（约五五开）**，"
-                "且 40 局里**执白的一方赢了 38 局**。两者都被启发式老师 **0:40** 完胜，平均 8–9 手就输",
-         caveat="**两个判据给出不同答案，都写出来**：按打随机的胜率判「连接组有贡献」成立，"
-                "按正面交锋判不成立。先后手效应（黑方有禁手）远大于两个脑的差别。"
-                "每组 20 局，n 很小；读出层 top1 上（0.0244 vs 0.018）本来就看不出差别，与对局结论一致",
-         script="gomoku/play_test.js", result_file="results/gomoku/play.json", log="§38.4",
-         verify=[("vs_random.fly_intact", 33, 0), ("vs_random.fly_shuffled", 24, 0),
-                 ("head_to_head.fly_intact", 18, 0), ("vs_teacher.fly_intact", 0, 0)]),
-    dict(id="sensor_landing", what="子回路里每一路感觉输入，能不能真的驱动运动输出",
-         status="reproduced",
-         result="逐路单独驱动 1 s（判据：任一运动读出 > 5 Hz）。**≤200 Hz 就有落点**："
-                "LC4 / LPLC2 / LC16 / 糖味 / JO / **头部刚毛（触感）**；"
-                "**只有 400 Hz 以上才有**：温度；**完全没有落点**：湿度（给到 600 Hz 也推不动）。"
-                "触感单侧 200 Hz → DNa02 左 **30 Hz**，而**双侧同时给反而全是 0**——"
-                "左右对称驱动把转向所需的左右差抵消了",
-         caveat="**苦味「没有落点」是对的**：它是抑制性的，单独给本来就不该驱动任何东西"
-                "（它的作用是把糖驱动的 MN9 压下去，见 Fig 3B–C 那条）。"
-                "全脑里 2–3 跳可达**不等于**裁剪后还留着足够通路——温度就是例子",
-         script="dodge/sensor_drive.js", result_file="results/dodge/sensor_drive.json", log="§40",
-         verify=[("inputs.TOUCH.lands_at_200", True, 0), ("inputs.THERMO.lands_at_200", False, 0),
-                 ("inputs.THERMO.lands", True, 0), ("inputs.HYGRO.lands", False, 0),
-                 ("inputs.LC4.lands_at_200", True, 0), ("n", 5563, 0)]),
+         status="negative",
+         result="**分不开，而且第一版的结论被自己推翻了**。子回路 v2 上：打随机真实 33/40、打乱 24/40"
+                "（差 22.5 pp，越过事先定的 15 pp 线，当时判「有贡献」成立）；"
+                "换到子回路 v3 重跑，**完全反过来**——真实 **26/40**、打乱 **40/40**，"
+                "正面交锋真实脑 **0/40** 被打乱脑完胜。换一版子回路就翻盘，说明那个差别不可重复。"
+                "两版里两者都被启发式老师 **0:40** 完胜",
+         caveat="这条的价值在于**它推翻了我们自己先前的判定**：单看 v2 会得出「连接组对棋力有贡献」，"
+                "重复一次就没了。与读出层的准确率一致（真实 0.021 vs 打乱 0.019，两版都看不出差别）。"
+                "每组 20 局，n 很小；v2 那 40 局里执白的赢了 38 局，先后手效应本来就远大于两个脑的差别",
+         script="gomoku/play_test.js", result_file="results/gomoku/play_v3.json", log="§38.4 + §41",
+         verify=[("vs_random.fly_intact", 26, 0), ("vs_random.fly_shuffled", 40, 0),
+                 ("head_to_head.fly_intact", 0, 0), ("vs_teacher.fly_intact", 0, 0),
+                 ("criterion_connectome_helps_play", False, 0)]),
     dict(id="touch_pathway", what="「只给物理量、不写判断逻辑」能让果蝇自己绕开围栏吗",
          status="reproduced",
          result="**能，但前提是子回路里真有那条通路**。触感送到触角 JO（v2 唯一的机械感觉）**完全无效**"
