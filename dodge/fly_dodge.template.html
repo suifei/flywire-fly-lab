@@ -582,8 +582,13 @@ code { font: 12px var(--mono); }
         而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
-      <p class="sub"><b>棋盘在上面的主画面里</b>——把「主画面」切到「五子棋」，球场就整个换成棋盘，
-        三维场景也随之停止渲染（这也是帧率最高的一档）。平面模式最快最好点；立体模式能看到果蝇飞过去插旗。</p>
+      <p class="sub"><b>棋盘在上面的主画面里</b>——把「主画面」切到「五子棋」，球场就整个换成棋盘。
+        切过去时<b>球场那只果蝇会被完全冻结</b>：不跑大脑、不动身体、不发球，三维场景也停止渲染
+        （这也是帧率最高的一档）。同时左边那三块面板——实时 spike、下行神经元、感觉输入——
+        <b>全部切到正在下棋的这一只</b>身上，它有自己独立的一份 5,563 神经元大脑。
+        你会看到它的放电是<b>一阵一阵</b>的：只在"思考"的那 100 ms 里放，想完就停——那不是卡，是它真的在想。
+        棋盘格子被随机铺在 LC4/LPLC2/LC16/糖/苦/JO/触感 这些真实感觉神经元上，
+        所以「感觉输入」那块显示的是<b>每一组里有多少神经元被棋子点着</b>。切回球场，一切照旧继续。</p>
       <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
       <div class="tbl"><table id="tGomokuPlay"></table></div>
       <p class="sub" id="gmPlayNote"></p>
@@ -1358,14 +1363,27 @@ code { font: 12px var(--mono); }
   }
 
   // ——— panels ———
+  // 下棋时这些面板显示的是**正在思考的那只果蝇**（它有自己独立的一份大脑）。
+  // 它只在"思考"的那 100 ms 里放电，所以读数是一阵一阵的——这不是卡，是它真的在想。
+  const GMSTATS = { rates: null, drive: null, t: 0 };
   function updatePanels() {
-    const out = game.readout();
+    const gmMode = window.__stageMode === "gomoku";
+    const gs = gmMode ? GMSTATS : null;
+    const out = (gs && gs.rates) ? {
+      dnaL: (gs.rates.DNa01_left + gs.rates.DNa02_left) || 0,
+      dnaR: (gs.rates.DNa01_right + gs.rates.DNa02_right) || 0,
+      gf: ((gs.rates.DNp01_left + gs.rates.DNp01_right) / 2) || 0,
+      mn9: ((gs.rates.MN9_left + gs.rates.MN9_right) / 2) || 0,
+      adn1: Math.max(gs.rates.aDN1_left || 0, gs.rates.aDN1_right || 0),
+      mdn: ((gs.rates.MDN_left + gs.rates.MDN_right) / 2) || 0,
+    } : game.readout();
     const bar = (id, v, max) => { $(id).style.width = Math.min(100, v / max * 100) + "%"; };
     bar("mDL", out.dnaL, 120); $("vDL").textContent = out.dnaL.toFixed(0);
     bar("mDR", out.dnaR, 120); $("vDR").textContent = out.dnaR.toFixed(0);
     bar("mGF", out.gf, 250); $("vGF").textContent = out.gf.toFixed(0);
     $("thrGF").style.left = (CFG.gfThreshold / 250 * 100) + "%";
-    const L = game.loom;
+    const d = gs && gs.drive;
+    const L = d ? { lc4L: d.LC4_left, lc4R: d.LC4_right, lplc2L: d.LPLC2_left, lplc2R: d.LPLC2_right } : game.loom;
     bar("mIL", L.lc4L || 0, 200); $("vIL").textContent = (L.lc4L || 0).toFixed(0);
     bar("mIR", L.lc4R || 0, 200); $("vIR").textContent = (L.lc4R || 0).toFixed(0);
     bar("mPL", L.lplc2L || 0, 200); $("vPL").textContent = (L.lplc2L || 0).toFixed(0);
@@ -1384,7 +1402,12 @@ code { font: 12px var(--mono); }
       st.textContent = dw ? "MN9 触发 · 伸喙喝水" : "MN9 触发 · 伸喙进食"; st.className = "pill state-jump";
     }
     else if (S.state === "groom") { st.textContent = "aDN1 触发 · 梳理触角"; st.className = "pill state-jump"; }
+    else if (gmMode) { st.textContent = "球场已冻结 · 面板显示下棋的那只"; st.className = "pill"; }
     else { st.textContent = paused ? "已暂停" : "行走中"; st.className = "pill"; }
+    {
+      const h = document.querySelector("#brainSub");
+      if (h) h.textContent = (gmMode ? "下棋的那只 · " : "") + SUB.meta.n.toLocaleString() + " 个神经元 · 真实胞体坐标";
+    }
     const tp = $("thirstPill");
     if (tp) {
       const th = S.thirst || 0;
@@ -1396,14 +1419,16 @@ code { font: 12px var(--mono); }
       bar("mMN9", out.mn9, 200); $("vMN9").textContent = out.mn9.toFixed(0); $("thrMN9").style.left = (CFG.feedThreshold / 200 * 100) + "%";
       bar("mADN", out.adn1, 120); $("vADN").textContent = out.adn1.toFixed(0); $("thrADN").style.left = (CFG.groomThreshold / 120 * 100) + "%";
       bar("mMDN", out.mdn, 120); $("vMDN").textContent = out.mdn.toFixed(0); $("thrMDN").style.left = (CFG.mdnThreshold / 120 * 100) + "%";
-      const l16 = Math.max(L.lc16L || 0, L.lc16R || 0);
-      bar("mL16", l16, 200); $("vL16").textContent = `${(L.lc16L || 0).toFixed(0)}/${(L.lc16R || 0).toFixed(0)}`;
-      bar("mSUG", game.gust.sugar, 200); $("vSUG").textContent = game.gust.sugar.toFixed(0);
-      bar("mBIT", game.gust.bitter, 200); $("vBIT").textContent = game.gust.bitter.toFixed(0);
-      const jo = game.joInput || { L: 0, R: 0 };
+      const l16L = d ? (d.LC16_left || 0) : (L.lc16L || 0), l16R = d ? (d.LC16_right || 0) : (L.lc16R || 0);
+      bar("mL16", Math.max(l16L, l16R), 200); $("vL16").textContent = `${l16L.toFixed(0)}/${l16R.toFixed(0)}`;
+      const sug = d ? ((d.SUGAR_left + d.SUGAR_right) / 2 || 0) : game.gust.sugar;
+      const bit = d ? ((d.BITTER_left + d.BITTER_right) / 2 || 0) : game.gust.bitter;
+      bar("mSUG", sug, 200); $("vSUG").textContent = sug.toFixed(0);
+      bar("mBIT", bit, 200); $("vBIT").textContent = bit.toFixed(0);
+      const jo = d ? { L: d.JO_left || 0, R: d.JO_right || 0 } : (game.joInput || { L: 0, R: 0 });
       bar("mJO", Math.max(jo.L, jo.R), 200); $("vJO").textContent = `${jo.L.toFixed(0)}/${jo.R.toFixed(0)}`;
-      const od = game.odor;
-      bar("mODR", od ? Math.max(od.L, od.R) : 0, 1); $("vODR").textContent = od ? `${od.L.toFixed(2)}/${od.R.toFixed(2)}` : "关";
+      const od = gmMode ? null : game.odor;
+      bar("mODR", od ? Math.max(od.L, od.R) : 0, 1); $("vODR").textContent = gmMode ? "棋盘" : (od ? `${od.L.toFixed(2)}/${od.R.toFixed(2)}` : "关");
     }
   }
 
@@ -1820,7 +1845,13 @@ code { font: 12px var(--mono); }
                 over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0 };
 
     const say = t => { $("gmPill").textContent = t; };
-    const ensurePlayer = () => { if (!player && RO && RO.W) player = F5.makePlayer(SUB, ConnectomeBrain, RO); };
+    // 下棋这只果蝇的放电直接喂给页面的实时 spike 图与脑图——和球场那只用的是同两个缓冲，
+    // 所以切过去之后左边看到的就是**正在思考的这一只**。
+    const ensurePlayer = () => {
+      if (!player && RO && RO.W)
+        player = F5.makePlayer(SUB, ConnectomeBrain, RO,
+          { onSpike: i => { if (window.__stageMode === "gomoku") { spikeBuf.push(i); brainBuf.push(i); } } });
+    };
 
     // —— 布局：棋盘按画布短边居中，留出右侧信息栏 ——
     function layout() {
@@ -2073,7 +2104,10 @@ code { font: 12px var(--mono); }
         ensurePlayer();
         const t0 = performance.now();
         const mv = agentMove(who);
-        if (who === "fly") S.thinkMs = performance.now() - t0;
+        if (who === "fly") {
+          S.thinkMs = performance.now() - t0;
+          if (player && player.lastStats) { GMSTATS.rates = player.lastStats.rates; GMSTATS.drive = player.lastStats.drive; GMSTATS.t = performance.now(); }
+        }
         play(mv);
         S.busy = false; timer = 0.25;
         if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "轮到黑" : "轮到白"));
@@ -2103,6 +2137,7 @@ code { font: 12px var(--mono); }
       const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = S.on ? "none" : "";
       segSet([$("viewCourt"), $("viewGomoku")], S.on ? $("viewGomoku") : $("viewCourt"));
       window.__stageMode = which;
+      if (!S.on) { GMSTATS.rates = null; GMSTATS.drive = null; }
       if (S.on) { ensurePlayer(); reset(); $("coach").textContent =
         "主画面已换成棋盘，三维球场停止渲染。你执黑，点交叉点落子；红叉是禁手点。"; }
       else $("coach").textContent = "回到球场。";
@@ -2836,9 +2871,13 @@ code { font: 12px var(--mono); }
     if (S.jumpT < 0 && CFG.takeoff !== pendingTakeoff) CFG.takeoff = pendingTakeoff;
     const inFlight = !!(S.clip && S.jumpT >= 0);
     if (!paused) {
-      carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
+      // **五子棋占用主画面时，球场里那只果蝇整个冻结**：不跑大脑、不动身体、不发球、
+      // 同伴也停。切回来时从冻结的那一刻继续（carry 清零，避免攒出一大堆积压步）。
+      const frozen = window.__stageMode === "gomoku";
+      if (frozen) carry = 0;
+      else carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
-      while (carry >= game.chunkDt && n < 12) { game.step(); mTick(); if (COMP) COMP.step(); carry -= game.chunkDt; n++; }
+      while (!frozen && carry >= game.chunkDt && n < 12) { game.step(); mTick(); if (COMP) COMP.step(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }

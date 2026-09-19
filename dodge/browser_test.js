@@ -225,10 +225,38 @@ function chromePath() {
     await page.click("#gmView2d");
     return (r.view === "3d" && r.sd > 2) ? `立体模式画布标准差 ${r.sd.toFixed(1)}` : `view=${r.view} sd=${r.sd.toFixed(1)}`;
   });
+  await step("切到五子棋后球场那只果蝇被冻结", async () => {
+    const a0 = await page.evaluate(() => ({ t: window.__game.S.t, x: window.__game.S.x }));
+    await new Promise(r => setTimeout(r, 2500));
+    const a1 = await page.evaluate(() => ({ t: window.__game.S.t, x: window.__game.S.x }));
+    return (a1.t === a0.t && a1.x === a0.x)
+      ? `大脑时钟与位置都停在 ${a0.t.toFixed(2)} s` : `还在动（t ${a0.t.toFixed(2)}→${a1.t.toFixed(2)}）`;
+  });
+  await step("面板切到下棋那只果蝇的读数", async () => {
+    const r = await page.evaluate(async () => {
+      // 等一次"思考"跑完
+      const t0 = performance.now();
+      while (performance.now() - t0 < 6000) {
+        const v = document.getElementById("vGF").textContent;
+        if (+v > 0) break;
+        await new Promise(x => setTimeout(x, 100));
+      }
+      return { gf: +document.getElementById("vGF").textContent,
+               sug: +document.getElementById("vSUG").textContent,
+               odr: document.getElementById("vODR").textContent,
+               state: document.getElementById("pState").textContent };
+    });
+    return (r.gf > 0 && r.sug > 0 && r.odr === "棋盘")
+      ? `巨纤维 ${r.gf} Hz、糖味 ${r.sug} Hz、状态「${r.state}」` : JSON.stringify(r);
+  });
   await step("切回球场后三维场景恢复渲染", async () => {
     await page.click("#viewCourt");
     await new Promise(r => setTimeout(r, 1500));
-    return await page.evaluate(() => window.__stageMode) === "court" ? true : "没切回去";
+    if (await page.evaluate(() => window.__stageMode) !== "court") return "没切回去";
+    const a0 = await page.evaluate(() => window.__game.S.t);
+    await new Promise(r => setTimeout(r, 1500));
+    const a1 = await page.evaluate(() => window.__game.S.t);
+    return a1 > a0 ? `球场那只恢复计算（${a0.toFixed(2)} → ${a1.toFixed(2)} s）` : "切回去了但没恢复计算";
   });
   await step("五子棋禁手规则可用", async () => {
     const r = await page.evaluate(() => {
