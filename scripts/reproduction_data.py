@@ -334,6 +334,20 @@ FINDINGS = [
          script="gomoku/play_test.js", result_file="results/gomoku/play.json", log="§38.4",
          verify=[("vs_random.fly_intact", 33, 0), ("vs_random.fly_shuffled", 24, 0),
                  ("head_to_head.fly_intact", 18, 0), ("vs_teacher.fly_intact", 0, 0)]),
+    dict(id="sensor_landing", what="子回路里每一路感觉输入，能不能真的驱动运动输出",
+         status="reproduced",
+         result="逐路单独驱动 1 s（判据：任一运动读出 > 5 Hz）。**≤200 Hz 就有落点**："
+                "LC4 / LPLC2 / LC16 / 糖味 / JO / **头部刚毛（触感）**；"
+                "**只有 400 Hz 以上才有**：温度；**完全没有落点**：湿度（给到 600 Hz 也推不动）。"
+                "触感单侧 200 Hz → DNa02 左 **30 Hz**，而**双侧同时给反而全是 0**——"
+                "左右对称驱动把转向所需的左右差抵消了",
+         caveat="**苦味「没有落点」是对的**：它是抑制性的，单独给本来就不该驱动任何东西"
+                "（它的作用是把糖驱动的 MN9 压下去，见 Fig 3B–C 那条）。"
+                "全脑里 2–3 跳可达**不等于**裁剪后还留着足够通路——温度就是例子",
+         script="dodge/sensor_drive.js", result_file="results/dodge/sensor_drive.json", log="§40",
+         verify=[("inputs.TOUCH.lands_at_200", True, 0), ("inputs.THERMO.lands_at_200", False, 0),
+                 ("inputs.THERMO.lands", True, 0), ("inputs.HYGRO.lands", False, 0),
+                 ("inputs.LC4.lands_at_200", True, 0), ("n", 5563, 0)]),
     dict(id="touch_pathway", what="「只给物理量、不写判断逻辑」能让果蝇自己绕开围栏吗",
          status="reproduced",
          result="**能，但前提是子回路里真有那条通路**。触感送到触角 JO（v2 唯一的机械感觉）**完全无效**"

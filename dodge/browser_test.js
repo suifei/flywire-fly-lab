@@ -193,15 +193,31 @@ function chromePath() {
     });
     return r.n === r.sub ? `${r.n} 个（其中 ${r.soma} 个是真胞体坐标）` : `脑图 ${r.n} vs 子回路 ${r.sub}`;
   });
-  await step("五子棋：开局后棋盘出现且果蝇能落子", async () => {
+  await step("五子棋：独立场景，果蝇自对弈能落子", async () => {
     await page.click("#gmSelf");
-    await new Promise(r => setTimeout(r, 6000));
+    await new Promise(r => setTimeout(r, 7000));
     const r = await page.evaluate(() => {
       const g = window.__gm; if (!g) return { ok: false, why: "没有五子棋模块" };
-      const n = g.state.board.filter(v => v !== 0).length;
-      return { ok: true, n, turn: g.state.turn };
+      const cv = document.getElementById("gmCv2d");
+      const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
+      let n2 = 0, s = 0, s2 = 0;
+      for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3; n2++; s += v; s2 += v * v; }
+      const m = s / n2;
+      return { ok: true, n: g.state.board.filter(v => v !== 0).length, sd: Math.sqrt(Math.max(0, s2 / n2 - m * m)) };
     });
-    return r.ok ? (r.n > 0 ? `已落 ${r.n} 子` : "6 秒内一子未落") : r.why;
+    if (!r.ok) return r.why;
+    if (!(r.n > 0)) return "7 秒内一子未落";
+    return r.sd > 2 ? `已落 ${r.n} 子，棋盘画布标准差 ${r.sd.toFixed(1)}` : `落了 ${r.n} 子但画布是纯色`;
+  });
+  await step("五子棋：立体模式能切换并渲染", async () => {
+    await page.click("#gmView3d");
+    await new Promise(r => setTimeout(r, 2500));
+    const r = await page.evaluate(() => {
+      const c3 = document.getElementById("gmCv3d");
+      return { hidden: c3.hidden, w: c3.width, h: c3.height };
+    });
+    await page.click("#gmView2d");
+    return (!r.hidden && r.w > 10) ? `画布 ${r.w}×${r.h}` : `没切过去（hidden=${r.hidden} w=${r.w}）`;
   });
   await step("五子棋禁手规则可用", async () => {
     const r = await page.evaluate(() => {

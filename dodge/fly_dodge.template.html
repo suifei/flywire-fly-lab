@@ -105,6 +105,15 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
 .row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
+.gmbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.gmwrap { position: relative; width: 100%; max-width: 560px; aspect-ratio: 1 / 1; margin: 6px auto 2px;
+  background: var(--panel-2); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+/* 两张画布叠在一起，靠 hidden 切换。**必须显式盖住 display:block**——
+   UA 样式表里的 [hidden]{display:none} 优先级低于 .gmwrap canvas，
+   不写这一条的话切到立体模式时平面画布还盖在上面（2026-09-19 截图时发现）。 */
+.gmwrap canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+.gmwrap canvas[hidden] { display: none !important; }
+#gmCv2d { cursor: crosshair; }
 .brainbox { position: relative; background: var(--panel-2); border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
 .brainbox canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .brainbox canvas:active { cursor: grabbing; }
@@ -323,17 +332,6 @@ code { font: 12px var(--mono); }
           <span class="pill" id="cpPill">0 只</span>
           <small style="color:var(--muted)">每只都有自己独立的一份真实连接组大脑；只接了视觉→转向/起飞这一路</small>
         </div>
-        <div class="row" id="gomokuRow">
-          <label class="k" title="场边的 3D 棋盘：果蝇用真实连接组 + 一层线性读出来选点">五子棋</label>
-          <div class="seg" role="group">
-            <button id="gmOff" aria-pressed="true">关</button>
-            <button id="gmHuman" aria-pressed="false">我 vs 果蝇</button>
-            <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
-            <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
-          </div>
-          <button class="btn" id="gmNew">新局</button>
-          <span class="pill" id="gmPill" hidden></span>
-        </div>
         <div class="row" id="mutRow">
           <label class="k" title="随机敲掉一个真实神经元但不告诉你是哪个；靠行为把它诊断出来">盲盒突变体</label>
           <button class="btn" id="mutNew">抽一只突变体</button>
@@ -531,6 +529,16 @@ code { font: 12px var(--mono); }
         <b>中间没有任何我们写的判断</b>。但前提是<b>子回路里真的有那条通路</b>；
         送错地方（JO）就等于没给。游戏页现在仍然跑 v2 + 那个手写的「看得见围栏」，
         是因为切到 v3 会让已经发布的任务关卡、突变体、敲除比值全部需要重测——这是工程取舍，不是科学结论。</p>
+      <p><b>加了新的感觉通道，就得先量它有没有落点。</b>把 v3 的每一路输入单独驱动 1 秒，
+        看六个运动读出组里有没有哪个被推起来（判据：任一读出 &gt; 5 Hz）：</p>
+      <div class="tbl"><table id="tSensor"></table></div>
+      <p class="sub" id="sensorNote"></p>
+      <p class="sub">几点必须说明：<b>苦味「没有落点」是对的</b>——它是抑制性的，单独给它本来就不该驱动任何东西，
+        它的作用是把糖驱动的 MN9 压下去（论文 Fig 3B–C，我们复现过：最强糖下苦压掉 82.4%）。
+        <b>湿度是真的没有落点</b>，给多强都推不动运动输出。<b>温度要 400 Hz 以上才有</b>，
+        在合理的刺激强度下等于没有。<b>触感在 100–200 Hz 就有</b>，这也是为什么它能让果蝇绕开围栏。
+        还有一条有意思的：<b>触感双侧同时给反而更弱</b>（200 Hz 时六个读出全是 0）——
+        左右对称的驱动把转向所需的左右差抵消了，这不是 bug，是回路本来的样子。</p>
       <p class="sub">还有一处是我们自己的指标错误，值得写出来：第一版用「贴墙时间占比」当指标，
         而它<b>分不出「钉死在一点」和「贴着墙滑行」</b>——两种情况这个标志都为真。
         按那个指标，触感「没用」（85.6% → 85.6%）；换成走过的格子数才看出来果蝇其实一直在沿墙移动。
@@ -538,7 +546,7 @@ code { font: 12px var(--mono); }
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cGomoku">
       <h3>我能训练它下五子棋吗？能。但训练完必须回答一个问题</h3>
-      <p>场边有一张 3D 棋盘，你可以和果蝇下五子棋（含黑方禁手：长连、四四、三三）。
+      <p>下面是一个<b>独立的场景</b>（不在球场里），你可以和果蝇下五子棋（含黑方禁手：长连、四四、三三）。
         果蝇的每一步都<b>真跑一遍 4,599 个神经元</b>：棋盘 → 真实感觉神经元的泊松驱动 → 100 ms →
         下游发放计数 → <b>一层线性读出</b> → 225 个格子的分数。<b>脑子里一个突触都没有被训练</b>，
         被训练的只有最后那层线性读出（岭回归）。</p>
@@ -552,6 +560,26 @@ code { font: 12px var(--mono); }
         而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
+      <div class="gmbar">
+        <div class="seg" role="group" aria-label="对局模式">
+          <button id="gmHuman" aria-pressed="true">我 vs 果蝇</button>
+          <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
+          <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
+        </div>
+        <div class="seg" role="group" aria-label="可视化模式">
+          <button id="gmView2d" aria-pressed="true">平面棋盘</button>
+          <button id="gmView3d" aria-pressed="false">立体棋盘</button>
+        </div>
+        <button class="btn" id="gmNew">新局</button>
+        <button class="btn" id="gmOff">停</button>
+        <span class="pill" id="gmPill">未开始</span>
+      </div>
+      <div class="gmwrap">
+        <canvas id="gmCv2d"></canvas>
+        <canvas id="gmCv3d" hidden></canvas>
+      </div>
+      <p class="sub">这是<b>独立的场景</b>，不在球场里——球场那边东西太多、帧率低也不好操作。
+        这里只有棋盘和下棋的果蝇。平面模式最快最好点；立体模式能看到果蝇飞过去插旗。</p>
       <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
       <div class="tbl"><table id="tGomokuPlay"></table></div>
       <p class="sub" id="gmPlayNote"></p>
@@ -893,6 +921,7 @@ code { font: 12px var(--mono); }
 <script id="gomoku-train" type="application/json">/*__GOMOKU_TRAIN__*/</script>
 <script id="gomoku-play" type="application/json">/*__GOMOKU_PLAY__*/</script>
 <script id="touch-data" type="application/json">/*__TOUCH__*/</script>
+<script id="sensor-data" type="application/json">/*__SENSOR_DRIVE__*/</script>
 <script>/*__GOMOKU_RULES_JS__*/</script>
 <script>/*__GOMOKU_TEACHER_JS__*/</script>
 <script>/*__GOMOKU_FEATURES_JS__*/</script>
@@ -1484,7 +1513,6 @@ code { font: 12px var(--mono); }
     down = null;
     const r = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-    if (window.__gm && window.__gm.clickBoard(e)) return;          // 五子棋模式下先给棋盘
     ray.setFromCamera(ndc, camera);
     if (ray.ray.intersectPlane(plane, hit3)) game.launch(hit3.x, hit3.y);
   });
@@ -1771,130 +1799,237 @@ code { font: 12px var(--mono); }
     return api;
   })();
 
-  // ── 五子棋：场边 3D 棋盘 + 果蝇当棋子 ──────────────────────────────
+  // ── 五子棋：**独立场景**（不在球场里）+ 两种可视化 ───────────────────────
+  // 为什么独立：球场那个场景有看台、灯光、阴影、复眼读回，帧率本来就紧张，
+  // 再塞一张棋盘既卡又难点。这里只有棋盘和下棋的果蝇，自己一个画布、自己一套循环。
   // 果蝇怎么选点：棋盘 → 真实神经元的泊松驱动 → 4,599 个神经元跑 100 ms →
   // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
-  // **结果是阴性的，页面下方那张表原样写着**：它几乎没学会（测试 top1 0.025，
-  // 直接看棋盘是 0.174），而且打乱接线成绩一样——所以这里主要是个"可玩的对照实验"。
   const GM = (() => {
     const G5 = window.Gomoku, T5 = window.GomokuTeacher, F5 = window.GomokuFly, B3 = window.GomokuBoard3D;
-    if (!G5 || !B3) return null;
+    const cv2 = $("gmCv2d"), cv3 = $("gmCv3d");
+    if (!G5 || !cv2) return null;
     const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
     const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
-    let board3d = null, player = null;
-    const S = { on: false, mode: "human", board: G5.newBoard(), turn: G5.BLACK, over: null, busy: false, couriers: [] };
+    let player = null;
+    const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK,
+                over: null, busy: false, last: -1, hover: -1, fliers: [] };
 
-    const say = t => { const p = $("gmPill"); p.hidden = false; p.textContent = t; };
-    function ensure() {
-      if (!board3d) board3d = B3.build(THREE, scene, {
-        boardWood: "#caa06a", boardLine: "#4a3620", pole: "#efe6d8",
+    const say = t => { $("gmPill").textContent = t; };
+    const ensurePlayer = () => { if (!player && RO && RO.W) player = F5.makePlayer(SUB, ConnectomeBrain, RO); };
+
+    // ——— 平面棋盘：快、好点，默认 ———
+    function draw2d(dt) {
+      const W = cv2.clientWidth, H = cv2.clientHeight;
+      if (!W || !H) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      if (cv2.width !== Math.round(W * dpr)) { cv2.width = Math.round(W * dpr); cv2.height = Math.round(H * dpr); }
+      const ctx = cv2.getContext("2d"), w = cv2.width, h = cv2.height;
+      const pad = w * 0.045, cell = (w - 2 * pad) / (G5.N - 1);
+      ctx.fillStyle = palette["--panel-2"] || "#eee"; ctx.fillRect(0, 0, w, h);
+      // 棋盘线
+      ctx.strokeStyle = palette["--rule"] || "#bbb"; ctx.lineWidth = Math.max(1, dpr * 0.7);
+      ctx.beginPath();
+      for (let k = 0; k < G5.N; k++) {
+        const t = pad + k * cell;
+        ctx.moveTo(pad, t); ctx.lineTo(w - pad, t);
+        ctx.moveTo(t, pad); ctx.lineTo(t, h - pad);
+      }
+      ctx.stroke();
+      ctx.fillStyle = palette["--muted"] || "#888";
+      for (const [cx, cy] of [[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]]) {
+        ctx.beginPath(); ctx.arc(pad + cx * cell, pad + cy * cell, dpr * 2.2, 0, 6.2832); ctx.fill();
+      }
+      // 禁手点（只在轮到人执黑时提示）
+      if (S.mode === "human" && S.turn === G5.BLACK && !S.over) {
+        ctx.fillStyle = "rgba(208,59,59,.28)";
+        for (const i of G5.candidates(S.board, 2)) {
+          if (S.board[i] !== G5.EMPTY) continue;
+          if (!G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) continue;
+          const x = pad + (i % G5.N) * cell, y = pad + ((i / G5.N) | 0) * cell;
+          ctx.beginPath(); ctx.moveTo(x - cell * .18, y - cell * .18); ctx.lineTo(x + cell * .18, y + cell * .18);
+          ctx.moveTo(x + cell * .18, y - cell * .18); ctx.lineTo(x - cell * .18, y + cell * .18);
+          ctx.strokeStyle = "rgba(208,59,59,.55)"; ctx.lineWidth = dpr * 1.6; ctx.stroke();
+        }
+      }
+      // 棋子：果蝇形状（身体 + 两翅），黑白两色
+      for (let i = 0; i < G5.SIZE; i++) {
+        const v = S.board[i]; if (!v) continue;
+        const x = pad + (i % G5.N) * cell, y = pad + ((i / G5.N) | 0) * cell, r = cell * 0.42;
+        ctx.save(); ctx.translate(x, y);
+        ctx.fillStyle = v === G5.BLACK ? "#16181a" : "#f4f6f4";
+        ctx.strokeStyle = v === G5.BLACK ? "#000" : "#9aa5a1"; ctx.lineWidth = dpr;
+        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.92, r * 0.62, 0, 0, 6.2832); ctx.fill(); ctx.stroke();
+        ctx.globalAlpha = 0.45;
+        for (const sg of [1, -1]) { ctx.beginPath(); ctx.ellipse(-r * .1, sg * r * .55, r * .7, r * .3, sg * 0.5, 0, 6.2832); ctx.fill(); }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = v === G5.BLACK ? "#6b3a34" : "#c2524a";
+        ctx.beginPath(); ctx.arc(r * 0.72, 0, r * 0.26, 0, 6.2832); ctx.fill();
+        ctx.restore();
+      }
+      if (S.last >= 0) {
+        const x = pad + (S.last % G5.N) * cell, y = pad + ((S.last / G5.N) | 0) * cell;
+        ctx.strokeStyle = palette["--gf"] || "#1baf7a"; ctx.lineWidth = dpr * 2;
+        ctx.beginPath(); ctx.arc(x, y, cell * 0.55, 0, 6.2832); ctx.stroke();
+      }
+      if (S.hover >= 0 && S.mode === "human" && S.turn === G5.BLACK && !S.over && S.board[S.hover] === G5.EMPTY) {
+        const x = pad + (S.hover % G5.N) * cell, y = pad + ((S.hover / G5.N) | 0) * cell;
+        ctx.fillStyle = "rgba(0,0,0,.18)";
+        ctx.beginPath(); ctx.arc(x, y, cell * 0.3, 0, 6.2832); ctx.fill();
+      }
+      // 正在飞过去的果蝇（落子动画）
+      for (const f of S.fliers) {
+        const u = Math.min(1, f.t / f.dur);
+        const tx = pad + (f.cell % G5.N) * cell, ty = pad + ((f.cell / G5.N) | 0) * cell;
+        const x = f.x0 + (tx - f.x0) * u, y = f.y0 + (ty - f.y0) * u - Math.sin(Math.PI * u) * cell * 2.2;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(ty - f.y0, tx - f.x0));
+        ctx.fillStyle = f.color === G5.BLACK ? "#16181a" : "#f4f6f4";
+        ctx.beginPath(); ctx.ellipse(0, 0, cell * .38, cell * .24, 0, 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = .5;
+        const flap = Math.sin(performance.now() * 0.06) * 0.6;
+        for (const sg of [1, -1]) { ctx.beginPath(); ctx.ellipse(-cell * .05, sg * cell * .22, cell * .3, cell * .1, sg * flap, 0, 6.2832); ctx.fill(); }
+        ctx.globalAlpha = 1; ctx.restore();
+      }
+    }
+
+    // ——— 立体棋盘：自己一个 three.js 场景，只有棋盘和果蝇 ———
+    let R3 = null;
+    function ensure3d() {
+      if (R3 || typeof THREE === "undefined" || !B3) return R3;
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, canvas: cv3 });
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+      const sc = new THREE.Scene();
+      sc.background = new THREE.Color(css("--panel-2"));
+      const cam = new THREE.PerspectiveCamera(38, 1, 1, 3000);
+      cam.up.set(0, 0, 1);
+      sc.add(new THREE.AmbientLight(0xffffff, 0.75));
+      const dl = new THREE.DirectionalLight(0xffffff, 0.75); dl.position.set(120, -160, 260); sc.add(dl);
+      const board = B3.build(THREE, sc, { boardWood: "#caa06a", boardLine: "#4a3620", pole: "#efe6d8",
         stoneBlack: "#16181a", stoneWhite: "#f4f6f4", mark: "#e0562a" });
-      if (!player && RO && RO.W) player = F5.makePlayer(SUB, ConnectomeBrain, RO);
-      board3d.group.visible = true;
+      board.group.position.set(0, 0, 0);
+      R3 = { renderer, scene: sc, cam, board, yaw: 0, pitch: 0.95, dist: 330, drag: null, fliers: [] };
+      // 让立体模式也能拖动看
+      cv3.addEventListener("pointerdown", e => { R3.drag = [e.clientX, e.clientY, R3.yaw, R3.pitch]; cv3.setPointerCapture(e.pointerId); });
+      cv3.addEventListener("pointermove", e => {
+        if (!R3.drag) return;
+        R3.yaw = R3.drag[2] + (e.clientX - R3.drag[0]) * 0.008;
+        R3.pitch = Math.max(0.25, Math.min(1.45, R3.drag[3] + (e.clientY - R3.drag[1]) * 0.006));
+      });
+      cv3.addEventListener("pointerup", () => { R3.drag = null; });
+      return R3;
     }
-    // 一只信使果蝇飞到格子上插旗（装饰；真正的落子在上面一行就已经定了）
-    function courier(i, c) {
-      const to = board3d.worldOf(i);
+    function draw3d() {
+      const r = ensure3d(); if (!r) return;
+      const W = cv3.clientWidth, H = cv3.clientHeight;
+      if (!W || !H) return;
+      if (cv3.width !== Math.round(W * r.renderer.getPixelRatio())) r.renderer.setSize(W, H, false);
+      r.cam.aspect = W / Math.max(H, 1); r.cam.updateProjectionMatrix();
+      const d = r.dist;
+      r.cam.position.set(Math.sin(r.yaw) * Math.cos(r.pitch) * d, -Math.cos(r.yaw) * Math.cos(r.pitch) * d, Math.sin(r.pitch) * d);
+      r.cam.lookAt(0, 0, 0);
+      r.renderer.render(r.scene, r.cam);
+    }
+    // 立体模式里的信使果蝇
+    function courier3d(i, c) {
+      const r = ensure3d(); if (!r) return;
       const g = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.9, 2.2, 4, 8)
-        : new THREE.SphereGeometry(1.2, 8, 6), new THREE.MeshLambertMaterial({ color: css("--body") }));
-      body.rotation.z = Math.PI / 2; g.add(body);
-      for (const sgn of [1, -1]) {
-        const w = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.1),
-          new THREE.MeshLambertMaterial({ color: css("--muted"), transparent: true, opacity: .45, side: THREE.DoubleSide }));
-        w.position.set(-0.2, sgn * 1.0, 0.5); g.add(w);
-      }
-      g.position.set(game.S.x, game.S.y, 6);
-      scene.add(g);
-      S.couriers.push({ g, t: 0, dur: 0.7, from: g.position.clone(), to, cell: i, color: c });
+      const body = new THREE.Mesh(new THREE.SphereGeometry(2.2, 10, 7),
+        new THREE.MeshLambertMaterial({ color: c === G5.BLACK ? 0x16181a : 0xf4f6f4 }));
+      body.scale.set(1.6, .9, .8); g.add(body);
+      g.position.set((Math.random() - .5) * 120, -150, 60);
+      r.scene.add(g);
+      r.fliers.push({ g, t: 0, dur: .6, from: g.position.clone(), to: r.board.cellPos(i).clone(), cell: i, color: c });
     }
-    function stepCouriers(dt) {
-      for (let k = S.couriers.length - 1; k >= 0; k--) {
-        const c = S.couriers[k];
-        c.t += dt;
-        const u = Math.min(1, c.t / c.dur);
-        c.g.position.lerpVectors(c.from, c.to, u);
-        c.g.position.z += Math.sin(Math.PI * u) * 28;          // 飞一道弧
-        c.g.rotation.x += dt * 30;
-        if (u >= 1) { scene.remove(c.g); S.couriers.splice(k, 1); board3d.place(c.cell, c.color); board3d.markAt(c.cell); }
+    function step3dFliers(dt) {
+      if (!R3) return;
+      for (let k = R3.fliers.length - 1; k >= 0; k--) {
+        const f = R3.fliers[k]; f.t += dt;
+        const u = Math.min(1, f.t / f.dur);
+        f.g.position.lerpVectors(f.from, f.to, u);
+        f.g.position.z += Math.sin(Math.PI * u) * 40;
+        if (u >= 1) { R3.scene.remove(f.g); R3.fliers.splice(k, 1); R3.board.place(f.cell, f.color); R3.board.markAt(f.cell); }
       }
     }
+
+    function cellAt(e) {
+      const r = cv2.getBoundingClientRect();
+      const W = cv2.clientWidth, pad = W * 0.045, cell = (W - 2 * pad) / (G5.N - 1);
+      const x = Math.round((e.clientX - r.left - pad) / cell), y = Math.round((e.clientY - r.top - pad) / cell);
+      if (x < 0 || x >= G5.N || y < 0 || y >= G5.N) return -1;
+      return G5.idx(x, y);
+    }
+    cv2.addEventListener("pointermove", e => { S.hover = cellAt(e); });
+    cv2.addEventListener("pointerleave", () => { S.hover = -1; });
+    cv2.addEventListener("pointerdown", e => {
+      if (!S.on || S.mode !== "human" || S.turn !== G5.BLACK || S.over || S.busy) return;
+      const i = cellAt(e); if (i < 0) return;
+      play(i);
+    });
+
     function play(i) {
       if (S.over || i < 0 || S.board[i] !== G5.EMPTY) return false;
       if (S.turn === G5.BLACK && G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) { say("那是禁手"); return false; }
-      S.board[i] = S.turn;
-      courier(i, S.turn);
-      if (G5.wins(S.board, i % G5.N, (i / G5.N) | 0, S.turn)) {
-        S.over = S.turn;
-        say((S.turn === G5.BLACK ? "黑" : "白") + "胜");
-        $("coach").textContent = (S.turn === G5.BLACK ? "黑棋" : "白棋") + "五连——"
-          + (S.mode === "human" ? "" : "这一局两边都是果蝇。");
+      const c = S.turn;
+      S.board[i] = c; S.last = i;
+      // 平面模式：飞一只果蝇过去；立体模式：飞一只 3D 果蝇过去
+      const W = cv2.clientWidth || 400, pad = W * 0.045, cell = (W - 2 * pad) / (G5.N - 1);
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      S.fliers.push({ cell: i, color: c, t: 0, dur: .45,
+                      x0: (c === G5.BLACK ? 0 : cv2.width), y0: cv2.height * (0.5 + (Math.random() - .5) * .4) });
+      if (S.view === "3d") courier3d(i, c);
+      if (G5.wins(S.board, i % G5.N, (i / G5.N) | 0, c)) {
+        S.over = c; say((c === G5.BLACK ? "黑" : "白") + "胜（" + S.board.filter(v => v).length + " 手）");
         return true;
       }
-      S.turn = S.turn === G5.BLACK ? G5.WHITE : G5.BLACK;
+      S.turn = c === G5.BLACK ? G5.WHITE : G5.BLACK;
       return true;
     }
     function agentMove(who) {
-      if (who === "teacher") return T5.best(S.board, S.turn).move;
-      if (!player) return T5.best(S.board, S.turn).move;
-      return player.think(S.board, S.turn).move;               // 真跑一遍连接组
+      if (who === "teacher" || !player) return T5.best(S.board, S.turn).move;
+      return player.think(S.board, S.turn).move;
     }
     let timer = 0;
     function tick(dt) {
-      if (!S.on) return;
-      stepCouriers(dt);
-      if (S.over || S.busy || S.couriers.length) return;
-      timer -= dt;
-      if (timer > 0) return;
-      const humanTurn = S.mode === "human" && S.turn === G5.BLACK;
-      if (humanTurn) { say("轮到你（黑）"); return; }
+      for (let k = S.fliers.length - 1; k >= 0; k--) { S.fliers[k].t += dt; if (S.fliers[k].t > S.fliers[k].dur) S.fliers.splice(k, 1); }
+      step3dFliers(dt);
+      if (S.view === "2d") draw2d(dt); else draw3d();
+      if (!S.on || S.over || S.busy || S.fliers.length) return;
+      timer -= dt; if (timer > 0) return;
+      if (S.mode === "human" && S.turn === G5.BLACK) { say("轮到你（黑）"); return; }
       const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
-      say(who === "fly" ? "果蝇在想…" : "老师在想…");
+      say(who === "fly" ? "果蝇在想…（真跑一遍 " + SUB.meta.n.toLocaleString() + " 个神经元）" : "老师在想…");
       S.busy = true;
       setTimeout(() => {
-        const mv = agentMove(who);
-        play(mv);
-        S.busy = false; timer = 0.35;
-        if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "黑（果蝇）" : "白"));
+        ensurePlayer();
+        play(agentMove(who));
+        S.busy = false; timer = 0.3;
+        if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "轮到黑" : "轮到白"));
       }, 0);
     }
     function reset() {
-      S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false;
-      if (board3d) { board3d.clear(); board3d.markAt(null); }
-      for (const c of S.couriers) scene.remove(c.g);
-      S.couriers.length = 0;
+      S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false; S.last = -1; S.fliers.length = 0;
+      if (R3) { R3.board.clear(); R3.board.markAt(null); for (const f of R3.fliers) R3.scene.remove(f.g); R3.fliers.length = 0; }
       say(S.mode === "human" ? "轮到你（黑）" : "开始");
     }
+    const MODEBTN = { human: $("gmHuman"), self: $("gmSelf"), teach: $("gmTeach") };
     function setMode(m) {
-      S.mode = m; S.on = m !== "off";
-      if (S.on) { ensure(); reset(); } else if (board3d) board3d.group.visible = false;
-      $("gmPill").hidden = !S.on;
-      segSet([$("gmOff"), $("gmHuman"), $("gmSelf"), $("gmTeach")],
-             { off: $("gmOff"), human: $("gmHuman"), self: $("gmSelf"), teach: $("gmTeach") }[m]);
-      if (S.on) $("coach").textContent = m === "human"
-        ? "点棋盘落子（你执黑）。果蝇的每一步都真跑一遍 4,599 个神经元——但它下得很烂，下面那张表写着为什么。"
-        : "两边都是果蝇（或老师）。看它们下。";
+      S.mode = m; S.on = true; ensurePlayer(); reset();
+      segSet(Object.values(MODEBTN), MODEBTN[m]);
     }
-    // 点棋盘落子：把射线打到棋盘平面上
-    function clickBoard(e) {
-      if (!S.on || S.mode !== "human" || S.turn !== G5.BLACK || S.over) return false;
-      const r = renderer.domElement.getBoundingClientRect();
-      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      ray.setFromCamera(ndc, camera);
-      const hits = ray.intersectObject(board3d.group, true);
-      if (!hits.length) return false;
-      const p = board3d.group.worldToLocal(hits[0].point.clone());
-      const S0 = board3d.cell, span = board3d.span;
-      const x = Math.round((p.x + span / 2) / S0), y = Math.round((span / 2 - p.y) / S0);
-      if (x < 0 || x >= G5.N || y < 0 || y >= G5.N) return false;
-      play(G5.idx(x, y));
-      return true;
+    function setView(v) {
+      S.view = v;
+      cv2.hidden = v !== "2d"; cv3.hidden = v !== "3d";
+      segSet([$("gmView2d"), $("gmView3d")], v === "2d" ? $("gmView2d") : $("gmView3d"));
+      if (v === "3d") { ensure3d(); if (R3) { R3.board.clear(); for (let i = 0; i < G5.SIZE; i++) if (S.board[i]) R3.board.place(i, S.board[i]); } }
     }
-    $("gmOff").onclick = () => setMode("off");
     $("gmHuman").onclick = () => setMode("human");
     $("gmSelf").onclick = () => setMode("self");
     $("gmTeach").onclick = () => setMode("teach");
-    $("gmNew").onclick = () => { if (S.on) reset(); };
+    $("gmView2d").onclick = () => setView("2d");
+    $("gmView3d").onclick = () => setView("3d");
+    $("gmNew").onclick = reset;
+    $("gmOff").onclick = () => { S.on = false; say("已停"); };
+    setView("2d"); setMode("human"); S.on = false; say("点「我 vs 果蝇」开始");
+
     // 对局结果表
     (function buildPlayTable() {
       const t = document.getElementById("tGomokuPlay"); if (!t) return;
@@ -1929,24 +2064,9 @@ code { font: 12px var(--mono); }
         `判据：${TR.criterion}　结论：A ${TR.criterion_A_connectome_matters ? "被否" : "成立——真实接线没有贡献"}；` +
         `B ${TR.criterion_B_brain_adds ? "被否" : "成立——这颗脑子不如直接看棋盘"}。`;
     })();
-    const api = { tick, clickBoard, state: S };
+    const api = { tick, state: S };
     window.__gm = api;
     return api;
-  })();
-
-  // 触感实验表：数字来自 results/dodge/touch.json
-  (function buildTouchTable() {
-    const t = document.getElementById("tTouch"); if (!t) return;
-    let TC = null;
-    try { TC = JSON.parse(document.getElementById("touch-data").textContent); } catch (e) { return; }
-    t.innerHTML = "<tr><th>条件（无球）</th><th>走过的格子</th><th>路程 mm</th><th>贴墙时间</th><th>触到围栏</th><th>起跳</th></tr>" +
-      Object.entries(TC.arms).map(([k, v]) => {
-        const m = v.mean;
-        return `<tr${k.indexOf("头部刚毛") >= 0 ? ' class="em"' : ""}><td>${k}</td><td>${m.cells}</td><td>${m.pathLen}</td>` +
-          `<td>${(m.stuckFrac * 100).toFixed(1)}%</td><td>${(m.touchFrac * 100).toFixed(1)}%</td><td>${m.jump}</td></tr>`;
-      }).join("");
-    const n = document.getElementById("touchNote");
-    if (n) n.textContent = `每格 ${TC.seeds} 个种子 × ${TC.seconds_per_seed} 秒，场上无球。` + TC.note;
   })();
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
