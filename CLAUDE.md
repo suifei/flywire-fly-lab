@@ -250,9 +250,9 @@ python screen/sufficiency.py run|analyze    # Fig 2A：101 个 SEZ 类型的伸�
 python screen/jon_ce_f.py run|analyze       # Fig 5G：aBN1 只认 JO-CE 不认 JO-F（1 块，~1 min）
 python screen/shuffle_full.py run --n 10 && python screen/shuffle_full.py analyze   # 补充表 1D 全脑打乱（11 次建模，~11 min）
 python screen/audit.py [--fill]         # data audit: re-enumerates every segment the §14/16/19 analyses need and reports gaps (read-only unless --fill); 13,515 segments, currently 0 missing
-#   NOTE: audit.py covers only the §14/16/19 analyses. Total segments on disk across all screens is 18,799 / 10.56 h (deduped by key) —
+#   NOTE: audit.py covers only the §14/16/19 analyses. Total segments on disk across all screens is 24,250 / 14.68 h (deduped by key) —
 #   recount with `python screen/compute_ledger.py` (read-only, ~1 min; the old figure came from an ad-hoc shell loop
-#   pasted into docs/log/report.md §23 and silently went stale twice: 12,993 then 14,743 then 17,628, each missing later runs); the report's old 12,993 / 14,743 figures were both wrong.
+#   pasted into docs/log/report.md §23 and silently went stale twice: 12,993 then 14,743 then 17,628 then 18,799, each missing later runs); the report's old 12,993 / 14,743 figures were both wrong.
 python scratch/rerun_refs.py [--dry]    # re-runs the 34 seed-bug-affected refs with independent trials; backs up old results to results/{v2_ref,dodge_ref}_seedbug/ → results/v2_ref/rerun_diff.csv
 python3 dodge/collect_v6_results.py && python3 dodge/build.py   # screen + double + stress → results/dodge/v6_results.json, inlined at /*__V6__*/ (page card "除了玩游戏")
 

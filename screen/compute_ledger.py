@@ -31,6 +31,12 @@ SRC = [
     ("JON 全部 JO-（24 节，已作废）", ["results/screen/jon/chunks"]),
     ("JON 弱刺激（24.1 节）", ["results/screen/jon_weak/chunks"]),
     ("JON 论文名单（24.2 + 24.3 节，含集中度段）", ["results/screen/jon_paper/chunks"]),
+    ("参数稳健性 · 前两条预测（35 + 38.1 节）", ["results/screen/robustness/chunks"]),
+    ("参数稳健性 · 第三条预测：每种扰动重做整轮敲除（39 节）", ["results/screen/robust_knockout/chunks"]),
+    ("四味交互 ST4 + Fig 3 剂量网格（37.1 + 37.2 节）",
+     ["results/screen/taste/chunks", "results/screen/taste/notebook/chunks", "results/screen/taste/grid/chunks"]),
+    ("Fig 2A 伸喙充分性（37.4 节）", ["results/screen/sufficiency/chunks"]),
+    ("Fig 5G JO-CE / JO-F（37.5 节）", ["results/screen/jon_ce_f/chunks"]),
 ]
 
 
