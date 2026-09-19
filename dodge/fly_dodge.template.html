@@ -105,15 +105,12 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
 .row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
-.gmbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-.gmwrap { position: relative; width: 100%; max-width: 560px; aspect-ratio: 1 / 1; margin: 6px auto 2px;
-  background: var(--panel-2); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
-/* 两张画布叠在一起，靠 hidden 切换。**必须显式盖住 display:block**——
-   UA 样式表里的 [hidden]{display:none} 优先级低于 .gmwrap canvas，
-   不写这一条的话切到立体模式时平面画布还盖在上面（2026-09-19 截图时发现）。 */
-.gmwrap canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
-.gmwrap canvas[hidden] { display: none !important; }
-#gmCv2d { cursor: crosshair; }
+/* 五子棋直接占主画面：和 three.js 的画布叠在同一个 .stage 里，靠 hidden 切换。
+   **必须显式盖住 display:block**——UA 样式表的 [hidden]{display:none} 优先级低于
+   .stage canvas，不写这一条切过去时旧画布还盖在上面（2026-09-19 踩过一次）。 */
+#gmStage { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  background: var(--panel-2); cursor: crosshair; touch-action: none; z-index: 2; }
+#gmStage[hidden] { display: none !important; }
 .brainbox { position: relative; background: var(--panel-2); border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
 .brainbox canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .brainbox canvas:active { cursor: grabbing; }
@@ -266,6 +263,7 @@ code { font: 12px var(--mono); }
   <section class="app">
     <div class="stage-card">
       <div class="stage" id="stage">
+        <canvas id="gmStage" hidden></canvas>
         <div class="overlay">
           <span class="pill" id="pState">行走中</span>
           <span class="pill" id="pClock">大脑 0.00 s · 1.00× 实时</span>
@@ -319,6 +317,27 @@ code { font: 12px var(--mono); }
         </div>
       </div>
       <div class="controls">
+        <div class="row" id="viewRow">
+          <label class="k" id="lblView">主画面</label>
+          <div class="seg" role="group" aria-labelledby="lblView">
+            <button id="viewCourt" aria-pressed="true">篮球场</button>
+            <button id="viewGomoku" aria-pressed="false">五子棋</button>
+          </div>
+          <span id="gmInline" class="row" style="gap:6px 10px" hidden>
+            <div class="seg" role="group" aria-label="对局模式">
+              <button id="gmHuman" aria-pressed="true">我 vs 果蝇</button>
+              <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
+              <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
+            </div>
+            <div class="seg" role="group" aria-label="可视化">
+              <button id="gmView2d" aria-pressed="true">平面</button>
+              <button id="gmView3d" aria-pressed="false">立体</button>
+            </div>
+            <button class="btn" id="gmNew">新局</button>
+            <button class="btn" id="gmUndo">悔棋</button>
+            <span class="pill" id="gmPill">未开始</span>
+          </span>
+        </div>
         <div class="row" id="optoRow">
           <label class="k" title="给真实神经元一段泊松驱动（与论文 poi() 同一机制：被驱动神经元不应期置 0）；强度与时长手选">光遗传</label>
           <span id="optoBtns" class="row" style="gap:6px 8px; flex:1"></span>
@@ -563,26 +582,8 @@ code { font: 12px var(--mono); }
         而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
         把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
         连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
-      <div class="gmbar">
-        <div class="seg" role="group" aria-label="对局模式">
-          <button id="gmHuman" aria-pressed="true">我 vs 果蝇</button>
-          <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
-          <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
-        </div>
-        <div class="seg" role="group" aria-label="可视化模式">
-          <button id="gmView2d" aria-pressed="true">平面棋盘</button>
-          <button id="gmView3d" aria-pressed="false">立体棋盘</button>
-        </div>
-        <button class="btn" id="gmNew">新局</button>
-        <button class="btn" id="gmOff">停</button>
-        <span class="pill" id="gmPill">未开始</span>
-      </div>
-      <div class="gmwrap">
-        <canvas id="gmCv2d"></canvas>
-        <canvas id="gmCv3d" hidden></canvas>
-      </div>
-      <p class="sub">这是<b>独立的场景</b>，不在球场里——球场那边东西太多、帧率低也不好操作。
-        这里只有棋盘和下棋的果蝇。平面模式最快最好点；立体模式能看到果蝇飞过去插旗。</p>
+      <p class="sub"><b>棋盘在上面的主画面里</b>——把「主画面」切到「五子棋」，球场就整个换成棋盘，
+        三维场景也随之停止渲染（这也是帧率最高的一档）。平面模式最快最好点；立体模式能看到果蝇飞过去插旗。</p>
       <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
       <div class="tbl"><table id="tGomokuPlay"></table></div>
       <p class="sub" id="gmPlayNote"></p>
@@ -1084,6 +1085,13 @@ code { font: 12px var(--mono); }
   // 原来只有两个"假影子"——果蝇脚下一个暗椭圆、每个球一个暗圆。
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // **阴影不每帧重画**：球场有 4 盏投影灯，各一张 2048² 阴影贴图，
+  // 每帧全部重画是这一页最大的一笔 GPU 开销（用户反馈帧率低）。
+  // 场地本身是静的，会动的只有果蝇、球和颗粒，阴影晚一两帧看不出来。
+  // 关掉自动更新，改成每 SHADOW_EVERY 帧手动刷一次。
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
+  const SHADOW_EVERY = 3;
   stage.prepend(renderer.domElement);
   const scene = new THREE.Scene();
   // 近裁面从 0.1 提到 1：0.1/800 = 8000:1 的比值，远处深度精度差到
@@ -1487,20 +1495,13 @@ code { font: 12px var(--mono); }
       for (const i of order) {
         const persp = SP2[i];
         const px = ox + SX[i] * R, py = oy - SY[i] * R;
-        const L = lit[i];
         // 静息点用 --ink-2：它**跟随主题反转**（亮色主题下是深墨、暗色主题下是浅灰），
         // 所以两种主题下都和面板底色拉得开。原来用 --rule（分隔线灰）几乎看不见。
-        if (L < 0.02) {
-          ctx.fillStyle = palette["--ink-2"] || "#555"; ctx.globalAlpha = 0.5 * persp;
-          const r0 = Math.max(1, dpr * 0.9);
-          ctx.fillRect(px - r0 / 2, py - r0 / 2, r0, r0);
-        }
-        else {
-          ctx.globalAlpha = Math.min(1, 0.35 + L);
-          ctx.fillStyle = palette[colKey[i]] || palette["--ink-2"];
-          const r = (0.8 + 2.2 * L) * dpr * persp;
-          ctx.beginPath(); ctx.arc(px, py, r, 0, 6.2832); ctx.fill();
-        }
+        const L = lit[i];
+        ctx.globalAlpha = Math.min(1, 0.35 + L);
+        ctx.fillStyle = palette[colKey[i]] || palette["--ink-2"];
+        const r = (0.8 + 2.2 * L) * dpr * persp;
+        ctx.beginPath(); ctx.arc(px, py, r, 0, 6.2832); ctx.fill();
         lit[i] *= decay;
       }
       ctx.globalAlpha = 1;
@@ -1810,129 +1811,186 @@ code { font: 12px var(--mono); }
   // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
   const GM = (() => {
     const G5 = window.Gomoku, T5 = window.GomokuTeacher, F5 = window.GomokuFly, B3 = window.GomokuBoard3D;
-    const cv2 = $("gmCv2d"), cv3 = $("gmCv3d");
-    if (!G5 || !cv2) return null;
+    const cv = $("gmStage");
+    if (!G5 || !cv) return null;
     const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
     const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
     let player = null;
     const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK,
-                over: null, busy: false, last: -1, hover: -1, fliers: [] };
+                over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0 };
 
     const say = t => { $("gmPill").textContent = t; };
     const ensurePlayer = () => { if (!player && RO && RO.W) player = F5.makePlayer(SUB, ConnectomeBrain, RO); };
 
-    // ——— 平面棋盘：快、好点，默认 ———
+    // —— 布局：棋盘按画布短边居中，留出右侧信息栏 ——
+    function layout() {
+      const W = cv.clientWidth || 800, H = cv.clientHeight || 600;
+      const side = Math.min(W * 0.72, H * 0.94);
+      const pad = side * 0.05, cell = (side - 2 * pad) / (G5.N - 1);
+      const x0 = (W - side) * 0.5 - W * 0.12, y0 = (H - side) / 2;
+      return { W, H, side, pad, cell, x0: x0 + pad, y0: y0 + pad, panelX: x0 + side + W * 0.02 };
+    }
+    const cellXY = (L, i) => [L.x0 + (i % G5.N) * L.cell, L.y0 + ((i / G5.N) | 0) * L.cell];
+
+    function drawFly(ctx, x, y, r, color, flap) {
+      ctx.save(); ctx.translate(x, y);
+      ctx.fillStyle = color === G5.BLACK ? "#14161a" : "#f6f8f7";
+      ctx.strokeStyle = color === G5.BLACK ? "#000" : "#96a29e";
+      ctx.lineWidth = Math.max(1, r * 0.12);
+      ctx.globalAlpha = 0.42;
+      const f = flap === undefined ? 0.35 : flap;
+      for (const sg of [1, -1]) { ctx.beginPath(); ctx.ellipse(-r * .12, sg * r * .6, r * .78, r * .3, sg * f, 0, 6.2832); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.66, 0, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = color === G5.BLACK ? "#7a3f38" : "#c2524a";
+      ctx.beginPath(); ctx.arc(r * 0.78, 0, r * 0.28, 0, 6.2832); ctx.fill();
+      ctx.restore();
+    }
+
+    // ——— 平面棋盘（默认，最快最好点）———
     function draw2d(dt) {
-      const W = cv2.clientWidth, H = cv2.clientHeight;
-      if (!W || !H) return;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      if (cv2.width !== Math.round(W * dpr)) { cv2.width = Math.round(W * dpr); cv2.height = Math.round(H * dpr); }
-      const ctx = cv2.getContext("2d"), w = cv2.width, h = cv2.height;
-      const pad = w * 0.045, cell = (w - 2 * pad) / (G5.N - 1);
-      ctx.fillStyle = palette["--panel-2"] || "#eee"; ctx.fillRect(0, 0, w, h);
-      // 棋盘线
-      ctx.strokeStyle = palette["--rule"] || "#bbb"; ctx.lineWidth = Math.max(1, dpr * 0.7);
+      const W = cv.clientWidth, H = cv.clientHeight;
+      if (!W || !H) return;
+      if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+      const ctx = cv.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const L = layout();
+      ctx.fillStyle = palette["--panel-2"] || "#eee"; ctx.fillRect(0, 0, W, H);
+      // 木纹底板：写死暖木色（棋盘就该是木头色，不跟主题走），深色主题下压暗一档
+      const darkTheme = (palette["--panel-2"] || "").match(/^#?[0-3]/) ||
+        matchMedia("(prefers-color-scheme: dark)").matches;
+      const sidePx = L.cell * (G5.N - 1);
+      const g2 = ctx.createLinearGradient(L.x0, L.y0, L.x0 + sidePx, L.y0 + sidePx);
+      g2.addColorStop(0, darkTheme ? "#6b5436" : "#e6c68c");
+      g2.addColorStop(1, darkTheme ? "#5a4629" : "#d9b477");
+      ctx.fillStyle = g2;
+      const bx = L.x0 - L.pad, by = L.y0 - L.pad, bw2 = sidePx + 2 * L.pad;
+      ctx.fillRect(bx, by, bw2, bw2);
+      ctx.strokeStyle = darkTheme ? "rgba(0,0,0,.5)" : "rgba(90,60,25,.35)";
+      ctx.lineWidth = 2; ctx.strokeRect(bx + 1, by + 1, bw2 - 2, bw2 - 2);
+      ctx.strokeStyle = darkTheme ? "rgba(20,14,6,.85)" : "rgba(70,48,20,.85)"; ctx.lineWidth = 1;
       ctx.beginPath();
       for (let k = 0; k < G5.N; k++) {
-        const t = pad + k * cell;
-        ctx.moveTo(pad, t); ctx.lineTo(w - pad, t);
-        ctx.moveTo(t, pad); ctx.lineTo(t, h - pad);
+        const t = L.x0 + k * L.cell, u = L.y0 + k * L.cell;
+        ctx.moveTo(L.x0, u); ctx.lineTo(L.x0 + sidePx, u);
+        ctx.moveTo(t, L.y0); ctx.lineTo(t, L.y0 + sidePx);
       }
       ctx.stroke();
-      ctx.fillStyle = palette["--muted"] || "#888";
+      ctx.fillStyle = darkTheme ? "rgba(20,14,6,.9)" : "rgba(70,48,20,.9)";
       for (const [cx, cy] of [[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]]) {
-        ctx.beginPath(); ctx.arc(pad + cx * cell, pad + cy * cell, dpr * 2.2, 0, 6.2832); ctx.fill();
+        ctx.beginPath(); ctx.arc(L.x0 + cx * L.cell, L.y0 + cy * L.cell, Math.max(2, L.cell * 0.09), 0, 6.2832); ctx.fill();
       }
-      // 禁手点（只在轮到人执黑时提示）
-      if (S.mode === "human" && S.turn === G5.BLACK && !S.over) {
-        ctx.fillStyle = "rgba(208,59,59,.28)";
+      // 坐标：横 A–O、纵 1–15
+      ctx.fillStyle = darkTheme ? "rgba(235,225,205,.75)" : "rgba(60,40,15,.7)";
+      ctx.font = Math.max(9, L.cell * 0.34) + "px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      for (let k = 0; k < G5.N; k++) {
+        ctx.fillText(String.fromCharCode(65 + k), L.x0 + k * L.cell, by + bw2 - L.pad * 0.45);
+        ctx.fillText(String(k + 1), bx + L.pad * 0.45, L.y0 + k * L.cell);
+      }
+      ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
+      // 禁手点（只在轮到人执黑时画）
+      if (S.on && S.mode === "human" && S.turn === G5.BLACK && !S.over) {
+        ctx.strokeStyle = "rgba(208,59,59,.6)"; ctx.lineWidth = 2;
         for (const i of G5.candidates(S.board, 2)) {
-          if (S.board[i] !== G5.EMPTY) continue;
-          if (!G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) continue;
-          const x = pad + (i % G5.N) * cell, y = pad + ((i / G5.N) | 0) * cell;
-          ctx.beginPath(); ctx.moveTo(x - cell * .18, y - cell * .18); ctx.lineTo(x + cell * .18, y + cell * .18);
-          ctx.moveTo(x + cell * .18, y - cell * .18); ctx.lineTo(x - cell * .18, y + cell * .18);
-          ctx.strokeStyle = "rgba(208,59,59,.55)"; ctx.lineWidth = dpr * 1.6; ctx.stroke();
+          if (S.board[i] !== G5.EMPTY || !G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) continue;
+          const [x, y] = cellXY(L, i), d = L.cell * 0.2;
+          ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d);
+          ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke();
         }
       }
-      // 棋子：果蝇形状（身体 + 两翅），黑白两色
+      // 棋子
       for (let i = 0; i < G5.SIZE; i++) {
-        const v = S.board[i]; if (!v) continue;
-        const x = pad + (i % G5.N) * cell, y = pad + ((i / G5.N) | 0) * cell, r = cell * 0.42;
-        ctx.save(); ctx.translate(x, y);
-        ctx.fillStyle = v === G5.BLACK ? "#16181a" : "#f4f6f4";
-        ctx.strokeStyle = v === G5.BLACK ? "#000" : "#9aa5a1"; ctx.lineWidth = dpr;
-        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.92, r * 0.62, 0, 0, 6.2832); ctx.fill(); ctx.stroke();
-        ctx.globalAlpha = 0.45;
-        for (const sg of [1, -1]) { ctx.beginPath(); ctx.ellipse(-r * .1, sg * r * .55, r * .7, r * .3, sg * 0.5, 0, 6.2832); ctx.fill(); }
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = v === G5.BLACK ? "#6b3a34" : "#c2524a";
-        ctx.beginPath(); ctx.arc(r * 0.72, 0, r * 0.26, 0, 6.2832); ctx.fill();
-        ctx.restore();
+        if (!S.board[i]) continue;
+        const [x, y] = cellXY(L, i);
+        drawFly(ctx, x, y, L.cell * 0.42, S.board[i]);
       }
-      if (S.last >= 0) {
-        const x = pad + (S.last % G5.N) * cell, y = pad + ((S.last / G5.N) | 0) * cell;
-        ctx.strokeStyle = palette["--gf"] || "#1baf7a"; ctx.lineWidth = dpr * 2;
-        ctx.beginPath(); ctx.arc(x, y, cell * 0.55, 0, 6.2832); ctx.stroke();
+      // 最后一手
+      if (S.last >= 0 && S.board[S.last]) {
+        const [x, y] = cellXY(L, S.last);
+        ctx.strokeStyle = palette["--gf"] || "#1baf7a"; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(x, y, L.cell * 0.56, 0, 6.2832); ctx.stroke();
       }
-      if (S.hover >= 0 && S.mode === "human" && S.turn === G5.BLACK && !S.over && S.board[S.hover] === G5.EMPTY) {
-        const x = pad + (S.hover % G5.N) * cell, y = pad + ((S.hover / G5.N) | 0) * cell;
-        ctx.fillStyle = "rgba(0,0,0,.18)";
-        ctx.beginPath(); ctx.arc(x, y, cell * 0.3, 0, 6.2832); ctx.fill();
+      // 悬停预览
+      if (S.on && S.hover >= 0 && S.mode === "human" && S.turn === G5.BLACK && !S.over && S.board[S.hover] === G5.EMPTY) {
+        const [x, y] = cellXY(L, S.hover);
+        ctx.globalAlpha = 0.35; drawFly(ctx, x, y, L.cell * 0.42, G5.BLACK); ctx.globalAlpha = 1;
       }
-      // 正在飞过去的果蝇（落子动画）
+      // 飞过去的果蝇
       for (const f of S.fliers) {
-        const u = Math.min(1, f.t / f.dur);
-        const tx = pad + (f.cell % G5.N) * cell, ty = pad + ((f.cell / G5.N) | 0) * cell;
-        const x = f.x0 + (tx - f.x0) * u, y = f.y0 + (ty - f.y0) * u - Math.sin(Math.PI * u) * cell * 2.2;
-        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(ty - f.y0, tx - f.x0));
-        ctx.fillStyle = f.color === G5.BLACK ? "#16181a" : "#f4f6f4";
-        ctx.beginPath(); ctx.ellipse(0, 0, cell * .38, cell * .24, 0, 0, 6.2832); ctx.fill();
-        ctx.globalAlpha = .5;
-        const flap = Math.sin(performance.now() * 0.06) * 0.6;
-        for (const sg of [1, -1]) { ctx.beginPath(); ctx.ellipse(-cell * .05, sg * cell * .22, cell * .3, cell * .1, sg * flap, 0, 6.2832); ctx.fill(); }
-        ctx.globalAlpha = 1; ctx.restore();
+        const u = Math.min(1, f.t / f.dur), [tx, ty] = cellXY(L, f.cell);
+        const x = f.x0 + (tx - f.x0) * u, y = f.y0 + (ty - f.y0) * u - Math.sin(Math.PI * u) * L.cell * 2.4;
+        drawFly(ctx, x, y, L.cell * 0.4, f.color, Math.sin(performance.now() * 0.05) * 0.8);
+      }
+      drawPanel(ctx, L);
+    }
+
+    // 右侧信息栏：轮到谁、想了多久、手数、最后一手坐标
+    function drawPanel(ctx, L) {
+      const x = L.panelX, W = cv.clientWidth;
+      if (x > W - 60) return;
+      const n = S.board.reduce((a, v) => a + (v ? 1 : 0), 0);
+      ctx.fillStyle = palette["--ink-2"] || "#333";
+      ctx.font = "600 13px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
+      let y = L.y0 + 6;
+      const line = (t, c) => { ctx.fillStyle = c || (palette["--ink-2"] || "#333"); ctx.fillText(t, x, y); y += 20; };
+      line(S.over ? ((S.over === G5.BLACK ? "黑" : "白") + "胜") : (S.on ? "进行中" : "未开始"),
+           S.over ? (palette["--gf"] || "#1baf7a") : undefined);
+      line("第 " + n + " 手");
+      if (!S.over && S.on) line(S.turn === G5.BLACK ? "● 轮到黑" : "○ 轮到白");
+      if (S.last >= 0) line("最后一手 " + String.fromCharCode(65 + S.last % G5.N) + (((S.last / G5.N) | 0) + 1));
+      if (S.thinkMs) line("果蝇思考 " + S.thinkMs.toFixed(0) + " ms");
+      y += 6;
+      ctx.font = "11px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
+      ctx.fillStyle = palette["--muted"] || "#888";
+      for (const t of ["果蝇每一步真跑一遍", SUB.meta.n.toLocaleString() + " 个神经元", "禁手由规则引擎判定"]) {
+        ctx.fillText(t, x, y); y += 15;
       }
     }
 
-    // ——— 立体棋盘：自己一个 three.js 场景，只有棋盘和果蝇 ———
+    // ——— 立体棋盘：自己一个 three.js 场景，画到同一张画布的 2D 上下文里不行，
+    // 所以立体模式用一个离屏 renderer 渲染后 drawImage 过来，省一个画布也省一个上下文。
     let R3 = null;
     function ensure3d() {
       if (R3 || typeof THREE === "undefined" || !B3) return R3;
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, canvas: cv3 });
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+      const c = document.createElement("canvas");
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, canvas: c });
+      renderer.setPixelRatio(1);
       const sc = new THREE.Scene();
       sc.background = new THREE.Color(css("--panel-2"));
       const cam = new THREE.PerspectiveCamera(38, 1, 1, 3000);
       cam.up.set(0, 0, 1);
-      sc.add(new THREE.AmbientLight(0xffffff, 0.75));
-      const dl = new THREE.DirectionalLight(0xffffff, 0.75); dl.position.set(120, -160, 260); sc.add(dl);
+      sc.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const dl = new THREE.DirectionalLight(0xffffff, 0.7); dl.position.set(120, -160, 260); sc.add(dl);
       const board = B3.build(THREE, sc, { boardWood: "#caa06a", boardLine: "#4a3620", pole: "#efe6d8",
         stoneBlack: "#16181a", stoneWhite: "#f4f6f4", mark: "#e0562a" });
-      board.group.position.set(0, 0, 0);
-      R3 = { renderer, scene: sc, cam, board, yaw: 0, pitch: 0.95, dist: 330, drag: null, fliers: [] };
-      // 让立体模式也能拖动看
-      cv3.addEventListener("pointerdown", e => { R3.drag = [e.clientX, e.clientY, R3.yaw, R3.pitch]; cv3.setPointerCapture(e.pointerId); });
-      cv3.addEventListener("pointermove", e => {
-        if (!R3.drag) return;
-        R3.yaw = R3.drag[2] + (e.clientX - R3.drag[0]) * 0.008;
-        R3.pitch = Math.max(0.25, Math.min(1.45, R3.drag[3] + (e.clientY - R3.drag[1]) * 0.006));
-      });
-      cv3.addEventListener("pointerup", () => { R3.drag = null; });
+      R3 = { c, renderer, scene: sc, cam, board, yaw: 0, pitch: 0.95, dist: 330, fliers: [] };
       return R3;
     }
-    function draw3d() {
-      const r = ensure3d(); if (!r) return;
-      const W = cv3.clientWidth, H = cv3.clientHeight;
+    function draw3d(dt) {
+      const r = ensure3d(); if (!r) return draw2d(dt);
+      const dpr = 1, W = cv.clientWidth, H = cv.clientHeight;
       if (!W || !H) return;
-      if (cv3.width !== Math.round(W * r.renderer.getPixelRatio())) r.renderer.setSize(W, H, false);
+      if (cv.width !== W) { cv.width = W; cv.height = H; }
+      if (r.c.width !== W || r.c.height !== H) r.renderer.setSize(W, H, false);
       r.cam.aspect = W / Math.max(H, 1); r.cam.updateProjectionMatrix();
       const d = r.dist;
       r.cam.position.set(Math.sin(r.yaw) * Math.cos(r.pitch) * d, -Math.cos(r.yaw) * Math.cos(r.pitch) * d, Math.sin(r.pitch) * d);
       r.cam.lookAt(0, 0, 0);
+      for (let k = r.fliers.length - 1; k >= 0; k--) {
+        const f = r.fliers[k]; f.t += dt;
+        const u = Math.min(1, f.t / f.dur);
+        f.g.position.lerpVectors(f.from, f.to, u);
+        f.g.position.z += Math.sin(Math.PI * u) * 40;
+        if (u >= 1) { r.scene.remove(f.g); r.fliers.splice(k, 1); r.board.place(f.cell, f.color); r.board.markAt(f.cell); }
+      }
       r.renderer.render(r.scene, r.cam);
+      const ctx = cv.getContext("2d");
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(r.c, 0, 0);
+      drawPanel(ctx, layout());
     }
-    // 立体模式里的信使果蝇
     function courier3d(i, c) {
       const r = ensure3d(); if (!r) return;
       const g = new THREE.Group();
@@ -1943,49 +2001,58 @@ code { font: 12px var(--mono); }
       r.scene.add(g);
       r.fliers.push({ g, t: 0, dur: .6, from: g.position.clone(), to: r.board.cellPos(i).clone(), cell: i, color: c });
     }
-    function step3dFliers(dt) {
-      if (!R3) return;
-      for (let k = R3.fliers.length - 1; k >= 0; k--) {
-        const f = R3.fliers[k]; f.t += dt;
-        const u = Math.min(1, f.t / f.dur);
-        f.g.position.lerpVectors(f.from, f.to, u);
-        f.g.position.z += Math.sin(Math.PI * u) * 40;
-        if (u >= 1) { R3.scene.remove(f.g); R3.fliers.splice(k, 1); R3.board.place(f.cell, f.color); R3.board.markAt(f.cell); }
-      }
-    }
 
     function cellAt(e) {
-      const r = cv2.getBoundingClientRect();
-      const W = cv2.clientWidth, pad = W * 0.045, cell = (W - 2 * pad) / (G5.N - 1);
-      const x = Math.round((e.clientX - r.left - pad) / cell), y = Math.round((e.clientY - r.top - pad) / cell);
+      const rect = cv.getBoundingClientRect(), L = layout();
+      const x = Math.round((e.clientX - rect.left - L.x0) / L.cell), y = Math.round((e.clientY - rect.top - L.y0) / L.cell);
       if (x < 0 || x >= G5.N || y < 0 || y >= G5.N) return -1;
+      // 离交叉点太远就不算，免得误落子
+      const [cx, cy] = cellXY(L, G5.idx(x, y));
+      if (Math.hypot(e.clientX - rect.left - cx, e.clientY - rect.top - cy) > L.cell * 0.55) return -1;
       return G5.idx(x, y);
     }
-    cv2.addEventListener("pointermove", e => { S.hover = cellAt(e); });
-    cv2.addEventListener("pointerleave", () => { S.hover = -1; });
-    cv2.addEventListener("pointerdown", e => {
+    let drag = null;
+    cv.addEventListener("pointermove", e => {
+      if (S.view === "3d" && drag && R3) {
+        R3.yaw = drag[2] + (e.clientX - drag[0]) * 0.008;
+        R3.pitch = Math.max(0.25, Math.min(1.45, drag[3] + (e.clientY - drag[1]) * 0.006));
+        return;
+      }
+      S.hover = cellAt(e);
+    });
+    cv.addEventListener("pointerleave", () => { S.hover = -1; drag = null; });
+    cv.addEventListener("pointerdown", e => {
+      if (S.view === "3d") { drag = [e.clientX, e.clientY, R3 ? R3.yaw : 0, R3 ? R3.pitch : 0.95]; cv.setPointerCapture(e.pointerId); return; }
       if (!S.on || S.mode !== "human" || S.turn !== G5.BLACK || S.over || S.busy) return;
       const i = cellAt(e); if (i < 0) return;
       play(i);
     });
+    cv.addEventListener("pointerup", () => { drag = null; });
 
     function play(i) {
       if (S.over || i < 0 || S.board[i] !== G5.EMPTY) return false;
       if (S.turn === G5.BLACK && G5.forbidden(S.board, i % G5.N, (i / G5.N) | 0)) { say("那是禁手"); return false; }
       const c = S.turn;
-      S.board[i] = c; S.last = i;
-      // 平面模式：飞一只果蝇过去；立体模式：飞一只 3D 果蝇过去
-      const W = cv2.clientWidth || 400, pad = W * 0.045, cell = (W - 2 * pad) / (G5.N - 1);
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      S.fliers.push({ cell: i, color: c, t: 0, dur: .45,
-                      x0: (c === G5.BLACK ? 0 : cv2.width), y0: cv2.height * (0.5 + (Math.random() - .5) * .4) });
+      S.board[i] = c; S.last = i; S.history.push(i);
+      const L = layout();
+      S.fliers.push({ cell: i, color: c, t: 0, dur: .4,
+                      x0: c === G5.BLACK ? 0 : cv.clientWidth, y0: cv.clientHeight * (0.3 + Math.random() * 0.4) });
       if (S.view === "3d") courier3d(i, c);
       if (G5.wins(S.board, i % G5.N, (i / G5.N) | 0, c)) {
-        S.over = c; say((c === G5.BLACK ? "黑" : "白") + "胜（" + S.board.filter(v => v).length + " 手）");
+        S.over = c; say((c === G5.BLACK ? "黑" : "白") + "胜（" + S.history.length + " 手）");
         return true;
       }
       S.turn = c === G5.BLACK ? G5.WHITE : G5.BLACK;
       return true;
+    }
+    function undo(n) {
+      for (let k = 0; k < n && S.history.length; k++) {
+        const i = S.history.pop(); S.board[i] = G5.EMPTY;
+        S.turn = S.turn === G5.BLACK ? G5.WHITE : G5.BLACK;
+      }
+      S.over = null; S.last = S.history.length ? S.history[S.history.length - 1] : -1;
+      if (R3) { R3.board.clear(); for (let i = 0; i < G5.SIZE; i++) if (S.board[i]) R3.board.place(i, S.board[i]); R3.board.markAt(S.last >= 0 ? S.last : null); }
+      say("已悔棋");
     }
     function agentMove(who) {
       if (who === "teacher" || !player) return T5.best(S.board, S.turn).move;
@@ -1993,46 +2060,63 @@ code { font: 12px var(--mono); }
     }
     let timer = 0;
     function tick(dt) {
+      if (!S.on) return;
       for (let k = S.fliers.length - 1; k >= 0; k--) { S.fliers[k].t += dt; if (S.fliers[k].t > S.fliers[k].dur) S.fliers.splice(k, 1); }
-      step3dFliers(dt);
-      if (S.view === "2d") draw2d(dt); else draw3d();
-      if (!S.on || S.over || S.busy || S.fliers.length) return;
+      if (S.view === "2d") draw2d(dt); else draw3d(dt);
+      if (S.over || S.busy || S.fliers.length) return;
       timer -= dt; if (timer > 0) return;
       if (S.mode === "human" && S.turn === G5.BLACK) { say("轮到你（黑）"); return; }
       const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
-      say(who === "fly" ? "果蝇在想…（真跑一遍 " + SUB.meta.n.toLocaleString() + " 个神经元）" : "老师在想…");
+      say(who === "fly" ? "果蝇在想…" : "老师在想…");
       S.busy = true;
       setTimeout(() => {
         ensurePlayer();
-        play(agentMove(who));
-        S.busy = false; timer = 0.3;
+        const t0 = performance.now();
+        const mv = agentMove(who);
+        if (who === "fly") S.thinkMs = performance.now() - t0;
+        play(mv);
+        S.busy = false; timer = 0.25;
         if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "轮到黑" : "轮到白"));
       }, 0);
     }
     function reset() {
-      S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false; S.last = -1; S.fliers.length = 0;
+      S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false;
+      S.last = -1; S.fliers.length = 0; S.history.length = 0; S.thinkMs = 0;
       if (R3) { R3.board.clear(); R3.board.markAt(null); for (const f of R3.fliers) R3.scene.remove(f.g); R3.fliers.length = 0; }
       say(S.mode === "human" ? "轮到你（黑）" : "开始");
     }
     const MODEBTN = { human: $("gmHuman"), self: $("gmSelf"), teach: $("gmTeach") };
-    function setMode(m) {
-      S.mode = m; S.on = true; ensurePlayer(); reset();
-      segSet(Object.values(MODEBTN), MODEBTN[m]);
-    }
+    function setMode(m) { S.mode = m; ensurePlayer(); reset(); segSet(Object.values(MODEBTN), MODEBTN[m]); }
     function setView(v) {
       S.view = v;
-      cv2.hidden = v !== "2d"; cv3.hidden = v !== "3d";
       segSet([$("gmView2d"), $("gmView3d")], v === "2d" ? $("gmView2d") : $("gmView3d"));
       if (v === "3d") { ensure3d(); if (R3) { R3.board.clear(); for (let i = 0; i < G5.SIZE; i++) if (S.board[i]) R3.board.place(i, S.board[i]); } }
+      cv.style.cursor = v === "3d" ? "grab" : "crosshair";
     }
+    // 主画面切换：切到五子棋就把 three.js 场景整个停掉（这也是帧率最高的一档）
+    function setStage(which) {
+      S.on = which === "gomoku";
+      cv.hidden = !S.on;
+      $("gmInline").hidden = !S.on;
+      // 舞台上那些浮层是给球场用的，棋盘模式下要收起来，否则会盖住棋盘右侧的信息栏
+      for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = S.on; }
+      const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = S.on ? "none" : "";
+      segSet([$("viewCourt"), $("viewGomoku")], S.on ? $("viewGomoku") : $("viewCourt"));
+      window.__stageMode = which;
+      if (S.on) { ensurePlayer(); reset(); $("coach").textContent =
+        "主画面已换成棋盘，三维球场停止渲染。你执黑，点交叉点落子；红叉是禁手点。"; }
+      else $("coach").textContent = "回到球场。";
+    }
+    $("viewCourt").onclick = () => setStage("court");
+    $("viewGomoku").onclick = () => setStage("gomoku");
     $("gmHuman").onclick = () => setMode("human");
     $("gmSelf").onclick = () => setMode("self");
     $("gmTeach").onclick = () => setMode("teach");
     $("gmView2d").onclick = () => setView("2d");
     $("gmView3d").onclick = () => setView("3d");
     $("gmNew").onclick = reset;
-    $("gmOff").onclick = () => { S.on = false; say("已停"); };
-    setView("2d"); setMode("human"); S.on = false; say("点「我 vs 果蝇」开始");
+    $("gmUndo").onclick = () => undo(S.mode === "human" ? 2 : 1);
+    setView("2d"); S.mode = "human"; say("点上面的「五子棋」开始");
 
     // 对局结果表
     (function buildPlayTable() {
@@ -2068,7 +2152,7 @@ code { font: 12px var(--mono); }
         `判据：${TR.criterion}　结论：A ${TR.criterion_A_connectome_matters ? "被否" : "成立——真实接线没有贡献"}；` +
         `B ${TR.criterion_B_brain_adds ? "被否" : "成立——这颗脑子不如直接看棋盘"}。`;
     })();
-    const api = { tick, state: S };
+    const api = { tick, state: S, setStage };
     window.__gm = api;
     return api;
   })();
@@ -2745,8 +2829,10 @@ code { font: 12px var(--mono); }
 
   camera.position.set(-4, -40, 36); controls.target.set(0, 0, 0); controls.update();
   let camPrev = [0, 0], prev = performance.now(), carry = 0, rt = [0, 0];
+  let rasterAcc = 0, brainAcc = 0, frameN = 0;
   function frame(now) {
     const dtReal = Math.min(0.05, Math.max(0, (now - prev) / 1000)); prev = now;
+    if ((frameN++ % SHADOW_EVERY) === 0) renderer.shadowMap.needsUpdate = true;
     if (S.jumpT < 0 && CFG.takeoff !== pendingTakeoff) CFG.takeoff = pendingTakeoff;
     const inFlight = !!(S.clip && S.jumpT >= 0);
     if (!paused) {
@@ -2756,8 +2842,12 @@ code { font: 12px var(--mono); }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
-      drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
-      BRAIN.draw(Math.min(0.1, dtReal));
+      // raster 与脑图都是侧栏，不必跟满 60 fps：各自攒够时间再画一次。
+      // 攒的是**游戏内时间**，所以慢放时它们也跟着慢，画出来的还是对的。
+      rasterAcc += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);
+      brainAcc += Math.min(0.1, dtReal);
+      if (rasterAcc >= 1 / 30) { drawRaster(rasterAcc); rasterAcc = 0; }
+      if (brainAcc >= 1 / 20) { BRAIN.draw(brainAcc); brainAcc = 0; }
       if (GM) GM.tick(Math.min(0.1, dtReal));
       if (COMP) COMP.draw();
     }
@@ -2783,7 +2873,8 @@ code { font: 12px var(--mono); }
       e.m.position.set(S.x + pv.x, S.y + pv.y, S.z + pv.z); e.m.visible = fly.visible; di++;
     }
     // 说话气泡：把果蝇的世界坐标投影到屏幕上
-    if ($("saysOn").checked) {
+    if (window.__stageMode === "gomoku") { const e2 = $("says"); if (e2) e2.hidden = true; }
+    else if ($("saysOn").checked) {
       if (!window._sayT || S.t - window._sayT > CFG.speechEvery) {
         window._sayT = S.t; window._say = game.speech();
       }
@@ -2803,12 +2894,18 @@ code { font: 12px var(--mono); }
       $("windArrow").style.transform = `rotate(${(-game.wind.dir * 180 / Math.PI).toFixed(0)}deg)`;
       $("windTxt").textContent = `风 ${(game.wind.speed * 100).toFixed(0)}% · JO ${((game.wind.joL + game.wind.joR) / 2).toFixed(0)} Hz`;
     }
-    const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
-    camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
-    controls.update();
-    renderer.render(scene, camera);
-    // 果蝇第一人称复眼视窗：每秒只刷几次（读回 GPU 像素会打断流水线）
-    if (window.__eyeTick) window.__eyeTick(vx, vy, vz, S.h);
+    // **主画面被五子棋占用时，整个三维球场都不渲染**——包括 4 张阴影贴图和复眼的
+    // 立方体贴图读回。这是帧率最高的一档，也是把棋盘做成"替换主画面"而不是
+    // "再加一块画布"的主要原因（用户反馈：原来那样帧率更低）。
+    const gomokuOwnsStage = window.__stageMode === "gomoku";
+    if (!gomokuOwnsStage) {
+      const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
+      camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
+      controls.update();
+      renderer.render(scene, camera);
+      // 果蝇第一人称复眼视窗：每秒只刷几次（读回 GPU 像素会打断流水线）
+      if (window.__eyeTick) window.__eyeTick(vx, vy, vz, S.h);
+    }
     updatePanels();
     requestAnimationFrame(frame);
   }
