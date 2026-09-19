@@ -219,19 +219,37 @@ const FlyEyeCam = (() => {
                  gl instanceof WebGL2RenderingContext &&
                  typeof gl.fenceSync === "function" && typeof gl.getBufferSubData === "function";
       if (!ok) return (this._pboState = null);            // WebGL1 等 → 退回同步
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
-      gl.bufferData(gl.PIXEL_PACK_BUFFER, this.px.byteLength, gl.STREAM_READ);
+      // **两个缓冲轮流用（乒乓）**。只用一个的话，每次提交都往同一个缓冲写，
+      // 驱动会刷一条性能警告：「READ-usage buffer was written, then fenced,
+      // but written again before being read back. This discarded the shadow copy
+      // that was created to accelerate readback.」——每次提交一条，几十秒就刷屏
+      //（2026-09-19 用户在控制台看到几百条）。逻辑上我们确实是读完才写的
+      //（实测 gl.getError() 恒为 0，不是错误），但驱动为加速读回准备的影子副本
+      //   还是会被下一次写作废。轮流用两个缓冲，正在被读的那个就不会被写。
+      const bufs = [gl.createBuffer(), gl.createBuffer()];
+      for (const b of bufs) {
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, b);
+        gl.bufferData(gl.PIXEL_PACK_BUFFER, this.px.byteLength, gl.STREAM_READ);
+      }
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
-      return (this._pboState = { gl, buf, sync: null });
+      return (this._pboState = { gl, bufs, i: 0, buf: bufs[0], sync: null });
     }
 
     /** 发起异步读回（不等）。必须在 _renderCube 之后调用。 */
     _submitAsync() {
       const P = this._pbo(); if (!P) return false;
-      const { gl, buf } = P, { renderer, rt, size } = this;
+      const { gl } = P, { renderer, rt, size } = this;
+      P.i = (P.i + 1) % P.bufs.length;                    // 换到另一个缓冲再写
+      P.buf = P.bufs[P.i];
+      const buf = P.buf;
       const prev = renderer.getRenderTarget();
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buf);
+      // **孤儿化**：重新分配一次，等于告诉驱动「旧内容不要了」。
+      // 不这么做的话每次提交都会刷一条 ANGLE 性能警告（shadow copy 被作废），
+      // 22 fps 下就是每秒 20 多条，控制台直接刷满（2026-09-19 用户反馈）。
+      // 逻辑上我们本来就是读完才写的（实测 gl.getError() 恒为 0），
+      // 孤儿化只是把这个意图明确告诉驱动。
+      gl.bufferData(gl.PIXEL_PACK_BUFFER, this.px.byteLength, gl.STREAM_READ);
       for (let f = 0; f < 6; f++) {
         renderer.setRenderTarget(rt, f);                  // 让 three.js 绑好这一面的 framebuffer
         gl.readPixels(0, 0, size, size, gl.RGBA, gl.UNSIGNED_BYTE, f * this.FACE);
