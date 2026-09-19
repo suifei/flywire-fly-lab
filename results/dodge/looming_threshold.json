@@ -1,0 +1,102 @@
+{
+ "subcircuit": "subcircuit_v3",
+ "seconds_per_speed": 120,
+ "seeds": 4,
+ "ball_radius_mm": 2.5,
+ "paper": {
+  "source": "Fotowat, Fayyazuddin, Bellen & Gabbiani 2009, J Neurophysiol 102:875–885",
+  "wr_angle_deg": 49,
+  "wr_sd": 4,
+  "to_angle_deg": 54,
+  "to_sd": 5,
+  "to_delay_ms": 6,
+  "white_eyed_angle_deg": 47,
+  "white_eyed_sd": 7.5
+ },
+ "criterion": "A：三档球速间起飞张角的变异系数 < 20% 且无单调趋势；B：起飞时刻与 l/|v| 正相关（Pearson > 0.5）",
+ "caveat": "Ache 2019 编码里 LPLC2 是角尺寸的高斯（峰 42°），所以「在固定张角起飞」有一部分是编码自带的偏置；非平凡的是阈值落在哪个角度、以及它与速度无关到什么程度。",
+ "by_radius": [
+  {
+   "ball_radius_mm": 2.5,
+   "by_speed": [
+    {
+     "speed_mm_s": 35,
+     "l_over_v_ms": 71.4,
+     "n": 65,
+     "theta_median": 6.39,
+     "theta_sd": 3.95,
+     "ttc_median_ms": 971.7,
+     "dist_median": 44.81
+    },
+    {
+     "speed_mm_s": 60,
+     "l_over_v_ms": 41.7,
+     "n": 235,
+     "theta_median": 13.6,
+     "theta_sd": 2.22,
+     "ttc_median_ms": 296.9,
+     "dist_median": 20.96
+    },
+    {
+     "speed_mm_s": 95,
+     "l_over_v_ms": 26.3,
+     "n": 244,
+     "theta_median": 14.4,
+     "theta_sd": 2.01,
+     "ttc_median_ms": 170.3,
+     "dist_median": 19.8
+    }
+   ],
+   "theta_mean": 11.46,
+   "theta_cv": 0.3849,
+   "criterion_A": false,
+   "pearson_lv_vs_ttc": 0.981,
+   "criterion_B": true,
+   "dist_at_54deg_mm": 4.9
+  },
+  {
+   "ball_radius_mm": 8,
+   "by_speed": [
+    {
+     "speed_mm_s": 35,
+     "l_over_v_ms": 228.6,
+     "n": 267,
+     "theta_median": 16.98,
+     "theta_sd": 4.1,
+     "ttc_median_ms": 1407.2,
+     "dist_median": 53.59
+    },
+    {
+     "speed_mm_s": 60,
+     "l_over_v_ms": 133.3,
+     "n": 247,
+     "theta_median": 17.22,
+     "theta_sd": 1.26,
+     "ttc_median_ms": 742.6,
+     "dist_median": 52.83
+    },
+    {
+     "speed_mm_s": 95,
+     "l_over_v_ms": 84.2,
+     "n": 251,
+     "theta_median": 17.76,
+     "theta_sd": 1.84,
+     "ttc_median_ms": 445.2,
+     "dist_median": 51.2
+    }
+   ],
+   "theta_mean": 17.32,
+   "theta_cv": 0.0231,
+   "criterion_A": true,
+   "pearson_lv_vs_ttc": 0.999,
+   "criterion_B": true,
+   "dist_at_54deg_mm": 15.7
+  }
+ ],
+ "theta_mean_across_speeds": 17.32,
+ "theta_cv": 0.0231,
+ "criterion_A_fixed_threshold": true,
+ "pearson_lv_vs_ttc": 0.999,
+ "criterion_B_earlier_for_slow": true,
+ "default_radius_note": "默认球半径 2.5 mm 时 54° 对应距离 4.9 mm，而接触距离就是 3.9 mm——论文那个阈值在这个场景里等于「已经贴到脸上」，来不及逃。所以同时测了 8 mm 的刺激。"
+}
