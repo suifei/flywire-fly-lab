@@ -221,7 +221,9 @@ PAPERS = [
                          "背离比例只有 **35%**，也就是六成五的时候转向**指向**威胁；侧向威胁才回到随机水平附近。"
                          "**这不是接线接反了**：全脑参考里单侧 LC4+LPLC2 只驱动**对侧** DNa"
                          "（左侧刺激 → DNa01 右 38.5 Hz / 左 0.0，右侧刺激反过来；侧别已换算成注释表口径），"
-                         "方向该是对的。正面这一档还没有解释，见日志 §44。"
+                         "方向该是对的。**追查过一次、预测被否**：假设是选择效应（朝威胁转才会进入正面一档），"
+                         "事先写明「转向增益设 0 后应回到 43–57%」，实测仍是 **40.7% / 37.7%**，不成立。"
+                         "2×2 表显示它也不是固定的左右偏置——威胁在左时左 DNa 更强的概率 66.9%、在右时 37.6%。机制未定，见日志 §44.1。"
                          "**第一版的 B 组是错的**：当时额外要求 |DNa 左右差| > 0.5 Hz 才算样本，"
                          "n 从 37,730 掉到 68、比例被抬到 76.5%——那是按被测量的信号本身筛样本，必然虚高。"
                          "另外这只是一个弱类比：模型里没有姿态、没有腿部准备动作，"
@@ -230,7 +232,9 @@ PAPERS = [
                   log="§32.2 + §44",
                   verify=[("pre_takeoff.frac_away", 0.5069, 0.002), ("no_takeoff.frac_away", 0.5231, 0.002),
                           ("criterion_A", False, 0), ("criterion_B", False, 0),
-                          ("pre_bins.0.frac", 0.3502, 0.002), ("takeoffs", 496, 0)]),
+                          ("pre_bins.0.frac", 0.3502, 0.002), ("takeoffs", 496, 0),
+                          ("front_table.pre.frac_dnaL_given_threatL", 0.6687, 0.0005),
+                          ("front_table.pre.frac_dnaL_given_threatR", 0.3765, 0.0005)]),
          ]),
     dict(key="fotowat2009", cite="Fotowat, Fayyazuddin, Bellen & Gabbiani 2009, J Neurophysiol 102:875-885",
          url="https://pmc.ncbi.nlm.nih.gov/articles/PMC3817277/",

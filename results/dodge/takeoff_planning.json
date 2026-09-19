@@ -35,6 +35,18 @@
     "defined": 0.992,
     "frac": 0.47403738616392394
    },
+   "front_table_pre": {
+    "dnaL_threatL": 159,
+    "dnaL_threatR": 44,
+    "dnaR_threatL": 94,
+    "dnaR_threatR": 38
+   },
+   "front_table_no": {
+    "dnaL_threatL": 102,
+    "dnaL_threatR": 6,
+    "dnaR_threatL": 51,
+    "dnaR_threatR": 27
+   },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
    "pre_bins": [
@@ -105,6 +117,18 @@
     "of": 6543,
     "defined": 0.99,
     "frac": 0.5516975308641975
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 47,
+    "dnaL_threatR": 8,
+    "dnaR_threatL": 90,
+    "dnaR_threatR": 92
+   },
+   "front_table_no": {
+    "dnaL_threatL": 23,
+    "dnaL_threatR": 0,
+    "dnaR_threatL": 65,
+    "dnaR_threatR": 28
    },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
@@ -177,6 +201,18 @@
     "defined": 0.986,
     "frac": 0.597717052922864
    },
+   "front_table_pre": {
+    "dnaL_threatL": 187,
+    "dnaL_threatR": 159,
+    "dnaR_threatL": 84,
+    "dnaR_threatR": 100
+   },
+   "front_table_no": {
+    "dnaL_threatL": 94,
+    "dnaL_threatR": 86,
+    "dnaR_threatL": 49,
+    "dnaR_threatR": 55
+   },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
    "pre_bins": [
@@ -247,6 +283,18 @@
     "of": 6121,
     "defined": 0.989,
     "frac": 0.5071003963011889
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 163,
+    "dnaL_threatR": 43,
+    "dnaR_threatL": 101,
+    "dnaR_threatR": 144
+   },
+   "front_table_no": {
+    "dnaL_threatL": 70,
+    "dnaL_threatR": 19,
+    "dnaR_threatL": 86,
+    "dnaR_threatR": 100
    },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
@@ -319,6 +367,18 @@
     "defined": 0.989,
     "frac": 0.44081954294720255
    },
+   "front_table_pre": {
+    "dnaL_threatL": 135,
+    "dnaL_threatR": 42,
+    "dnaR_threatL": 14,
+    "dnaR_threatR": 86
+   },
+   "front_table_no": {
+    "dnaL_threatL": 105,
+    "dnaL_threatR": 34,
+    "dnaR_threatL": 0,
+    "dnaR_threatR": 67
+   },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
    "pre_bins": [
@@ -389,6 +449,18 @@
     "of": 6474,
     "defined": 0.982,
     "frac": 0.5733165512901196
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 173,
+    "dnaL_threatR": 53,
+    "dnaR_threatL": 45,
+    "dnaR_threatR": 118
+   },
+   "front_table_no": {
+    "dnaL_threatL": 188,
+    "dnaL_threatR": 48,
+    "dnaR_threatL": 4,
+    "dnaR_threatR": 74
    },
    "pre_dna_abs_median": 0,
    "no_dna_abs_median": 0,
@@ -509,5 +581,28 @@
   },
   "side_frac": 0.5149,
   "verdict": "正面威胁（|方位| < 15°）时转向信号系统性地**指向**威胁——背离比例只有 35%；侧向威胁则在随机水平附近。所以不是「正面没有左右可分」，而是方向本身就不对。整体上这个模型没有「背离威胁的方向规划信号」。"
+ },
+ "front_table": {
+  "pre": {
+   "dnaL_threatL": 864,
+   "dnaL_threatR": 349,
+   "dnaR_threatL": 428,
+   "dnaR_threatR": 578,
+   "frac_dnaL": 0.5466,
+   "frac_threatL": 0.5822,
+   "frac_dnaL_given_threatL": 0.6687,
+   "frac_dnaL_given_threatR": 0.3765
+  },
+  "no": {
+   "dnaL_threatL": 582,
+   "dnaL_threatR": 193,
+   "dnaR_threatL": 255,
+   "dnaR_threatR": 351,
+   "frac_dnaL": 0.5612,
+   "frac_threatL": 0.6061,
+   "frac_dnaL_given_threatL": 0.6953,
+   "frac_dnaL_given_threatR": 0.3548
+  },
+  "note": "正面一档（|方位| < 15°）。dnaL = 左 DNa 更强（→ 左转）；threatL = 威胁在左。背离 = dnaR_threatL + dnaL_threatR"
  }
 }
