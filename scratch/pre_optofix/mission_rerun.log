@@ -1,0 +1,26 @@
+关掉警报　　　　　　 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：jump 0  feedS 18.33  contacts 11
+    不干预：jump 32.333  feedS 8  contacts 10.667
+一刀止痒　　　　　　 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：groom 0  groomS 0  dust 20  dodgeRate 1
+    不干预：groom 8.333  groomS 4.953  dust 20  dodgeRate 1
+饿死它　　　　　　　 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：feedS 0  contacts 11.667  dodgeRate 1
+    不干预：feedS 8  contacts 10.667  dodgeRate 1
+一个不够，两个才行　 参考解 3/3  不干预 0/3  单敲 Clavicle 0/3，G2N-1 0/3  ✓ 有区分度
+    参考解：feedS 0.56  contacts 11.333
+    不干预：feedS 8  contacts 10.667
+    单敲 Clavicle：feedS 7.507  contacts 10.667
+    单敲 G2N-1：feedS 6.81  contacts 10.333
+拆掉刹车　　　　　　 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：mn9Peak 57.733  mn9Mean 18.033  feedS 5.503  contacts 11.333
+    不干预：mn9Peak 33.467  mn9Mean 10.233  feedS 4.537  contacts 12.333
+证明连接组真的在起作用 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：dodgeRate 0.502  jump 2  launched 33
+    不干预：dodgeRate 0.855  jump 32.667  launched 33
+不用球，让它自己飞　 参考解 3/3  不干预 0/3  ✓ 有区分度
+    参考解：jump 1  launched 0
+    不干预：jump 0  launched 0
+
+用时 1222 s，写入 results/dodge/missions_v3.json
+RERUN_DONE

@@ -1,0 +1,42 @@
+{
+ "position": "开局 3 子，白先",
+ "table": "fly_intact",
+ "note": "用时受机器负载影响；节点数是确定的",
+ "rows": [
+  {
+   "depth": 2,
+   "nodes": 53,
+   "seconds": 0
+  },
+  {
+   "depth": 4,
+   "nodes": 476,
+   "seconds": 0.01,
+   "nodes_ratio_per_ply": 3
+  },
+  {
+   "depth": 6,
+   "nodes": 2832,
+   "seconds": 0.03,
+   "nodes_ratio_per_ply": 2.44
+  },
+  {
+   "depth": 8,
+   "nodes": 17798,
+   "seconds": 0.18,
+   "nodes_ratio_per_ply": 2.51
+  },
+  {
+   "depth": 10,
+   "nodes": 141103,
+   "seconds": 1.44,
+   "nodes_ratio_per_ply": 2.82
+  },
+  {
+   "depth": 12,
+   "nodes": 360832,
+   "seconds": 3.77,
+   "nodes_ratio_per_ply": 1.6
+  }
+ ]
+}

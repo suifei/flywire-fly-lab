@@ -388,6 +388,18 @@ PARAMETERS = [
     dict(name="DNg100 刺激电流", value="I = 350（全 MANC）/ 360（全突触版）", source="本项目标定",
          note="作者的 set_sizes 按**网络**中位体型归一，所以同一电流在全 VNC 里更弱（前足网络默认 250）",
          script="vnc/manc_full.py", log="§12.1"),
+    dict(name="五子棋老师的线型分值", value="成五 1e7 / 活四 1e5 / 冲四 2000 / 活三 1500 / 眠三 120 / 活二 100 / 眠二 10 / 单子 1", source="**手选**",
+         code_check=("gomoku/teacher2.js", r"const ATT = \[0, 1, 10, 100, 120, (1500), 2000, 1e5, 1e7\]", "1500"),
+         note="不是任何论文或引擎的值；老师的棋力主要来自搜索深度。它也是果蝇读出层阶段一的拟合目标（取 ln(分值+1)），所以果蝇学到的价值顺序是老师给的，不是它自己发现的",
+         script="gomoku/teacher2.js", log="§46.3"),
+    dict(name="五子棋线型的驱动", value="160 Hz × 300 ms，每通道约 61 个输入神经元，3 个泊松种子取平均", source="本项目按实测选定",
+         code_check=("gomoku/line_map.js", r"const ms = opt\.ms \?\? (\d+), hz = opt\.hz \?\? (\d+)", "60/160"),
+         note="窗口长度按「特征跨种子的相关」选：60 ms 中位 0.44、150 ms 0.77、300 ms 0.87（代码里的缺省 60 ms 只是缺省，流水线显式传 300）。通道→神经元的分配是固定种子的随机洗牌，是任意的",
+         script="gomoku/line_features.js", log="§46.4"),
+    dict(name="五子棋搜索引擎", value="每层宽度 K = 6（根 16）、先手系数 1.2", source="K 实测选定；先手系数**手选**",
+         code_check=("gomoku/engine.js", r"const K = o\.K \?\? (\d+), K0", "6"),
+         note="同等节点预算下 K=6 对 K=10 是 62–38（100 局）；先手系数 1.0 / 1.5 / 2.0 对 1.2 都在噪声里（46–54、55–45、51–48）。这两个属于搜索，不属于果蝇",
+         script="gomoku/engine.js", log="§46.6"),
 ]
 
 # ── 本项目自己的结果（不是对某篇论文的复现，但同样是"我们知道什么"）──────────
@@ -396,46 +408,73 @@ FINDINGS = [
          status="reproduced",
          result="**三处都不是空对照**。全脑 346 → **61** 个活跃神经元（18%）；"
                 "游戏子回路 60 s 起跳 32.7 → **2.0** 次；"
-                "五子棋水库**反而更活跃**——每个局面活跃神经元 1795 → **3055**",
+                "五子棋水库**反而更活跃**——每种线型活跃神经元 717 → **1602**（线型版特征；v1 的 1795 / 3055 随 v1 一起作废）",
          caveat="起因是 §42：别人那条实验的打乱臂读出完全不放电，判据因此是空的。"
                 "这条教训回头套自己身上才不是双标。"
-                "五子棋那一行还顺带解释了 §41.6 的翻盘：打乱脑下棋「更强」很可能只是因为"
-                "**它给读出层的特征更丰富**（打乱破坏抑制的特异性 → 整体更易兴奋），而不是它更懂棋",
+                "五子棋那一行也解释了 §46 里打乱接线为什么不输：**它给读出层的特征更丰富**"
+                "（打乱破坏抑制的特异性 → 整体更易兴奋，读出维度多一倍），而不是它更懂棋",
          script="scripts/check_shuffle_controls.py", result_file="results/shuffle_controls.json", log="§42.1",
          verify=[("full_brain.shuffled_active_median", 61, 0), ("all_alive", True, 0),
-                 ("gomoku.shuffled.mean_active_per_position", 3055.2, 0.1),
-                 ("gomoku.intact.mean_active_per_position", 1795.3, 0.1),
+                 ("gomoku.shuffled.mean_active_per_position", 1602.0, 0.1),
+                 ("gomoku.intact.mean_active_per_position", 717.3, 0.1),
                  ("game_subcircuit.shuffled_jump", 2.0, 0.05)]),
-    dict(id="gomoku_reservoir", what="把果蝇脑当「水库」训练它下五子棋，连接组有贡献吗",
+    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋铺进果蝇脑）的结论还算数吗",
          status="negative",
-         result="**没有，而且两版子回路上都一样**。脑里一个突触都不训练、只训练一层线性读出："
-                "子回路 v3 上真实连接组测试 top1 **0.0213**、**打乱接线 0.0190**（差 0.0023），"
-                "而直接看棋盘 **0.1745**（8 倍）；拼接反而更差（0.0786）。"
-                "v2 上是 0.0244 / 0.0178 / 0.1745——**同一个结论重复了一次**。"
-                "连「保拓扑编码」（按真实胞体位置铺棋盘）也救不回来（v2 上 0.0248）",
-         caveat="12,270 个局面、500 局自对弈、按整局切分。只用了线性读出——更强的读出可能挖出更多，"
-                "但那正是 Mineault 批评的「读出层足够灵活就能学会任何东西」。"
-                "棋盘→神经元的映射是任意的；禁手由规则引擎判定，不是果蝇。"
-                "**这条阴性结果的意义**：「把连接组接进游戏 + 训练读出层」本身不能证明连接组在起作用，必须跑打乱对照",
-         script="gomoku/train_readout.py", result_file="results/gomoku/train_v3.json", log="§38.4 + §41",
-         verify=[("arms.fly_intact.best.test.top1", 0.0213, 0.0005),
-                 ("arms.fly_shuffled.best.test.top1", 0.019, 0.0005),
-                 ("arms.board_raw.best.test.top1", 0.1745, 0.0005),
-                 ("random_baseline_top1", 0.0171, 0.0005)]),
-    dict(id="gomoku_play", what="让真实脑与打乱脑真下 40 局，棋力上分得开吗",
+         result="**不算数，全部作废**。`brain.setOpto` 换一批神经元时不清上一批的刺激，输入一个接一个叠上去："
+                "线型 A 单独喂是 **252** 个脉冲，先喂过 B 再喂 A 得到 **1901** 个，"
+                "逐神经元与真正的 A 相差 1665。v1 的每个棋盘喂进去几乎是同一个输入，读出层学的是噪声",
+         caveat="作废的数字：一致率 0.021 / 打乱 0.019 / 直接看棋盘 0.175、对随机 26/40、正面交锋 0:40、"
+                "以及「连接组对下棋没有贡献」这句话——那个实验本身是坏的，它既不支持也不否定任何说法。"
+                "**游戏不受影响**：`game_core` 每步用 `setRate` 整组重写输入；修复前后 7 个任务 + 10 个突变体的结果逐项相同。"
+                "教训：一个「几乎等于随机」的阴性结果，第一反应应该是查输入有没有真的送进去",
+         script="gomoku/test_engine.js", result_file="results/gomoku/opto_leak.json", log="§46.1",
+         verify=[("fixed.A_first", 252, 0), ("old_behaviour.A_after_B", 1901, 0),
+                 ("old_behaviour.abs_diff_vs_true_A", 1665, 0), ("fixed.abs_diff_A_first_vs_again", 0, 0)]),
+    dict(id="gomoku_lines", what="线型版：果蝇脑 + 一层线性读出，能学会给五子棋的每条线估价吗",
+         status="reproduced",
+         result="**能**。14,641 种线型每一种都在果蝇脑里跑一遍（脑里一个突触都不训练），线性读出给出每条线的对数价值。"
+                "测试一致率 **45.1%**（随机 1.5%、不经过脑子 34.8%）；"
+                "外部考卷 Wine（别人的引擎，只考不训）**41.3%**；换一组从未见过的泊松种子只掉 2.6 个百分点。"
+                "它从没见过棋形类别，自己排出的价值顺序（成五 > 活四 > 冲四、活三 > …）全部正确",
+         caveat="事先写好的判据 B（比不经过脑子高 ≥ 5 个点）与 D（换种子掉 ≤ 5 个点）成立。"
+                "D 是改了三次训练才过的：单种子 60 ms 窗掉 32 个点、300 ms 掉 17、3 种子平均掉 5.3，加噪声增广才到 2.6，代价是一致率少约 3 个点。"
+                "这条路能成靠的是线型可以**全部枚举**——泛化到没见过的线型很差（留出 20% 线型认棋形只有 0.72，活四召回 0.02）。"
+                "架构上限（每种线型一个自由参数）也只有 50.6%，老师自己的手写分值 56.2%",
+         script="gomoku/train_lines.py", result_file="results/gomoku/train_lines.json", log="§46.2–46.5",
+         verify=[("arms.fly_intact.test_top1", 0.4508, 0.0005), ("arms.fly_intact.wine_top1", 0.4131, 0.0005),
+                 ("arms.fly_intact.seed_drop", 0.0257, 0.0005), ("arms.raw24.test_top1", 0.3485, 0.0005),
+                 ("arms.fly_intact.distill_r2", 0.8511, 0.0005),
+                 ("criterion_B_brain_helps", True, 0), ("criterion_D_not_noise_hash", True, 0)]),
+    dict(id="gomoku_wiring", what="真实接线比打乱接线、比随便一个随机网络更会下棋吗",
          status="negative",
-         result="**分不开，而且第一版的结论被自己推翻了**。子回路 v2 上：打随机真实 33/40、打乱 24/40"
-                "（差 22.5 pp，越过事先定的 15 pp 线，当时判「有贡献」成立）；"
-                "换到子回路 v3 重跑，**完全反过来**——真实 **26/40**、打乱 **40/40**，"
-                "正面交锋真实脑 **0/40** 被打乱脑完胜。换一版子回路就翻盘，说明那个差别不可重复。"
-                "两版里两者都被启发式老师 **0:40** 完胜",
-         caveat="这条的价值在于**它推翻了我们自己先前的判定**：单看 v2 会得出「连接组对棋力有贡献」，"
-                "重复一次就没了。与读出层的准确率一致（真实 0.021 vs 打乱 0.019，两版都看不出差别）。"
-                "每组 20 局，n 很小；v2 那 40 局里执白的赢了 38 局，先后手效应本来就远大于两个脑的差别",
-         script="gomoku/play_test.js", result_file="results/gomoku/play_v3.json", log="§38.4 + §41",
-         verify=[("vs_random.fly_intact", 26, 0), ("vs_random.fly_shuffled", 40, 0),
-                 ("head_to_head.fly_intact", 0, 0), ("vs_teacher.fly_intact", 0, 0),
-                 ("criterion_connectome_helps_play", False, 0)]),
+         result="**不**。测试一致率：真实接线 45.1%、打乱接线 **47.4%**、同维度随机 ReLU 网络 **49.6%**；"
+                "正面交锋（同一个引擎）直觉 19–17–4、想 4 步 17–23、想 6 步 15–25",
+         caveat="事先写好的判据 C（一致率高 ≥ 5 个点）与 C2（想 4 步正面交锋 ≥ 60%）都不成立。"
+                "打乱之后活跃的神经元多一倍（读出维度 3527 对 1857），给读出层的特征更丰富——"
+                "所以能说的是「这颗脑子是一个够用的非线性展开」，不能说「真实接线对下棋有特殊贡献」",
+         script="gomoku/play_lines.js", result_file="results/gomoku/play_lines.json", log="§46.5–46.6",
+         verify=[("head_to_head.d4.win", 17, 0), ("head_to_head.d4.loss", 23, 0), ("criterion_C2.passed", False, 0)]),
+    dict(id="gomoku_strength", what="放进搜索之后，它下得怎么样（用户的目标：棋力）",
+         status="partial",
+         result="想 6 步：对旧老师（v1 的对手，v1 是 0:40）**39–1**，对老师搜 4 步 **26–14**，对搜 6 步 24–16，对搜 8 步 5–15；"
+                "想 10 步：对搜 6 步 35–5、对搜 8 步 **13–7**。只凭直觉：对随机 40–0、对旧老师 11–23–6",
+         caveat="判据 A（直觉对旧老师 ≥ 50%）**不成立**（27.5%）；A2（想 6 步对老师搜 4 步 ≥ 50%）成立（65.0%）。"
+                "**棋力主要来自搜索深度，不是来自果蝇**：向前推演是 alpha-beta 做的，搜索只懂规则（成五、必须挡五、禁手）、不含棋形分值；"
+                "每多搜一步节点数约 ×2.2。每组 40 局（深度 8 的老师 20 局），标准差约 8 个百分点。"
+                "表的精度也值棋力（给老师的表加噪声到 R² 0.85，同深度胜率从 45.0% 掉到 20.0%），但这颗脑子可靠的精度上限在 R² ≈ 0.85–0.88",
+         script="gomoku/play_lines.js", result_file="results/gomoku/play_lines.json", log="§46.6",
+         verify=[("engine.fly_intact.d6.old_teacher.win", 39, 0), ("engine.fly_intact.d6.teacher2_d4.win", 26, 0),
+                 ("engine.fly_intact.d10.teacher2_d8.win", 13, 0), ("engine.fly_intact.d1.old_teacher.win", 11, 0),
+                 ("criterion_A.passed", False, 0), ("criterion_A2.passed", True, 0)]),
+    dict(id="gomoku_rl", what="自对弈强化（「多巴胺」式三因子规则）能让它更强吗",
+         status="negative",
+         result="**不能**。Δw = 学习率 × δ × 资格迹，δ = 这一局的结果 − 近期平均。强化后的表对监督版（同一个引擎都想 4 步，200 局）"
+                "**78–122（39.0%）**，事先定的线是 55%；换更小的步长、更多的局数再跑一次是 110–90（55.0%）",
+         caveat="**δ 是在连接组外面算的**：这个模型自己的多巴胺神经元在非失控条件下不放电（§11，PAM 0/307），不存在「果蝇自己的奖励信号」。"
+                "每轮几十局的胜负太吵，推不动一个 1858 维的读出层。页面上的果蝇用的是监督训练的表",
+         script="gomoku/selfplay_rl.js", result_file="results/gomoku/rl.json", log="§46.7",
+         verify=[("final.d4_vs_supervised_d4.win", 78, 0), ("criterion_passed", False, 0),
+                 ("win_rate_vs_supervised", 0.39, 0.0005)]),
     dict(id="touch_pathway", what="「只给物理量、不写判断逻辑」能让果蝇自己绕开围栏吗",
          status="reproduced",
          result="**能，但前提是子回路里真有那条通路**。触感送到触角 JO（v2 唯一的机械感觉）**完全无效**"

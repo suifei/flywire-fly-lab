@@ -1,0 +1,228 @@
+{
+ "note": "只读 checkpoint，不跑新仿真；readout_* 是解码器读出那 ~350 个神经元的统计，不是全脑",
+ "n_conditions": 24,
+ "by_condition": {
+  "DM1_left_real_seed42": {
+   "n": 20,
+   "readout_mean_hz": 16.42,
+   "readout_active": 49.5,
+   "turn_drive": -0.1321,
+   "forward_drive": 0.9138
+  },
+  "DM1_left_real_seed43": {
+   "n": 20,
+   "readout_mean_hz": 16.79,
+   "readout_active": 51.0,
+   "turn_drive": -0.1317,
+   "forward_drive": 0.925
+  },
+  "DM1_left_real_seed44": {
+   "n": 20,
+   "readout_mean_hz": 16.3,
+   "readout_active": 49.0,
+   "turn_drive": -0.1329,
+   "forward_drive": 0.9001
+  },
+  "DM1_left_shuffled_seed42": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM1_left_shuffled_seed43": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM1_left_shuffled_seed44": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM1_right_real_seed42": {
+   "n": 20,
+   "readout_mean_hz": 16.67,
+   "readout_active": 51.0,
+   "turn_drive": -0.1146,
+   "forward_drive": 0.9361
+  },
+  "DM1_right_real_seed43": {
+   "n": 20,
+   "readout_mean_hz": 16.54,
+   "readout_active": 49.5,
+   "turn_drive": -0.1134,
+   "forward_drive": 0.9138
+  },
+  "DM1_right_real_seed44": {
+   "n": 20,
+   "readout_mean_hz": 16.18,
+   "readout_active": 49.0,
+   "turn_drive": -0.0995,
+   "forward_drive": 0.9138
+  },
+  "DM1_right_shuffled_seed42": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM1_right_shuffled_seed43": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM1_right_shuffled_seed44": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_left_real_seed42": {
+   "n": 20,
+   "readout_mean_hz": 16.91,
+   "readout_active": 49.5,
+   "turn_drive": -0.0595,
+   "forward_drive": 0.9198
+  },
+  "DM5_left_real_seed43": {
+   "n": 20,
+   "readout_mean_hz": 16.67,
+   "readout_active": 50.0,
+   "turn_drive": -0.1321,
+   "forward_drive": 0.9258
+  },
+  "DM5_left_real_seed44": {
+   "n": 20,
+   "readout_mean_hz": 4.53,
+   "readout_active": 18.0,
+   "turn_drive": -0.006,
+   "forward_drive": 0.8455
+  },
+  "DM5_left_shuffled_seed42": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_left_shuffled_seed43": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_left_shuffled_seed44": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_right_real_seed42": {
+   "n": 20,
+   "readout_mean_hz": 15.81,
+   "readout_active": 47.5,
+   "turn_drive": -0.1154,
+   "forward_drive": 0.9138
+  },
+  "DM5_right_real_seed43": {
+   "n": 20,
+   "readout_mean_hz": 16.91,
+   "readout_active": 49.5,
+   "turn_drive": -0.1329,
+   "forward_drive": 0.9405
+  },
+  "DM5_right_real_seed44": {
+   "n": 20,
+   "readout_mean_hz": 16.18,
+   "readout_active": 49.0,
+   "turn_drive": -0.1319,
+   "forward_drive": 0.8922
+  },
+  "DM5_right_shuffled_seed42": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_right_shuffled_seed43": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  },
+  "DM5_right_shuffled_seed44": {
+   "n": 20,
+   "readout_mean_hz": 0.0,
+   "readout_active": 0.0,
+   "turn_drive": 0.0,
+   "forward_drive": 0.1
+  }
+ },
+ "q1_dm1_vs_dm5": {
+  "dm1_readout_hz": 16.667,
+  "dm5_readout_hz": 16.176,
+  "dm1_readout_active": 49.0,
+  "dm5_readout_active": 48.0,
+  "verdict": "DM1 与 DM5 的读出活动几乎一样，**失败不是因为 DM1 把读出打爆了**"
+ },
+ "q2_shuffled_control": {
+  "shuffled_readout_hz": 0.0,
+  "shuffled_readout_active": 0.0,
+  "real_readout_hz": 16.422,
+  "shuffled_is_dead": true,
+  "verdict": "**打乱臂的读出完全不放电**，所以「真实 vs 打乱」这类判据是空的——任何非零效应都能通过。6 条里有 2 条属于这一类"
+ },
+ "turn_drive_common_bias": -0.1,
+ "tests": [
+  {
+   "name": "DM1_attractive_turning",
+   "passed": false,
+   "detail": "contrast=+0.0010 (expect <0)"
+  },
+  {
+   "name": "DM5_aversive_turning",
+   "passed": true,
+   "detail": "contrast=+0.0198 (expect >0)"
+  },
+  {
+   "name": "opposite_valence",
+   "passed": true,
+   "detail": "valence=+0.0187 (expect >0)"
+  },
+  {
+   "name": "connectome_specificity",
+   "passed": true,
+   "detail": "real=0.0187, shuffled=0.0016"
+  },
+  {
+   "name": "DM1_connectome_specificity",
+   "passed": false,
+   "detail": "real=0.0010, shuffled=0.0011"
+  },
+  {
+   "name": "DM5_connectome_specificity",
+   "passed": true,
+   "detail": "real=0.0198, shuffled=0.0005"
+  }
+ ],
+ "passed": 4,
+ "vacuous_tests": [
+  "connectome_specificity",
+  "DM1_connectome_specificity",
+  "DM5_connectome_specificity"
+ ],
+ "effective_passed": 2
+}

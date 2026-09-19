@@ -1,0 +1,748 @@
+{
+ "design": {
+  "freqs": {
+   "baseline": 50,
+   "w-30": 115,
+   "w+30": 30,
+   "inh-50": 30,
+   "inh+50": 100,
+   "glut_exc": 45
+  },
+  "R": 6,
+  "call": 0.8,
+  "n_targets": 183,
+  "normalization": "零参照：同一实现下所有敲除的 MN9 中位数",
+  "note": "论文对每种扰动重新标定了刺激频率（表 11A 的 Experiment 一列）；比较对象是**模型自己的默认判定**，不是实验"
+ },
+ "conditions": {
+  "baseline": {
+   "hz": 50,
+   "paper_sheet": null,
+   "paper_n_consistent": null,
+   "mn9_baseline": [
+    20,
+    7,
+    12,
+    22,
+    14,
+    29
+   ],
+   "null_median": [
+    19.0,
+    7.0,
+    12.0,
+    18.0,
+    15.0,
+    22.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.4722,
+     "required": true
+    },
+    "Fdg": {
+     "ratio": 1.0833,
+     "required": false
+    },
+    "FMIn": {
+     "ratio": 1.4667,
+     "required": false
+    },
+    "G2N-1": {
+     "ratio": 0.4774,
+     "required": true
+    },
+    "Phantom": {
+     "ratio": 1.0333,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 0.8224,
+     "required": false
+    },
+    "Roundup": {
+     "ratio": 0.4368,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 1.1806,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.9286,
+     "required": false
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940639198653",
+     "ratio": 0.2053
+    },
+    {
+     "fid": "720575940607272649",
+     "ratio": 0.4368
+    },
+    {
+     "fid": "720575940655014049",
+     "ratio": 0.4722
+    },
+    {
+     "fid": "720575940620874757",
+     "ratio": 0.4774
+    },
+    {
+     "fid": "720575940633143833",
+     "ratio": 0.4955
+    },
+    {
+     "fid": "720575940621502051",
+     "ratio": 0.6158
+    },
+    {
+     "fid": "720575940628972048",
+     "ratio": 0.619
+    },
+    {
+     "fid": "720575940632252743",
+     "ratio": 0.6338
+    },
+    {
+     "fid": "720575940623210445",
+     "ratio": 0.6905
+    },
+    {
+     "fid": "720575940619877396",
+     "ratio": 0.7281
+    },
+    {
+     "fid": "720575940630579574",
+     "ratio": 0.7468
+    },
+    {
+     "fid": "720575940630233916",
+     "ratio": 0.7573
+    }
+   ],
+   "n_consistent_with_default": 10,
+   "flipped": []
+  },
+  "w-30": {
+   "hz": 115,
+   "paper_sheet": "11B",
+   "paper_n_consistent": 8,
+   "mn9_baseline": [
+    5,
+    6,
+    13,
+    8,
+    7,
+    8
+   ],
+   "null_median": [
+    5.0,
+    6.0,
+    12.0,
+    8.0,
+    7.0,
+    8.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.75,
+     "required": true
+    },
+    "Fdg": {
+     "ratio": 1.0089,
+     "required": false
+    },
+    "FMIn": {
+     "ratio": 3.2083,
+     "required": false
+    },
+    "G2N-1": {
+     "ratio": 0.2083,
+     "required": true
+    },
+    "Phantom": {
+     "ratio": 1.4167,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 0.5,
+     "required": true
+    },
+    "Roundup": {
+     "ratio": 0.3393,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 0.9167,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.3095,
+     "required": true
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940620874757",
+     "ratio": 0.2083
+    },
+    {
+     "fid": "720575940632047890",
+     "ratio": 0.2679
+    },
+    {
+     "fid": "720575940625102692",
+     "ratio": 0.2679
+    },
+    {
+     "fid": "720575940629888530",
+     "ratio": 0.3095
+    },
+    {
+     "fid": "720575940623211725",
+     "ratio": 0.3393
+    },
+    {
+     "fid": "720575940631703608",
+     "ratio": 0.3542
+    },
+    {
+     "fid": "720575940639198653",
+     "ratio": 0.4018
+    },
+    {
+     "fid": "720575940617593233",
+     "ratio": 0.4167
+    },
+    {
+     "fid": "720575940642428045",
+     "ratio": 0.4583
+    },
+    {
+     "fid": "720575940628853239",
+     "ratio": 0.4643
+    },
+    {
+     "fid": "720575940638103349",
+     "ratio": 0.5
+    },
+    {
+     "fid": "720575940612692633",
+     "ratio": 0.506
+    }
+   ],
+   "n_consistent_with_default": 8,
+   "flipped": [
+    "Rattle",
+    "Zorro"
+   ]
+  },
+  "w+30": {
+   "hz": 30,
+   "paper_sheet": "11C",
+   "paper_n_consistent": 7,
+   "mn9_baseline": [
+    22,
+    24,
+    19,
+    30,
+    18,
+    25
+   ],
+   "null_median": [
+    24.0,
+    26.0,
+    20.0,
+    30.0,
+    20.0,
+    26.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.9115,
+     "required": false
+    },
+    "Fdg": {
+     "ratio": 1.075,
+     "required": false
+    },
+    "FMIn": {
+     "ratio": 1.1083,
+     "required": false
+    },
+    "G2N-1": {
+     "ratio": 0.8481,
+     "required": false
+    },
+    "Phantom": {
+     "ratio": 1.0,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 0.7731,
+     "required": true
+    },
+    "Roundup": {
+     "ratio": 0.5833,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 1.0942,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.7788,
+     "required": true
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940607272649",
+     "ratio": 0.5833
+    },
+    {
+     "fid": "720575940623211725",
+     "ratio": 0.7042
+    },
+    {
+     "fid": "720575940628853239",
+     "ratio": 0.7654
+    },
+    {
+     "fid": "720575940628972048",
+     "ratio": 0.7667
+    },
+    {
+     "fid": "720575940617000768",
+     "ratio": 0.7692
+    },
+    {
+     "fid": "720575940638103349",
+     "ratio": 0.7731
+    },
+    {
+     "fid": "720575940629888530",
+     "ratio": 0.7788
+    },
+    {
+     "fid": "720575940632252743",
+     "ratio": 0.7792
+    },
+    {
+     "fid": "720575940639198653",
+     "ratio": 0.7872
+    },
+    {
+     "fid": "720575940625102692",
+     "ratio": 0.7897
+    },
+    {
+     "fid": "720575940619473624",
+     "ratio": 0.8269
+    },
+    {
+     "fid": "720575940621586854",
+     "ratio": 0.8397
+    }
+   ],
+   "n_consistent_with_default": 6,
+   "flipped": [
+    "Clavicle",
+    "G2N-1",
+    "Rattle",
+    "Zorro"
+   ]
+  },
+  "inh-50": {
+   "hz": 30,
+   "paper_sheet": "11D",
+   "paper_n_consistent": 8,
+   "mn9_baseline": [
+    2,
+    33,
+    15,
+    25,
+    24,
+    28
+   ],
+   "null_median": [
+    2.0,
+    28.0,
+    15.0,
+    25.0,
+    22.0,
+    28.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.3207,
+     "required": true
+    },
+    "Fdg": {
+     "ratio": 0.94,
+     "required": false
+    },
+    "FMIn": {
+     "ratio": 0.2109,
+     "required": true
+    },
+    "G2N-1": {
+     "ratio": 0.1271,
+     "required": true
+    },
+    "Phantom": {
+     "ratio": 0.8891,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 1.0545,
+     "required": false
+    },
+    "Roundup": {
+     "ratio": 0.24,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 1.0,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.43,
+     "required": true
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940639198653",
+     "ratio": 0.125
+    },
+    {
+     "fid": "720575940620874757",
+     "ratio": 0.1271
+    },
+    {
+     "fid": "720575940633143833",
+     "ratio": 0.1697
+    },
+    {
+     "fid": "720575940614763666",
+     "ratio": 0.2109
+    },
+    {
+     "fid": "720575940623211725",
+     "ratio": 0.24
+    },
+    {
+     "fid": "720575940631703608",
+     "ratio": 0.2697
+    },
+    {
+     "fid": "720575940630579574",
+     "ratio": 0.3114
+    },
+    {
+     "fid": "720575940655014049",
+     "ratio": 0.3207
+    },
+    {
+     "fid": "720575940628853239",
+     "ratio": 0.401
+    },
+    {
+     "fid": "720575940607272649",
+     "ratio": 0.414
+    },
+    {
+     "fid": "720575940632425919",
+     "ratio": 0.4274
+    },
+    {
+     "fid": "720575940629888530",
+     "ratio": 0.43
+    }
+   ],
+   "n_consistent_with_default": 8,
+   "flipped": [
+    "FMIn",
+    "Zorro"
+   ]
+  },
+  "inh+50": {
+   "hz": 100,
+   "paper_sheet": "11E",
+   "paper_n_consistent": 7,
+   "mn9_baseline": [
+    22,
+    11,
+    18,
+    15,
+    17,
+    22
+   ],
+   "null_median": [
+    22.0,
+    15.0,
+    18.0,
+    17.0,
+    17.0,
+    19.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.7389,
+     "required": true
+    },
+    "Fdg": {
+     "ratio": 0.7753,
+     "required": true
+    },
+    "FMIn": {
+     "ratio": 1.904,
+     "required": false
+    },
+    "G2N-1": {
+     "ratio": 0.8114,
+     "required": false
+    },
+    "Phantom": {
+     "ratio": 1.2298,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 0.8529,
+     "required": false
+    },
+    "Roundup": {
+     "ratio": 0.2565,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 1.2176,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.8007,
+     "required": false
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940607272649",
+     "ratio": 0.2565
+    },
+    {
+     "fid": "720575940632252743",
+     "ratio": 0.4281
+    },
+    {
+     "fid": "720575940630579574",
+     "ratio": 0.4591
+    },
+    {
+     "fid": "720575940632047890",
+     "ratio": 0.4686
+    },
+    {
+     "fid": "720575940617593233",
+     "ratio": 0.5833
+    },
+    {
+     "fid": "720575940631703608",
+     "ratio": 0.5882
+    },
+    {
+     "fid": "720575940616885538",
+     "ratio": 0.5895
+    },
+    {
+     "fid": "720575940626279742",
+     "ratio": 0.6176
+    },
+    {
+     "fid": "720575940639198653",
+     "ratio": 0.6417
+    },
+    {
+     "fid": "720575940628972048",
+     "ratio": 0.6611
+    },
+    {
+     "fid": "720575940632365905",
+     "ratio": 0.7
+    },
+    {
+     "fid": "720575940623211725",
+     "ratio": 0.7182
+    }
+   ],
+   "n_consistent_with_default": 8,
+   "flipped": [
+    "Fdg",
+    "G2N-1"
+   ]
+  },
+  "glut_exc": {
+   "hz": 45,
+   "paper_sheet": "11F",
+   "paper_n_consistent": 7,
+   "mn9_baseline": [
+    37,
+    15,
+    5,
+    84,
+    34,
+    6
+   ],
+   "null_median": [
+    36.0,
+    15.0,
+    5.0,
+    74.0,
+    33.0,
+    6.0
+   ],
+   "n_scored": 183,
+   "calls": {
+    "Bract": {
+     "ratio": null,
+     "required": false
+    },
+    "Clavicle": {
+     "ratio": 0.6939,
+     "required": true
+    },
+    "Fdg": {
+     "ratio": 0.6455,
+     "required": true
+    },
+    "FMIn": {
+     "ratio": 1.1455,
+     "required": false
+    },
+    "G2N-1": {
+     "ratio": 0.6333,
+     "required": true
+    },
+    "Phantom": {
+     "ratio": 1.5152,
+     "required": false
+    },
+    "Rattle": {
+     "ratio": 0.7793,
+     "required": true
+    },
+    "Roundup": {
+     "ratio": 0.1606,
+     "required": true
+    },
+    "Usnea": {
+     "ratio": 2.7917,
+     "required": false
+    },
+    "Zorro": {
+     "ratio": 0.6806,
+     "required": true
+    }
+   },
+   "top": [
+    {
+     "fid": "720575940607272649",
+     "ratio": 0.1606
+    },
+    {
+     "fid": "720575940625102692",
+     "ratio": 0.2273
+    },
+    {
+     "fid": "720575940632425919",
+     "ratio": 0.2444
+    },
+    {
+     "fid": "720575940623211725",
+     "ratio": 0.2972
+    },
+    {
+     "fid": "720575940615671106",
+     "ratio": 0.4667
+    },
+    {
+     "fid": "720575940632047890",
+     "ratio": 0.4861
+    },
+    {
+     "fid": "720575940627847752",
+     "ratio": 0.5
+    },
+    {
+     "fid": "720575940619877396",
+     "ratio": 0.5756
+    },
+    {
+     "fid": "720575940619114048",
+     "ratio": 0.5788
+    },
+    {
+     "fid": "720575940623210445",
+     "ratio": 0.5861
+    },
+    {
+     "fid": "720575940624023188",
+     "ratio": 0.6091
+    },
+    {
+     "fid": "720575940617000768",
+     "ratio": 0.6203
+    }
+   ],
+   "n_consistent_with_default": 7,
+   "flipped": [
+    "Fdg",
+    "Rattle",
+    "Zorro"
+   ]
+  }
+ },
+ "ours_consistent": [
+  8,
+  6,
+  8,
+  8,
+  7
+ ],
+ "paper_consistent": [
+  8,
+  7,
+  8,
+  7,
+  7
+ ],
+ "mean_abs_diff": 0.4
+}

@@ -1,0 +1,86 @@
+{
+ "n_games_per_pair": 20,
+ "readout_test_top1": 0.0213,
+ "results": [
+  {
+   "black": "fly_intact",
+   "white": "random",
+   "black_win": 13,
+   "white_win": 7,
+   "draw": 0,
+   "mean_ply": 86.7
+  },
+  {
+   "black": "random",
+   "white": "fly_intact",
+   "black_win": 7,
+   "white_win": 13,
+   "draw": 0,
+   "mean_ply": 110
+  },
+  {
+   "black": "fly_intact",
+   "white": "teacher",
+   "black_win": 0,
+   "white_win": 20,
+   "draw": 0,
+   "mean_ply": 9
+  },
+  {
+   "black": "teacher",
+   "white": "fly_intact",
+   "black_win": 20,
+   "white_win": 0,
+   "draw": 0,
+   "mean_ply": 8
+  },
+  {
+   "black": "fly_shuffled",
+   "white": "random",
+   "black_win": 20,
+   "white_win": 0,
+   "draw": 0,
+   "mean_ply": 63.1
+  },
+  {
+   "black": "random",
+   "white": "fly_shuffled",
+   "black_win": 0,
+   "white_win": 20,
+   "draw": 0,
+   "mean_ply": 60.7
+  },
+  {
+   "black": "fly_intact",
+   "white": "fly_shuffled",
+   "black_win": 0,
+   "white_win": 20,
+   "draw": 0,
+   "mean_ply": 50.4
+  },
+  {
+   "black": "fly_shuffled",
+   "white": "fly_intact",
+   "black_win": 20,
+   "white_win": 0,
+   "draw": 0,
+   "mean_ply": 51.8
+  }
+ ],
+ "vs_random": {
+  "fly_intact": 26,
+  "fly_shuffled": 40,
+  "of": 40
+ },
+ "vs_teacher": {
+  "fly_intact": 0,
+  "of": 40
+ },
+ "head_to_head": {
+  "fly_intact": 0,
+  "of": 40
+ },
+ "fly_total_wins": 26,
+ "fly_total_games": 80,
+ "criterion_connectome_helps_play": false
+}

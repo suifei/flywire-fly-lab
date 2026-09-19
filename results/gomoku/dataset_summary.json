@@ -1,0 +1,35 @@
+{
+ "n_games": 800,
+ "n_positions": 21015,
+ "n_train": 16615,
+ "n_test": 4400,
+ "n_candidates": 1558774,
+ "agree_with_depth8": {
+  "1": 0.5472,
+  "2": 0.5394,
+  "3": 0.564,
+  "4": 0.6215,
+  "5": 0.6569,
+  "6": 0.7236,
+  "8": 1
+ },
+ "cpu_seconds": 12830,
+ "patterns_total": 14641,
+ "patterns_seen_in_dataset": 6571,
+ "wine": {
+  "source": "Karesis/Gomoku (HuggingFace, MIT) — WinePy self-play",
+  "n_games": 875,
+  "n": 25146,
+  "dropped": {
+   "outside_radius2": 0,
+   "black_forbidden_under_renju": 346,
+   "occupied": 11,
+   "first_two_plies": 1750
+  }
+ },
+ "outcomes": {
+  "unfinished": 19,
+  "black": 455,
+  "white": 326
+ }
+}

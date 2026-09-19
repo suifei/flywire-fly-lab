@@ -68,6 +68,60 @@ results/connectome_loop_smoke/*
 !results/connectome_loop_smoke/*.json
 !results/connectome_loop_smoke/log.csv
 
+# 台账与构建脚本引用的汇总 JSON（2026-09-20 系统查了一遍：82 个引用里有 18 个被挡在仓库外，CI 因此一直是红的）
+!results/reproduction.json
+!results/shuffle_controls.json
+!results/fba_turn_sign.json
+!results/fba_odor_valence/
+results/fba_odor_valence/*
+!results/fba_odor_valence/recheck.json
+!results/v2_ref/
+results/v2_ref/*
+!results/v2_ref/olfaction_runaway.json
+!results/v2_ref/v4_analysis.json
+!results/screen/jon_ce_f/
+results/screen/jon_ce_f/*
+!results/screen/jon_ce_f/*.json
+!results/screen/robust_knockout/
+results/screen/robust_knockout/*
+!results/screen/robust_knockout/*.json
+!results/screen/shuffle_full/
+results/screen/shuffle_full/*
+!results/screen/shuffle_full/*.json
+!results/screen/sufficiency/
+results/screen/sufficiency/*
+!results/screen/sufficiency/*.json
+!results/screen/taste/
+results/screen/taste/*
+!results/screen/taste/*/
+results/screen/taste/*/*
+!results/screen/taste/*/summary.json
+# 五子棋 v2：只放行汇总与页面必需的表（特征矩阵 60 MB × 18、数据集等由脚本重新生成）
+!results/gomoku/
+results/gomoku/*
+# v1 的四个汇总文件：结论已作废（§46.1），但日志 §38.4 / §41 的历史数字仍由 audit_report.py 对着它们核对
+!results/gomoku/train.json
+!results/gomoku/train_v3.json
+!results/gomoku/play.json
+!results/gomoku/play_v3.json
+!results/gomoku/train_lines.json
+!results/gomoku/play_lines.json
+!results/gomoku/rl.json
+!results/gomoku/rl_small.json
+!results/gomoku/exit.json
+!results/gomoku/line_class_probe.json
+!results/gomoku/dataset_summary.json
+!results/gomoku/table_noise.json
+!results/gomoku/depth_timing.json
+!results/gomoku/teacher_ladder.json
+!results/gomoku/score_forms.json
+!results/gomoku/opto_leak.json
+!results/gomoku/search_width.json
+!results/gomoku/vcf_value.json
+!results/gomoku/seed_averaging.json
+!results/gomoku/lines_summary.json
+!results/gomoku/page_tables.json
+
 # ── 大文件类型兜底（防止误加）────────────────────────────────
 *.npz
 *.npy

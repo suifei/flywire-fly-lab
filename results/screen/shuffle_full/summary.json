@@ -1,0 +1,215 @@
+{
+ "design": {
+  "freq_hz": 100,
+  "R": 3,
+  "n_shuffles": 10,
+  "n_grn": 20,
+  "method": "保每个神经元的出度与权重，只把靶点列整体重排",
+  "criterion": "A：打乱后 MN9_r 均值 < 不打乱的 10%；B：表 1D 的 15 个里在模型中的 13 个，≥12 个下降（论文 14/15 = 93.3%，按比例折算）"
+ },
+ "neurons": [
+  {
+   "name": "Zorro_l",
+   "fid": "720575940629888530",
+   "ours_intact": 93.333,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 102.2,
+   "paper_shuf_mean": 2.754,
+   "went_down": true
+  },
+  {
+   "name": "G2N_1_l",
+   "fid": "720575940620874757",
+   "ours_intact": 61.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 69.4,
+   "paper_shuf_mean": 4.862,
+   "went_down": true
+  },
+  {
+   "name": "rattle_l",
+   "fid": "720575940638103349",
+   "ours_intact": 70.667,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 75.4333333333333,
+   "paper_shuf_mean": 2.707,
+   "went_down": true
+  },
+  {
+   "name": "usnea_l",
+   "fid": "720575940632648612",
+   "ours_intact": 72.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 72.6,
+   "paper_shuf_mean": 5.389,
+   "went_down": true
+  },
+  {
+   "name": "clavicle_l",
+   "fid": "720575940655014049",
+   "ours_intact": 44.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 54.0333333333333,
+   "paper_shuf_mean": 3.597,
+   "went_down": true
+  },
+  {
+   "name": "FMIn_l",
+   "fid": "720575940614763666",
+   "ours_intact": 63.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 61.3,
+   "paper_shuf_mean": 4.08,
+   "went_down": true
+  },
+  {
+   "name": "MN9_r",
+   "fid": "720575940660219265",
+   "ours_intact": 62.667,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 68.0,
+   "paper_shuf_mean": 0.004,
+   "went_down": true
+  },
+  {
+   "name": "phantom_l",
+   "fid": "720575940616103218",
+   "ours_intact": 54.333,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 57.6,
+   "paper_shuf_mean": 4.16,
+   "went_down": true
+  },
+  {
+   "name": "roundup_l",
+   "fid": "720575940623211725",
+   "ours_intact": 40.667,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 46.3333333333333,
+   "paper_shuf_mean": 0.0,
+   "went_down": true
+  },
+  {
+   "name": "Fdg_l",
+   "fid": "720575940631997032",
+   "ours_intact": 37.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 38.3,
+   "paper_shuf_mean": 0.487,
+   "went_down": true
+  },
+  {
+   "name": "MN6_r",
+   "fid": "720575940628826128",
+   "ours_intact": 32.667,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 31.7333333333333,
+   "paper_shuf_mean": 0.0,
+   "went_down": true
+  },
+  {
+   "name": "Fudog_l",
+   "fid": "720575940612648106",
+   "ours_intact": 0.0,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 0.5,
+   "paper_shuf_mean": 3.065,
+   "went_down": false
+  },
+  {
+   "name": "Bract_l",
+   "fid": "720575940610001220",
+   "ours_intact": 4.667,
+   "ours_shuf_mean": 0.0,
+   "ours_shuf_sd": 0.0,
+   "paper_intact": 5.13333333333333,
+   "paper_shuf_mean": 0.019,
+   "went_down": true
+  }
+ ],
+ "intact_n_active": [
+  354,
+  346,
+  345
+ ],
+ "shuffled_n_active": [
+  [
+   65,
+   63,
+   60
+  ],
+  [
+   63,
+   63,
+   65
+  ],
+  [
+   95,
+   95,
+   90
+  ],
+  [
+   61,
+   60,
+   56
+  ],
+  [
+   62,
+   61,
+   60
+  ],
+  [
+   63,
+   62,
+   56
+  ],
+  [
+   63,
+   63,
+   59
+  ],
+  [
+   59,
+   58,
+   54
+  ],
+  [
+   64,
+   61,
+   59
+  ],
+  [
+   61,
+   63,
+   56
+  ]
+ ],
+ "pearson_intact_vs_paper": 0.992,
+ "n_down": 12,
+ "n_total": 13,
+ "criterion_A_mn9_collapses": true,
+ "criterion_B_most_go_down": true,
+ "both_pass": true,
+ "mn9_r": {
+  "name": "MN9_r",
+  "fid": "720575940660219265",
+  "ours_intact": 62.667,
+  "ours_shuf_mean": 0.0,
+  "ours_shuf_sd": 0.0,
+  "paper_intact": 68.0,
+  "paper_shuf_mean": 0.004,
+  "went_down": true
+ }
+}

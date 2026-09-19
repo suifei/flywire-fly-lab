@@ -1,0 +1,41 @@
+{
+ "note": "判据：打乱之后如果网络基本不放电，那么「真实 vs 打乱」的比较就是空的（见报告 §42）",
+ "full_brain": {
+  "intact_active": [
+   354,
+   346,
+   345
+  ],
+  "shuffled_active_median": 61,
+  "shuffled_active_range": [
+   54,
+   95
+  ],
+  "ratio": 0.178,
+  "alive": true
+ },
+ "gomoku": {
+  "intact": {
+   "cols": 4093,
+   "ever_active": 1773,
+   "mean_active_per_position": 717.3,
+   "mean_total_spikes": 9429.1
+  },
+  "shuffled": {
+   "cols": 4093,
+   "ever_active": 3473,
+   "mean_active_per_position": 1602.0,
+   "mean_total_spikes": 12758.6
+  },
+  "alive": true,
+  "ratio_active": 2.233
+ },
+ "game_subcircuit": {
+  "intact_jump": 32.667,
+  "shuffled_jump": 2,
+  "intact_dodge": 0.855,
+  "shuffled_dodge": 0.502,
+  "alive": true
+ },
+ "all_alive": true
+}

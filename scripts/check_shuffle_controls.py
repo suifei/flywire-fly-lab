@@ -31,12 +31,14 @@ out["full_brain"] = dict(
     alive=bool(np.median(shuf_act) > 10))
 
 # ② 五子棋水库：直接数特征矩阵里非零的神经元
-def feat_stats(arm, suf="_v3"):
-    meta = json.loads((ROOT / f"results/gomoku/feat_{arm}{suf}.json").read_text())
-    X = np.fromfile(ROOT / f"results/gomoku/feat_{arm}{suf}.bin", np.float32).reshape(meta["rows"], meta["cols"])
+# 2026-09-20 起读**线型版**的特征（linefeat_<arm>_s777）。v1 整盘棋的特征（feat_*_v3）被 brain.setOpto 的
+# 刺激残留 bug 污染了——每个局面喂进去的几乎是同一个输入——所以那一版的 1795 / 3055 两个数作废。
+def feat_stats(arm, seed=777):
+    meta = json.loads((ROOT / f"results/gomoku/linefeat_{arm}_s{seed}.json").read_text())
+    X = np.fromfile(ROOT / f"results/gomoku/linefeat_{arm}_s{seed}.bin", np.uint8).reshape(meta["rows"], meta["cols"])
     return dict(cols=meta["cols"], ever_active=int((X.max(0) > 0).sum()),
                 mean_active_per_position=round(float((X > 0).sum(1).mean()), 1),
-                mean_total_spikes=round(float(X.sum(1).mean()), 1))
+                mean_total_spikes=round(float(X.sum(1, dtype=np.int64).mean()), 1))
 out["gomoku"] = {arm: feat_stats(arm) for arm in ("intact", "shuffled")}
 g = out["gomoku"]
 g["alive"] = bool(g["shuffled"]["mean_active_per_position"] > 10)
@@ -53,7 +55,7 @@ out["game_subcircuit"] = dict(
 print(f"{'对照':16s}{'完整':>14s}{'打乱':>14s}{'还活着?':>9s}")
 f = out["full_brain"]
 print(f"{'全脑（活跃数）':16s}{np.median(f['intact_active']):14.0f}{f['shuffled_active_median']:14.0f}{'是' if f['alive'] else '否':>9s}")
-print(f"{'五子棋（活跃/局面）':16s}{g['intact']['mean_active_per_position']:14.1f}{g['shuffled']['mean_active_per_position']:14.1f}{'是' if g['alive'] else '否':>9s}")
+print(f"{'五子棋（活跃/线型）':16s}{g['intact']['mean_active_per_position']:14.1f}{g['shuffled']['mean_active_per_position']:14.1f}{'是' if g['alive'] else '否':>9s}")
 gs = out["game_subcircuit"]
 print(f"{'游戏子回路（起跳）':16s}{gs['intact_jump']:14.1f}{gs['shuffled_jump']:14.1f}{'是' if gs['alive'] else '否':>9s}")
 out["all_alive"] = bool(f["alive"] and g["alive"] and gs["alive"])

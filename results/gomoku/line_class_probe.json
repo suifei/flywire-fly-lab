@@ -1,0 +1,41 @@
+{
+ "raw24": {
+  "dim": 24,
+  "alpha": 1000,
+  "train": 0.67,
+  "heldout_patterns": 0.679,
+  "heldout_patterns_newseed": 0.679,
+  "recall": {
+   "5": 0.0,
+   "6": 0.438,
+   "7": 0.0,
+   "8": 0.0
+  }
+ },
+ "intact": {
+  "dim": 2842,
+  "alpha": 100,
+  "train": 0.878,
+  "heldout_patterns": 0.721,
+  "heldout_patterns_newseed": 0.697,
+  "recall": {
+   "5": 0.214,
+   "6": 0.47,
+   "7": 0.021,
+   "8": 0.342
+  }
+ },
+ "shuffled": {
+  "dim": 6351,
+  "alpha": 1000,
+  "train": 0.983,
+  "heldout_patterns": 0.729,
+  "heldout_patterns_newseed": 0.719,
+  "recall": {
+   "5": 0.274,
+   "6": 0.451,
+   "7": 0.083,
+   "8": 0.468
+  }
+ }
+}

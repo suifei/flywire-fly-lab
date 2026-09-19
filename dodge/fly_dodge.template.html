@@ -329,6 +329,17 @@ code { font: 12px var(--mono); }
               <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
               <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
             </div>
+            <div class="seg" role="group" aria-label="果蝇想几步" id="gmDepthSeg" title="直觉 = 只看落子分；其余 = 用同一张线型价值表向前搜这么多步。实测中位用时：8 步 0.3 秒、10 步 1 秒、12 步 5 秒、14 步约半分钟。搜索在后台线程里跑，不卡界面">
+              <button data-d="1" aria-pressed="false">直觉</button>
+              <button data-d="4" aria-pressed="false">4</button>
+              <button data-d="6" aria-pressed="false">6</button>
+              <button data-d="8" aria-pressed="true">8 步</button>
+              <button data-d="10" aria-pressed="false">10</button>
+              <button data-d="12" aria-pressed="false">12</button>
+              <button data-d="14" aria-pressed="false">14</button>
+            </div>
+            <label class="toggle" title="先找连续冲四的杀棋（纯规则：每一手都逼对方必须挡，最多算 12 手）"><input type="checkbox" id="gmVcf" checked> 杀棋</label>
+            <label class="toggle" title="每走一步，把这一步的 8 条线放进真实的果蝇脑里重跑，与价值表逐个比对。关掉下得快"><input type="checkbox" id="gmLive" checked> 真脑核对</label>
             <div class="seg" role="group" aria-label="可视化">
               <button id="gmView2d" aria-pressed="true">平面</button>
               <button id="gmView3d" aria-pressed="false">立体</button>
@@ -567,49 +578,52 @@ code { font: 12px var(--mono); }
         <b>指标选错，阴性结果就是假的。</b></p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cGomoku">
-      <h3>我能训练它下五子棋吗？能。但训练完必须回答一个问题</h3>
-      <p>下面是一个<b>独立的场景</b>（不在球场里），你可以和果蝇下五子棋（含黑方禁手：长连、四四、三三）。
-        果蝇的每一步都<b>真跑一遍 5,563 个神经元</b>：棋盘 → 真实感觉神经元的泊松驱动 → 100 ms →
-        下游发放计数 → <b>一层线性读出</b> → 225 个格子的分数。<b>脑子里一个突触都没有被训练</b>，
-        被训练的只有最后那层线性读出（岭回归）。</p>
-      <p><b>但"训练一个读出层"正是那三个刷屏项目被批评的地方</b>——读出层足够灵活，
-        连接组到底有没有在起作用就说不清了。所以我们把同一套训练在四组特征上各做了一遍，
-        这才是做这件事的全部意义：</p>
+      <h3>训练果蝇下五子棋：它怎么学的、学到了什么、哪些不是它的功劳</h3>
+      <p>把「主画面」切到「五子棋」就能和它下（含黑方禁手：长连、四四、三三）。先说清楚分工：</p>
+      <p><b>① 每条线值多少——果蝇脑 + 一层线性读出。</b>对一个候选点，沿 4 个方向各取一条线（两侧各 4 格，
+        每格 = 空 / 我方 / 对方 / 边界）。这样的线型一共只有 <b id="gmNPat">14,641</b> 种，少到可以让这颗
+        <b>5,563 个神经元的果蝇脑把每一种都跑一遍</b>：8 个格子 × 3 种状态 = 24 个通道，各接约 61 个真实感觉神经元，
+        泊松驱动 300 ms，数下游神经元的脉冲，对 3 个随机种子取平均。<b>脑子里一个突触都不训练</b>，
+        训练的只有一层线性读出，它把放电换成这条线的<b>对数价值</b>。落子分 = 4 条进攻线 + λ × 4 条防守线的价值之和。</p>
+      <p><b>② 向前推演几步——搜索，不是果蝇。</b>「想 N 步」是把同一张价值表交给 alpha-beta 搜索。
+        搜索<b>只懂规则</b>（成五 = 赢、对手能成五就必须挡、黑方禁手），不含任何棋形分值；「杀棋」是连续冲四的纯规则搜索。
+        ③ 禁手与胜负由规则引擎判。每走一步，页面会把这一步的 8 条线<b>放进真脑里现场重跑</b>，与价值表逐个比对——
+        这时左边的 spike 图、下行神经元、感觉输入显示的就是下棋这只果蝇的放电。</p>
+      <h4 style="margin:.9em 0 .3em">训练过程</h4>
+      <p class="sub">两个阶段。<b>阶段一</b>：把「落子评分算法」当训练数据——让读出层去拟合老师对全部线型的对数分值
+        （训练局面里只出现过其中 <span id="gmNSeen">6,266</span> 种，只靠着法标签的话，其余的价值会随意漂移，搜索一走进没见过的局面就崩）。
+        <b>阶段二</b>：用深度 8 搜索的最佳着做微调（<span id="gmNPos"></span>）。
+        下图左：<b>果蝇从没见过「活三」「冲四」这些类别</b>，类别只用来给学到的价值分组——看它自己排出的顺序对不对。
+        右：阶段二的验证集一致率随训练步数的变化，起点就是阶段一的成绩。</p>
+      <div class="row" style="gap:8px 12px; margin:.2em 0 .5em">
+        <button class="btn" id="gmVizPlay">▶ 播放训练过程</button>
+        <input type="range" id="gmVizSlider" min="0" max="1" value="1" step="1" style="flex:1 1 220px; max-width:420px" aria-label="训练进度">
+        <span class="pill" id="gmVizFrame">训练完成</span>
+      </div>
+      <div class="row" style="gap:14px; align-items:stretch; flex-wrap:wrap">
+        <canvas id="gmVizShapes" style="flex:1 1 380px; height:230px; min-width:300px"></canvas>
+        <canvas id="gmVizCurve" style="flex:1 1 380px; height:230px; min-width:300px"></canvas>
+      </div>
+      <p class="sub" id="gmVizNote"></p>
+      <div id="gmRLBox" hidden>
+        <h4 style="margin:.9em 0 .3em">阶段三：自对弈强化（「多巴胺」）</h4>
+        <p class="sub">三因子规则，只改读出层：Δw = 学习率 × <b>δ</b> × 资格迹，δ = 这一局的结果 − 近期平均 = 奖励预测误差，
+          在强化学习里对应多巴胺信号。<b>必须说清楚</b>：这个模型自己的多巴胺神经元在非失控条件下根本不放电（PAM 0/307），
+          所以 δ 是在连接组<b>外面</b>算的。下图：每轮训练对局的胜率，和每一局的 δ。</p>
+        <canvas id="gmVizRL" style="width:100%; height:200px"></canvas>
+        <p class="sub" id="gmRLNote"></p>
+      </div>
+      <h4 style="margin:.9em 0 .3em">同一套训练，换六种特征各做一遍</h4>
       <div class="tbl"><table id="tGomoku"></table></div>
       <p class="sub" id="gmNote"></p>
-      <p class="sub"><b>结论是阴性的，而且很干净</b>：果蝇脑的测试 top1 只有 <b>0.025</b>，
-        只比随机猜（0.017）高一点；<b>打乱接线之后成绩几乎一样</b>（0.018）——说明真实接线没有贡献；
-        而直接看棋盘（同样是线性读出）能到 <b>0.174</b>，是果蝇脑的 7 倍。
-        把两者<b>拼在一起</b>反而更差（0.081），多出来的 3,537 维只是噪声。
-        连"保拓扑编码"（按输入神经元的真实胞体位置铺棋盘，让相邻格子落到空间相邻的神经元）也救不回来（0.025）。</p>
-      <p class="sub"><b>棋盘在上面的主画面里</b>——把「主画面」切到「五子棋」，球场就整个换成棋盘。
-        「果蝇自对弈」是<b>两只真的果蝇在下</b>：黑白各一份独立的 5,563 神经元大脑，
-        连接组完全相同（同一份 FlyWire 子回路），差别只在<b>泊松输入的随机流种子</b>——
-        就像两只同基因型的果蝇：线路一样，放电不一样。实测同一个局面下，它们有约四成的时候选点不同；
-        不给不同种子的话两只会给出完全相同的着法，「两只」就没有意义了。
-        切过去时<b>球场那只果蝇会被完全冻结</b>：不跑大脑、不动身体、不发球，三维场景也停止渲染
-        （这也是帧率最高的一档）。同时左边那三块面板——实时 spike、下行神经元、感觉输入——
-        <b>全部切到正在下棋的这一只</b>身上，它有自己独立的一份 5,563 神经元大脑。
-        你会看到它的放电是<b>一阵一阵</b>的：只在"思考"的那 100 ms 里放，想完就停——那不是卡，是它真的在想。
-        棋盘格子被随机铺在 LC4/LPLC2/LC16/糖/苦/JO/触感 这些真实感觉神经元上，
-        所以「感觉输入」那块显示的是<b>每一组里有多少神经元被棋子点着</b>。切回球场，一切照旧继续。</p>
-      <p><b>但光看读出层的准确率不够——还得真下几盘。</b>让它们各打 40 局（含执黑执白对调）：</p>
+      <h4 style="margin:.9em 0 .3em">真下几盘</h4>
       <div class="tbl"><table id="tGomokuPlay"></table></div>
       <p class="sub" id="gmPlayNote"></p>
-      <p class="sub"><b>这里有一次值得写出来的自我推翻。</b>第一版（子回路 v2）上，
-        真实接线打随机 33/40、打乱接线 24/40，差 22.5 个百分点，越过了我们事先定的 15 pp 线，
-        当时判「连接组对棋力有贡献」<b>成立</b>。后来页面换到子回路 v3、把整条管线重跑一遍，
-        结果<b>完全反过来</b>：真实接线 26/40，而<b>打乱接线 40/40</b>，正面交锋真实脑 <b>0:40</b> 被打乱脑完胜。
-        换一版子回路就翻盘，说明 v2 上那个差别<b>不可重复</b>，是噪声。
-        <b>所以结论回到最朴素的那个：连接组对下棋没有贡献</b>——这也与读出层的准确率一致
-        （真实 0.021 vs 打乱 0.019，两版都看不出差别）。两者都被那个几十行的启发式老师 <b>0:40</b> 完胜。</p>
-      <p class="sub"><b>为什么这是个有意义的阴性结果</b>：它说明"把连接组接进游戏 + 训练一个读出层"这件事，
-        本身<b>不能证明连接组在起作用</b>——必须跑打乱对照。我们跑了，结果是不起作用。
-        果蝇脑不是一个好用的"水库"：它稀疏放电（4,599 个里只有约 500 个响应）、
-        而且完全没有为棋盘这种任务准备的结构。<b>这不丢人，这是能被证伪的科学</b>。</p>
-      <p class="sub">诚实清单：棋盘格子→神经元的映射是任意的（固定随机种子）；禁手与合法性由规则引擎判定，不是果蝇；
-        为了让水库成为确定性函数，特征提取时固定了泊松随机流的种子（不固定的话同一个棋盘每次给的特征都不同，
-        读出层只能去拟合噪声——第一版就是这样，训练 0.194 / 测试 0.021）。</p>
+      <p class="sub"><b>v1 的全部数字作废。</b>这张卡片以前写的是「果蝇脑的一致率 0.025、只比随机高一点；连接组对下棋没有贡献」。
+        那一版有一个 bug：给大脑换输入时<b>上一批刺激没清掉</b>，输入一个接一个地叠上去。
+        <span id="gmLeak"></span>于是所有棋盘喂进去几乎是同一个输入，读出层学到的是噪声。
+        另一半原因是架构：v1 把<b>整盘棋</b>随机铺到感觉神经元上，丢掉了五子棋最要紧的局部性与平移不变性。
+        游戏本身不受这个 bug 影响（每一步都整组重写输入；修复前后 7 个任务、10 个突变体的结果逐项相同）。</p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cMutants">
       <h3>盲盒突变体：十个敲除里，只有七个能从行为上看出来</h3>
@@ -933,12 +947,15 @@ code { font: 12px var(--mono); }
 <script id="soma-data" type="application/json">/*__SOMA__*/</script>
 <script id="gomoku-readout" type="application/json">/*__GOMOKU_READOUT__*/</script>
 <script id="gomoku-train" type="application/json">/*__GOMOKU_TRAIN__*/</script>
-<script id="gomoku-play" type="application/json">/*__GOMOKU_PLAY__*/</script>
+
 <script id="touch-data" type="application/json">/*__TOUCH__*/</script>
 <script id="sensor-data" type="application/json">/*__SENSOR_DRIVE__*/</script>
-<script>/*__GOMOKU_RULES_JS__*/</script>
-<script>/*__GOMOKU_TEACHER_JS__*/</script>
+<script id="js-gm-rules">/*__GOMOKU_RULES_JS__*/</script>
+<script id="js-gm-lines">/*__GOMOKU_LINES_JS__*/</script>
+<script id="js-gm-teacher">/*__GOMOKU_TEACHER_JS__*/</script>
+<script id="js-gm-engine">/*__GOMOKU_ENGINE_JS__*/</script>
 <script>/*__GOMOKU_FEATURES_JS__*/</script>
+<script>/*__GOMOKU_LINEMAP_JS__*/</script>
 <script>/*__GOMOKU_FLY_JS__*/</script>
 <script>/*__GOMOKU_BOARD3D_JS__*/</script>
 <script>/*__COMPANIONS_JS__*/</script>
@@ -1839,35 +1856,65 @@ code { font: 12px var(--mono); }
   // 果蝇怎么选点：棋盘 → 真实神经元的泊松驱动 → 4,599 个神经元跑 100 ms →
   // 下游发放计数 → 一层线性读出 → 225 个格子的分数。脑子里一个突触都没训练。
   const GM = (() => {
-    const G5 = window.Gomoku, T5 = window.GomokuTeacher, F5 = window.GomokuFly, B3 = window.GomokuBoard3D;
+    const G5 = window.Gomoku, T5 = window.GomokuTeacher2, F5 = window.GomokuFly2, B3 = window.GomokuBoard3D;
     const cv = $("gmStage");
     if (!G5 || !cv) return null;
-    const RO = JSON.parse(document.getElementById("gomoku-readout").textContent);
+    const PT = JSON.parse(document.getElementById("gomoku-readout").textContent);
     const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
     let player = null;
-    const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK,
-                over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0, thinker: G5.BLACK };
+    const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK, depth: 8, vcf: true, liveCheck: true,
+                over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0, thinker: G5.BLACK,
+                info: null, check: null, phase: "" };
 
     const say = t => { $("gmPill").textContent = t; };
-    // **黑白各一只果蝇，各自一份独立的 5,563 神经元大脑。**
-    // 两只的连接组完全相同（同一份 FlyWire 子回路），差别只在**泊松输入的随机流种子**——
-    // 就像两只同基因型的果蝇：线路一样，放电不一样，于是选的点也不一样。
-    // 不给不同种子的话两只会对同一个局面给出完全相同的着法，"两只"就没有意义了。
-    const SEEDS = { black: 777, white: 20260919 };
+    // **黑白各一只果蝇，各自一份独立的 5,563 神经元大脑。**接线相同、读出层相同；
+    // 差别在线型价值表来自**不同的一组泊松种子**的试次平均——同一份接线的另一只个体，放电不完全一样，
+    // 所以价值表有细微差别，偶尔会选不同的点。（没有白蝇的表时两只同表。）
     const players = { black: null, white: null };
+    const tableFor = side => (side === "white" && PT.white) ? Object.assign({}, PT.black, PT.white) : PT.black;
     const ensurePlayer = () => {
-      if (!RO || !RO.W) return;
+      if (!PT || !PT.black) return;
       for (const side of ["black", "white"]) {
         if (players[side]) continue;
-        players[side] = F5.makePlayer(SUB, ConnectomeBrain, RO, {
+        players[side] = F5.makeLinePlayer(SUB, ConnectomeBrain, tableFor(side), {
           seed: side === "black" ? 11 : 23,
-          featSeed: SEEDS[side],
           onSpike: i => { if (window.__stageMode === "gomoku") { spikeBuf.push(i); brainBuf.push(i); } },
         });
       }
       player = players.black;
     };
     const playerFor = turn => (turn === G5.BLACK ? players.black : players.white) || players.black;
+
+    // 搜索放到 Worker 里跑（深度 8–10 要几秒到十几秒，不能卡住界面）。Worker 起不来（比如被 CSP 拦了）就退回主线程同步跑。
+    let worker = null, workerOk = null, reqId = 0; const pending = new Map();
+    function startWorker() {
+      if (workerOk !== null) return;
+      try {
+        const src = ["js-gm-rules", "js-gm-lines", "js-gm-teacher", "js-gm-engine"].map(id => document.getElementById(id).textContent).join("\n;\n") + `
+          ;const f32 = s => { const b = Uint8Array.from(atob(s), c => c.charCodeAt(0)); return new Float32Array(b.buffer, 0, b.byteLength >> 2); };
+          const ENG = {}, L = self.GomokuLines, codes = L.allCodes();
+          const full = a => { const t = new Float32Array(L.NCODE); for (let k = 0; k < codes.length; k++) t[codes[k]] = a[k]; return t; };
+          self.onmessage = e => { const m = e.data;
+            if (m.init) { for (const [side, t] of Object.entries(m.init)) ENG[side] = self.GomokuEngine.makeEngine(full(f32(t.att)), t.lam); self.postMessage({ ready: true }); return; }
+            const b = Uint8Array.from(m.board), t0 = Date.now(); let out = null;
+            if (m.vcf) { const k = self.GomokuTeacher2.vcf(b.slice(), m.me, 12); if (k >= 0) out = { move: k, depth: 0, how: "vcf", nodes: 0 }; }
+            if (!out) { out = m.depth <= 1 ? { move: ENG[m.side].greedy(b, m.me), depth: 1, how: "greedy", nodes: 0 } : ENG[m.side].think(b, m.me, { depth: m.depth });
+              if (m.vcf && out.ranked && out.ranked.length > 1 && Math.abs(out.score) < 5e8) { const a = self.GomokuTeacher2.avoidVcf(b.slice(), m.me, out.ranked, 12); out.move = a.move; out.avoided = a.skipped; } }
+            out.id = m.id; out.ms = Date.now() - t0; self.postMessage(out); };`;
+        worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+        worker.onmessage = e => { const m = e.data; if (m.ready) { workerOk = true; return; } const cb = pending.get(m.id); if (cb) { pending.delete(m.id); cb(m); } };
+        worker.onerror = () => { workerOk = false; for (const [id, cb] of pending) { pending.delete(id); cb(null); } };
+        worker.postMessage({ init: { black: { att: PT.black.att, lam: PT.black.lam }, white: { att: (PT.white || PT.black).att, lam: PT.black.lam } } });
+      } catch (e) { workerOk = false; }
+    }
+    // 返回 Promise<{move, depth, how, nodes, ms}>
+    function chooseMove(side, board, me) {
+      const sync = () => { const c = playerFor(me).choose(board, me, { depth: S.depth, vcf: S.vcf }); return { move: c.move, depth: c.depth, how: c.how, nodes: c.nodes, ms: c.ms }; };
+      startWorker();
+      if (!worker || workerOk === false) return Promise.resolve(sync());
+      return new Promise(res => { const id = ++reqId; pending.set(id, m => res(m || sync()));
+        worker.postMessage({ id, side, board: Array.from(board), me, depth: S.depth, vcf: S.vcf }); });
+    }
 
     // —— 布局：棋盘按画布短边居中，留出右侧信息栏 ——
     function layout() {
@@ -1987,14 +2034,21 @@ code { font: 12px var(--mono); }
       line("第 " + n + " 手");
       if (!S.over && S.on) line(S.turn === G5.BLACK ? "● 轮到黑" : "○ 轮到白");
       if (S.last >= 0) line("最后一手 " + String.fromCharCode(65 + S.last % G5.N) + (((S.last / G5.N) | 0) + 1));
-      if (S.thinkMs) line((S.thinker === G5.WHITE ? "白蝇" : "黑蝇") + "思考 " + S.thinkMs.toFixed(0) + " ms");
+      if (S.info) {
+        const who = S.thinker === G5.WHITE ? "白蝇" : "黑蝇", f = S.info;
+        line(who + (f.how === "vcf" ? " 找到杀棋" : f.how === "greedy" ? " 凭直觉" : f.how === "block" ? " 被迫挡" : f.how === "win" ? " 成五" : " 想了 " + f.depth + " 步"));
+        line((f.nodes ? f.nodes.toLocaleString() + " 个局面 · " : "") + (f.ms / 1000).toFixed(f.ms < 1000 ? 2 : 1) + " s", palette["--muted"]);
+      }
+      if (S.phase) line(S.phase, palette["--gf"]);
+      if (S.check) line("真脑重跑 " + S.check.runs + " 次" + (S.check.cached ? " · 复用 " + S.check.cached + " 条" : ""), palette["--muted"]),
+                   line("与表的偏差 " + S.check.max_rel_diff.toExponential(1), palette["--muted"]);
       if (S.mode === "self") line("两只果蝇对战", palette["--muted"]);
       y += 6;
       ctx.font = "11px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
       ctx.fillStyle = palette["--muted"] || "#888";
       const lines2 = S.mode === "self"
-        ? ["黑白各一只果蝇", "各自一份 " + SUB.meta.n.toLocaleString() + " 神经元大脑", "连接组相同，泊松种子不同"]
-        : ["果蝇每一步真跑一遍", SUB.meta.n.toLocaleString() + " 个神经元", "禁手由规则引擎判定"];
+        ? ["黑白各一只果蝇", "各自一份 " + SUB.meta.n.toLocaleString() + " 神经元大脑", "接线与读出层相同，泊松种子不同"]
+        : ["每条线值多少：果蝇脑 + 线性读出", "向前推演几步：搜索（只懂规则）", "禁手由规则引擎判定"];
       for (const t of lines2) {
         ctx.fillText(t, x, y); y += 15;
       }
@@ -2120,41 +2174,42 @@ code { font: 12px var(--mono); }
       if (R3) { R3.board.clear(); for (let i = 0; i < G5.SIZE; i++) if (S.board[i]) R3.board.place(i, S.board[i]); R3.board.markAt(S.last >= 0 ? S.last : null); }
       say("已悔棋");
     }
-    function agentMove(who) {
-      const p = playerFor(S.turn);
-      if (who === "teacher" || !p) return T5.best(S.board, S.turn).move;
-      return p.think(S.board, S.turn).move;
+    let timer = 0, checker = null;                              // checker = 正在分帧执行的真脑核对
+    function finishMove(mv) {
+      play(mv); S.busy = false; S.phase = ""; timer = 0.25;
+      if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "轮到黑" : "轮到白"));
     }
-    let timer = 0;
     function tick(dt) {
       if (!S.on) return;
       for (let k = S.fliers.length - 1; k >= 0; k--) { S.fliers[k].t += dt; if (S.fliers[k].t > S.fliers[k].dur) S.fliers.splice(k, 1); }
+      // 真脑核对：每帧只跑一条线型（约 0.1–0.3 s），跑完才落子——这段时间里三块面板显示的就是这只果蝇的放电
+      if (checker) {
+        const r = checker.gen.next();
+        if (r.done) { const st = r.value; S.check = st.liveCheck; GMSTATS.rates = st.rates; GMSTATS.drive = st.drive; GMSTATS.t = performance.now(); const mv = checker.move; checker = null; finishMove(mv); }
+        else S.phase = "真脑核对第 " + r.value.runs + " 次…";
+      }
       if (S.view === "2d") draw2d(dt); else draw3d(dt);
       if (S.over || S.busy || S.fliers.length) return;
       timer -= dt; if (timer > 0) return;
       if (S.mode === "human" && S.turn === G5.BLACK) { say("轮到你（黑）"); return; }
       const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
-      const thinkingSide = S.turn;
-      say(who === "fly" ? ((S.turn === G5.BLACK ? "黑蝇" : "白蝇") + "在想…") : "老师在想…");
-      S.busy = true;
-      setTimeout(() => {
-        ensurePlayer();
-        const t0 = performance.now();
-        const mv = agentMove(who);
-        if (who === "fly") {
-          S.thinkMs = performance.now() - t0;
-          S.thinker = thinkingSide;
-          const p = playerFor(thinkingSide);
-          if (p && p.lastStats) { GMSTATS.rates = p.lastStats.rates; GMSTATS.drive = p.lastStats.drive; GMSTATS.t = performance.now(); }
-        }
-        play(mv);
-        S.busy = false; timer = 0.25;
-        if (!S.over) say(S.mode === "human" ? "轮到你（黑）" : (S.turn === G5.BLACK ? "轮到黑" : "轮到白"));
-      }, 0);
+      const side = S.turn, board = S.board.slice();
+      say(who === "fly" ? ((side === G5.BLACK ? "黑蝇" : "白蝇") + (S.depth > 1 ? "在想（" + S.depth + " 步）…" : "在想…")) : "老师在想…");
+      S.busy = true; ensurePlayer();
+      if (who === "teacher") { setTimeout(() => finishMove(T5.bestMove(board, side, { depth: 4 }).move), 0); return; }
+      chooseMove(side === G5.BLACK ? "black" : "white", board, side).then(c => {
+        if (!S.busy || !S.on) return;                            // 期间被重置或切走了
+        S.info = c; S.thinkMs = c.ms; S.thinker = side;
+        const p = playerFor(side);
+        if (S.liveCheck && p && p.live && c.move >= 0) checker = { gen: p.inspectGen(board, side, c.move), move: c.move };
+        else { S.check = null; finishMove(c.move); }
+      });
     }
     function reset() {
       S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false;
-      S.last = -1; S.fliers.length = 0; S.history.length = 0; S.thinkMs = 0;
+      S.last = -1; S.fliers.length = 0; S.history.length = 0; S.thinkMs = 0; S.info = null; S.check = null; S.phase = ""; checker = null;
+      // 还有没算完的搜索（比如想 14 步要半分钟）就直接把后台线程掐掉重开，不然新局的第一步得排在它后面
+      if (pending.size && worker) { try { worker.terminate(); } catch (e) {} worker = null; workerOk = null; pending.clear(); }
       if (R3) { R3.board.clear(); R3.board.markAt(null); for (const f of R3.fliers) R3.scene.remove(f.g); R3.fliers.length = 0; }
       say(S.mode === "human" ? "轮到你（黑）" : "开始");
     }
@@ -2188,45 +2243,127 @@ code { font: 12px var(--mono); }
     $("gmTeach").onclick = () => setMode("teach");
     $("gmView2d").onclick = () => setView("2d");
     $("gmView3d").onclick = () => setView("3d");
+    for (const bt of $("gmDepthSeg").querySelectorAll("button")) bt.onclick = () => { S.depth = +bt.dataset.d; segSet([...$("gmDepthSeg").querySelectorAll("button")], bt); };
+    $("gmVcf").onchange = e => { S.vcf = e.target.checked; };
+    $("gmLive").onchange = e => { S.liveCheck = e.target.checked; };
     $("gmNew").onclick = reset;
     $("gmUndo").onclick = () => undo(S.mode === "human" ? 2 : 1);
     setView("2d"); S.mode = "human"; say("点上面的「五子棋」开始");
 
-    // 对局结果表
-    (function buildPlayTable() {
-      const t = document.getElementById("tGomokuPlay"); if (!t) return;
-      let PL = null;
-      try { PL = JSON.parse(document.getElementById("gomoku-play").textContent); } catch (e) { return; }
-      const NM = { fly_intact: "果蝇 · 真实连接组", fly_shuffled: "果蝇 · 打乱接线",
-                   teacher: "启发式老师", random: "随机走子" };
-      t.innerHTML = "<tr><th>黑方</th><th>白方</th><th>黑胜</th><th>白胜</th><th>平均手数</th></tr>" +
-        PL.results.map(r => `<tr><td>${NM[r.black] || r.black}</td><td>${NM[r.white] || r.white}</td>` +
-          `<td>${r.black_win}</td><td>${r.white_win}</td><td>${r.mean_ply}</td></tr>`).join("");
-      const n = document.getElementById("gmPlayNote");
-      if (n) n.textContent = `每组 ${PL.n_games_per_pair} 局。打随机：真实接线 ${PL.vs_random.fly_intact}/${PL.vs_random.of}，` +
-        `打乱接线 ${PL.vs_random.fly_shuffled}/${PL.vs_random.of}；打老师 ${PL.vs_teacher.fly_intact}/${PL.vs_teacher.of}；` +
-        `真实 vs 打乱正面交锋 ${PL.head_to_head.fly_intact}/${PL.head_to_head.of}。`;
-    })();
+    // ── 训练过程可视化 + 结果表：全部从 lines_summary.json 取数 ─────────────────
+    (function buildGomokuCard() {
+      const A = (TR.train && TR.train.arms) || {}, PL = TR.play || {}, SV = TR.shape_values || {};
+      const NAME = { fly_intact: "果蝇脑 · 真实连接组", fly_shuffled: "果蝇脑 · 打乱接线", raw24: "不经过脑子（24 个输入通道直接读出）",
+                     rand_relu: "同维度的随机 ReLU 网络", free_table: "每种线型一个自由参数（架构上限）", teacher_table: "老师的手写分值（不训练）" };
+      const pct = v => (v === undefined || v === null) ? "—" : (v * 100).toFixed(1) + "%";
+      const set = (id, t) => { const e2 = document.getElementById(id); if (e2) e2.textContent = t; };
+      if (TR.class_counts) set("gmNPat", TR.class_counts.reduce((x, y) => x + y, 0).toLocaleString());
+      if (TR.dataset) set("gmNSeen", TR.dataset.patterns_seen_in_dataset.toLocaleString());
+      if (TR.opto_leak) { const o = TR.opto_leak; set("gmLeak", `重演一遍旧行为：线型 A 单独喂进去是 ${o.fixed.A_first} 个脉冲；先喂过线型 B（${o.fixed.B} 个）再喂 A，得到的是 ${o.old_behaviour.A_after_B.toLocaleString()} 个，` +
+        `逐个神经元与真正的 A 相差 ${o.old_behaviour.abs_diff_vs_true_A.toLocaleString()}。`); }
+      if (TR.train) set("gmNPos", `${(TR.train.n_train + TR.train.n_val + TR.train.n_test).toLocaleString()} 个局面，按整局切分，测试 ${TR.train.n_test.toLocaleString()} 个`);
+      const t = document.getElementById("tGomoku");
+      if (t && TR.train) {
+        t.innerHTML = "<tr><th>线型特征来自</th><th>维数</th><th>阶段一 R²</th><th>只做阶段一</th><th>测试一致率</th><th>换一组种子</th><th>外部考卷 Wine</th></tr>" +
+          `<tr><td>随机猜（候选点均匀）</td><td>—</td><td>—</td><td>—</td><td>${pct(TR.train.random_top1)}</td><td>—</td><td>${pct(TR.train.wine_random_top1)}</td></tr>` +
+          Object.keys(NAME).filter(k => A[k]).map(k => { const v = A[k];
+            return `<tr${k === "fly_intact" ? ' class="em"' : ""}><td>${NAME[k]}</td><td>${v.dim ?? "—"}</td><td>${v.distill_r2 ?? "—"}</td>` +
+              `<td>${pct(v.stage1_test_top1)}</td><td>${pct(v.test_top1)}</td><td>${k.startsWith("fly") ? pct(v.test_top1_testseeds) : "—"}</td><td>${pct(v.wine_top1)}</td></tr>`; }).join("");
+        const fi = A.fly_intact, fs2 = A.fly_shuffled, rw = A.raw24;
+        if (fi && fs2 && rw) set("gmNote",
+          `「一致率」= 果蝇的第一选择与深度 8 搜索的最佳着相同的比例；「外部考卷」= 与 Wine 引擎（别人写的、与我们的老师无关，${(TR.train.wine_n || 0).toLocaleString()} 个局面，只考不训）着法相同的比例。` +
+          `事先写好的判据：B 脑子有用（比不经过脑子高 ≥ 5 个百分点）→ ${TR.train.criterion_B_brain_helps ? "成立" : "不成立"}（${pct(fi.test_top1)} 对 ${pct(rw.test_top1)}）；` +
+          `C 接线有用（比打乱接线高 ≥ 5 个百分点）→ ${TR.train.criterion_C_wiring_helps_top1 ? "成立" : "不成立"}（${pct(fi.test_top1)} 对 ${pct(fs2.test_top1)}——打乱之后活跃的神经元多一倍，读出维度更高）；` +
+          `D 不是噪声哈希（换一组没见过的泊松种子，掉幅 ≤ 5 个百分点）→ ${TR.train.criterion_D_not_noise_hash ? "成立" : "不成立"}（掉 ${(fi.seed_drop * 100).toFixed(1)} 个百分点）。`);
+      }
+      const tp = document.getElementById("tGomokuPlay");
+      if (tp && PL.engine) {
+        const OPPN = { random: "随机", old_teacher: "旧老师（v1 的对手）", teacher2_d4: "老师 · 搜 4 步", teacher2_d6: "老师 · 搜 6 步", teacher2_d8: "老师 · 搜 8 步" };
+        const cols = Object.keys(OPPN), cell = r => r ? `${r.win}–${r.loss}${r.draw ? "–" + r.draw : ""}` : "—";
+        let h = "<tr><th>谁的价值表</th><th>想几步</th>" + cols.map(c => `<th>对 ${OPPN[c]}</th>`).join("") + "</tr>";
+        for (const k of Object.keys(NAME)) if (PL.engine[k]) for (const [d, row] of Object.entries(PL.engine[k]))
+          h += `<tr${k === "fly_intact" ? ' class="em"' : ""}><td>${NAME[k]}</td><td>${d === "d1" ? "直觉" : d.slice(1) + " 步"}</td>` + cols.map(c => `<td>${cell(row[c])}</td>`).join("") + "</tr>";
+        tp.innerHTML = h;
+        const hh = PL.head_to_head || {}, cA = PL.criterion_A, cA2 = PL.criterion_A2, cC2 = PL.criterion_C2;
+        set("gmPlayNote", `每格 = 胜–负（–和），每组 ${PL.games_per_match} 局、同一个开局双方各执一次黑；所有臂用同一个搜索引擎，差别只在塞进去的那张价值表。` +
+          (cA ? `判据 A 棋力达标（直觉对旧老师 ≥ 50%、对随机 ≥ 95%）→ ${cA.passed ? "成立" : "不成立"}（${pct(cA.vs_old_teacher)}、${pct(cA.vs_random)}；v1 是 ${cA.v1.vs_teacher} 与 ${cA.v1.vs_random}）。` : "") +
+          (cA2 ? `A2 搜索有用（想 6 步对老师搜 4 步 ≥ 50%）→ ${cA2.passed ? "成立" : "不成立"}（${pct(cA2.d6_vs_teacher2_d4)}）。` : "") +
+          (cC2 ? `C2 接线有用（真实接线对打乱接线，同为想 4 步，≥ 60%）→ ${cC2.passed ? "成立" : "不成立"}（${pct(cC2.intact_vs_shuffled_d4)}）。` : "") +
+          (hh.d1 ? `正面交锋：直觉 ${cell(hh.d1)}、想 4 步 ${cell(hh.d4)}、想 6 步 ${cell(hh.d6)}。` : ""));
+      }
 
-    // 训练对照表
-    (function buildTrainTable() {
-      const t = document.getElementById("tGomoku"); if (!t || !TR.arms) return;
-      const NAME = { board_raw: "直接看棋盘（不经过任何网络）", fly_intact: "果蝇脑 · 真实连接组",
-                     fly_shuffled: "果蝇脑 · 打乱接线", fly_topo: "果蝇脑 · 真实连接组 + 保拓扑编码",
-                     "board+fly": "棋盘 + 果蝇脑 拼在一起" };
-      const rows = Object.entries(TR.arms).filter(([k]) => NAME[k]).map(([k, v]) =>
-        `<tr${k === "board_raw" ? ' class="em"' : ""}><td>${NAME[k]}</td><td>${v.dim}</td>` +
-        `<td>${v.best.test.top1}</td><td>${v.best.test.top5}</td><td>${v.best.test.median_r ?? "—"}</td>` +
-        `<td>${v.best.train.top1}</td></tr>`).join("");
-      t.innerHTML = "<tr><th>用什么特征训练读出层</th><th>维数</th><th>测试 top1</th><th>top5</th>" +
-        "<th>中位 r</th><th>训练 top1</th></tr>" +
-        `<tr><td>随机猜（候选点均匀）</td><td>—</td><td>${TR.random_baseline_top1}</td><td>—</td><td>—</td><td>—</td></tr>` + rows;
-      const n = document.getElementById("gmNote");
-      if (n) n.textContent = `${TR.n} 个局面、${TR.n_games} 局自对弈，按整局切分（训练 ${TR.n_train} / 测试 ${TR.n_test}）。` +
-        `判据：${TR.criterion}　结论：A ${TR.criterion_A_connectome_matters ? "被否" : "成立——真实接线没有贡献"}；` +
-        `B ${TR.criterion_B_brain_adds ? "被否" : "成立——这颗脑子不如直接看棋盘"}。`;
+      // 画布工具
+      const setup = id => { const c = document.getElementById(id); if (!c) return null; const dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth || 400, H = c.clientHeight || 220;
+        c.width = W * dpr; c.height = H * dpr; const x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H); x.font = "11px " + (getComputedStyle(document.body).fontFamily || "sans-serif"); return { x, W, H }; };
+      const ink = () => palette["--ink-2"] || "#333", mut = () => palette["--muted"] || "#888", grid = () => palette["--rule"] || "#ddd";
+      const COL = { fly_intact: () => palette["--gf"] || "#1baf7a", fly_shuffled: () => palette["--critical"] || "#d03b3b", raw24: () => mut(), rand_relu: () => "#c58a1c", free_table: () => "#5b7fd6", teacher: () => mut() };
+
+      // 训练过程的帧：0 = 还没训练（权重全 0，9 类价值一样），1 = 阶段一（蒸馏评分表）之后，2… = 阶段二每 20 步一个检查点
+      const CUR = (A.fly_intact && A.fly_intact.curve) || [], hasFrames = CUR.length && CUR[0].cls_logmean;
+      const FRAMES = hasFrames ? [{ label: "还没训练", cls: new Array(9).fill(0), step: null }]
+        .concat(CUR.map((c, i) => ({ label: i === 0 ? "阶段一之后（蒸馏评分表）" : "阶段二 · 第 " + c.step + " 步", cls: c.cls_logmean, step: c.step, val: c.val_top1 }))) : [];
+      let frame = FRAMES.length ? FRAMES.length - 1 : -1;
+      function drawShapes() {
+        const g = setup("gmVizShapes"); if (!g || !SV.fly_intact) return; const { x, W, H } = g;
+        const names = TR.class_names, tea = SV.teacher.log_att, fly = frame >= 0 ? FRAMES[frame].cls : SV.fly_intact.log_att;
+        const fin = SV.fly_intact.log_att, lo = Math.min(0, ...fin, ...tea), hi = Math.max(...fin, ...tea), L0 = 38, B0 = H - 34, T0 = 22, bw = (W - L0 - 8) / names.length;   // 纵轴固定，播放时柱子才看得出在长
+        const Y = v => B0 - (v - lo) / (hi - lo) * (B0 - T0);
+        x.fillStyle = ink(); x.fillText("学到的线型价值（对数），按棋形类别取均值", L0, 12);
+        x.strokeStyle = grid(); x.beginPath(); x.moveTo(L0, B0); x.lineTo(W - 6, B0); x.stroke();
+        names.forEach((nm, k) => { const cx = L0 + k * bw;
+          x.fillStyle = mut(); x.globalAlpha = .45; x.fillRect(cx + bw * .12, Y(tea[k]), bw * .34, B0 - Y(tea[k])); x.globalAlpha = 1;
+          x.fillStyle = COL.fly_intact(); x.fillRect(cx + bw * .52, Y(fly[k]), bw * .34, B0 - Y(fly[k]));
+          x.fillStyle = ink(); x.textAlign = "center"; x.fillText(nm, cx + bw / 2, B0 + 14); x.fillStyle = mut(); x.fillText(String(TR.class_counts[k]), cx + bw / 2, B0 + 27); x.textAlign = "start"; });
+        x.fillStyle = mut(); x.globalAlpha = .45; x.fillRect(W - 150, 6, 10, 9); x.globalAlpha = 1; x.fillStyle = ink(); x.fillText("老师", W - 136, 14);
+        x.fillStyle = COL.fly_intact(); x.fillRect(W - 100, 6, 10, 9); x.fillStyle = ink(); x.fillText("果蝇学到的", W - 86, 14);
+      }
+      function drawCurve() {
+        const g = setup("gmVizCurve"); if (!g || !TR.train) return; const { x, W, H } = g;
+        const arms = ["fly_intact", "fly_shuffled", "raw24", "rand_relu", "free_table"].filter(k => A[k] && A[k].curve);
+        if (!arms.length) return;
+        const L0 = 38, B0 = H - 24, T0 = 22, steps = Math.max(...arms.map(k => A[k].curve[A[k].curve.length - 1].step));
+        const all = arms.flatMap(k => A[k].curve.map(c => c.val_top1)), lo = Math.floor(Math.min(...all) * 20) / 20, hi = Math.ceil(Math.max(...all) * 20) / 20;
+        const X = st => L0 + st / steps * (W - L0 - 8), Y = v => B0 - (v - lo) / (hi - lo || 1) * (B0 - T0);
+        x.fillStyle = ink(); x.fillText("阶段二：验证集一致率 × 训练步数", L0, 12);
+        x.strokeStyle = grid(); x.fillStyle = mut();
+        for (let v = lo; v <= hi + 1e-9; v += 0.05) { x.beginPath(); x.moveTo(L0, Y(v)); x.lineTo(W - 6, Y(v)); x.stroke(); x.fillText((v * 100).toFixed(0) + "%", 4, Y(v) + 4); }
+        arms.forEach((k, n) => { x.strokeStyle = COL[k](); x.lineWidth = k === "fly_intact" ? 2.4 : 1.4; x.beginPath();
+          A[k].curve.forEach((c, i) => { i ? x.lineTo(X(c.step), Y(c.val_top1)) : x.moveTo(X(c.step), Y(c.val_top1)); }); x.stroke();
+          x.fillStyle = COL[k](); x.fillRect(L0 + 6 + n * ((W - L0) / arms.length), H - 10, 9, 3); x.fillStyle = ink();
+          x.fillText({ fly_intact: "真实接线", fly_shuffled: "打乱接线", raw24: "不经过脑子", rand_relu: "随机网络", free_table: "自由参数" }[k], L0 + 18 + n * ((W - L0) / arms.length), H - 5); });
+        x.lineWidth = 1;
+        if (frame >= 1 && FRAMES[frame].step !== null) { const px = X(FRAMES[frame].step); x.strokeStyle = ink(); x.setLineDash([3, 3]); x.beginPath(); x.moveTo(px, T0); x.lineTo(px, B0); x.stroke(); x.setLineDash([]);
+          x.fillStyle = ink(); x.fillText((FRAMES[frame].val * 100).toFixed(1) + "%", Math.min(px + 4, W - 40), T0 + 10); }
+      }
+      function drawRL() {
+        const R2 = TR.rl; const box = document.getElementById("gmRLBox"); if (!R2 || !box) return; box.hidden = false;
+        const g = setup("gmVizRL"); if (!g) return; const { x, W, H } = g, L0 = 38, mid = H * 0.55, n = R2.log.length;
+        x.fillStyle = ink(); x.fillText("上：每轮训练对局的胜率　下：每一局的 δ（奖励预测误差）", L0, 12);
+        x.strokeStyle = grid(); x.beginPath(); x.moveTo(L0, mid); x.lineTo(W - 6, mid); x.stroke();
+        x.strokeStyle = COL.fly_intact(); x.lineWidth = 2; x.beginPath();
+        R2.log.forEach((r, i) => { const px = L0 + i / Math.max(n - 1, 1) * (W - L0 - 8), py = mid - 6 - r.win_rate * (mid - 26); i ? x.lineTo(px, py) : x.moveTo(px, py); }); x.stroke(); x.lineWidth = 1;
+        const D = R2.delta_trace || [], h2 = (H - mid - 10) / 2, y0 = mid + 6 + h2;
+        D.forEach((d, i) => { const px = L0 + i / Math.max(D.length - 1, 1) * (W - L0 - 8); x.fillStyle = d >= 0 ? COL.fly_intact() : COL.fly_shuffled(); x.fillRect(px, d >= 0 ? y0 - d * h2 / 2 : y0, 1.5, Math.abs(d) * h2 / 2); });
+        const f = R2.final; set("gmRLNote", `${R2.iters} 轮 × ${R2.games_per_iter} 局。判据（事先写好）：${R2.criterion} → ${R2.criterion_passed ? "通过" : "不通过"}` +
+          `（${f.vs_supervised.win}/${f.vs_supervised.games}，${(R2.win_rate_vs_supervised * 100).toFixed(1)}%）。${R2.criterion_passed ? "页面上的果蝇用的是强化后的表。" : "不达标，所以页面上的果蝇仍用监督训练的表。"}`);
+      }
+      const sv = SV.fly_intact;
+      if (sv) set("gmVizNote", `顺序检验（成五 > 活四 > 冲四、活三 > 眠三、活二 > 眠二）：果蝇学到的 ${sv.order_ok ? "全部正确" : "有颠倒"}。柱下的小字是该类别有多少种线型。` +
+        (A.fly_intact && A.fly_intact.distill_r2 ? `阶段一对全部线型的拟合 R² = ${A.fly_intact.distill_r2}（不经过脑子只有 ${A.raw24 ? A.raw24.distill_r2 : "—"}）。` : ""));
+      const redraw = () => { drawShapes(); drawCurve(); drawRL(); };
+      const slider = document.getElementById("gmVizSlider"), playBtn = document.getElementById("gmVizPlay"), lab = document.getElementById("gmVizFrame");
+      if (FRAMES.length && slider) {
+        slider.max = FRAMES.length - 1; slider.value = frame;
+        const show = k => { frame = k; slider.value = k; lab.textContent = FRAMES[k].label + (FRAMES[k].val !== undefined ? " · 验证一致率 " + (FRAMES[k].val * 100).toFixed(1) + "%" : ""); drawShapes(); drawCurve(); };
+        slider.oninput = () => { stopPlay(); show(+slider.value); };
+        let timer = 0; const stopPlay = () => { if (timer) { clearInterval(timer); timer = 0; playBtn.textContent = "▶ 播放训练过程"; } };
+        playBtn.onclick = () => { if (timer) return stopPlay(); let k = 0; show(0); playBtn.textContent = "■ 停";
+          timer = setInterval(() => { k++; if (k >= FRAMES.length) return stopPlay(); show(k); }, 450); };
+        show(frame);
+      } else if (playBtn) { playBtn.hidden = true; slider.hidden = true; lab.hidden = true; }
+      redraw(); window.addEventListener("resize", redraw); window.__gmVizRedraw = redraw;
     })();
-    const api = { tick, state: S, setStage };
+    const api = { tick, state: S, setStage, workerState: () => workerOk };
     window.__gm = api;
     return api;
   })();
