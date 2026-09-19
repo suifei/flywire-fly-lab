@@ -20,7 +20,16 @@
  * 注意 A 里用的是 DNa（连接组自己的输出），**不是** game_core 里那条手写的
  * 「起飞方向取背离威胁」规则——那条是我们写的，拿来当证据就是循环论证。
  *
+ * **对照（2026-09-19 加，预测写在跑之前）**：分箱里正面（|方位| < 15°）背离比例只有 35%，远离 50%。
+ * 候选解释是**选择效应**：方位是被转向本身改变的——朝威胁转，方位才会缩进正面这一档；
+ * 背离威胁转，方位只会变大、离开这一档。于是正面一档里装的多半是「正在朝威胁转」的时刻，
+ * 再加上 DNa 读出带 EMA 滞后，那一刻的信号自然还指着威胁。
+ * 干预：TURN_GAIN=0 让 DNa 不再影响朝向（果蝇只直走），选择效应随之消失。
+ * **预测**：TURN_GAIN=0 时正面一档 A、B 两组都回到 [43%, 57%]；
+ * 只要有一组仍 < 43%，这个解释就被否掉，35% 继续记为未解释。
+ *
  * 用法：node dodge/takeoff_planning.js [每局秒数=120] [种子数=5]
+ *       TURN_GAIN=0 node dodge/takeoff_planning.js 150 6     ← 对照，写到 takeoff_planning_noturn.json
  * 输出：results/dodge/takeoff_planning.json
  */
 const fs = require("fs");
@@ -32,13 +41,16 @@ const SUBNAME = process.env.SUB || "subcircuit_v3";
 const SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge", SUBNAME + ".json"), "utf8"));
 const T = +(process.argv[2] || 120), SEEDS = +(process.argv[3] || 5);
 const WIN = 0.2;                     // 论文里的准备期长度：200 ms
+const TURN_GAIN = process.env.TURN_GAIN === undefined ? null : +process.env.TURN_GAIN;
+const OUTNAME = TURN_GAIN === null ? "takeoff_planning.json" : "takeoff_planning_noturn.json";
 
 function wrap(a) { return Math.atan2(Math.sin(a), Math.cos(a)); }
 
 function run(seed) {
   const g = createGame(SUB, ConnectomeBrain, { seed, ballSpeed: 60,
     cfg: { encoding: "ache2019", gfTau: 0.02, takeoff: "hop",   // hop：起飞不带方向，免得手写飞行规则混进来
-           autoPellets: false, autoDust: false, wallVision: false, touch: false } });
+           autoPellets: false, autoDust: false, wallVision: false, touch: false,
+           ...(TURN_GAIN === null ? {} : { turnGain: TURN_GAIN }) } });
   const n = Math.round(T / g.chunkDt), dt = g.chunkDt;
   const hist = [];                   // 每步：[t, omega, threatBearing(体坐标), gf]
   const events = [];                 // 每次起飞的时刻
@@ -82,7 +94,19 @@ function run(seed) {
   const noTakeoff = hist.filter(r => r[2] != null && !jumpMask.has(r[0]));
   const absMed = rows => { const v = rows.map(r => Math.abs(r[1])).sort((x, y) => x - y);
     return v.length ? +v[Math.floor(v.length / 2)].toFixed(2) : null; };
+  // 正面一档的 2×2 表：DNa 左右差的符号 × 威胁方位的符号。
+  // 用来分辨「DNa 自带固定的左右偏置」（某一行恒大，与方位无关）
+  // 和「DNa 真的随方位变、但方向反了」（对角线上的两格大）。
+  const table = rows => {
+    const t = { dnaL_threatL: 0, dnaL_threatR: 0, dnaR_threatL: 0, dnaR_threatR: 0 };
+    for (const r of rows) {
+      if (r[2] == null || r[1] === 0 || r[2] === 0 || Math.abs(r[2]) * 180 / Math.PI >= 15) continue;
+      t[(r[1] > 0 ? "dnaL" : "dnaR") + "_" + (r[2] > 0 ? "threatL" : "threatR")]++;
+    }
+    return t;
+  };
   return { takeoffs: events.length, pre: frac(preTakeoff), no: frac(noTakeoff),
+           front_table_pre: table(preTakeoff), front_table_no: table(noTakeoff),
            pre_dna_abs_median: absMed(preTakeoff), no_dna_abs_median: absMed(noTakeoff),
            pre_bins: byBearing(preTakeoff), no_bins: byBearing(noTakeoff),
            dodge: g.score.dodge, hit: g.score.hit };
@@ -137,5 +161,28 @@ out.explanation = {
     : "分箱没有显示出方位相关的方向偏好"
 };
 console.log("\n" + out.explanation.verdict);
-fs.writeFileSync(ROOT + "/results/dodge/takeoff_planning.json", JSON.stringify(out, null, 1));
-console.log("→ results/dodge/takeoff_planning.json");
+const sumTable = key => runs.reduce((a, r) => { for (const k in r[key]) a[k] = (a[k] || 0) + r[key][k]; return a; }, {});
+out.front_table = { pre: sumTable("front_table_pre"), no: sumTable("front_table_no"),
+  note: "正面一档（|方位| < 15°）。dnaL = 左 DNa 更强（→ 左转）；threatL = 威胁在左。背离 = dnaR_threatL + dnaL_threatR" };
+for (const k of ["pre", "no"]) {
+  const t = out.front_table[k], n = t.dnaL_threatL + t.dnaL_threatR + t.dnaR_threatL + t.dnaR_threatR;
+  t.frac_dnaL = +((t.dnaL_threatL + t.dnaL_threatR) / n).toFixed(4);          // DNa 自身的左右偏置
+  t.frac_threatL = +((t.dnaL_threatL + t.dnaR_threatL) / n).toFixed(4);       // 威胁方位的左右偏置
+  t.frac_dnaL_given_threatL = +(t.dnaL_threatL / (t.dnaL_threatL + t.dnaR_threatL)).toFixed(4);
+  t.frac_dnaL_given_threatR = +(t.dnaL_threatR / (t.dnaL_threatR + t.dnaR_threatR)).toFixed(4);
+  console.log(`正面 2×2（${k === "pre" ? "起飞前" : "没起飞"}）：左DNa强 ${(t.frac_dnaL * 100).toFixed(1)}%｜威胁在左 ${(t.frac_threatL * 100).toFixed(1)}%｜` +
+    `P(左DNa强 | 威胁在左) ${(t.frac_dnaL_given_threatL * 100).toFixed(1)}%  P(左DNa强 | 威胁在右) ${(t.frac_dnaL_given_threatR * 100).toFixed(1)}%`);
+}
+if (TURN_GAIN !== null) {
+  out.turn_gain = TURN_GAIN;
+  const fa = out.pre_bins[0].frac, fb = out.no_bins[0].frac;
+  const inBand = x => x !== null && x >= 0.43 && x <= 0.57;
+  out.selection_control = {
+    prediction: "TURN_GAIN=0 时正面一档 A、B 两组的背离比例都回到 [0.43, 0.57]",
+    front_A: fa, front_B: fb, n_A: out.pre_bins[0].n, n_B: out.no_bins[0].n,
+    confirmed: inBand(fa) && inBand(fb) };
+  console.log(`\n选择效应对照（turnGain = ${TURN_GAIN}）：正面一档 A ${(fa * 100).toFixed(1)}%（n=${out.pre_bins[0].n}）、` +
+    `B ${(fb * 100).toFixed(1)}%（n=${out.no_bins[0].n}） → 预测${out.selection_control.confirmed ? "成立" : "**不成立**"}`);
+}
+fs.writeFileSync(ROOT + "/results/dodge/" + OUTNAME, JSON.stringify(out, null, 1));
+console.log("→ results/dodge/" + OUTNAME);

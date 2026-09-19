@@ -1,0 +1,617 @@
+{
+ "subcircuit": "subcircuit_v3",
+ "seconds_per_seed": 150,
+ "seeds": 6,
+ "window_s": 0.2,
+ "note": "「背离威胁」= DNa 左右差的符号与威胁方位相反。用的是连接组自己的 DNa 输出，不是 game_core 里那条手写的「起飞方向取背离威胁」规则。",
+ "criterion": "A（起飞前 200 ms）与 B（最终没起飞的窗口）的比例都要 > 60%；分箱是**事后加的探索性分析**，用来解释 A 为什么不成立",
+ "takeoffs": 496,
+ "pre_takeoff": {
+  "n": 19400,
+  "frac_away": 0.5074,
+  "frac_frames_with_signal": 0.985,
+  "dna_abs_median": 0
+ },
+ "no_takeoff": {
+  "n": 38521,
+  "frac_away": 0.5045,
+  "frac_frames_with_signal": 0.988,
+  "dna_abs_median": 0
+ },
+ "criterion_A": false,
+ "criterion_B": false,
+ "runs": [
+  {
+   "takeoffs": 84,
+   "pre": {
+    "n": 3296,
+    "of": 3338,
+    "defined": 0.987,
+    "frac": 0.4672330097087379
+   },
+   "no": {
+    "n": 6765,
+    "of": 6815,
+    "defined": 0.993,
+    "frac": 0.4634146341463415
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 159,
+    "dnaL_threatR": 45,
+    "dnaR_threatL": 78,
+    "dnaR_threatR": 57
+   },
+   "front_table_no": {
+    "dnaL_threatL": 86,
+    "dnaL_threatR": 32,
+    "dnaR_threatL": 4,
+    "dnaR_threatR": 43
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 339,
+     "frac": 0.36283185840707965
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 744,
+     "frac": 0.5913978494623656
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 1086,
+     "frac": 0.3139963167587477
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 1127,
+     "frac": 0.5643300798580302
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 165,
+     "frac": 0.21818181818181817
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 572,
+     "frac": 0.5122377622377622
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 2266,
+     "frac": 0.42806707855251547
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 3762,
+     "frac": 0.4880382775119617
+    }
+   ],
+   "dodge": 53,
+   "hit": 3
+  },
+  {
+   "takeoffs": 83,
+   "pre": {
+    "n": 3249,
+    "of": 3299,
+    "defined": 0.985,
+    "frac": 0.4989227454601416
+   },
+   "no": {
+    "n": 6538,
+    "of": 6601,
+    "defined": 0.99,
+    "frac": 0.49143468950749464
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 52,
+    "dnaL_threatR": 40,
+    "dnaR_threatL": 85,
+    "dnaR_threatR": 109
+   },
+   "front_table_no": {
+    "dnaL_threatL": 0,
+    "dnaL_threatR": 1,
+    "dnaR_threatL": 39,
+    "dnaR_threatR": 20
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 286,
+     "frac": 0.4370629370629371
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 784,
+     "frac": 0.5420918367346939
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 908,
+     "frac": 0.45484581497797355
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 1271,
+     "frac": 0.5177025963808025
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 60,
+     "frac": 0.6666666666666666
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 1179,
+     "frac": 0.5097540288379983
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 1390,
+     "frac": 0.38920863309352516
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 3909,
+     "frac": 0.5195702225633154
+    }
+   ],
+   "dodge": 51,
+   "hit": 2
+  },
+  {
+   "takeoffs": 82,
+   "pre": {
+    "n": 3182,
+    "of": 3257,
+    "defined": 0.977,
+    "frac": 0.535512256442489
+   },
+   "no": {
+    "n": 6122,
+    "of": 6207,
+    "defined": 0.986,
+    "frac": 0.5297288467820973
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 147,
+    "dnaL_threatR": 186,
+    "dnaR_threatL": 68,
+    "dnaR_threatR": 43
+   },
+   "front_table_no": {
+    "dnaL_threatL": 124,
+    "dnaL_threatR": 88,
+    "dnaR_threatL": 70,
+    "dnaR_threatR": 48
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 444,
+     "frac": 0.5720720720720721
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 1113,
+     "frac": 0.5175202156334232
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 765,
+     "frac": 0.6013071895424836
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 860,
+     "frac": 0.4813953488372093
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 330,
+     "frac": 0.47878787878787876
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 1378,
+     "frac": 0.4223512336719884
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 1868,
+     "frac": 0.6921841541755889
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 2546,
+     "frac": 0.4752553024351925
+    }
+   ],
+   "dodge": 38,
+   "hit": 2
+  },
+  {
+   "takeoffs": 81,
+   "pre": {
+    "n": 3161,
+    "of": 3218,
+    "defined": 0.982,
+    "frac": 0.5229357798165137
+   },
+   "no": {
+    "n": 6141,
+    "of": 6206,
+    "defined": 0.99,
+    "frac": 0.5072463768115942
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 112,
+    "dnaL_threatR": 54,
+    "dnaR_threatL": 161,
+    "dnaR_threatR": 154
+   },
+   "front_table_no": {
+    "dnaL_threatL": 32,
+    "dnaL_threatR": 34,
+    "dnaR_threatL": 46,
+    "dnaR_threatR": 107
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 481,
+     "frac": 0.446985446985447
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 840,
+     "frac": 0.5380952380952381
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 840,
+     "frac": 0.569047619047619
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 1000,
+     "frac": 0.508
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 219,
+     "frac": 0.365296803652968
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 1004,
+     "frac": 0.5368525896414342
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 2107,
+     "frac": 0.517797816801139
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 2811,
+     "frac": 0.49982212735681253
+    }
+   ],
+   "dodge": 44,
+   "hit": 2
+  },
+  {
+   "takeoffs": 82,
+   "pre": {
+    "n": 3217,
+    "of": 3257,
+    "defined": 0.988,
+    "frac": 0.5110351258936898
+   },
+   "no": {
+    "n": 6469,
+    "of": 6540,
+    "defined": 0.989,
+    "frac": 0.5303756376565157
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 125,
+    "dnaL_threatR": 45,
+    "dnaR_threatL": 4,
+    "dnaR_threatR": 86
+   },
+   "front_table_no": {
+    "dnaL_threatL": 120,
+    "dnaL_threatR": 49,
+    "dnaR_threatL": 0,
+    "dnaR_threatR": 28
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 260,
+     "frac": 0.18846153846153846
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 804,
+     "frac": 0.7238805970149254
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 1092,
+     "frac": 0.45879120879120877
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 1061,
+     "frac": 0.4825636192271442
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 197,
+     "frac": 0.24873096446700507
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 792,
+     "frac": 0.7285353535353535
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 2432,
+     "frac": 0.5505756578947368
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 3048,
+     "frac": 0.4809711286089239
+    }
+   ],
+   "dodge": 50,
+   "hit": 3
+  },
+  {
+   "takeoffs": 84,
+   "pre": {
+    "n": 3295,
+    "of": 3336,
+    "defined": 0.988,
+    "frac": 0.5101669195751138
+   },
+   "no": {
+    "n": 6486,
+    "of": 6604,
+    "defined": 0.982,
+    "frac": 0.5081714461917978
+   },
+   "front_table_pre": {
+    "dnaL_threatL": 175,
+    "dnaL_threatR": 49,
+    "dnaR_threatL": 103,
+    "dnaR_threatR": 120
+   },
+   "front_table_no": {
+    "dnaL_threatL": 120,
+    "dnaL_threatR": 22,
+    "dnaR_threatL": 78,
+    "dnaR_threatR": 38
+   },
+   "pre_dna_abs_median": 0,
+   "no_dna_abs_median": 0,
+   "pre_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 447,
+     "frac": 0.3400447427293065
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 860,
+     "frac": 0.6697674418604651
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 811,
+     "frac": 0.34155363748458695
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 1177,
+     "frac": 0.5743415463041631
+    }
+   ],
+   "no_bins": [
+    {
+     "from": 0,
+     "to": 15,
+     "n": 258,
+     "frac": 0.3875968992248062
+    },
+    {
+     "from": 15,
+     "to": 40,
+     "n": 1233,
+     "frac": 0.5847526358475263
+    },
+    {
+     "from": 40,
+     "to": 80,
+     "n": 1647,
+     "frac": 0.5919854280510018
+    },
+    {
+     "from": 80,
+     "to": 180,
+     "n": 3348,
+     "frac": 0.44802867383512546
+    }
+   ],
+   "dodge": 47,
+   "hit": 1
+  }
+ ],
+ "pre_bins": [
+  {
+   "from": 0,
+   "to": 15,
+   "n": 2257,
+   "frac": 0.4067
+  },
+  {
+   "from": 15,
+   "to": 40,
+   "n": 5145,
+   "frac": 0.593
+  },
+  {
+   "from": 40,
+   "to": 80,
+   "n": 5502,
+   "frac": 0.4489
+  },
+  {
+   "from": 80,
+   "to": 180,
+   "n": 6496,
+   "frac": 0.524
+  }
+ ],
+ "no_bins": [
+  {
+   "from": 0,
+   "to": 15,
+   "n": 1229,
+   "frac": 0.3767
+  },
+  {
+   "from": 15,
+   "to": 40,
+   "n": 6158,
+   "frac": 0.538
+  },
+  {
+   "from": 40,
+   "to": 80,
+   "n": 11710,
+   "frac": 0.5302
+  },
+  {
+   "from": 80,
+   "to": 180,
+   "n": 19424,
+   "frac": 0.4864
+  }
+ ],
+ "explanation": {
+  "front_bin": {
+   "from": 0,
+   "to": 15,
+   "n": 2257,
+   "frac": 0.4067
+  },
+  "side_frac": 0.4896,
+  "verdict": "正面威胁（|方位| < 15°）时转向信号系统性地**指向**威胁——背离比例只有 41%；侧向威胁则在随机水平附近。所以不是「正面没有左右可分」，而是方向本身就不对。整体上这个模型没有「背离威胁的方向规划信号」。"
+ },
+ "front_table": {
+  "pre": {
+   "dnaL_threatL": 770,
+   "dnaL_threatR": 419,
+   "dnaR_threatL": 499,
+   "dnaR_threatR": 569,
+   "frac_dnaL": 0.5268,
+   "frac_threatL": 0.5623,
+   "frac_dnaL_given_threatL": 0.6068,
+   "frac_dnaL_given_threatR": 0.4241
+  },
+  "no": {
+   "dnaL_threatL": 482,
+   "dnaL_threatR": 226,
+   "dnaR_threatL": 237,
+   "dnaR_threatR": 284,
+   "frac_dnaL": 0.5761,
+   "frac_threatL": 0.585,
+   "frac_dnaL_given_threatL": 0.6704,
+   "frac_dnaL_given_threatR": 0.4431
+  },
+  "note": "正面一档（|方位| < 15°）。dnaL = 左 DNa 更强（→ 左转）；threatL = 威胁在左。背离 = dnaR_threatL + dnaL_threatR"
+ },
+ "turn_gain": 0,
+ "selection_control": {
+  "prediction": "TURN_GAIN=0 时正面一档 A、B 两组的背离比例都回到 [0.43, 0.57]",
+  "front_A": 0.4067,
+  "front_B": 0.3767,
+  "n_A": 2257,
+  "n_B": 1229,
+  "confirmed": false
+ }
+}
