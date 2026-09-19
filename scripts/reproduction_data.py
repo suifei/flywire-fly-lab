@@ -69,23 +69,24 @@ PAPERS = [
                           ("mn9_r.ours_intact", 62.667, 0.02), ("mn9_r.ours_shuf_mean", 0.0, 0.001),
                           ("design.n_shuffles", 10, 0)]),
              dict(id="robustness", what="参数稳健性（补充表 11A–F，**全脑**）", status="partial",
-                  result="w_syn −30% 下 MN9_r = **34.5 Hz**，论文表 11B 是 **33.47 Hz**（差 3%，不经任何拟合）；"
+                  result="w_syn −30% 下 MN9_r = **34.5 Hz**（论文表 11B **33.47**，差 3%）、+30% 下 **96.7**（论文 96.13）；"
+                         "**抑制 −50% 下 MN9_r = 154.7**（论文表 11D 143.93）、+50% 下 **36.2**（论文 19.07）；"
                          "「同侧 MN9 比对侧弱」**6/6 种条件都成立**；基线响应神经元保住的比例 "
-                         "**57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +30% 保住 87%，其余三种 ≥99%",
-                  caveat="**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自多强」对不太上，"
-                         "原因未分辨。表 11B–F 的 182 行里只有 38–48 行带 flyid（其余是类型级汇总块）。"
-                         "第三条预测「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），**没有做**。"
-                         "另有一个论文没报告的现象：**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475）",
-                  script="screen/robustness.py", result_file="results/screen/robustness/summary.json", log="§35",
+                         "**57%（w_syn −30%）到 100%（w_syn +30%）**，抑制 +50% 保住 77%",
+                  caveat="**抑制的幅度是 ±50% 不是 ±30%**——表 11A 的分节标题写着 Decrease/Increase Inhibition 50%，"
+                         "而 11D/11E 那两张表自己的表头不带幅度。第一版照着 w_syn 那两节的 30% 想当然写成了 ±30%，"
+                         "2026-09-19 查表 11A 时发现；改成 ±50% 后两个抑制条件都更接近论文（−50%：154.7 vs 126.3 更接近 143.9；"
+                         "+50%：36.2 vs 59.5 更接近 19.1）。"
+                         "**逐个神经元的发放率相关只有 r = 0.26–0.47**——「哪些响应」对得上，「各自强弱」对不太上。"
+                         "表 11B–F 的 182 行里只有 38–48 行带 flyid。另有一个论文没报告的现象："
+                         "**谷氨酸改兴奋性让全脑失控**（活跃神经元 421 → 30,475），所以那一列的 MN9 也对不上（115.5 vs 28.4）",
+                  script="screen/robustness.py", result_file="results/screen/robustness/summary.json", log="§35 + §38.1",
                   verify=[("perturbations.w-30.mn9_right", 34.5, 0.1),
+                          ("perturbations.inh-50.mn9_right", 154.67, 0.1),
+                          ("perturbations.inh+50.mn9_right", 36.17, 0.1),
                           ("perturbations.glut_exc.n_active", 30475, 0),
-                          # 「保住多少基线响应者」正文里写错过一次（把 ≥99.7% 安到了全部四种扰动上，
-                          # 而抑制 +30% 只有 86.9%）。四个值全部钉死，手打的汇总再脱节就会被 --check 拦下。
-                          ("perturbations.w-30.frac_baseline_kept", 0.575, 0.002),
-                          ("perturbations.w+30.frac_baseline_kept", 1.0, 0.002),
-                          ("perturbations.inh-30.frac_baseline_kept", 0.998, 0.002),
-                          ("perturbations.inh+30.frac_baseline_kept", 0.869, 0.002),
-                          ("perturbations.glut_exc.frac_baseline_kept", 0.990, 0.002)]),
+                          ("perturbations.w-30.frac_baseline_kept", 0.5748, 0.002),
+                          ("perturbations.inh+50.frac_baseline_kept", 0.772, 0.002)]),
              dict(id="taste_interaction", what="糖/水/苦/Ir94e 四味及其组合（补充表 4，615 行）", status="reproduced",
                   result="8 个条件全跑（全脑，各 6 个实现），刺激名单用**官方 notebook 的**。"
                          "剔除全部被刺激 GRN 后的 466 个神经元上，与论文发放率的 Pearson **0.963–0.999**；"

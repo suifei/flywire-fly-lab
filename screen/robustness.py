@@ -14,7 +14,11 @@
 扰动（对应论文各表）：
   baseline  不改
   11B  w_syn −30%      11C  w_syn +30%
-  11D  抑制 −30%       11E  抑制 +30%     （只缩放负权重）
+  11D  抑制 −50%       11E  抑制 +50%     （只缩放负权重）
+       ——**幅度是 50% 不是 30%**：表 11A 的分节标题写着 "Decrease/Increase Inhibition 50%"，
+       而 11D/11E 那两张表自己的表头只写 "Neurons that respond to sugar stimulation"，不带幅度。
+       第一版照着 w_syn 那两节的 30% 想当然地写成了 ±30%，2026-09-19 查表 11A 时发现。
+       ±30% 的结果留在 chunks/inh-30.npz、inh+30.npz 里备查。
   11F  谷氨酸改兴奋性   （谷氨酸能神经元的传出突触取绝对值）
 
 做法：一次编译（FREQS=(150,)），6 种权重设定各跑 R 个输入实现，
@@ -39,7 +43,7 @@ from xlsx_lite import read_xlsx  # noqa: E402
 
 FREQ, R = 150, 6
 WDIR = S.OUT / "robustness"
-PERTURB = ["baseline", "w-30", "w+30", "inh-30", "inh+30", "glut_exc"]
+PERTURB = ["baseline", "w-30", "w+30", "inh-50", "inh+50", "glut_exc"]
 
 
 def setup():
@@ -60,10 +64,10 @@ def weights(kind, nt_of_pre, w0, pre_idx):
         return w * 0.7
     if kind == "w+30":
         return w * 1.3
-    if kind == "inh-30":
-        w[w < 0] *= 0.7; return w
-    if kind == "inh+30":
-        w[w < 0] *= 1.3; return w
+    if kind in ("inh-30", "inh-50"):
+        w[w < 0] *= 0.7 if kind.endswith("30") else 0.5; return w
+    if kind in ("inh+30", "inh+50"):
+        w[w < 0] *= 1.3 if kind.endswith("30") else 1.5; return w
     if kind == "glut_exc":
         m = nt_of_pre == 1                       # 1 = 谷氨酸
         w[m] = np.abs(w[m]); return w
@@ -163,8 +167,8 @@ def cmd_analyze():
         print(f"  （注：表 11B 的 182 行里只有 {len(rows0)} 行带 flyid，其余是类型级汇总块，无法逐个对应）")
     except Exception as e:
         print("  基线对照失败：", e)
-    SHEET = {"w-30": "Supp Table 11B", "w+30": "Supp Table 11C", "inh-30": "Supp Table 11D",
-             "inh+30": "Supp Table 11E", "glut_exc": "Supp Table 11F"}
+    SHEET = {"w-30": "Supp Table 11B", "w+30": "Supp Table 11C", "inh-50": "Supp Table 11D",
+             "inh+50": "Supp Table 11E", "glut_exc": "Supp Table 11F"}
     out = dict(design=dict(freq_hz=FREQ, R=R, perturbations=PERTURB,
                            note="只复现不需要敲除的两条预测（P1 哪些神经元响应、P2 同侧 vs 对侧 MN9）；"
                                 "「哪些神经元必需」需在每种扰动下重做整轮敲除筛选（约 5,460 段 / 3 h），未做"),

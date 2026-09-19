@@ -105,6 +105,10 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .controls { display: grid; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
 .row > label.k { font: 500 12px/1.2 var(--sans); color: var(--muted); min-width: 4.5em; }
+.brainbox { position: relative; background: var(--panel-2); border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
+.brainbox canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+.brainbox canvas:active { cursor: grabbing; }
+.brainhint { position: absolute; left: 8px; bottom: 8px; pointer-events: none; opacity: .75; }
 .missionbar { border-top: 1px solid var(--rule); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .missionbar .mrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .mlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
@@ -396,6 +400,19 @@ code { font: 12px var(--mono); }
     </div>
 
     <aside class="rail">
+      <div class="panel">
+        <h2>这颗脑子 <span id="brainSub">4,599 个神经元 · 真实胞体坐标</span></h2>
+        <div class="brainbox"><canvas id="brainCv"></canvas>
+          <span class="pill brainhint" id="brainHint">拖动可旋转</span></div>
+        <div class="row" style="gap:6px 12px">
+          <label class="toggle"><input type="checkbox" id="brSpin" checked> 自转</label>
+          <label class="toggle"><input type="checkbox" id="brTrail" checked> 余辉 <small>放电后慢慢暗下去</small></label>
+          <label class="toggle" style="gap:8px">视角
+            <select id="brView" class="btn" style="padding:4px 6px"><option value="front">正面</option><option value="side">侧面</option><option value="top">顶面</option></select>
+          </label>
+        </div>
+        <p class="sub" id="brainNote"></p>
+      </div>
       <div class="panel">
         <h2>实时 spike <span>每行一个神经元 · 最近 1 秒</span></h2>
         <div class="raster-wrap">
@@ -775,6 +792,7 @@ code { font: 12px var(--mono); }
 <script>/*__MISSIONS_JS__*/</script>
 <script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
 <script id="mutants-data" type="application/json">/*__MUTANTS__*/</script>
+<script id="soma-data" type="application/json">/*__SOMA__*/</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -914,8 +932,8 @@ code { font: 12px var(--mono); }
     const lab = $("rasterLabels");
     bands.forEach(b => { const d = document.createElement("div"); d.style.top = b.mid * k + "px"; d.textContent = b.label; lab.append(d); });
   })();
-  let spikeBuf = [];
-  game.onSpike = i => { spikeBuf.push(i); };
+  let spikeBuf = [], brainBuf = [];
+  game.onSpike = i => { spikeBuf.push(i); brainBuf.push(i); };
   let palette = {};
   const readPalette = () => { palette = Object.fromEntries(["--left", "--right", "--gf", "--inter", "--panel-2", "--muted", "--sugar", "--bitter", "--water", "--rule", "--ink-2"].map(k => [k, css(k)])); };
 
@@ -1250,6 +1268,84 @@ code { font: 12px var(--mono); }
     for (const i of spikeBuf) { rctx.fillStyle = palette[rowColor[i]]; rctx.fillRect(W - shift, rowY[i] * sy, shift, Math.max(1, rowH[i] * sy)); }
     spikeBuf = [];
   }
+
+  // ——— 这颗脑子：4,599 个神经元的真实胞体位置，放电时亮一下 ———————————
+  // 坐标来自公开注释表的 soma_x/y/z（体素 4×4×40 nm，已换算成 µm），3,917 个是真胞体、
+  // 682 个退回该神经元的代表点（注释表里没有胞体）——这一点写在面板下方，不含糊。
+  // 亮度 = 该神经元最近的放电，按 brDecay 衰减；颜色按功能分组，与 raster 一致。
+  const BRAIN = (() => {
+    const SOMA = JSON.parse(document.getElementById("soma-data").textContent);
+    const cv = $("brainCv");
+    const N = SOMA.n;
+    const GCOL = { LC4: "--left", LPLC2: "--right", LC16: "--inter", SUGAR: "--sugar", BITTER: "--bitter",
+                   JO: "--water", DNa01: "--left", DNa02: "--right", DNp01: "--gf", MN9: "--sugar",
+                   aDN1: "--inter", MDN: "--inter" };
+    const colKey = new Array(N).fill("--muted");
+    SOMA.group.forEach((g, i) => { if (!g) return; const base = g.replace(/_(left|right)$/, ""); if (GCOL[base]) colKey[i] = GCOL[base]; });
+    // 居中 + 归一化到 [-1,1]；y 取反（注释表的 y 越大越靠腹侧）
+    const bb = SOMA.bbox, c = [0, 1, 2].map(k => (bb[0][k] + bb[1][k]) / 2);
+    const sc = 2 / Math.max(...[0, 1, 2].map(k => bb[1][k] - bb[0][k]));
+    const P = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      P[i * 3] = (SOMA.xyz[i][0] - c[0]) * sc;
+      P[i * 3 + 1] = -(SOMA.xyz[i][1] - c[1]) * sc;
+      P[i * 3 + 2] = (SOMA.xyz[i][2] - c[2]) * sc;
+    }
+    const lit = new Float32Array(N);
+    const ctx = cv.getContext("2d");
+    let yaw = 0, pitch = -0.25, dragging = null, view = "front";
+    cv.addEventListener("pointerdown", e => { dragging = [e.clientX, e.clientY, yaw, pitch]; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener("pointermove", e => {
+      if (!dragging) return;
+      yaw = dragging[2] + (e.clientX - dragging[0]) * 0.01;
+      pitch = Math.max(-1.4, Math.min(1.4, dragging[3] + (e.clientY - dragging[1]) * 0.01));
+      $("brSpin").checked = false;
+    });
+    cv.addEventListener("pointerup", () => { dragging = null; });
+    $("brView").onchange = e => { view = e.target.value; yaw = view === "front" ? 0 : view === "side" ? Math.PI / 2 : 0; pitch = view === "top" ? -1.35 : -0.25; };
+    const note = $("brainNote");
+    note.textContent = `真实胞体坐标：${SOMA.n_from_soma.toLocaleString()} 个取自注释表的 soma_x/y/z，` +
+      `${SOMA.n_from_pos} 个没有胞体坐标、退回该神经元的一个代表点。单位换算自 4×4×40 nm 体素。` +
+      `亮起来 = 这一刻真的放了电，和左边的 spike 图是同一份数据。`;
+    let last = 0;
+    function draw(dt) {
+      const W = cv.clientWidth, H = cv.clientHeight;
+      if (!W || !H) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+      if ($("brSpin").checked && !dragging) yaw += dt * 0.25;
+      for (const i of brainBuf) if (i < N) lit[i] = 1;
+      brainBuf.length = 0;
+      const decay = $("brTrail").checked ? Math.exp(-dt / 0.35) : Math.exp(-dt / 0.06);
+      const cw = cv.width, ch = cv.height;
+      ctx.fillStyle = palette["--panel-2"] || "#eee";
+      ctx.fillRect(0, 0, cw, ch);
+      const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      const R = Math.min(cw, ch) * 0.42, ox = cw / 2, oy = ch / 2;
+      // 先画暗的，再画亮的，免得亮点被盖住
+      const order = [];
+      for (let i = 0; i < N; i++) order.push(i);
+      order.sort((a, b) => lit[a] - lit[b]);
+      for (const i of order) {
+        const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
+        const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+        const y1 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+        const persp = 1 / (1 + z2 * 0.25);
+        const px = ox + x1 * R * persp, py = oy - y1 * R * persp;
+        const L = lit[i];
+        if (L < 0.02) { ctx.fillStyle = palette["--rule"] || "#ccc"; ctx.globalAlpha = 0.35 * persp; ctx.fillRect(px, py, dpr, dpr); }
+        else {
+          ctx.globalAlpha = Math.min(1, 0.35 + L);
+          ctx.fillStyle = palette[colKey[i]] || palette["--ink-2"];
+          const r = (0.8 + 2.2 * L) * dpr * persp;
+          ctx.beginPath(); ctx.arc(px, py, r, 0, 6.2832); ctx.fill();
+        }
+        lit[i] *= decay;
+      }
+      ctx.globalAlpha = 1;
+    }
+    return { draw };
+  })();
 
   // ——— input ———
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit3 = new THREE.Vector3();
@@ -2162,6 +2258,7 @@ code { font: 12px var(--mono); }
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
       if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       drawRaster(dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1));
+      BRAIN.draw(Math.min(0.1, dtReal));
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
       window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);
