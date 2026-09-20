@@ -46,7 +46,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   await page.goto(isUrl ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
 
-  const R = await page.evaluate(async () => {
+  const R = await page.evaluate(async IN_CI => {
     const out = [];
     const ok = (name, pass, got, want) => out.push({ name, pass: !!pass, got: String(got), want });
     const D = window.__eyeDiag, FS = window.__flyScene, T = FS.THREE;
@@ -317,7 +317,10 @@ const chromePath = () => [process.env.CHROME_PATH,
       await new Promise(r => setTimeout(r, 1500));
       const fps = n / ((performance.now() - t0) / 1000);
       cam2._resample = orig;
-      ok("复眼视窗成像速率", fps >= 10, fps.toFixed(1) + " fps", "≥10（原同步版 3）");
+      // CI 的机器没有 GPU（SwiftShader 软件渲染），实测只有约 2 fps——那量的是硬件，不是代码。
+      // 这一项防的回归是「异步读回退化成同步读回」，上面的逐字节比对与 fence 检查在 CI 里照样在查；帧率门槛只在有 GPU 的本机上判。
+      if (IN_CI) out.push({ name: "复眼视窗成像速率（CI 无 GPU，只报告不判；本机门槛 ≥10）", pass: true, got: fps.toFixed(1) + " fps", want: "—" });
+      else ok("复眼视窗成像速率", fps >= 10, fps.toFixed(1) + " fps", "≥10（原同步版 3）");
     }
 
     // ── 视蛋白光谱（R1–6 / R7 / R8）────────────────────────────
@@ -447,7 +450,7 @@ const chromePath = () => [process.env.CHROME_PATH,
     }
 
     return out;
-  });
+  }, !!process.env.CI);
 
   await browser.close();
   const w = Math.max(...R.map(r => r.name.length)) + 2;
