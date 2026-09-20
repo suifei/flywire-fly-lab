@@ -1,0 +1,58 @@
+{
+ "tests": {
+  "N1_free_fall": {
+   "pass": true,
+   "t_sim": 0.08,
+   "t_analytic": 0.0782
+  },
+  "N2_no_energy_gain": {
+   "pass": true,
+   "peaks_mm": [
+    3.09,
+    0.19
+   ],
+   "bound_mm": 4.23
+  },
+  "N3_comes_to_rest": {
+   "pass": true,
+   "rest_s": 0.17000000000000007
+  },
+  "N4_rolls_downhill_only_when_steep": {
+   "pass": true,
+   "steep_slope": 0.33,
+   "dropped_mm": 5.92,
+   "flat_moved_mm": 0
+  },
+  "N5_deterministic_continuous": {
+   "pass": true,
+   "max_step_mm": 0.0306
+  },
+  "N6_slope_speed": {
+   "pass": true,
+   "uphill": 0.6,
+   "downhill": 1.25
+  },
+  "N7_solid": {
+   "pass": true,
+   "rock_r": 2.63,
+   "pushed_to": 3.63
+  },
+  "N8_wind_plume": {
+   "pass": true,
+   "downwind": 0.811,
+   "upwind": 0.064,
+   "calm": 0.325
+  },
+  "N9_closed_loop_walk": {
+   "pass": true,
+   "path_mm": 1066,
+   "max_penetration_mm": 0,
+   "berries_dropped": 3,
+   "rain_s": 0,
+   "jumps": 2,
+   "fields": 8,
+   "pellets": 13
+  }
+ },
+ "all_pass": true
+}

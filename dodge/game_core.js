@@ -359,6 +359,9 @@
       return { PAM: out.PAM[1] > 0 ? out.PAM[0] / out.PAM[1] : 1, PPL1: out.PPL1[1] > 0 ? out.PPL1[0] / out.PPL1[1] : 1 };
     };
     G.forget = () => { if (MB) { MB.plast.reset(); MB.kcProfile = {}; } };
+    // 大自然（dodge/nature.js，可选）：有地形、石头、天气与重力的开放世界。装上之后：步行受坡度影响、实心物件挡路并压到触角、气味被风吹歪、
+    // 浆果按重力下落弹跳滚动、雨带来声音与湿度。没装时下面所有 G.world 分支都不走，已发布的数字不受影响。
+    G.world = null; G.ambient = null; G.attachWorld = W => { G.world = W; return W; };
     G.legs = null; G.attachLegs = legs => { G.legs = legs; return legs; };   // 六条腿的身体（可选）
     G.mind = () => {
       const o = G.readout(), S = G.S, Sn = G.senses, B = G.body, felt = [], fThr = CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold;
@@ -372,8 +375,9 @@
         felt.push(["嗅", (kind === "A" ? "果香（气味 A）" : "焦味（气味 B）") + tail, hz]); }
       if (MB && MB.drive.PAM) felt.push(["多巴胺", "奖赏多巴胺（PAM）在放电", CFG.danRate]); if (MB && MB.drive.PPL1) felt.push(["多巴胺", "惩罚多巴胺（PPL1）在放电", CFG.danRate]);
       if (G.gust.sugar > 0) felt.push(["味", "甜的", G.gust.sugar]); if (G.gust.bitter > 0) felt.push(["味", "苦的", G.gust.bitter]); if (G.gust.water > 0) felt.push(["味", "是水", G.gust.water]);
-      if (G.touch.L + G.touch.R > 0) felt.push(["触", "撞到墙了", Math.max(G.touch.L, G.touch.R)]);
+      if (G.touch.L + G.touch.R > 0) felt.push(["触", G.world ? "触角碰到东西了" : "撞到墙了", Math.max(G.touch.L, G.touch.R)]);
       if (G.dust.length) felt.push(["触", "触角上有灰", CFG.joRate]);
+      if (G.world && G.ambient && G.ambient.sound > 0.15) felt.push(["听", G.ambient.sound > 0.4 ? "下大雨了" : "下雨了", G.ambient.sound * CFG.audioRate]);
       if (G.wind.joL + G.wind.joR > 2 * CFG.speechWind) felt.push(["触", "有风", (G.wind.joL + G.wind.joR) / 2]);
       if (G.field.thermo > 0.3) felt.push(["温", "这里好热", G.field.thermo * CFG.fieldRate]); if (G.field.hygro > 0.3) felt.push(["湿", "这里潮乎乎的", G.field.hygro * CFG.fieldRate]);
       const body = []; if (CFG.physiology) { if (B.energy < 0.3) body.push("饿了"); if (B.hydration < 0.3) body.push("渴了"); if (B.energy > 0.9 && B.hydration > 0.9) body.push("吃饱喝足"); }
@@ -487,8 +491,9 @@
       for (const b of G.balls) {
         const rx = b.x - S.x, ry = b.y - S.y;
         const fx = ch * rx - sh * ry, fy = sh * rx + ch * ry;        // 果蝇坐标：x 前、y 左
-        const d = Math.max(Math.hypot(fx, fy), CFG.ballR + 0.01);
-        const theta = 2 * Math.atan(CFG.ballR / d);
+        const br = b.r || CFG.ballR, dz = G.world && b.z !== undefined ? b.z - (G.world.h(S.x, S.y) + S.z + 0.8) : 0;      // 大自然里物体有高度（头顶掉下来的浆果）
+        const d = Math.max(Math.hypot(fx, fy, dz), br + 0.01);
+        const theta = 2 * Math.atan(br / d);
         const dtheta = b.prevTheta === null ? 0 : (theta - b.prevTheta) / dt;
         b.prevTheta = theta;
         if (dtheta <= 0 || theta < 0.05) continue;                    // 只对“正在变大”的物体反应
@@ -598,6 +603,10 @@
           }
         }
       }
+      if (CFG.touch && G.world && S.z <= 0.01) {                       // 大自然：触角尖压进石头 / 蘑菇柄 / 灌木茎多深
+        for (const [side, a] of [["L", 0.61], ["R", -0.61]]) { const over = G.world.press(S.x + Math.cos(S.h + a) * CFG.antennaLen, S.y + Math.sin(S.h + a) * CFG.antennaLen);
+          if (over > 0) { const v = Math.min(1, over / CFG.antennaLen) * CFG.touchRate; if (side === "L") touchL = Math.max(touchL, v); else touchR = Math.max(touchR, v); } }
+      }
       G.touch = { L: touchL, R: touchR };
 
       // —— 温度与湿度（2026-09-19 加）：世界里的**物理场**，同样不写任何判断逻辑 ——
@@ -614,6 +623,7 @@
           else if (f.type === "damp") hygro += f.strength * g2;
         }
       }
+      if (G.world && G.ambient) hygro += G.ambient.hygro;                  // 下过雨，到处都是潮的
       G.field = { thermo, hygro };
       if (has("THERMO_left")) {
         const t = Math.min(CFG.fieldRate, thermo * CFG.fieldRate);
@@ -634,6 +644,7 @@
           const rel = Math.sin(Math.atan2(o.y - S.y, o.x - S.x) - S.h);              // + = 声源在左
           aL += at(lx, ly) * (1 + CFG.earBias * rel); aR += at(rx, ry) * (1 - CFG.earBias * rel);
         }
+        if (G.world && G.ambient) { aL += G.ambient.sound; aR += G.ambient.sound; }   // 雨声：两耳一样响
         let vL = 0, vR = 0, gL = 0, gR = 0;
         for (const o of G.odors) {
           const c = (x, y) => o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma));
@@ -648,7 +659,7 @@
           MB.ornHz.fill(0); const lesion = G.lesion.OLFA || G.lesion.OLFR; MB.conc = {};
           for (const o of G.odors) {
             const sl = MB.odorSlots[o.kind]; if (!sl) continue;
-            const c = (x, y) => o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma)), cL = c(lx, ly), cR = c(rx, ry), hL = cap(cL, CFG.olfRate), hR = cap(cR, CFG.olfRate);
+            const c = (x, y) => G.world ? G.world.plume(o, CFG.wind ? G.wind : null, x, y) : o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma)), cL = c(lx, ly), cR = c(rx, ry), hL = cap(cL, CFG.olfRate), hR = cap(cR, CFG.olfRate);
             for (const q of sl.L) if (hL > MB.ornHz[q]) MB.ornHz[q] = hL; for (const q of sl.R) if (hR > MB.ornHz[q]) MB.ornHz[q] = hR;
             const k = MB.conc[o.kind] || (MB.conc[o.kind] = { L: 0, R: 0 }); k.L = Math.max(k.L, Math.min(1, cL)); k.R = Math.max(k.R, Math.min(1, cR));
           }
@@ -783,7 +794,8 @@
         if (state !== S.state) { G.onEvent && G.onEvent("state", { from: S.state, to: state }); if (state === "groom" && S.groomT <= 0) { S.groomT = CFG.groomDur; G.score.groom++; } }
         S.state = state;
         const vigor = CFG.physiology ? 0.45 + 0.55 * G.body.energy : 1;      // 能量低了走得慢（身体，不是决策）
-        const speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
+        let speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
+        if (G.world && speed) speed *= G.world.slopeFactor(S.x, S.y, S.h, speed);        // 上坡慢、下坡快：身体对抗重力做功，不是决策
         if (G.legs) {
           // 六条腿的身体（dodge/legs.js，默认不装）：上面算出的 speed / omega 只是**指令**，身体实际怎么动由支撑腿的运动学解出来。
           // 截掉一条腿、按住一条腿之后，同样的指令走出来的路就不一样了。
@@ -818,6 +830,7 @@
         const push = (S.jumpT >= 0 ? CFG.windFlyPush : CFG.windPush) * G.wind.speed * dt;
         S.x += Math.cos(G.wind.dir) * push; S.y += Math.sin(G.wind.dir) * push;
       }
+      if (G.world && S.z <= 0.01) { const q = { x: S.x, y: S.y }; S.bump = G.world.collide(q, CFG.flyR * 0.75); if (S.bump) { G.world.collide(q, CFG.flyR * 0.75); S.x = q.x; S.y = q.y; } }   // 大自然：实心物件挡路（走、被风吹之后统一推一次；夹在两块石头之间时再推一遍）
       // 关在场内：走、飞、被风吹，最后统一夹一次。
       // 撞到边界就停在边上（不反弹）—— 反弹要改朝向，会污染"哪侧 DNa 活跃
       // 就往哪侧转"的对照，那是这个游戏要测的东西。
@@ -830,15 +843,21 @@
       }
       if (S.jumpT >= 0) { S.state = "fly"; S.proboscis = 0; }
 
+      if (G.world) { S.ground = G.world.h(S.x, S.y); const gr = G.world.grad(S.x, S.y), c = Math.cos(S.h), sn = Math.sin(S.h); S.pitch = -Math.atan(gr[0] * c + gr[1] * sn); S.roll = Math.atan(-gr[0] * sn + gr[1] * c); }   // 给渲染用：脚下的高度与身体随地形的俯仰 / 侧倾
       // 球与判定
       for (const b of G.balls) {
-        if (b.stopT === undefined || b.age < b.stopT) { b.x += b.vx * dt; b.y += b.vy * dt; }
+        if (G.world && b.physical) { if (!b.rest) G.world.integrate(b, dt); b.removeT = 40; }                     // 受重力的物体（浆果）
+        else { if (b.stopT === undefined || b.age < b.stopT) { b.x += b.vx * dt; b.y += b.vy * dt; } if (G.world) b.z = G.world.h(b.x, b.y) + CFG.ballR; }   // 甲虫贴着地形爬
         b.age += dt;
         if (CFG.courtW && !b.done &&
             (Math.abs(b.x) > CFG.courtW / 2 + 20 || Math.abs(b.y) > CFG.courtH / 2 + 20)) {
           b.done = true; b.outcome = "out";        // 出界作废，不计入躲开/击中
         }
         const d = Math.hypot(b.x - S.x, b.y - S.y);
+        if (b.physical) {                                              // 浆果砸到它：只记一次踉跄，不计入躲开 / 被砸的比分
+          if (!b.done && Math.hypot(d, b.z - (G.world.h(S.x, S.y) + S.z + 0.8)) < b.r + CFG.flyR) { b.done = true; S.hitFlash = 0.4; G.score.bonk = (G.score.bonk || 0) + 1; G.onEvent && G.onEvent("bonk", b); }
+          continue;
+        }
         if (!b.done && d < CFG.ballR + CFG.flyR && S.z < CFG.ballR * 1.6) {
           b.done = true; b.outcome = "hit"; G.score.hit++; S.hitFlash = 0.5; G.onEvent && G.onEvent("hit", b);
         }
@@ -915,6 +934,7 @@
         return inside(Math.max(-hw, Math.min(hw, S.x + Math.cos(a) * d)), Math.max(-hh, Math.min(hh, S.y + Math.sin(a) * d))); };
       // 昼夜：光照按正弦变化（0.15–1）。只是视觉前端的光照系数，和页面上的光照滑块同一个量
       G.clock = ((G.clock || 0) + dt) % CFG.dayLength; CFG.light = 0.575 + 0.425 * Math.cos(2 * Math.PI * G.clock / CFG.dayLength);
+      if (G.world) { G.world.step(dt, G, rand); if (G.ambient) CFG.light *= G.ambient.lightMul; return; }     // 大自然：世界的调度整个交给 nature.js（浆果、石板、水洼、雨、甲虫）
       if ((LT.food -= dt) <= 0) { LT.food = between(CFG.lifeFood); const [x, y] = near(), bad = rand() < 0.2;
         // 食物是**一块**烂果子（半径 lifeFoodR），不是 2 mm 的糖粒：嗅觉在这个模型里不通到转向，果蝇只能靠撞，2 mm 的目标 10 分钟也撞不到一次
         const p = G.addPellet(x, y, bad ? "bitter" : "sugar"); p.r = CFG.lifeFoodR; p.amount = CFG.lifeFoodAmount;

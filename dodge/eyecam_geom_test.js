@@ -54,7 +54,7 @@ const CASES = [0, 30, -30, 60, -60, 90, -90, 120, -120, 180];
   await page.setViewport({ width: 1200, height: 900 });
   const errs = [];
   page.on("pageerror", e => errs.push(e.message));
-  await page.goto(isUrl ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
+  await page.goto((isUrl ? PAGE : "file://" + PAGE) + "?scene=court", { waitUntil: "load", timeout: 180000 });   // 这些检查针对球场版（v3）；页面默认进的是大自然
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
   // 暂停游戏：否则果蝇一边走一边转，标记的真实方位会在测量过程中漂掉
   await page.evaluate(() => {

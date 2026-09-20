@@ -82,6 +82,8 @@ jobs:
         run: node gomoku/test_engine.js
       - name: 六条腿的运动学身体（判据 T1–T4）
         run: node dodge/legs_test.js
+      - name: 大自然的物理自检（判据 N1–N9：自由落体、反弹、滚动、不可穿透、风吹气味、闭环行走）
+        run: node dodge/nature_test.js
 
       - name: 复现台账校验（每条主张引用的脚本与结果文件必须存在）
         # 台账是「复现了什么」的唯一事实源，REPRODUCTION.md 与游戏页都从它渲染。

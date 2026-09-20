@@ -549,7 +549,9 @@ function initFlyEye(assets) {
     const ceSw = $("ceOn"), ceTxt = $("ceTxt");
     const cvPrj = document.getElementById("ecPrj");
     let ce = null, ceLast = performance.now();
-    const ceOff = () => { if (window.__game) window.__game.setVisionOverride(null);
+    // 这条真实像素通路接在**此刻画面上的那一只**：平时是球场版，「五感全开 / 大自然」时是 v5 那只（它于是真的从像素里看到甲虫、掉下来的浆果、石头和草）
+    const seer = () => (window.__life3d && window.__life) ? window.__life : window.__game;
+    const ceOff = () => { for (const gm of [window.__game, window.__life]) if (gm) gm.setVisionOverride(null);
                           if (ceTxt) ceTxt.textContent = ""; };
     if (ceSw) ceSw.addEventListener("change", () => { if (!ceSw.checked) ceOff(); });
 
@@ -569,7 +571,7 @@ function initFlyEye(assets) {
             const now = performance.now(), dt = Math.min(0.2, (now - ceLast) / 1000);
             ceLast = now;
             const o = ce.step(r.r16, dt);
-            window.__game.setVisionOverride(o);
+            const gm = seer(); gm.setVisionOverride(o); for (const other of [window.__game, window.__life]) if (other && other !== gm) other.setVisionOverride(null);
             if (ceTxt) ceTxt.textContent = o.warm
               ? `LPLC2 左 ${o.lplc2L.toFixed(0)} / 右 ${o.lplc2R.toFixed(0)} Hz`
               : "预热中…";
