@@ -63,7 +63,9 @@ function chromePath() {
   if (process.env.THROTTLE) await page.emulateCPUThrottling(+process.env.THROTTLE);
 
   const errs = [];
-  page.on("console", m => { if (m.type() === "error") errs.push("console: " + m.text()); });
+  // 页面唯一的外部请求是取 GitHub star 数（取不到就静默不显示）。CI 机器的出口 IP 常被 GitHub 限流（403 / 429），
+  // 浏览器会为它打一条 "Failed to load resource" 的控制台错误——那不是页面的错，按 URL 放过这一条，别的照抓。
+  page.on("console", m => { if (m.type() !== "error") return; const loc = (m.location() || {}).url || ""; if (/Failed to load resource/.test(m.text()) && /api\.github\.com/.test(loc)) return; errs.push("console: " + m.text() + (loc ? " @ " + loc : "")); });
   page.on("pageerror", e => errs.push("pageerror: " + e.message));
 
   const target = isUrl ? PAGE : "file://" + PAGE;
