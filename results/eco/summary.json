@@ -1,0 +1,769 @@
+{
+ "audit": {
+  "hz": 150,
+  "seeds": 3,
+  "n_neurons": 15055,
+  "realtime_one": 1.18,
+  "realtime_32": 0.037,
+  "flight": "「起不起飞」可以是一个决策量；「怎么飞」现在学不了",
+  "channels": [
+   {
+    "name": "逼近的物体",
+    "verdict": "接上了"
+   },
+   {
+    "name": "正面逼近",
+    "verdict": "接上了"
+   },
+   {
+    "name": "甜",
+    "verdict": "接上了"
+   },
+   {
+    "name": "苦",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "风 / 触角偏转",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "触碰",
+    "verdict": "半接上"
+   },
+   {
+    "name": "热",
+    "verdict": "接上了"
+   },
+   {
+    "name": "湿",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "声音",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "气味 A",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "气味 B",
+    "verdict": "半接上"
+   },
+   {
+    "name": "醋味",
+    "verdict": "只到脑内"
+   },
+   {
+    "name": "霉味",
+    "verdict": "没接上"
+   },
+   {
+    "name": "同类的信息素 cVA",
+    "verdict": "没接上"
+   },
+   {
+    "name": "内感受 ISN",
+    "verdict": "没接上"
+   }
+  ]
+ },
+ "surface": {
+  "n_neurons": 15055,
+  "n_samples": 7200,
+  "n_test": 1440,
+  "r2_min": 0.85,
+  "pass": true,
+  "features": [
+   {
+    "name": "dnaL",
+    "r2": 0.9266,
+    "silent": false
+   },
+   {
+    "name": "dnaR",
+    "r2": 0.9066,
+    "silent": false
+   },
+   {
+    "name": "gf",
+    "r2": 0.9926,
+    "silent": false
+   },
+   {
+    "name": "mn9",
+    "r2": 0.9508,
+    "silent": false
+   },
+   {
+    "name": "adn1",
+    "r2": 0.9813,
+    "silent": false
+   },
+   {
+    "name": "mdn",
+    "r2": 0.9347,
+    "silent": false
+   },
+   {
+    "name": "odn1",
+    "r2": 0.9216,
+    "silent": false
+   },
+   {
+    "name": "bdn2",
+    "r2": 0.9516,
+    "silent": false
+   },
+   {
+    "name": "mbonReward",
+    "r2": 0.9872,
+    "silent": false
+   },
+   {
+    "name": "mbonPunish",
+    "r2": 0.9864,
+    "silent": false
+   },
+   {
+    "name": "pam",
+    "r2": 0.9289,
+    "silent": true
+   },
+   {
+    "name": "ppl1",
+    "r2": 0.9847,
+    "silent": false
+   }
+  ],
+  "vs_mean": {
+   "dnaL": 0.9339,
+   "dnaR": 0.9351,
+   "gf": 0.994,
+   "mn9": 0.9746,
+   "adn1": 0.9831,
+   "mdn": 0.9413,
+   "odn1": 0.9338,
+   "bdn2": 0.9646,
+   "mbonReward": 0.9948,
+   "mbonPunish": 0.9943,
+   "pam": -0.4038,
+   "ppl1": 0.9952
+  },
+  "ceiling": {
+   "dnaL": 0.9584,
+   "dnaR": 0.9558,
+   "gf": 0.9986,
+   "mn9": 0.9646,
+   "adn1": 0.9808,
+   "mdn": 0.9824,
+   "odn1": 0.9423,
+   "bdn2": 0.9712,
+   "mbonReward": 0.9958,
+   "mbonPunish": 0.9972,
+   "pam": 1.0,
+   "ppl1": 0.996
+  },
+  "v1_samples": 3600,
+  "v1_dna": "0.67 / 0.79",
+  "v1_pass": false
+ },
+ "m2": {
+  "train_lives": 30,
+  "test_lives": 30,
+  "cap_s": 1800,
+  "C1": true,
+  "C2": true,
+  "n_features": 63,
+  "individuals": [
+   {
+    "base": 2000,
+    "off": 460,
+    "on": 1800,
+    "ratio_on": 3.913,
+    "ratio_shuffle": 0.981,
+    "ratio_yoked": 0.931,
+    "ratio_nobrain": 3.913,
+    "drinks_per_visit_on": 16.307,
+    "drinks_per_visit_off": 2.333
+   },
+   {
+    "base": 3000,
+    "off": 460,
+    "on": 1800,
+    "ratio_on": 3.913,
+    "ratio_shuffle": 0.901,
+    "ratio_yoked": 0.972,
+    "ratio_nobrain": 3.913,
+    "drinks_per_visit_on": 19.273,
+    "drinks_per_visit_off": 2.333
+   },
+   {
+    "base": 4000,
+    "off": 460,
+    "on": 1800,
+    "ratio_on": 3.913,
+    "ratio_shuffle": 1.145,
+    "ratio_yoked": 1.09,
+    "ratio_nobrain": 3.913,
+    "drinks_per_visit_on": 18.208,
+    "drinks_per_visit_off": 2.333
+   }
+  ],
+  "learned": {
+   "turn": [
+    [
+     "感:touchΔ",
+     0.037
+    ],
+    [
+     "感:joΔ",
+     -0.031
+    ],
+    [
+     "坡:roll",
+     -0.018
+    ],
+    [
+     "hygroΣ×joΔ",
+     0.014
+    ],
+    [
+     "vinegarΣ×joΔ",
+     -0.012
+    ],
+    [
+     "odorAΣ×joΔ",
+     -0.01
+    ]
+   ],
+   "kinesis": [
+    [
+     "感:vinegar′",
+     -0.046
+    ],
+    [
+     "内:hunger",
+     0.043
+    ],
+    [
+     "脑:mbonPunish",
+     0.034
+    ],
+    [
+     "感:geosminΣ",
+     0.033
+    ],
+    [
+     "hunger×vinegar′",
+     -0.032
+    ],
+    [
+     "感:hygroΣ",
+     -0.031
+    ]
+   ],
+   "speed": [
+    [
+     "1",
+     0.281
+    ],
+    [
+     "感:hygroΣ",
+     0.243
+    ],
+    [
+     "内:hunger",
+     0.219
+    ],
+    [
+     "内:hurt",
+     0.187
+    ],
+    [
+     "感:joΔ",
+     0.146
+    ],
+    [
+     "内:cold",
+     0.141
+    ]
+   ],
+   "ingest": [
+    [
+     "味:water",
+     1.786
+    ],
+    [
+     "感:hygroΣ",
+     1.563
+    ],
+    [
+     "1",
+     1.269
+    ],
+    [
+     "thirst×hygroΣ",
+     0.731
+    ],
+    [
+     "内:thirst",
+     0.641
+    ],
+    [
+     "内:hunger",
+     0.497
+    ]
+   ],
+   "value": [
+    [
+     "内:hurt",
+     4.666
+    ],
+    [
+     "thirst×hygroΣ",
+     4.295
+    ],
+    [
+     "1",
+     -2.726
+    ],
+    [
+     "内:hunger",
+     -1.64
+    ],
+    [
+     "thirst×hygro′",
+     1.29
+    ],
+    [
+     "内:cold",
+     1.148
+    ],
+    [
+     "感:vinegarΣ",
+     -1.081
+    ],
+    [
+     "hunger×vinegarΣ",
+     1.05
+    ]
+   ]
+  },
+  "robust_learned": 10,
+  "robust_n": 10,
+  "drought_off": 383,
+  "drought_on": 386,
+  "long_lives30": 386,
+  "long_lives120": 387,
+  "worlds": {
+   "drought": {
+    "off": 383,
+    "on": 386,
+    "causes": {
+     "thirst": 28,
+     "bite": 2
+    },
+    "cards": [
+     {
+      "key": "death-thirst",
+      "title": "渴死了",
+      "count": 28
+     },
+     {
+      "key": "death-bite",
+      "title": "被甲虫吃掉了",
+      "count": 2
+     },
+     {
+      "key": "rot-eater",
+      "title": "烂的也吃",
+      "count": 1
+     },
+     {
+      "key": "circling",
+      "title": "原地打转",
+      "count": 4
+     }
+    ]
+   },
+   "beetles": {
+    "off": 407,
+    "on": 1079,
+    "causes": {
+     "alive": 8,
+     "starve": 4,
+     "bite": 17,
+     "thirst": 1
+    },
+    "cards": [
+     {
+      "key": "rot-eater",
+      "title": "烂的也吃",
+      "count": 1
+     },
+     {
+      "key": "learned-drink",
+      "title": "学会了喝水",
+      "count": 24
+     },
+     {
+      "key": "wall-hug",
+      "title": "贴着玻璃走",
+      "count": 6
+     },
+     {
+      "key": "death-starve",
+      "title": "饿死了",
+      "count": 4
+     },
+     {
+      "key": "death-bite",
+      "title": "被甲虫吃掉了",
+      "count": 17
+     },
+     {
+      "key": "death-thirst",
+      "title": "渴死了",
+      "count": 1
+     }
+    ]
+   },
+   "coldnight": {
+    "off": 230,
+    "on": 234,
+    "causes": {
+     "temp": 30
+    },
+    "cards": [
+     {
+      "key": "wall-hug",
+      "title": "贴着玻璃走",
+      "count": 29
+     },
+     {
+      "key": "death-temp",
+      "title": "冷 / 热死了",
+      "count": 30
+     },
+     {
+      "key": "learned-drink",
+      "title": "学会了喝水",
+      "count": 4
+     }
+    ]
+   }
+  },
+  "seconds": 792,
+  "v1_C2": "2/3",
+  "v1_shuffle_ratios": [
+   1.002,
+   0.872,
+   2.076
+  ],
+  "no_decay": {
+   "learned": "4/10",
+   "wall": 3,
+   "rest": 3
+  }
+ },
+ "m3": {
+  "seconds": 10800,
+  "n_seeds": 5,
+  "pass": true,
+  "labels": {
+   "beetles": "平",
+   "calm": "平",
+   "sparse": "降"
+  },
+  "worlds": [
+   {
+    "key": "beetles",
+    "name": "甲虫横行",
+    "label": "平",
+    "deltas": [
+     -0.69,
+     0.23,
+     -2.2,
+     -1.11,
+     1.22
+    ],
+    "delta_mean": -0.509,
+    "n_up": 1,
+    "n_down": 3,
+    "life_head": 445,
+    "life_tail": 1841,
+    "drink": 1.65,
+    "learnRate": 0.0121,
+    "odorTurn": 0.03,
+    "immigrants": [
+     66,
+     11,
+     26,
+     2,
+     40
+    ],
+    "gen_max": [
+     11,
+     8,
+     9,
+     7,
+     13
+    ],
+    "flights_tail": [
+     0.187,
+     1.219,
+     0.141,
+     0.548,
+     0.54
+    ]
+   },
+   {
+    "key": "calm",
+    "name": "风平浪静",
+    "label": "平",
+    "deltas": [
+     0.11,
+     0.02,
+     0.21,
+     -0.11,
+     -0.4
+    ],
+    "delta_mean": -0.037,
+    "n_up": 0,
+    "n_down": 0,
+    "life_head": 604,
+    "life_tail": 2779,
+    "drink": 1.02,
+    "learnRate": 0.015,
+    "odorTurn": 0.21,
+    "immigrants": [
+     13,
+     1,
+     0,
+     0,
+     0
+    ],
+    "gen_max": [
+     8,
+     7,
+     6,
+     6,
+     7
+    ],
+    "flights_tail": [
+     0.957,
+     1.231,
+     1.061,
+     1.175,
+     0.592
+    ]
+   },
+   {
+    "key": "sparse",
+    "name": "地广物稀",
+    "label": "降",
+    "deltas": [
+     -1.54,
+     -1.24,
+     -2.29,
+     -0.67,
+     -1.24
+    ],
+    "delta_mean": -1.394,
+    "n_up": 0,
+    "n_down": 5,
+    "life_head": 617,
+    "life_tail": 1339,
+    "drink": 1.23,
+    "learnRate": 0.0147,
+    "odorTurn": -0.12,
+    "immigrants": [
+     14,
+     8,
+     22,
+     21,
+     14
+    ],
+    "gen_max": [
+     12,
+     10,
+     13,
+     12,
+     12
+    ],
+    "flights_tail": [
+     0.176,
+     0.254,
+     0.112,
+     0.339,
+     0.238
+    ]
+   }
+  ]
+ },
+ "m4": {
+  "pass": true,
+  "checks": [
+   {
+    "name": "续跑逐位相同",
+    "pass": true
+   },
+   {
+    "name": "存档格式稳定",
+    "pass": true
+   },
+   {
+    "name": "挑战码来回无损",
+    "pass": true
+   },
+   {
+    "name": "坏输入被拒绝",
+    "pass": true
+   }
+  ],
+  "fingerprint": "ae890128:764327",
+  "save_bytes": 889132,
+  "code_chars": 167
+ },
+ "long": {
+  "n": 10,
+  "n_learned": 10,
+  "n_retest_ok": 10,
+  "goal_met": true,
+  "total_lives": 100,
+  "baseline": 478,
+  "need": 718,
+  "lives_per_round": 10,
+  "max_rounds": 30,
+  "test_worlds": 20,
+  "rounds_to_learn": [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "individuals": [
+   {
+    "k": 0,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.23,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 1,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.284,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 2,
+    "rounds": 1,
+    "learned": true,
+    "median": 1779,
+    "wall": 0.326,
+    "rest": 0.001,
+    "retest": 1350,
+    "retest_ok": true
+   },
+   {
+    "k": 3,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.249,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 4,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.228,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 5,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.289,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 6,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.171,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 7,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.372,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 8,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.249,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   },
+   {
+    "k": 9,
+    "rounds": 1,
+    "learned": true,
+    "median": 1800,
+    "wall": 0.287,
+    "rest": 0,
+    "retest": 1800,
+    "retest_ok": true
+   }
+  ]
+ },
+ "live": {
+  "lives": 3,
+  "cap_s": 900,
+  "live_median": 900,
+  "surface_median": 825,
+  "naive_median": 469,
+  "ratio_live_vs_naive": 1.92,
+  "drink_live": 0.167,
+  "drink_surface": 0.041,
+  "drink_ratio": 4.07,
+  "L1": true,
+  "L2": false
+ }
+}

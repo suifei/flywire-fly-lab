@@ -1,0 +1,26 @@
+{
+ "checks": {
+  "S1_resume_bit_identical": {
+   "pass": true,
+   "uninterrupted": "ae890128:764327",
+   "resumed": "ae890128:764327",
+   "save_bytes": 889132,
+   "agents": 25,
+   "births": 8,
+   "lives": 15
+  },
+  "S2_format_stable": {
+   "pass": true
+  },
+  "S3_challenge_roundtrip": {
+   "pass": true,
+   "code_chars": 167
+  },
+  "S4_bad_input_rejected": {
+   "pass": true,
+   "rejected": 4,
+   "of": 4
+  }
+ },
+ "pass": true
+}

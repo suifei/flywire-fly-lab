@@ -1,0 +1,2605 @@
+{
+ "protocol": {
+  "train_lives": 30,
+  "test_lives": 30,
+  "cap_s": 1800,
+  "bases": [
+   2000,
+   3000,
+   4000
+  ],
+  "test_seeds": "5000–5029",
+  "frozen_at_test": true
+ },
+ "rules": {
+  "size": 140,
+  "food": 10,
+  "foodRegrow": 45,
+  "rot": 1,
+  "water": 3,
+  "evaporation": 1,
+  "rain": 1,
+  "dayLength": 240,
+  "tempDay": 28,
+  "tempNight": 18,
+  "wind": 0.4,
+  "predators": 1,
+  "predatorSpeed": 6,
+  "roughness": 1,
+  "sunrocks": 3,
+  "shade": 3
+ },
+ "genes": {
+  "learnRate": 0.012,
+  "explore": 0.35,
+  "flightBias": -2,
+  "tempPref": 25,
+  "metabolism": 1,
+  "caution": 1,
+  "innateTurn": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "plastic_hp": {
+  "gamma": 0.995,
+  "lambda": 0.9,
+  "alphaV": 0.03,
+  "ingestGain": 6,
+  "rScale": 20,
+  "ouTau": 0.8,
+  "speedBias": 2.2,
+  "speedSigma": 0.5,
+  "wMax": 6,
+  "turnMax": 200
+ },
+ "n_features": 60,
+ "individuals": [
+  {
+   "base": 2000,
+   "arms": {
+    "off": {
+     "test_median_life": 454.1,
+     "test_lives": [
+      742,
+      624,
+      457,
+      528,
+      588,
+      457,
+      692,
+      522,
+      369,
+      451,
+      442,
+      413,
+      422,
+      358,
+      504,
+      366,
+      566,
+      539,
+      379,
+      382,
+      444,
+      510,
+      523,
+      429,
+      403,
+      506,
+      483,
+      450,
+      373,
+      409
+     ],
+     "train_lives": [
+      356,
+      515,
+      421,
+      377,
+      418,
+      409,
+      496,
+      370,
+      401,
+      457,
+      363,
+      464,
+      453,
+      394,
+      339,
+      427,
+      381,
+      423,
+      591,
+      412,
+      620,
+      422,
+      417,
+      541,
+      369,
+      448,
+      455,
+      623,
+      649,
+      403
+     ],
+     "causes": {
+      "thirst": 30
+     },
+     "eat": 0.162,
+     "drink": 0.002,
+     "rest": 0,
+     "wall": 0.287,
+     "drinks_per_water_visit": 1.917,
+     "cards": [
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 30,
+       "evidence": {
+        "life": 741.8,
+        "cause": "thirst",
+        "meals": 18,
+        "drinks": 44,
+        "bites": 0,
+        "hops": 4,
+        "foodVisits": 10,
+        "waterVisits": 17
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 23,
+       "evidence": {
+        "drinks": 44,
+        "waterVisits": 17,
+        "drink": 0.006
+       }
+      }
+     ]
+    },
+    "on": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1295,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "train_lives": [
+      465,
+      473,
+      418,
+      339,
+      1800,
+      470,
+      1701,
+      311,
+      405,
+      1262,
+      390,
+      291,
+      626,
+      636,
+      587,
+      484,
+      392,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "causes": {
+      "alive": 29,
+      "toxin": 1
+     },
+     "eat": 0.22,
+     "drink": 0.076,
+     "rest": 0,
+     "wall": 0.118,
+     "drinks_per_water_visit": 14.911,
+     "cards": [
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 29,
+       "evidence": {
+        "dist": 19208,
+        "cells": 606,
+        "spread": 0.315,
+        "life": 1800
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 30,
+       "evidence": {
+        "drinks": 487,
+        "waterVisits": 35,
+        "drink": 0.079
+       }
+      },
+      {
+       "key": "death-toxin",
+       "kind": "failure",
+       "title": "吃坏的东西吃死了",
+       "count": 1,
+       "evidence": {
+        "life": 1295,
+        "cause": "toxin",
+        "meals": 67,
+        "drinks": 259,
+        "bites": 2,
+        "hops": 22,
+        "foodVisits": 32,
+        "waterVisits": 17
+       }
+      }
+     ]
+    },
+    "shuffle": {
+     "test_median_life": 455,
+     "test_lives": [
+      508,
+      463,
+      382,
+      455,
+      419,
+      505,
+      572,
+      508,
+      399,
+      866,
+      421,
+      383,
+      528,
+      367,
+      465,
+      339,
+      554,
+      408,
+      541,
+      393,
+      379,
+      401,
+      482,
+      185,
+      372,
+      498,
+      704,
+      456,
+      350,
+      586
+     ],
+     "train_lives": [
+      359,
+      416,
+      392,
+      379,
+      388,
+      422,
+      374,
+      369,
+      413,
+      419,
+      426,
+      454,
+      444,
+      374,
+      419,
+      555,
+      377,
+      474,
+      553,
+      396,
+      483,
+      390,
+      470,
+      433,
+      372,
+      528,
+      510,
+      599,
+      490,
+      409
+     ],
+     "causes": {
+      "starve": 9,
+      "thirst": 17,
+      "bite": 4
+     },
+     "eat": 0.009,
+     "drink": 0.004,
+     "rest": 0.037,
+     "wall": 0.244,
+     "drinks_per_water_visit": 5.25,
+     "cards": [
+      {
+       "key": "death-starve",
+       "kind": "failure",
+       "title": "饿死了",
+       "count": 9,
+       "evidence": {
+        "life": 865.7,
+        "cause": "starve",
+        "meals": 5,
+        "drinks": 60,
+        "bites": 0,
+        "hops": 11,
+        "foodVisits": 9,
+        "waterVisits": 26
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 22,
+       "evidence": {
+        "drinks": 33,
+        "waterVisits": 2,
+        "drink": 0.007
+       }
+      },
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 15,
+       "evidence": {
+        "dist": 8664,
+        "cells": 187,
+        "spread": 0.216,
+        "life": 865.7
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 17,
+       "evidence": {
+        "life": 703.8,
+        "cause": "thirst",
+        "meals": 59,
+        "drinks": 33,
+        "bites": 0,
+        "hops": 8,
+        "foodVisits": 3,
+        "waterVisits": 7
+       }
+      },
+      {
+       "key": "rot-eater",
+       "kind": "exploit",
+       "title": "烂的也吃",
+       "count": 5,
+       "evidence": {
+        "rotten": 1,
+        "meals": 59,
+        "life": 703.8,
+        "cause": "thirst"
+       }
+      },
+      {
+       "key": "death-bite",
+       "kind": "failure",
+       "title": "被甲虫吃掉了",
+       "count": 4,
+       "evidence": {
+        "life": 420.6,
+        "cause": "bite",
+        "meals": 1,
+        "drinks": 28,
+        "bites": 10,
+        "hops": 2,
+        "foodVisits": 1,
+        "waterVisits": 8
+       }
+      }
+     ]
+    },
+    "nobrain": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      660,
+      1800,
+      1800,
+      495,
+      1800,
+      1800,
+      388,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1047,
+      1200,
+      1451,
+      1800,
+      1800,
+      1800,
+      1800,
+      204,
+      1800
+     ],
+     "train_lives": [
+      341,
+      749,
+      471,
+      371,
+      527,
+      420,
+      413,
+      562,
+      419,
+      532,
+      418,
+      381,
+      1538,
+      500,
+      1800,
+      472,
+      404,
+      1800,
+      1454,
+      1800,
+      423,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1760,
+      1800
+     ],
+     "causes": {
+      "alive": 23,
+      "bite": 3,
+      "starve": 2,
+      "thirst": 1,
+      "toxin": 1
+     },
+     "eat": 0.108,
+     "drink": 0.06,
+     "rest": 0.073,
+     "wall": 0.161,
+     "drinks_per_water_visit": 27.585,
+     "cards": [
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 28,
+       "evidence": {
+        "drinks": 475,
+        "waterVisits": 12,
+        "drink": 0.07
+       }
+      },
+      {
+       "key": "rot-eater",
+       "kind": "exploit",
+       "title": "烂的也吃",
+       "count": 4,
+       "evidence": {
+        "rotten": 0.309,
+        "meals": 94,
+        "life": 1800,
+        "cause": null
+       }
+      },
+      {
+       "key": "death-bite",
+       "kind": "failure",
+       "title": "被甲虫吃掉了",
+       "count": 3,
+       "evidence": {
+        "life": 1450.8,
+        "cause": "bite",
+        "meals": 17,
+        "drinks": 258,
+        "bites": 8,
+        "hops": 11,
+        "foodVisits": 8,
+        "waterVisits": 8
+       }
+      },
+      {
+       "key": "death-starve",
+       "kind": "failure",
+       "title": "饿死了",
+       "count": 2,
+       "evidence": {
+        "life": 1046.8,
+        "cause": "starve",
+        "meals": 3,
+        "drinks": 234,
+        "bites": 3,
+        "hops": 7,
+        "foodVisits": 2,
+        "waterVisits": 10
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 1,
+       "evidence": {
+        "life": 388.2,
+        "cause": "thirst",
+        "meals": 3,
+        "drinks": 0,
+        "bites": 3,
+        "hops": 6,
+        "foodVisits": 2,
+        "waterVisits": 0
+       }
+      },
+      {
+       "key": "death-toxin",
+       "kind": "failure",
+       "title": "吃坏的东西吃死了",
+       "count": 1,
+       "evidence": {
+        "life": 204.2,
+        "cause": "toxin",
+        "meals": 39,
+        "drinks": 0,
+        "bites": 3,
+        "hops": 2,
+        "foodVisits": 3,
+        "waterVisits": 0
+       }
+      }
+     ]
+    },
+    "yoked": {
+     "test_median_life": 394.3,
+     "test_lives": [
+      391,
+      403,
+      411,
+      374,
+      374,
+      404,
+      371,
+      403,
+      374,
+      411,
+      374,
+      410,
+      403,
+      409,
+      372,
+      374,
+      421,
+      407,
+      424,
+      409,
+      378,
+      372,
+      373,
+      374,
+      397,
+      372,
+      373,
+      402,
+      410,
+      373
+     ],
+     "train_lives": [
+      366,
+      487,
+      431,
+      410,
+      412,
+      409,
+      419,
+      410,
+      409,
+      405,
+      409,
+      373,
+      416,
+      374,
+      375,
+      371,
+      372,
+      378,
+      394,
+      410,
+      373,
+      412,
+      404,
+      371,
+      374,
+      410,
+      372,
+      404,
+      411,
+      375
+     ],
+     "causes": {
+      "thirst": 30
+     },
+     "eat": 0.004,
+     "drink": 0,
+     "rest": 0,
+     "wall": 0.903,
+     "drinks_per_water_visit": 0,
+     "cards": [
+      {
+       "key": "wall-hug",
+       "kind": "exploit",
+       "title": "贴着玻璃走",
+       "count": 30,
+       "evidence": {
+        "wall": 0.831,
+        "life": 423.8,
+        "cells": 197
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 30,
+       "evidence": {
+        "life": 423.8,
+        "cause": "thirst",
+        "meals": 1,
+        "drinks": 5,
+        "bites": 0,
+        "hops": 0,
+        "foodVisits": 1,
+        "waterVisits": 2
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 1,
+       "evidence": {
+        "drinks": 5,
+        "waterVisits": 2,
+        "drink": 0.001
+       }
+      }
+     ]
+    }
+   },
+   "learned": {
+    "turn": [
+     [
+      "坡:roll",
+      0.241
+     ],
+     [
+      "感:touchΔ",
+      -0.184
+     ],
+     [
+      "感:odorAΔ",
+      -0.125
+     ],
+     [
+      "感:hygroΔ",
+      0.118
+     ],
+     [
+      "感:vinegarΔ",
+      0.092
+     ],
+     [
+      "感:thermoΔ",
+      -0.05
+     ]
+    ],
+    "kinesis": [
+     [
+      "脑:mbonReward",
+      -0.934
+     ],
+     [
+      "脑:mbonPunish",
+      -0.791
+     ],
+     [
+      "内:thirst",
+      0.75
+     ],
+     [
+      "光",
+      0.737
+     ],
+     [
+      "感:odorAΣ",
+      -0.63
+     ],
+     [
+      "脑:mn9",
+      0.515
+     ]
+    ],
+    "speed": [
+     [
+      "脑:mbonPunish",
+      4.507
+     ],
+     [
+      "1",
+      2.473
+     ],
+     [
+      "感:odorAΣ",
+      1.876
+     ],
+     [
+      "内:thirst",
+      1.792
+     ],
+     [
+      "脑:mbonReward",
+      1.738
+     ],
+     [
+      "内:hunger",
+      1.672
+     ]
+    ],
+    "ingest": [
+     [
+      "味:water",
+      1.663
+     ],
+     [
+      "感:hygroΣ",
+      1.406
+     ],
+     [
+      "1",
+      1.359
+     ],
+     [
+      "内:thirst",
+      0.564
+     ],
+     [
+      "thirst×hygroΣ",
+      0.563
+     ],
+     [
+      "光",
+      0.515
+     ]
+    ],
+    "value": [
+     [
+      "内:hurt",
+      5.999
+     ],
+     [
+      "thirst×hygroΣ",
+      3.983
+     ],
+     [
+      "内:cold",
+      1.567
+     ],
+     [
+      "内:thirst",
+      1.498
+     ],
+     [
+      "hunger×vinegarΣ",
+      1.091
+     ],
+     [
+      "1",
+      -0.999
+     ],
+     [
+      "内:tired",
+      -0.98
+     ],
+     [
+      "光",
+      0.915
+     ]
+    ]
+   },
+   "ratio_on": 3.964,
+   "ratio_shuffle": 1.002,
+   "ratio_nobrain": 3.964,
+   "ratio_yoked_posthoc": 0.868,
+   "C1": true,
+   "C2": true
+  },
+  {
+   "base": 3000,
+   "arms": {
+    "off": {
+     "test_median_life": 454.1,
+     "test_lives": [
+      742,
+      624,
+      457,
+      528,
+      588,
+      457,
+      692,
+      522,
+      369,
+      451,
+      442,
+      413,
+      422,
+      358,
+      504,
+      366,
+      566,
+      539,
+      379,
+      382,
+      444,
+      510,
+      523,
+      429,
+      403,
+      506,
+      483,
+      450,
+      373,
+      409
+     ],
+     "train_lives": [
+      496,
+      446,
+      524,
+      401,
+      455,
+      471,
+      622,
+      395,
+      379,
+      479,
+      297,
+      463,
+      502,
+      575,
+      324,
+      385,
+      457,
+      390,
+      448,
+      443,
+      673,
+      457,
+      443,
+      396,
+      351,
+      435,
+      483,
+      516,
+      487,
+      405
+     ],
+     "causes": {
+      "thirst": 30
+     },
+     "eat": 0.162,
+     "drink": 0.002,
+     "rest": 0,
+     "wall": 0.287,
+     "drinks_per_water_visit": 1.917,
+     "cards": [
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 30,
+       "evidence": {
+        "life": 741.8,
+        "cause": "thirst",
+        "meals": 18,
+        "drinks": 44,
+        "bites": 0,
+        "hops": 4,
+        "foodVisits": 10,
+        "waterVisits": 17
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 23,
+       "evidence": {
+        "drinks": 44,
+        "waterVisits": 17,
+        "drink": 0.006
+       }
+      }
+     ]
+    },
+    "on": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      736,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "train_lives": [
+      487,
+      506,
+      383,
+      343,
+      623,
+      944,
+      596,
+      1561,
+      425,
+      967,
+      346,
+      470,
+      1413,
+      704,
+      1800,
+      328,
+      1345,
+      648,
+      653,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      418,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "causes": {
+      "alive": 29,
+      "toxin": 1
+     },
+     "eat": 0.238,
+     "drink": 0.091,
+     "rest": 0,
+     "wall": 0.121,
+     "drinks_per_water_visit": 12.853,
+     "cards": [
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 29,
+       "evidence": {
+        "dist": 21247,
+        "cells": 621,
+        "spread": 0.292,
+        "life": 1800
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 30,
+       "evidence": {
+        "drinks": 534,
+        "waterVisits": 47,
+        "drink": 0.092
+       }
+      },
+      {
+       "key": "death-toxin",
+       "kind": "failure",
+       "title": "吃坏的东西吃死了",
+       "count": 1,
+       "evidence": {
+        "life": 735.7,
+        "cause": "toxin",
+        "meals": 24,
+        "drinks": 76,
+        "bites": 4,
+        "hops": 4,
+        "foodVisits": 15,
+        "waterVisits": 11
+       }
+      }
+     ]
+    },
+    "shuffle": {
+     "test_median_life": 395.95,
+     "test_lives": [
+      385,
+      385,
+      378,
+      388,
+      395,
+      507,
+      411,
+      383,
+      387,
+      419,
+      476,
+      388,
+      428,
+      386,
+      450,
+      397,
+      415,
+      599,
+      388,
+      513,
+      373,
+      410,
+      422,
+      420,
+      384,
+      418,
+      420,
+      383,
+      389,
+      388
+     ],
+     "train_lives": [
+      459,
+      444,
+      471,
+      399,
+      452,
+      699,
+      690,
+      615,
+      418,
+      395,
+      628,
+      755,
+      313,
+      566,
+      575,
+      388,
+      380,
+      389,
+      395,
+      413,
+      479,
+      398,
+      379,
+      449,
+      377,
+      412,
+      382,
+      480,
+      387,
+      381
+     ],
+     "causes": {
+      "thirst": 25,
+      "starve": 5
+     },
+     "eat": 0,
+     "drink": 0,
+     "rest": 0.022,
+     "wall": 0.849,
+     "drinks_per_water_visit": 0,
+     "cards": [
+      {
+       "key": "wall-hug",
+       "kind": "exploit",
+       "title": "贴着玻璃走",
+       "count": 28,
+       "evidence": {
+        "wall": 0.787,
+        "life": 513.2,
+        "cells": 213
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 25,
+       "evidence": {
+        "life": 427.9,
+        "cause": "thirst",
+        "meals": 0,
+        "drinks": 8,
+        "bites": 0,
+        "hops": 0,
+        "foodVisits": 0,
+        "waterVisits": 2
+       }
+      },
+      {
+       "key": "death-starve",
+       "kind": "failure",
+       "title": "饿死了",
+       "count": 5,
+       "evidence": {
+        "life": 599.4,
+        "cause": "starve",
+        "meals": 1,
+        "drinks": 34,
+        "bites": 1,
+        "hops": 2,
+        "foodVisits": 2,
+        "waterVisits": 2
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 6,
+       "evidence": {
+        "drinks": 25,
+        "waterVisits": 2,
+        "drink": 0.006
+       }
+      },
+      {
+       "key": "rot-eater",
+       "kind": "exploit",
+       "title": "烂的也吃",
+       "count": 1,
+       "evidence": {
+        "rotten": 1,
+        "meals": 10,
+        "life": 387.5,
+        "cause": "thirst"
+       }
+      }
+     ]
+    },
+    "nobrain": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "train_lives": [
+      476,
+      709,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "causes": {
+      "alive": 30
+     },
+     "eat": 0.191,
+     "drink": 0.089,
+     "rest": 0,
+     "wall": 0.075,
+     "drinks_per_water_visit": 10.552,
+     "cards": [
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 30,
+       "evidence": {
+        "dist": 20411,
+        "cells": 576,
+        "spread": 0.282,
+        "life": 1800
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 30,
+       "evidence": {
+        "drinks": 512,
+        "waterVisits": 51,
+        "drink": 0.066
+       }
+      }
+     ]
+    },
+    "yoked": {
+     "test_median_life": 394.1,
+     "test_lives": [
+      432,
+      383,
+      421,
+      393,
+      426,
+      387,
+      385,
+      394,
+      399,
+      421,
+      418,
+      384,
+      417,
+      394,
+      389,
+      391,
+      393,
+      388,
+      421,
+      394,
+      389,
+      391,
+      421,
+      423,
+      427,
+      385,
+      434,
+      419,
+      402,
+      386
+     ],
+     "train_lives": [
+      498,
+      540,
+      465,
+      356,
+      525,
+      574,
+      405,
+      386,
+      389,
+      485,
+      381,
+      594,
+      392,
+      358,
+      377,
+      434,
+      367,
+      360,
+      401,
+      403,
+      415,
+      422,
+      376,
+      433,
+      411,
+      389,
+      421,
+      413,
+      423,
+      393
+     ],
+     "causes": {
+      "thirst": 30
+     },
+     "eat": 0,
+     "drink": 0,
+     "rest": 0.122,
+     "wall": 0.817,
+     "drinks_per_water_visit": 0,
+     "cards": [
+      {
+       "key": "wall-hug",
+       "kind": "exploit",
+       "title": "贴着玻璃走",
+       "count": 29,
+       "evidence": {
+        "wall": 0.672,
+        "life": 433.5,
+        "cells": 151
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 30,
+       "evidence": {
+        "life": 433.5,
+        "cause": "thirst",
+        "meals": 1,
+        "drinks": 1,
+        "bites": 0,
+        "hops": 0,
+        "foodVisits": 1,
+        "waterVisits": 2
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 1,
+       "evidence": {
+        "drinks": 8,
+        "waterVisits": 1,
+        "drink": 0.002
+       }
+      }
+     ]
+    }
+   },
+   "learned": {
+    "turn": [
+     [
+      "感:touchΔ",
+      -0.497
+     ],
+     [
+      "感:odorAΔ",
+      -0.313
+     ],
+     [
+      "感:vinegarΔ",
+      0.16
+     ],
+     [
+      "坡:roll",
+      -0.149
+     ],
+     [
+      "感:hygroΔ",
+      0.147
+     ],
+     [
+      "感:geosminΔ",
+      0.097
+     ]
+    ],
+    "kinesis": [
+     [
+      "脑:mn9",
+      1.263
+     ],
+     [
+      "味:sugar",
+      0.89
+     ],
+     [
+      "内:hurt",
+      0.666
+     ],
+     [
+      "内:hunger",
+      -0.64
+     ],
+     [
+      "内:thirst",
+      0.556
+     ],
+     [
+      "感:hygro′",
+      -0.555
+     ]
+    ],
+    "speed": [
+     [
+      "内:hurt",
+      1.061
+     ],
+     [
+      "内:scent",
+      0.96
+     ],
+     [
+      "内:thirst",
+      0.885
+     ],
+     [
+      "脑:mn9",
+      0.883
+     ],
+     [
+      "内:hunger",
+      -0.876
+     ],
+     [
+      "感:geosminΣ",
+      0.746
+     ]
+    ],
+    "ingest": [
+     [
+      "味:water",
+      1.54
+     ],
+     [
+      "感:hygroΣ",
+      1.419
+     ],
+     [
+      "1",
+      1.319
+     ],
+     [
+      "光",
+      0.695
+     ],
+     [
+      "thirst×hygroΣ",
+      0.682
+     ],
+     [
+      "内:thirst",
+      0.659
+     ]
+    ],
+    "value": [
+     [
+      "内:hurt",
+      5.975
+     ],
+     [
+      "thirst×hygroΣ",
+      3.312
+     ],
+     [
+      "hunger×vinegarΣ",
+      1.831
+     ],
+     [
+      "内:cold",
+      1.633
+     ],
+     [
+      "1",
+      -1.201
+     ],
+     [
+      "thirst×hygro′",
+      0.959
+     ],
+     [
+      "光",
+      0.851
+     ],
+     [
+      "内:thirst",
+      -0.755
+     ]
+    ]
+   },
+   "ratio_on": 3.964,
+   "ratio_shuffle": 0.872,
+   "ratio_nobrain": 3.964,
+   "ratio_yoked_posthoc": 0.868,
+   "C1": true,
+   "C2": true
+  },
+  {
+   "base": 4000,
+   "arms": {
+    "off": {
+     "test_median_life": 454.1,
+     "test_lives": [
+      742,
+      624,
+      457,
+      528,
+      588,
+      457,
+      692,
+      522,
+      369,
+      451,
+      442,
+      413,
+      422,
+      358,
+      504,
+      366,
+      566,
+      539,
+      379,
+      382,
+      444,
+      510,
+      523,
+      429,
+      403,
+      506,
+      483,
+      450,
+      373,
+      409
+     ],
+     "train_lives": [
+      566,
+      485,
+      444,
+      386,
+      419,
+      753,
+      522,
+      443,
+      544,
+      366,
+      418,
+      546,
+      472,
+      565,
+      464,
+      384,
+      346,
+      568,
+      498,
+      475,
+      503,
+      479,
+      630,
+      431,
+      406,
+      467,
+      393,
+      407,
+      371,
+      437
+     ],
+     "causes": {
+      "thirst": 30
+     },
+     "eat": 0.162,
+     "drink": 0.002,
+     "rest": 0,
+     "wall": 0.287,
+     "drinks_per_water_visit": 1.917,
+     "cards": [
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 30,
+       "evidence": {
+        "life": 741.8,
+        "cause": "thirst",
+        "meals": 18,
+        "drinks": 44,
+        "bites": 0,
+        "hops": 4,
+        "foodVisits": 10,
+        "waterVisits": 17
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 23,
+       "evidence": {
+        "drinks": 44,
+        "waterVisits": 17,
+        "drink": 0.006
+       }
+      }
+     ]
+    },
+    "on": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "train_lives": [
+      461,
+      881,
+      1800,
+      1800,
+      1800,
+      1800,
+      1180,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1308,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "causes": {
+      "alive": 30
+     },
+     "eat": 0.231,
+     "drink": 0.091,
+     "rest": 0,
+     "wall": 0.122,
+     "drinks_per_water_visit": 13.402,
+     "cards": [
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 30,
+       "evidence": {
+        "dist": 21108,
+        "cells": 634,
+        "spread": 0.3,
+        "life": 1800
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 30,
+       "evidence": {
+        "drinks": 573,
+        "waterVisits": 44,
+        "drink": 0.098
+       }
+      }
+     ]
+    },
+    "shuffle": {
+     "test_median_life": 942.8499999999999,
+     "test_lives": [
+      957,
+      758,
+      397,
+      1800,
+      1800,
+      929,
+      385,
+      685,
+      1115,
+      1800,
+      801,
+      388,
+      1800,
+      273,
+      1663,
+      350,
+      1054,
+      1184,
+      1700,
+      455,
+      1195,
+      1065,
+      698,
+      424,
+      1736,
+      678,
+      1800,
+      827,
+      355,
+      1800
+     ],
+     "train_lives": [
+      509,
+      369,
+      509,
+      410,
+      356,
+      396,
+      376,
+      380,
+      367,
+      485,
+      418,
+      556,
+      373,
+      431,
+      440,
+      657,
+      711,
+      437,
+      593,
+      390,
+      689,
+      678,
+      426,
+      449,
+      360,
+      1117,
+      1800,
+      407,
+      1159,
+      505
+     ],
+     "causes": {
+      "bite": 14,
+      "alive": 6,
+      "thirst": 8,
+      "toxin": 1,
+      "starve": 1
+     },
+     "eat": 0.117,
+     "drink": 0.009,
+     "rest": 0.138,
+     "wall": 0.295,
+     "drinks_per_water_visit": 10.031,
+     "cards": [
+      {
+       "key": "death-bite",
+       "kind": "failure",
+       "title": "被甲虫吃掉了",
+       "count": 14,
+       "evidence": {
+        "life": 1736.3,
+        "cause": "bite",
+        "meals": 18,
+        "drinks": 144,
+        "bites": 9,
+        "hops": 9,
+        "foodVisits": 14,
+        "waterVisits": 19
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 27,
+       "evidence": {
+        "drinks": 76,
+        "waterVisits": 4,
+        "drink": 0.009
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 8,
+       "evidence": {
+        "life": 928.8,
+        "cause": "thirst",
+        "meals": 17,
+        "drinks": 83,
+        "bites": 5,
+        "hops": 2,
+        "foodVisits": 6,
+        "waterVisits": 5
+       }
+      },
+      {
+       "key": "rot-eater",
+       "kind": "exploit",
+       "title": "烂的也吃",
+       "count": 1,
+       "evidence": {
+        "rotten": 0.351,
+        "meals": 54,
+        "life": 685.4,
+        "cause": "toxin"
+       }
+      },
+      {
+       "key": "death-toxin",
+       "kind": "failure",
+       "title": "吃坏的东西吃死了",
+       "count": 1,
+       "evidence": {
+        "life": 685.4,
+        "cause": "toxin",
+        "meals": 54,
+        "drinks": 67,
+        "bites": 3,
+        "hops": 1,
+        "foodVisits": 4,
+        "waterVisits": 5
+       }
+      },
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 3,
+       "evidence": {
+        "dist": 16721,
+        "cells": 561,
+        "spread": 0.335,
+        "life": 1800
+       }
+      },
+      {
+       "key": "death-starve",
+       "kind": "failure",
+       "title": "饿死了",
+       "count": 1,
+       "evidence": {
+        "life": 677.7,
+        "cause": "starve",
+        "meals": 9,
+        "drinks": 53,
+        "bites": 3,
+        "hops": 2,
+        "foodVisits": 5,
+        "waterVisits": 6
+       }
+      }
+     ]
+    },
+    "nobrain": {
+     "test_median_life": 1800,
+     "test_lives": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+     ],
+     "train_lives": [
+      789,
+      1800,
+      1800,
+      1800,
+      437,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      485,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      1800,
+      495,
+      1800,
+      1800,
+      1800
+     ],
+     "causes": {
+      "alive": 30
+     },
+     "eat": 0.206,
+     "drink": 0.071,
+     "rest": 0.013,
+     "wall": 0.099,
+     "drinks_per_water_visit": 21.071,
+     "cards": [
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 30,
+       "evidence": {
+        "drinks": 798,
+        "waterVisits": 33,
+        "drink": 0.08
+       }
+      },
+      {
+       "key": "circling",
+       "kind": "exploit",
+       "title": "原地打转",
+       "count": 1,
+       "evidence": {
+        "dist": 17705,
+        "cells": 600,
+        "spread": 0.339,
+        "life": 1800
+       }
+      }
+     ]
+    },
+    "yoked": {
+     "test_median_life": 426.54999999999995,
+     "test_lives": [
+      490,
+      441,
+      387,
+      532,
+      435,
+      412,
+      453,
+      435,
+      411,
+      421,
+      424,
+      364,
+      537,
+      368,
+      448,
+      367,
+      455,
+      609,
+      388,
+      429,
+      492,
+      422,
+      488,
+      349,
+      394,
+      413,
+      445,
+      443,
+      398,
+      423
+     ],
+     "train_lives": [
+      532,
+      473,
+      388,
+      356,
+      404,
+      604,
+      387,
+      545,
+      526,
+      415,
+      491,
+      467,
+      388,
+      456,
+      444,
+      384,
+      441,
+      491,
+      396,
+      395,
+      453,
+      404,
+      395,
+      430,
+      405,
+      451,
+      395,
+      405,
+      390,
+      441
+     ],
+     "causes": {
+      "starve": 7,
+      "thirst": 20,
+      "bite": 3
+     },
+     "eat": 0,
+     "drink": 0.001,
+     "rest": 0.801,
+     "wall": 0.06,
+     "drinks_per_water_visit": 5.5,
+     "cards": [
+      {
+       "key": "lie-flat",
+       "kind": "exploit",
+       "title": "躺平",
+       "count": 26,
+       "evidence": {
+        "rest": 0.816,
+        "life": 537.2,
+        "dist": 601,
+        "meals": 0,
+        "drinks": 56
+       }
+      },
+      {
+       "key": "death-starve",
+       "kind": "failure",
+       "title": "饿死了",
+       "count": 7,
+       "evidence": {
+        "life": 608.7,
+        "cause": "starve",
+        "meals": 1,
+        "drinks": 28,
+        "bites": 2,
+        "hops": 2,
+        "foodVisits": 2,
+        "waterVisits": 3
+       }
+      },
+      {
+       "key": "learned-drink",
+       "kind": "milestone",
+       "title": "学会了喝水",
+       "count": 19,
+       "evidence": {
+        "drinks": 29,
+        "waterVisits": 2,
+        "drink": 0.006
+       }
+      },
+      {
+       "key": "death-thirst",
+       "kind": "failure",
+       "title": "渴死了",
+       "count": 20,
+       "evidence": {
+        "life": 452.5,
+        "cause": "thirst",
+        "meals": 1,
+        "drinks": 4,
+        "bites": 0,
+        "hops": 0,
+        "foodVisits": 1,
+        "waterVisits": 2
+       }
+      },
+      {
+       "key": "death-bite",
+       "kind": "failure",
+       "title": "被甲虫吃掉了",
+       "count": 3,
+       "evidence": {
+        "life": 443.4,
+        "cause": "bite",
+        "meals": 0,
+        "drinks": 33,
+        "bites": 4,
+        "hops": 0,
+        "foodVisits": 0,
+        "waterVisits": 5
+       }
+      },
+      {
+       "key": "soak",
+       "kind": "exploit",
+       "title": "泡在水里",
+       "count": 1,
+       "evidence": {
+        "wet": 0.536,
+        "drink": 0.011,
+        "eat": 0,
+        "life": 537.2
+       }
+      },
+      {
+       "key": "rot-eater",
+       "kind": "exploit",
+       "title": "烂的也吃",
+       "count": 1,
+       "evidence": {
+        "rotten": 1,
+        "meals": 31,
+        "life": 349.2,
+        "cause": "thirst"
+       }
+      }
+     ]
+    }
+   },
+   "learned": {
+    "turn": [
+     [
+      "感:touchΔ",
+      -0.362
+     ],
+     [
+      "感:hygroΔ",
+      0.125
+     ],
+     [
+      "坡:roll",
+      -0.112
+     ],
+     [
+      "感:vinegarΔ",
+      0.058
+     ],
+     [
+      "thirst×hygroΔ",
+      0.045
+     ],
+     [
+      "感:joΔ",
+      -0.035
+     ]
+    ],
+    "kinesis": [
+     [
+      "感:hygro′",
+      -0.647
+     ],
+     [
+      "脑:mbonPunish",
+      -0.467
+     ],
+     [
+      "脑:mbonReward",
+      -0.344
+     ],
+     [
+      "thirst×hygro′",
+      -0.308
+     ],
+     [
+      "感:vinegar′",
+      -0.253
+     ],
+     [
+      "感:vinegarΣ",
+      -0.241
+     ]
+    ],
+    "speed": [
+     [
+      "1",
+      1.563
+     ],
+     [
+      "内:scent",
+      1.481
+     ],
+     [
+      "感:hygroΣ",
+      1.107
+     ],
+     [
+      "味:water",
+      0.702
+     ],
+     [
+      "感:hygro′",
+      0.66
+     ],
+     [
+      "内:cold",
+      0.612
+     ]
+    ],
+    "ingest": [
+     [
+      "味:water",
+      1.766
+     ],
+     [
+      "感:hygroΣ",
+      1.508
+     ],
+     [
+      "1",
+      1.241
+     ],
+     [
+      "thirst×hygroΣ",
+      0.638
+     ],
+     [
+      "内:thirst",
+      0.592
+     ],
+     [
+      "光",
+      0.523
+     ]
+    ],
+    "value": [
+     [
+      "内:hurt",
+      5.551
+     ],
+     [
+      "thirst×hygroΣ",
+      3.199
+     ],
+     [
+      "内:cold",
+      2.022
+     ],
+     [
+      "hunger×vinegarΣ",
+      1.774
+     ],
+     [
+      "1",
+      -1.056
+     ],
+     [
+      "thirst×hygro′",
+      0.93
+     ],
+     [
+      "内:hot",
+      0.672
+     ],
+     [
+      "光",
+      0.625
+     ]
+    ]
+   },
+   "ratio_on": 3.964,
+   "ratio_shuffle": 2.076,
+   "ratio_nobrain": 3.964,
+   "ratio_yoked_posthoc": 0.939,
+   "C1": true,
+   "C2": false
+  }
+ ],
+ "worlds": {
+  "drought": {
+   "rules": {
+    "water": 1,
+    "evaporation": 2.5,
+    "rain": 0.3
+   },
+   "off_median": 390.35,
+   "on_median": 419.4,
+   "off_causes": {
+    "thirst": 29,
+    "bite": 1
+   },
+   "on_causes": {
+    "thirst": 30
+   },
+   "on_cards": [
+    {
+     "key": "lie-flat",
+     "title": "躺平",
+     "count": 25
+    },
+    {
+     "key": "wall-hug",
+     "title": "贴着玻璃走",
+     "count": 11
+    },
+    {
+     "key": "death-thirst",
+     "title": "渴死了",
+     "count": 30
+    },
+    {
+     "key": "rot-eater",
+     "title": "烂的也吃",
+     "count": 1
+    }
+   ]
+  },
+  "beetles": {
+   "rules": {
+    "predators": 4,
+    "predatorSpeed": 9
+   },
+   "off_median": 377,
+   "on_median": 418.25,
+   "off_causes": {
+    "bite": 17,
+    "thirst": 13
+   },
+   "on_causes": {
+    "bite": 19,
+    "starve": 8,
+    "thirst": 3
+   },
+   "on_cards": [
+    {
+     "key": "lie-flat",
+     "title": "躺平",
+     "count": 29
+    },
+    {
+     "key": "death-bite",
+     "title": "被甲虫吃掉了",
+     "count": 19
+    },
+    {
+     "key": "learned-drink",
+     "title": "学会了喝水",
+     "count": 22
+    },
+    {
+     "key": "wall-hug",
+     "title": "贴着玻璃走",
+     "count": 7
+    },
+    {
+     "key": "death-starve",
+     "title": "饿死了",
+     "count": 8
+    },
+    {
+     "key": "death-thirst",
+     "title": "渴死了",
+     "count": 3
+    },
+    {
+     "key": "soak",
+     "title": "泡在水里",
+     "count": 1
+    }
+   ]
+  },
+  "coldnight": {
+   "rules": {
+    "tempNight": 6,
+    "tempDay": 24,
+    "sunrocks": 5
+   },
+   "off_median": 227.5,
+   "on_median": 229.25,
+   "off_causes": {
+    "temp": 29,
+    "bite": 1
+   },
+   "on_causes": {
+    "temp": 30
+   },
+   "on_cards": [
+    {
+     "key": "lie-flat",
+     "title": "躺平",
+     "count": 20
+    },
+    {
+     "key": "death-temp",
+     "title": "冷 / 热死了",
+     "count": 30
+    },
+    {
+     "key": "learned-drink",
+     "title": "学会了喝水",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "criteria": {
+  "C1_all": true,
+  "C2_all": false,
+  "censored_note": "寿命在 1,800 s 截尾；on 臂的比值是下限"
+ },
+ "longer_training_drought": {
+  "lives30_median": 419.4,
+  "lives120_median": 393.6,
+  "lives120_causes": {
+   "thirst": 27,
+   "bite": 3
+  },
+  "lives120_turn": [
+   [
+    "感:touchΔ",
+    -0.766
+   ],
+   [
+    "坡:roll",
+    -0.764
+   ],
+   [
+    "感:joΔ",
+    -0.754
+   ],
+   [
+    "感:geosminΔ",
+    0.113
+   ],
+   [
+    "感:odorAΔ",
+    0.056
+   ]
+  ],
+  "lives120_kinesis": [
+   [
+    "hunger×vinegarΣ",
+    1.161
+   ],
+   [
+    "脑:mbonPunish",
+    1.009
+   ],
+   [
+    "感:vinegarΣ",
+    0.878
+   ],
+   [
+    "内:thirst",
+    0.597
+   ],
+   [
+    "1",
+    0.485
+   ]
+  ]
+ },
+ "seconds": 378.2,
+ "sim_seconds_per_wall_second": null
+}

@@ -1,0 +1,136 @@
+{
+ "protocol": {
+  "cap_s": 900,
+  "seeds": [
+   6000,
+   6001,
+   6002
+  ]
+ },
+ "arms": {
+  "naive": {
+   "lives": [
+    {
+     "life": 499.4,
+     "cause": "thirst",
+     "drink": 0.003,
+     "eat": 0.239,
+     "hops": 0,
+     "drinks": 15,
+     "waterVisits": 6,
+     "wall_s": 0
+    },
+    {
+     "life": 469.3,
+     "cause": "bite",
+     "drink": 0.004,
+     "eat": 0.274,
+     "hops": 2,
+     "drinks": 20,
+     "waterVisits": 2,
+     "wall_s": 0
+    },
+    {
+     "life": 454,
+     "cause": "thirst",
+     "drink": 0.003,
+     "eat": 0.187,
+     "hops": 1,
+     "drinks": 10,
+     "waterVisits": 4,
+     "wall_s": 0
+    }
+   ],
+   "median_life": 469.3,
+   "median_drink": 0.003,
+   "median_eat": 0.239
+  },
+  "surface": {
+   "lives": [
+    {
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.041,
+     "eat": 0.162,
+     "hops": 1,
+     "drinks": 99,
+     "waterVisits": 7,
+     "wall_s": 0
+    },
+    {
+     "life": 330,
+     "cause": "thirst",
+     "drink": 0,
+     "eat": 0.116,
+     "hops": 2,
+     "drinks": 0,
+     "waterVisits": 1,
+     "wall_s": 0
+    },
+    {
+     "life": 824.9,
+     "cause": "starve",
+     "drink": 0.052,
+     "eat": 0.03,
+     "hops": 6,
+     "drinks": 132,
+     "waterVisits": 10,
+     "wall_s": 0
+    }
+   ],
+   "median_life": 824.9,
+   "median_drink": 0.041,
+   "median_eat": 0.116
+  },
+  "live": {
+   "lives": [
+    {
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.224,
+     "eat": 0.151,
+     "hops": 4,
+     "drinks": 174,
+     "waterVisits": 10,
+     "wall_s": 502
+    },
+    {
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.167,
+     "eat": 0.225,
+     "hops": 3,
+     "drinks": 123,
+     "waterVisits": 11,
+     "wall_s": 524
+    },
+    {
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.124,
+     "eat": 0.163,
+     "hops": 10,
+     "drinks": 114,
+     "waterVisits": 7,
+     "wall_s": 549
+    }
+   ],
+   "median_life": 900,
+   "median_drink": 0.167,
+   "median_eat": 0.163
+  }
+ },
+ "summary": {
+  "lives": 3,
+  "cap_s": 900,
+  "live_median": 900,
+  "surface_median": 825,
+  "naive_median": 469,
+  "ratio_live_vs_naive": 1.92,
+  "drink_live": 0.167,
+  "drink_surface": 0.041,
+  "drink_ratio": 4.07,
+  "L1": true,
+  "L2": false
+ }
+}
