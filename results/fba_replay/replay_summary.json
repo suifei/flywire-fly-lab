@@ -1,0 +1,41 @@
+{
+ "source": "results/fba_replay/replay.json（由 fba_export_replay.py 生成，未入库）",
+ "meta": {
+  "source": "neilt93/Fly-Brain-AI @ 64bdbaf (plastic-fly/experiments/looming.py logic)",
+  "flygym": "1.2.1",
+  "seed": 42,
+  "body_steps": 5000,
+  "brain_dt_ms": 50.0,
+  "frame_dt_s": 0.0025,
+  "rate_scale": 12.0,
+  "axes": "MuJoCo world: +x forward (initial heading), +y fly's left, +z up (mm)",
+  "turn_sign_note": "LocomotionBridge: turn_drive>0 shrinks LEFT leg amplitude → body turns LEFT; interfaces.py comment and paper say '+ = right'"
+ },
+ "n_meshes": 69,
+ "trials": [
+  {
+   "condition": "loom_left",
+   "loom_left": 1.0,
+   "loom_right": 0.0,
+   "frames": 200,
+   "brain": 10,
+   "mean_turn_drive": 0.35028999999999993
+  },
+  {
+   "condition": "loom_right",
+   "loom_left": 0.0,
+   "loom_right": 1.0,
+   "frames": 200,
+   "brain": 10,
+   "mean_turn_drive": -0.5397700000000001
+  },
+  {
+   "condition": "control",
+   "loom_left": 0.0,
+   "loom_right": 0.0,
+   "frames": 200,
+   "brain": 10,
+   "mean_turn_drive": -0.04496
+  }
+ ]
+}

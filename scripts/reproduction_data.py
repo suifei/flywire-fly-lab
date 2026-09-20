@@ -334,7 +334,7 @@ PAPERS = [
          claims=[
              dict(id="looming_loop", what="Brian2 全脑 ↔ FlyGym 闭环的 looming 实验", status="reproduced",
                   result="复现成功，峰值内存 **4.3 GB**（其 README 说约 8 GB）",
-                  caveat=None, script="fba_export_replay.py", result_file="results/fba_replay/replay.json", log="§4.1"),
+                  caveat=None, script="fba_export_replay.py", result_file="results/fba_replay/replay_summary.json", log="§4.1"),
              dict(id="odor_valence", what="气味效价实验（作者 README 自报 6/6）", status="partial",
                   result="6 条判据里通过 **4 条**，但**扣掉空对照后实质只有 2 条**。"
                          "失败的两条都在 DM1（吸引）：转向对比 +0.0010（要求 < 0）、"
@@ -551,7 +551,7 @@ FINDINGS = [
     dict(id="fly_speaks", what="能不能从全脑发放率解码出「果蝇在感知什么」",
          result="12 个词、301 试次一次跑完（429 s、3.3 GB），岭回归解码器给出第一句中文",
          caveat="词的触发是手写的感觉populations，句子模板也是手写的；这是**解码**不是语言",
-         script="language/fly_words.py", result_file="results/language/dataset.npz", log="§13"),
+         script="language/fly_words.py", result_file="results/language/first_sentence.json", log="§13"),
     dict(id="decoder_stress", what="像脑机接口那样只看到一部分神经元，还读得出吗",
          result="**覆盖率胜过通道数**：1,000 个随机神经元 0.82，1,000 个**真的会放电的** 0.95，而 3,000 个空间相邻的只有 0.55",
          caveat="90% 的非感觉神经元从不放电；给它们全加 1 Hz 假脉冲会把准确率打到 0.65，而 1,000 通道解码器仍有 0.91。"

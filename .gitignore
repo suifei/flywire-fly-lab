@@ -70,6 +70,9 @@ results/connectome_loop_smoke/*
 
 # 台账与构建脚本引用的汇总 JSON（2026-09-20 系统查了一遍：82 个引用里有 18 个被挡在仓库外，CI 因此一直是红的）
 !results/reproduction.json
+!results/fba_replay/
+results/fba_replay/*
+!results/fba_replay/replay_summary.json
 !results/shuffle_controls.json
 !results/fba_turn_sign.json
 !results/fba_odor_valence/
