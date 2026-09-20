@@ -59,6 +59,8 @@ function chromePath() {
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1400, height: 1000 });
+  // THROTTLE=6 node dodge/browser_test.js：把浏览器 CPU 限到 1/6，在本机模拟没有 GPU 的 CI 机器，专门用来抓"按墙上时间等"的脆弱测试
+  if (process.env.THROTTLE) await page.emulateCPUThrottling(+process.env.THROTTLE);
 
   const errs = [];
   page.on("console", m => { if (m.type() === "error") errs.push("console: " + m.text()); });
@@ -323,7 +325,7 @@ function chromePath() {
   await step("生活模式：五感全开，世界自己运转，球场冻结", async () => {
     const t0 = await page.evaluate(() => window.__game.S.t);
     await page.click("#viewLife");
-    await new Promise(r => setTimeout(r, 6000));
+    for (let k = 0; k < 80; k++) { await new Promise(r => setTimeout(r, 500)); if (await page.evaluate(() => window.__life && window.__life.body.age > 2.2)) break; }   // 不按墙上时间等（慢机器上 6 s 只走 1.3 s 模拟时间）
     const r = await page.evaluate(() => { const g = window.__life, cv = document.getElementById("lifeStage"); if (!g) return null;
       const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data; let n = 0, s1 = 0, s2 = 0; for (let i = 0; i < d.length; i += 16) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3; n++; s1 += v; s2 += v * v; }
       g.addSound(g.S.x + 10, g.S.y, 1.5, 1.0); for (let k = 0; k < 40; k++) g.step(); const heard = Math.max(g.senses.audioL, g.senses.audioR);
@@ -353,10 +355,14 @@ function chromePath() {
   await step("同伴果蝇：加两只之后各自有独立大脑并在动", async () => {
     await page.click("#cpAdd"); await page.click("#cpAdd");
     const before = await page.evaluate(() => window.__comp ? window.__comp.list.map(c => [c.S.x, c.S.y]) : null);
-    await new Promise(r => setTimeout(r, 2500));
-    const after = await page.evaluate(() => window.__comp ? window.__comp.list.map(c => [c.S.x, c.S.y]) : null);
     if (!before || before.length !== 2) return "没有同伴模块或数量不对";
-    const moved = before.filter((p, i) => Math.hypot(after[i][0] - p[0], after[i][1] - p[1]) > 1).length;
+    // 不按墙上时间等：CI 没有 GPU，页面每秒只有一两帧，2.5 s 里模拟时间走不了多少。最多等 25 s，两只都走出 1 mm 就立刻通过。
+    let after = before, moved = 0;
+    for (let k = 0; k < 50 && moved < 2; k++) {
+      await new Promise(r => setTimeout(r, 500));
+      after = await page.evaluate(() => window.__comp.list.map(c => [c.S.x, c.S.y]));
+      moved = before.filter((p, i) => Math.hypot(after[i][0] - p[0], after[i][1] - p[1]) > 1).length;
+    }
     const brains = await page.evaluate(() => window.__comp.list.map(c => c.brain.n));
     return moved === 2 ? `2 只都在走，各自 ${brains[0]} 神经元` : `只有 ${moved} 只在动`;
   });
