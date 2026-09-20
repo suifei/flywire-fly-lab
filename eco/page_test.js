@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+// 真浏览器里把生态箱页面跑一遍（`node --check` 和语法检查盖不住运行期的错——这个项目吃过三次亏）。用法：node eco/page_test.js [页面路径]；CI=1 时缺 Chrome 算失败而不是跳过
+const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, ".."), PAGE = process.argv[2] || path.join(ROOT, "docs/ecobox.html");
+function loadPuppeteer() { for (const p of ["puppeteer-core", "puppeteer", path.join(ROOT, "studio/capture/node_modules/puppeteer-core"), path.join(ROOT, "studio/capture/node_modules/puppeteer")]) { try { return require(p); } catch (e) {} } return null; }
+const chromePath = () => [process.env.CHROME_PATH, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium-browser"].filter(Boolean).find(p => { try { return fs.existsSync(p); } catch (e) { return false; } });
+(async () => {
+  const puppeteer = loadPuppeteer(), strict = !!process.env.CI, exe = chromePath(); if (!puppeteer || !exe) { const m = !puppeteer ? "没有 puppeteer-core" : "找不到 Chrome"; if (strict) { console.error("✗ " + m); process.exit(1); } console.log("跳过：" + m); process.exit(0); }
+  const browser = await puppeteer.launch({ executablePath: exe, headless: "new", args: ["--no-sandbox", "--disable-dev-shm-usage", "--allow-file-access-from-files"] }), page = await browser.newPage(); await page.setViewport({ width: 1300, height: 950 });
+  const errs = [], fails = [], ok = (name, cond, info) => { console.log((cond ? "✓ " : "✗ ") + name + (info !== undefined ? "  " + JSON.stringify(info) : "")); if (!cond) fails.push(name); };
+  page.on("console", m => { if (m.type() === "error") errs.push(m.text()); }); page.on("pageerror", e => errs.push("pageerror: " + e.message)); page.on("dialog", d => d.accept());
+  await page.goto("file://" + PAGE + "?fresh=1&seed=42&speed=-1", { waitUntil: "load", timeout: 60000 });
+  await page.waitForFunction(() => window.__eco && window.__eco.E, { timeout: 20000 });
+  // 1 最快档下箱内时间在走，画布上有东西
+  const t0 = await page.evaluate(() => window.__eco.E.sim.world.t); await new Promise(r => setTimeout(r, 2500)); const t1 = await page.evaluate(() => window.__eco.E.sim.world.t); ok("最快档：2.5 s 里箱内时间前进 > 60 s", t1 - t0 > 60, { advanced: +(t1 - t0).toFixed(0) });
+  const variance = await page.evaluate(() => { const c = document.getElementById("view"), d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let s = 0, s2 = 0, n = 0; for (let i = 0; i < d.length; i += 4 * 97) { const v = d[i] + d[i + 1] + d[i + 2]; s += v; s2 += v * v; n++; } return s2 / n - (s / n) ** 2; }); ok("画布画出了东西", variance > 500, { variance: Math.round(variance) });
+  // 2 每个面板都能渲染
+  for (const t of ["fly", "log", "cards", "replay", "compare", "save", "rules"]) { await page.click(`#tabs button[data-tab="${t}"]`); await new Promise(r => setTimeout(r, 450)); const len = await page.evaluate(k => document.getElementById("p-" + k).innerHTML.length, t); ok("面板「" + t + "」有内容", len > 80, { chars: len }); }
+  ok("实测卡渲染出来了", await page.evaluate(() => document.querySelectorAll("#explain .card").length) >= 4, await page.evaluate(() => document.querySelectorAll("#explain .card").length));
+  // 3 改世界规则：不重开箱子
+  const before = await page.evaluate(() => ({ t: window.__eco.E.sim.world.t, pred: window.__eco.E.sim.world.predators.length })); await page.evaluate(() => { const i = document.getElementById("r-predators"); i.value = 5; i.dispatchEvent(new Event("input", { bubbles: true })); }); await page.click("#applyBtn"); await new Promise(r => setTimeout(r, 300));
+  const after = await page.evaluate(() => ({ t: window.__eco.E.sim.world.t, pred: window.__eco.E.sim.world.predators.length, rule: window.__eco.E.sim.world.rules.predators })); ok("改规则：甲虫 1 → 5，箱子没重开", after.pred === 5 && after.rule === 5 && after.t >= before.t, { before, after });
+  // 4 在箱子里放东西
+  await page.click('#toolSeg button[data-tool="water"]'); const nw0 = await page.evaluate(() => window.__eco.E.sim.world.water.length); const box = await (await page.$("#view")).boundingBox(); await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4); ok("点一下放了一洼水", (await page.evaluate(() => window.__eco.E.sim.world.water.length)) === nw0 + 1);
+  await page.click('#toolSeg button[data-tool="pick"]'); await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.5); await new Promise(r => setTimeout(r, 500)); ok("点一下选中一只，面板显示六种内部状态", await page.evaluate(() => document.querySelectorAll("#p-fly .meter").length) === 6);
+  // 5 进化模式：32 只、飞行解锁；跑一阵之后有出生 / 死亡 / 时间线 / 发现卡
+  await page.evaluate(() => window.__eco.start("evo", {}, 7)); const n32 = await page.evaluate(() => ({ n: window.__eco.E.sim.agents.length, flight: window.__eco.E.flight, solo: window.__eco.E.solo })); ok("进化模式：32 只，飞行解锁", n32.n === 32 && n32.flight && !n32.solo, n32);
+  await page.waitForFunction(() => window.__eco.E.sim.world.t > 700, { timeout: 120000 }); const evo = await page.evaluate(() => { const E = window.__eco.E; return { t: Math.round(E.sim.world.t), lives: E.lives, timeline: E.timeline.length, cards: E.cards.length, replays: E.replays.length }; }); ok("进化跑了 700 s：有死亡、时间线、发现卡、回放", evo.lives > 0 && evo.timeline >= 10 && evo.cards > 0 && evo.replays > 0, evo);
+  // 6 发现卡：点「接受」会记下裁决（先按暂停——和真人一样；最快档下新回放到来时那一排按钮会重排）
+  await page.click('#speedSeg button[data-speed="0"]');
+  await page.click('#tabs button[data-tab="cards"]'); await new Promise(r => setTimeout(r, 500)); const hasBtn = await page.$('#p-cards button[data-v="accepted"]'); if (hasBtn) { await hasBtn.click(); await new Promise(r => setTimeout(r, 300)); } ok("发现卡：裁决被记下", await page.evaluate(() => window.__eco.E.cards.some(c => c.verdict === "accepted")));
+  await page.click('#tabs button[data-tab="replay"]'); await new Promise(r => setTimeout(r, 500)); const rb = await page.$("#p-replay button[data-rp]"); if (rb) { await rb.click(); await new Promise(r => setTimeout(r, 600)); } ok("回放：点了以后有说明文字", (await page.evaluate(() => (document.getElementById("rpInfo") || {}).textContent || "")).length > 5);
+  // 7 存档：暂停 → 存 → 两边各跑 300 步 → 指纹相同（页面里的逐位复现）
+  const same = await page.evaluate(() => { const X = window.__eco, s = JSON.stringify(X.Save.snapshot(X.E)); const A = X.E; for (let i = 0; i < 300; i++) A.step(); const fa = X.Save.fingerprint(A); X.resume(JSON.parse(s)); const B = X.E; for (let i = 0; i < 300; i++) B.step(); return { fa, fb: X.Save.fingerprint(B), bytes: s.length }; }); ok("页面内：存档读回后续跑逐位相同", same.fa === same.fb, same);
+  await page.click('#tabs button[data-tab="save"]'); await new Promise(r => setTimeout(r, 400)); await page.click("#svLocal"); await new Promise(r => setTimeout(r, 400)); ok("存到本机成功", await page.evaluate(() => !!localStorage.getItem("fly-ecobox-save")));
+  await page.click("#mkCode"); const code = await page.evaluate(() => document.getElementById("codeBox").value); ok("生成了挑战码", /^FLYECO1\./.test(code), { chars: code.length }); await page.click("#useCode"); await new Promise(r => setTimeout(r, 400)); ok("用挑战码开局", await page.evaluate(() => window.__eco.E.sim.world.t < 60 && window.__eco.E.sim.agents.length === 32));
+  // 8 刷新页面 → 自动接上本机存档
+  await page.goto("file://" + PAGE + "?speed=0", { waitUntil: "load" }); await page.waitForFunction(() => window.__eco && window.__eco.E, { timeout: 20000 }); ok("刷新后自动接着上次的箱子", await page.evaluate(() => window.__eco.E.sim.world.t > 600), await page.evaluate(() => Math.round(window.__eco.E.sim.world.t)));
+  // 9 手机宽度：不横向滚动
+  await page.setViewport({ width: 390, height: 800, isMobile: true }); await page.goto("file://" + PAGE + "?fresh=1&speed=10", { waitUntil: "load" }); await new Promise(r => setTimeout(r, 800)); const ow = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth })); ok("手机宽度（390）下不横向滚动", ow.sw <= 391 && ow.cw <= 391, ow);   /* 不能拿 innerWidth 比：内容把布局视口撑宽时两个数会一起变大（第一版就这样假通过了，实际宽 598） */
+  if (process.env.SHOT) { await page.setViewport({ width: 1300, height: 950 }); await page.goto("file://" + PAGE + "?speed=10", { waitUntil: "load" }); await new Promise(r => setTimeout(r, 1500)); await page.screenshot({ path: process.env.SHOT }); }
+  ok("没有控制台错误 / 未捕获异常", errs.length === 0, errs.slice(0, 5)); await browser.close(); console.log(fails.length ? `\n${fails.length} 项失败` : "\n全部通过"); process.exit(fails.length ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

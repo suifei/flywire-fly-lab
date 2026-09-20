@@ -1,0 +1,71 @@
+{
+ "decay": 0,
+ "off_median": 459.95,
+ "individuals": [
+  {
+   "base": 20000,
+   "last10_median": 1800,
+   "wall": 0.139,
+   "rest": 0
+  },
+  {
+   "base": 20100,
+   "last10_median": 1800,
+   "wall": 0.079,
+   "rest": 0
+  },
+  {
+   "base": 20200,
+   "last10_median": 411.8,
+   "wall": 0.918,
+   "rest": 0
+  },
+  {
+   "base": 20300,
+   "last10_median": 372.4,
+   "wall": 0.978,
+   "rest": 0
+  },
+  {
+   "base": 20400,
+   "last10_median": 1800,
+   "wall": 0.168,
+   "rest": 0
+  },
+  {
+   "base": 20500,
+   "last10_median": 485.1,
+   "wall": 0,
+   "rest": 0.936
+  },
+  {
+   "base": 20600,
+   "last10_median": 1800,
+   "wall": 0.078,
+   "rest": 0
+  },
+  {
+   "base": 20700,
+   "last10_median": 506.4,
+   "wall": 0,
+   "rest": 0.969
+  },
+  {
+   "base": 20800,
+   "last10_median": 537.8,
+   "wall": 0.053,
+   "rest": 0.594
+  },
+  {
+   "base": 20900,
+   "last10_median": 475.4,
+   "wall": 0.741,
+   "rest": 0.72
+  }
+ ],
+ "n": 10,
+ "n_learned": 4,
+ "n_wall": 3,
+ "n_rest": 3,
+ "note": "按训练后 10 条命的寿命中位数判（不另做冻结测试）"
+}

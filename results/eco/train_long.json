@@ -1,0 +1,466 @@
+{
+ "rule": {
+  "individuals": 10,
+  "lives_per_round": 10,
+  "max_rounds": 30,
+  "cap_s": 1800,
+  "test_worlds": 20,
+  "threshold": "1.5 × 不学习的测试寿命中位数",
+  "test_seeds": "5000–5019",
+  "retest_seeds": "5100–5119"
+ },
+ "baseline_median": 478.4,
+ "baseline_retest_median": 463.79999999999995,
+ "need_s": 717.6,
+ "n_learned": 10,
+ "n_retest_ok": 10,
+ "n": 10,
+ "total_lives": 100,
+ "rounds_to_learn": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "individuals": [
+  {
+   "k": 0,
+   "base": 40000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.058,
+    "eat": 0.184,
+    "wall": 0.23,
+    "rest": 0,
+    "alive": 20,
+    "causes": {
+     "alive": 20
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.047,
+    "eat": 0.191,
+    "wall": 0.241,
+    "rest": 0,
+    "alive": 17,
+    "causes": {
+     "alive": 17,
+     "bite": 2,
+     "toxin": 1
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.23,
+     "rest": 0,
+     "drink": 0.058
+    }
+   ]
+  },
+  {
+   "k": 1,
+   "base": 41000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.047,
+    "eat": 0.162,
+    "wall": 0.284,
+    "rest": 0,
+    "alive": 18,
+    "causes": {
+     "alive": 18,
+     "thirst": 2
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.048,
+    "eat": 0.171,
+    "wall": 0.301,
+    "rest": 0,
+    "alive": 18,
+    "causes": {
+     "alive": 18,
+     "thirst": 1,
+     "toxin": 1
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.284,
+     "rest": 0,
+     "drink": 0.047
+    }
+   ]
+  },
+  {
+   "k": 2,
+   "base": 42000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1779.35,
+    "drink": 0.028,
+    "eat": 0.095,
+    "wall": 0.326,
+    "rest": 0.001,
+    "alive": 9,
+    "causes": {
+     "alive": 9,
+     "bite": 5,
+     "starve": 3,
+     "toxin": 1,
+     "thirst": 2
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1349.8,
+    "drink": 0.032,
+    "eat": 0.088,
+    "wall": 0.297,
+    "rest": 0.001,
+    "alive": 7,
+    "causes": {
+     "alive": 7,
+     "starve": 8,
+     "thirst": 3,
+     "bite": 2
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1779.35,
+     "wall": 0.326,
+     "rest": 0.001,
+     "drink": 0.028
+    }
+   ]
+  },
+  {
+   "k": 3,
+   "base": 43000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.041,
+    "eat": 0.185,
+    "wall": 0.249,
+    "rest": 0,
+    "alive": 19,
+    "causes": {
+     "alive": 19,
+     "thirst": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.043,
+    "eat": 0.167,
+    "wall": 0.227,
+    "rest": 0,
+    "alive": 20,
+    "causes": {
+     "alive": 20
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.249,
+     "rest": 0,
+     "drink": 0.041
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "base": 44000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.067,
+    "eat": 0.174,
+    "wall": 0.228,
+    "rest": 0,
+    "alive": 19,
+    "causes": {
+     "alive": 19,
+     "toxin": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.07,
+    "eat": 0.173,
+    "wall": 0.223,
+    "rest": 0,
+    "alive": 20,
+    "causes": {
+     "alive": 20
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.228,
+     "rest": 0,
+     "drink": 0.067
+    }
+   ]
+  },
+  {
+   "k": 5,
+   "base": 45000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.046,
+    "eat": 0.145,
+    "wall": 0.289,
+    "rest": 0,
+    "alive": 17,
+    "causes": {
+     "alive": 17,
+     "thirst": 2,
+     "starve": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.044,
+    "eat": 0.16,
+    "wall": 0.3,
+    "rest": 0,
+    "alive": 18,
+    "causes": {
+     "alive": 18,
+     "thirst": 2
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.289,
+     "rest": 0,
+     "drink": 0.046
+    }
+   ]
+  },
+  {
+   "k": 6,
+   "base": 46000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.018,
+    "eat": 0.177,
+    "wall": 0.171,
+    "rest": 0,
+    "alive": 14,
+    "causes": {
+     "alive": 14,
+     "bite": 4,
+     "starve": 1,
+     "thirst": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.018,
+    "eat": 0.193,
+    "wall": 0.172,
+    "rest": 0,
+    "alive": 15,
+    "causes": {
+     "alive": 15,
+     "bite": 3,
+     "thirst": 2
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.171,
+     "rest": 0,
+     "drink": 0.018
+    }
+   ]
+  },
+  {
+   "k": 7,
+   "base": 47000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.028,
+    "eat": 0.13,
+    "wall": 0.372,
+    "rest": 0,
+    "alive": 14,
+    "causes": {
+     "starve": 2,
+     "alive": 14,
+     "thirst": 2,
+     "bite": 2
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.028,
+    "eat": 0.127,
+    "wall": 0.358,
+    "rest": 0,
+    "alive": 16,
+    "causes": {
+     "alive": 16,
+     "thirst": 2,
+     "bite": 1,
+     "toxin": 1
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.372,
+     "rest": 0,
+     "drink": 0.028
+    }
+   ]
+  },
+  {
+   "k": 8,
+   "base": 48000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.065,
+    "eat": 0.184,
+    "wall": 0.249,
+    "rest": 0,
+    "alive": 17,
+    "causes": {
+     "alive": 17,
+     "bite": 2,
+     "thirst": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.064,
+    "eat": 0.188,
+    "wall": 0.262,
+    "rest": 0,
+    "alive": 20,
+    "causes": {
+     "alive": 20
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.249,
+     "rest": 0,
+     "drink": 0.065
+    }
+   ]
+  },
+  {
+   "k": 9,
+   "base": 49000,
+   "learned": true,
+   "rounds": 1,
+   "lives": 10,
+   "last": {
+    "round": 1,
+    "median": 1800,
+    "drink": 0.04,
+    "eat": 0.164,
+    "wall": 0.287,
+    "rest": 0,
+    "alive": 20,
+    "causes": {
+     "alive": 20
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.039,
+    "eat": 0.17,
+    "wall": 0.303,
+    "rest": 0,
+    "alive": 18,
+    "causes": {
+     "alive": 18,
+     "thirst": 2
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.287,
+     "rest": 0,
+     "drink": 0.04
+    }
+   ]
+  }
+ ],
+ "stuck": [],
+ "goal_met": true
+}

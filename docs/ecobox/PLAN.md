@@ -37,7 +37,7 @@
 ## 数据结构
 
 ```text
-Genome        { id, parent, generation, genes: { learnRate, explore, flightBias, tempPref, metabolism, caution, innateTurn[4] } }
+Genome        { id, parent, generation, genes: { learnRate, explore, flightBias, tempPref, metabolism, caution, innateTurn[4] } }   # innateTurn[4] = 饿时朝醋味转 / 渴时朝湿处转 / 尝到水就喝 / 朝捕食者气味转（实现时第 3 项从「热时朝热处转」换成了「尝到水就喝」：不这样进化够不着喝水这件事，见 RESULTS.md）
 Physiology    { hunger, thirst, stamina, health, scent, bodyTemp }        # 0–1（bodyTemp 为 ℃）；舒适点与耗损速率是常数，不对玩家开放
 Senses        { food:{L,R}, water:{L,R}, slope:{pitch,roll}, wind:{L,R}, temp, danger:{L,R}, others:{L,R}, taste:{sugar,bitter,water}, touch:{L,R} }
 BrainOut      { dnaL, dnaR, gf, mn9, adn1, mdn, mbonReward, mbonPunish, pam, ppl1, pop[k]:{L,R} }   # 来自真脑或响应面，同一接口
@@ -66,3 +66,7 @@ eco/save.js         Experiment ⇄ JSON ⇄ 挑战码
 ## 参考数据集（暂不接，留作后续）
 
 真实步行数据（Dryad / Zenodo）可用来校步速与转向分布；FlyMABe2022 与 InsectSound 适合第二阶段之后的「其他果蝇」通道。本阶段不引入，避免玩法建立在还没核实的数据上。
+
+## 进度（2026-09-20）
+
+四个里程碑都做完了一轮，结果（含没通过的判据）见 [RESULTS.md](RESULTS.md)；页面 `docs/ecobox.html`。与计划不同的地方：响应面的输入是 27 路（湿度也分了左右）；页面里只跑响应面，真脑复核放在无头脚本 `eco/live_check.js` 里；云端保存没做。
