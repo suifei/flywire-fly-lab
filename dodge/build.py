@@ -58,6 +58,7 @@ def _slim_life():
 for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/dodge/subcircuit_v3.json").read_text()))),
                   ("/*__SUBCIRCUIT_LIFE__*/", _slim_life()),
                   ("/*__LIFE__*/", (ROOT / "results/dodge/life_summary.json").read_text()),
+                  ("/*__BRAND_HERO__*/", (D / "brand_hero.b64").read_text().strip()), ("/*__BRAND_ICON__*/", (D / "brand_icon.b64").read_text().strip()),
                   ("/*__LEARN__*/", (ROOT / "results/learn/learn_summary.json").read_text()),
                   ("/*__NATURE__*/", json.dumps({"test": json.loads((ROOT / "results/dodge/nature_test.json").read_text())["tests"],
                                                  "life": {k: v["mean"] for k, v in json.loads((ROOT / "results/learn/nature_life.json").read_text())["worlds"].items()},
