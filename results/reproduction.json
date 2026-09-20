@@ -937,7 +937,7 @@
      "result": "复现成功，峰值内存 **4.3 GB**（其 README 说约 8 GB）",
      "caveat": null,
      "script": "fba_export_replay.py",
-     "result_file": "results/fba_replay/replay.json",
+     "result_file": "results/fba_replay/replay_summary.json",
      "log": "§4.1"
     },
     {
@@ -1551,7 +1551,7 @@
    "result": "12 个词、301 试次一次跑完（429 s、3.3 GB），岭回归解码器给出第一句中文",
    "caveat": "词的触发是手写的感觉populations，句子模板也是手写的；这是**解码**不是语言",
    "script": "language/fly_words.py",
-   "result_file": "results/language/dataset.npz",
+   "result_file": "results/language/first_sentence.json",
    "log": "§13"
   },
   {
