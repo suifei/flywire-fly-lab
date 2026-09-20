@@ -108,7 +108,7 @@ JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的
 2. **自对弈强化（「多巴胺」式三因子规则）是阴性结果**：强化后的表对强化前 6–194；而且奖励预测误差是在连接组外面算的——这个模型自己的多巴胺神经元不放电。
 3. **五子棋第一版的全部数字已作废**：当时给大脑换输入不清上一批刺激，每个棋盘喂进去几乎是同一个输入。
 
-复现：`AGENTS.md` 里「五子棋 v2」一段是完整命令；细节与踩过的坑见 [docs/log/report.md §46](docs/log/report.md)；改了 `gomoku/` 或 `dodge/brain.js` 之后跑 `node gomoku/test_engine.js`。
+复现：本地工程笔记 `AGENTS.md`（未入库）里「五子棋 v2」一段是完整命令；细节与踩过的坑见 [docs/log/report.md §46](docs/log/report.md)；改了 `gomoku/` 或 `dodge/brain.js` 之后跑 `node gomoku/test_engine.js`。
 <!-- gomoku:end -->
 
 <!-- life:begin （本节由 scratch/patch_readme_gomoku.py 从 results/dodge/life_summary.json 渲染）-->
@@ -177,7 +177,7 @@ python run_experiment.py --preset sugar --t_run 1
 python3 dodge/build.py && open results/dodge/fly_dodge.html
 ```
 
-完整命令清单（虚拟敲除筛选、腹神经索、视觉管线、"果蝇说中文"等）见 [`AGENTS.md`](AGENTS.md)。
+完整命令清单（虚拟敲除筛选、腹神经索、视觉管线、"果蝇说中文"等）在本地工程笔记 `AGENTS.md` 里（该文件不入库）；每个脚本开头的文档字符串也写了用法。
 
 ## 目录
 
@@ -192,7 +192,7 @@ python3 dodge/build.py && open results/dodge/fly_dodge.html
 | `language/` | "果蝇说中文"：12 个词的解码器 + 脑机接口压力测试 |
 | `flight/` | flybody 飞行控制器回放，导出真实逃逸飞行轨迹 |
 | `docs/log/report.md` | **完整报告**，约 6.5 万字，含全部结果、阴性结果与错误账本 |
-| `AGENTS.md` | 工程笔记：环境、命令、内存安全规则、领域陷阱 |
+| `AGENTS.md` | 工程笔记：环境、命令、内存安全规则、领域陷阱（本地文件，不入库） |
 
 ## 许可
 
