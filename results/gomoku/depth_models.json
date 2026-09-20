@@ -1,0 +1,337 @@
+{
+ "note": "下棋时不搜索：每一步 = 模型落子分最大的点。每格 = 胜–负–和",
+ "train": {
+  "1": {
+   "lam": 0.4058,
+   "agree_own_label": 0.5742,
+   "agree_depth8": 0.4656,
+   "agree_depth8_newseeds": 0.4281,
+   "wine_top1": 0.4432,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 287.3
+  },
+  "2": {
+   "lam": 0.093,
+   "agree_own_label": 0.5945,
+   "agree_depth8": 0.4467,
+   "agree_depth8_newseeds": 0.4265,
+   "wine_top1": 0.4312,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 288.2
+  },
+  "3": {
+   "lam": 0.2183,
+   "agree_own_label": 0.5242,
+   "agree_depth8": 0.4631,
+   "agree_depth8_newseeds": 0.4392,
+   "wine_top1": 0.4519,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 292.2
+  },
+  "4": {
+   "lam": 0.1572,
+   "agree_own_label": 0.5033,
+   "agree_depth8": 0.4806,
+   "agree_depth8_newseeds": 0.4528,
+   "wine_top1": 0.4736,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 292.3
+  },
+  "5": {
+   "lam": 0.2519,
+   "agree_own_label": 0.5026,
+   "agree_depth8": 0.4749,
+   "agree_depth8_newseeds": 0.4487,
+   "wine_top1": 0.4576,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 292.2
+  },
+  "6": {
+   "lam": 0.2216,
+   "agree_own_label": 0.4926,
+   "agree_depth8": 0.4853,
+   "agree_depth8_newseeds": 0.4594,
+   "wine_top1": 0.4695,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 299.8
+  },
+  "8": {
+   "lam": 0.2532,
+   "agree_own_label": 0.4947,
+   "agree_depth8": 0.4947,
+   "agree_depth8_newseeds": 0.4581,
+   "wine_top1": 0.4704,
+   "stage1_agree_depth8": 0.4417,
+   "seconds": 300.3
+  }
+ },
+ "vs": {
+  "1": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 65,
+    "loss": 70,
+    "draw": 65,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 74,
+    "loss": 88,
+    "draw": 38,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 35,
+    "loss": 65,
+    "draw": 0,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 22,
+    "loss": 76,
+    "draw": 2,
+    "games": 100
+   }
+  },
+  "2": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 49,
+    "loss": 118,
+    "draw": 33,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 70,
+    "loss": 117,
+    "draw": 13,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 27,
+    "loss": 72,
+    "draw": 1,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 12,
+    "loss": 86,
+    "draw": 2,
+    "games": 100
+   }
+  },
+  "3": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 64,
+    "loss": 98,
+    "draw": 38,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 65,
+    "loss": 110,
+    "draw": 25,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 34,
+    "loss": 64,
+    "draw": 2,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 13,
+    "loss": 86,
+    "draw": 1,
+    "games": 100
+   }
+  },
+  "4": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 64,
+    "loss": 100,
+    "draw": 36,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 73,
+    "loss": 109,
+    "draw": 18,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 31,
+    "loss": 69,
+    "draw": 0,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 20,
+    "loss": 79,
+    "draw": 1,
+    "games": 100
+   }
+  },
+  "5": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 85,
+    "loss": 81,
+    "draw": 34,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 67,
+    "loss": 99,
+    "draw": 34,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 31,
+    "loss": 68,
+    "draw": 1,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 26,
+    "loss": 72,
+    "draw": 2,
+    "games": 100
+   }
+  },
+  "6": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 65,
+    "loss": 94,
+    "draw": 41,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 87,
+    "loss": 94,
+    "draw": 19,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 30,
+    "loss": 69,
+    "draw": 1,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 21,
+    "loss": 78,
+    "draw": 1,
+    "games": 100
+   }
+  },
+  "8": {
+   "random": {
+    "win": 40,
+    "loss": 0,
+    "draw": 0,
+    "games": 40
+   },
+   "old_teacher": {
+    "win": 72,
+    "loss": 88,
+    "draw": 40,
+    "games": 200
+   },
+   "teacher2_d1": {
+    "win": 64,
+    "loss": 108,
+    "draw": 28,
+    "games": 200
+   },
+   "teacher2_d2": {
+    "win": 33,
+    "loss": 67,
+    "draw": 0,
+    "games": 100
+   },
+   "teacher2_d4": {
+    "win": 26,
+    "loss": 74,
+    "draw": 0,
+    "games": 100
+   }
+  }
+ },
+ "vs_d1_model": {
+  "2": {
+   "win": 87,
+   "loss": 97,
+   "draw": 16,
+   "games": 200
+  },
+  "3": {
+   "win": 82,
+   "loss": 90,
+   "draw": 28,
+   "games": 200
+  },
+  "4": {
+   "win": 85,
+   "loss": 87,
+   "draw": 28,
+   "games": 200
+  },
+  "5": {
+   "win": 76,
+   "loss": 85,
+   "draw": 39,
+   "games": 200
+  },
+  "6": {
+   "win": 71,
+   "loss": 93,
+   "draw": 36,
+   "games": 200
+  },
+  "8": {
+   "win": 72,
+   "loss": 86,
+   "draw": 42,
+   "games": 200
+  }
+ },
+ "criterion": {
+  "text": "用 8 步标签训练的模型 对 用 1 步标签训练的模型，200 局胜率 ≥ 55%",
+  "win_rate": 0.36,
+  "passed": false
+ }
+}

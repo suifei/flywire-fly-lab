@@ -9,28 +9,28 @@
      "loss": 0,
      "draw": 0,
      "games": 40,
-     "mean_ply": 9.8
+     "mean_ply": 9.9
     },
     "old_teacher": {
-     "win": 18,
-     "loss": 18,
-     "draw": 4,
+     "win": 11,
+     "loss": 23,
+     "draw": 6,
      "games": 40,
-     "mean_ply": 56.8
+     "mean_ply": 67.9
     },
     "teacher2_d4": {
-     "win": 8,
-     "loss": 31,
-     "draw": 1,
+     "win": 4,
+     "loss": 34,
+     "draw": 2,
      "games": 40,
-     "mean_ply": 37.8
+     "mean_ply": 51.4
     },
     "teacher2_d6": {
-     "win": 2,
-     "loss": 38,
+     "win": 1,
+     "loss": 39,
      "draw": 0,
      "games": 40,
-     "mean_ply": 31.8
+     "mean_ply": 29.8
     }
    },
    "d4": {
@@ -39,28 +39,28 @@
      "loss": 0,
      "draw": 0,
      "games": 40,
-     "mean_ply": 9.7
+     "mean_ply": 9.9
     },
     "old_teacher": {
-     "win": 32,
-     "loss": 7,
-     "draw": 1,
+     "win": 35,
+     "loss": 3,
+     "draw": 2,
      "games": 40,
-     "mean_ply": 42
+     "mean_ply": 44
     },
     "teacher2_d4": {
-     "win": 19,
-     "loss": 21,
-     "draw": 0,
+     "win": 21,
+     "loss": 18,
+     "draw": 1,
      "games": 40,
-     "mean_ply": 34.3
+     "mean_ply": 38.3
     },
     "teacher2_d6": {
-     "win": 14,
-     "loss": 26,
+     "win": 12,
+     "loss": 28,
      "draw": 0,
      "games": 40,
-     "mean_ply": 29.4
+     "mean_ply": 25.6
     }
    },
    "d6": {
@@ -72,78 +72,78 @@
      "mean_ply": 10.6
     },
     "old_teacher": {
-     "win": 40,
-     "loss": 0,
+     "win": 39,
+     "loss": 1,
      "draw": 0,
      "games": 40,
-     "mean_ply": 33.4
+     "mean_ply": 30.7
     },
     "teacher2_d4": {
-     "win": 31,
-     "loss": 9,
-     "draw": 0,
-     "games": 40,
-     "mean_ply": 28.7
-    },
-    "teacher2_d6": {
-     "win": 19,
-     "loss": 21,
-     "draw": 0,
-     "games": 40,
-     "mean_ply": 31.6
-    },
-    "teacher2_d8": {
-     "win": 6,
+     "win": 26,
      "loss": 14,
      "draw": 0,
+     "games": 40,
+     "mean_ply": 29.6
+    },
+    "teacher2_d6": {
+     "win": 24,
+     "loss": 16,
+     "draw": 0,
+     "games": 40,
+     "mean_ply": 30.6
+    },
+    "teacher2_d8": {
+     "win": 5,
+     "loss": 15,
+     "draw": 0,
      "games": 20,
-     "mean_ply": 28.9
+     "mean_ply": 25.9
     }
    },
    "d8": {
+    "teacher2_d4": {
+     "win": 34,
+     "loss": 6,
+     "draw": 0,
+     "games": 40,
+     "mean_ply": 27.9
+    },
+    "teacher2_d6": {
+     "win": 35,
+     "loss": 5,
+     "draw": 0,
+     "games": 40,
+     "mean_ply": 28
+    },
+    "teacher2_d8": {
+     "win": 12,
+     "loss": 8,
+     "draw": 0,
+     "games": 20,
+     "mean_ply": 27.6
+    }
+   },
+   "d10": {
     "teacher2_d4": {
      "win": 36,
      "loss": 4,
      "draw": 0,
      "games": 40,
-     "mean_ply": 26.7
+     "mean_ply": 23.3
     },
     "teacher2_d6": {
-     "win": 28,
-     "loss": 12,
+     "win": 35,
+     "loss": 5,
      "draw": 0,
      "games": 40,
-     "mean_ply": 29.8
+     "mean_ply": 27.1
     },
     "teacher2_d8": {
      "win": 13,
      "loss": 7,
      "draw": 0,
      "games": 20,
-     "mean_ply": 31.9
-    }
-   },
-   "d10": {
-    "teacher2_d4": {
-     "win": 37,
-     "loss": 3,
-     "draw": 0,
-     "games": 40,
-     "mean_ply": 25.6
-    },
-    "teacher2_d6": {
-     "win": 34,
-     "loss": 6,
-     "draw": 0,
-     "games": 40,
-     "mean_ply": 26.4
-    },
-    "teacher2_d8": {
-     "win": 13,
-     "loss": 7,
-     "draw": 0,
-     "games": 20,
-     "mean_ply": 31.4
+     "mean_ply": 30.4
     }
    }
   },
@@ -157,25 +157,25 @@
      "mean_ply": 9.8
     },
     "old_teacher": {
-     "win": 17,
-     "loss": 14,
-     "draw": 9,
+     "win": 12,
+     "loss": 18,
+     "draw": 10,
      "games": 40,
-     "mean_ply": 70.3
+     "mean_ply": 71.7
     },
     "teacher2_d4": {
-     "win": 8,
-     "loss": 31,
+     "win": 9,
+     "loss": 30,
      "draw": 1,
      "games": 40,
-     "mean_ply": 39.1
+     "mean_ply": 37.4
     },
     "teacher2_d6": {
-     "win": 5,
-     "loss": 35,
+     "win": 3,
+     "loss": 37,
      "draw": 0,
      "games": 40,
-     "mean_ply": 31.4
+     "mean_ply": 35.3
     }
    },
    "d4": {
@@ -187,25 +187,25 @@
      "mean_ply": 9.8
     },
     "old_teacher": {
-     "win": 31,
-     "loss": 8,
-     "draw": 1,
+     "win": 28,
+     "loss": 10,
+     "draw": 2,
      "games": 40,
-     "mean_ply": 44
+     "mean_ply": 46.9
     },
     "teacher2_d4": {
-     "win": 22,
-     "loss": 18,
+     "win": 25,
+     "loss": 15,
      "draw": 0,
      "games": 40,
-     "mean_ply": 36.2
+     "mean_ply": 33.5
     },
     "teacher2_d6": {
-     "win": 8,
-     "loss": 32,
+     "win": 12,
+     "loss": 28,
      "draw": 0,
      "games": 40,
-     "mean_ply": 26.6
+     "mean_ply": 29.1
     }
    },
    "d6": {
@@ -217,25 +217,25 @@
      "mean_ply": 11
     },
     "old_teacher": {
-     "win": 37,
-     "loss": 2,
-     "draw": 1,
+     "win": 40,
+     "loss": 0,
+     "draw": 0,
      "games": 40,
-     "mean_ply": 39
+     "mean_ply": 29.4
     },
     "teacher2_d4": {
      "win": 29,
      "loss": 11,
      "draw": 0,
      "games": 40,
-     "mean_ply": 31.4
+     "mean_ply": 32.2
     },
     "teacher2_d6": {
-     "win": 25,
-     "loss": 14,
-     "draw": 1,
+     "win": 19,
+     "loss": 21,
+     "draw": 0,
      "games": 40,
-     "mean_ply": 35
+     "mean_ply": 33.7
     }
    },
    "d8": {
@@ -244,14 +244,14 @@
      "loss": 8,
      "draw": 0,
      "games": 40,
-     "mean_ply": 28.1
+     "mean_ply": 25.2
     },
     "teacher2_d6": {
      "win": 38,
      "loss": 2,
      "draw": 0,
      "games": 40,
-     "mean_ply": 24.6
+     "mean_ply": 28.3
     }
    }
   },
@@ -292,14 +292,14 @@
      "loss": 23,
      "draw": 0,
      "games": 40,
-     "mean_ply": 28.4
+     "mean_ply": 28.1
     },
     "teacher2_d6": {
      "win": 20,
      "loss": 20,
      "draw": 0,
      "games": 40,
-     "mean_ply": 28.6
+     "mean_ply": 28.4
     }
    }
   },
@@ -313,41 +313,41 @@
      "mean_ply": 9.8
     },
     "old_teacher": {
-     "win": 13,
-     "loss": 18,
-     "draw": 9,
+     "win": 25,
+     "loss": 11,
+     "draw": 4,
      "games": 40,
-     "mean_ply": 70.1
+     "mean_ply": 60.7
     },
     "teacher2_d4": {
-     "win": 9,
-     "loss": 30,
+     "win": 8,
+     "loss": 31,
      "draw": 1,
      "games": 40,
-     "mean_ply": 42.5
+     "mean_ply": 40.9
     },
     "teacher2_d6": {
-     "win": 3,
-     "loss": 37,
+     "win": 0,
+     "loss": 40,
      "draw": 0,
      "games": 40,
-     "mean_ply": 28.6
+     "mean_ply": 26.7
     }
    },
    "d6": {
     "teacher2_d4": {
-     "win": 36,
-     "loss": 4,
-     "draw": 0,
-     "games": 40,
-     "mean_ply": 30.3
-    },
-    "teacher2_d6": {
-     "win": 25,
-     "loss": 14,
+     "win": 30,
+     "loss": 9,
      "draw": 1,
      "games": 40,
-     "mean_ply": 36.4
+     "mean_ply": 31.9
+    },
+    "teacher2_d6": {
+     "win": 22,
+     "loss": 18,
+     "draw": 0,
+     "games": 40,
+     "mean_ply": 35
     }
    }
   },
@@ -450,30 +450,30 @@
  },
  "head_to_head": {
   "d1": {
-   "win": 14,
-   "loss": 20,
-   "draw": 6,
+   "win": 19,
+   "loss": 17,
+   "draw": 4,
    "games": 40,
-   "mean_ply": 62.1
+   "mean_ply": 60.2
   },
   "d4": {
-   "win": 23,
-   "loss": 16,
-   "draw": 1,
-   "games": 40,
-   "mean_ply": 35.8
-  },
-  "d6": {
-   "win": 25,
-   "loss": 15,
+   "win": 17,
+   "loss": 23,
    "draw": 0,
    "games": 40,
-   "mean_ply": 30
+   "mean_ply": 33
+  },
+  "d6": {
+   "win": 15,
+   "loss": 25,
+   "draw": 0,
+   "games": 40,
+   "mean_ply": 31
   }
  },
  "note": "所有臂共用 engine.js；深度 = 向前搜的步数，1 = 直觉",
  "criterion_A": {
-  "vs_old_teacher": 0.45,
+  "vs_old_teacher": 0.275,
   "vs_random": 1,
   "passed": false,
   "v1": {
@@ -482,12 +482,12 @@
   }
  },
  "criterion_A2": {
-  "d6_vs_teacher2_d4": 0.775,
+  "d6_vs_teacher2_d4": 0.65,
   "passed": true
  },
  "criterion_C2": {
-  "intact_vs_shuffled_d4": 0.575,
+  "intact_vs_shuffled_d4": 0.425,
   "passed": false
  },
- "seconds": 2449
+ "seconds": 2536
 }

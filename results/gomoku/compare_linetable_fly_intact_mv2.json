@@ -1,0 +1,34 @@
+{
+ "new_table": "linetable_fly_intact_mv2.json",
+ "old_table": "linetable_fly_intact.json",
+ "depth": 6,
+ "criterion": "新表对旧表，都想 6 步，200 局，胜率 ≥ 55% 才换用",
+ "head_to_head": {
+  "win": 113,
+  "loss": 87,
+  "draw": 0,
+  "games": 200
+ },
+ "win_rate": 0.565,
+ "adopt": true,
+ "greedy_head_to_head": {
+  "win": 99,
+  "loss": 80,
+  "draw": 21,
+  "games": 200
+ },
+ "vs_teacher_d6": {
+  "new": {
+   "win": 32,
+   "loss": 28,
+   "draw": 0,
+   "games": 60
+  },
+  "old": {
+   "win": 34,
+   "loss": 26,
+   "draw": 0,
+   "games": 60
+  }
+ }
+}

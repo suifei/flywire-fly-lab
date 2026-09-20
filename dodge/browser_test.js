@@ -224,13 +224,47 @@ function chromePath() {
     if (r.move !== r.block && r.move !== r.block2) return `黑方竖着活三，白蝇没去挡（走了 ${r.move}）`;
     return `白蝇挡住了黑的活三；真脑重跑 ${r.runs} 次，与表的最大相对偏差 ${r.diff.toExponential(1)}`;
   });
-  await step("五子棋：想几步可选，搜索在 Worker 里不卡界面", async () => {
+  await step("五子棋：推理步数随时可切、立即生效", async () => {
     const r = await page.evaluate(async () => {
-      const g = window.__gm; document.querySelector('#gmDepthSeg button[data-d="8"]').click();
-      const d8 = g.state.depth; document.querySelector('#gmDepthSeg button[data-d="4"]').click();
-      return { d8, d4: g.state.depth, worker: g.workerState() };
+      const g = window.__gm, btns = [...document.querySelectorAll("#gmDepthSeg button")];
+      if (!btns.length) return { err: "没有推理步数按钮" };
+      document.getElementById("gmSelf").click(); await new Promise(x => setTimeout(x, 600));       // 让它开始想
+      const before = g.state.thought ? g.state.thought.t : -1;
+      const target = btns.find(b => b.getAttribute("aria-pressed") !== "true") || btns[0]; target.click();
+      const afterBusy = g.state.busy, d = g.state.depth;
+      await new Promise(x => setTimeout(x, 400));
+      return { n: btns.length, d, want: +target.dataset.d, restarted: afterBusy === false || (g.state.thought && g.state.thought.t < 0.45), before, list: g.depths };
     });
-    return (r.d8 === 8 && r.d4 === 4) ? `深度可切换（8 → 4）；Worker ${r.worker === true ? "已启用" : r.worker === false ? "不可用，已退回主线程" : "尚未启动"}` : JSON.stringify(r);
+    if (r.err) return r.err;
+    return (r.d === r.want && r.restarted) ? `共 ${r.n} 档（${r.list.join("/") || "只有主表"}）；想到一半切到 ${r.d} 步，这一步立刻按新模型重想` : JSON.stringify(r);
+  });
+  await step("五子棋：思考过程画在棋盘上（候选点概率 + 预想的后续）", async () => {
+    const r = await page.evaluate(async () => {
+      const g = window.__gm; let seen = null;
+      for (let k = 0; k < 60 && !seen; k++) { const T = g.state.thought; if (T && T.pol.length && T.seq.length) seen = { pol: T.pol.length, seq: T.seq.length, p0: T.pol[0].p, first: T.seq[0].cell, top: T.pol[0].cell, search: T.searching }; await new Promise(x => setTimeout(x, 100)); }
+      return seen;
+    });
+    if (!r) return "✗ 6 秒内没看到思考过程";
+    return (r.first === r.top && !r.search) ? `候选点 ${r.pol} 个（首选把握 ${(r.p0 * 100).toFixed(0)}%），预想后续 ${r.seq} 步；没有搜索` : JSON.stringify(r);
+  });
+  await step("五子棋：立体棋盘上点一下就能落子", async () => {
+    await page.click("#gmHuman"); await page.click("#gmView3d");
+    await page.evaluate(() => document.getElementById("gmStage").scrollIntoView({ block: "center" }));
+    await new Promise(r => setTimeout(r, 1500));
+    const pt = await page.evaluate(() => { const g = window.__gm, cv = document.getElementById("gmStage"), rect = cv.getBoundingClientRect();
+      // 在画布上扫一遍，找到能拾取到天元 (7,7) 的屏幕点
+      for (let y = 20; y < rect.height; y += 6) for (let x = 20; x < rect.width; x += 6) {
+        const X = rect.left + x, Y = rect.top + y;
+        if (Y < 0 || Y > innerHeight || document.elementFromPoint(X, Y) !== cv) continue;          // 必须真的点得到画布（没被别的元素盖住、在视口内）
+        if (g.pick3d(X, Y) === 7 * 15 + 7) return { x: X, y: Y };
+      }
+      return null; });
+    if (!pt) return "✗ 立体模式下拾取不到天元";
+    await page.mouse.click(pt.x, pt.y);
+    await new Promise(r => setTimeout(r, 1200));
+    const r = await page.evaluate(() => ({ center: window.__gm.state.board[7 * 15 + 7], n: window.__gm.state.board.filter(v => v).length }));
+    await page.click("#gmView2d"); await page.click("#gmSelf");        // 后面几项要看果蝇自己在想、在放电
+    return r.center === 1 ? `点天元 → 黑子落在天元（盘上 ${r.n} 子）` : `✗ 点了天元但没落子（${JSON.stringify(r)}，点击位置 ${JSON.stringify(pt)}）`;
   });
   await step("五子棋：立体模式棋盘在视野里", async () => {
     await page.click("#gmView3d");
@@ -286,6 +320,19 @@ function chromePath() {
     return (r.gf > 0 && r.sug > 0 && r.odr === "棋盘")
       ? `巨纤维 ${r.gf} Hz、糖味 ${r.sug} Hz、状态「${r.state}」` : JSON.stringify(r);
   });
+  await step("生活模式：五感全开，世界自己运转，球场冻结", async () => {
+    const t0 = await page.evaluate(() => window.__game.S.t);
+    await page.click("#viewLife");
+    await new Promise(r => setTimeout(r, 6000));
+    const r = await page.evaluate(() => { const g = window.__life, cv = document.getElementById("lifeStage"); if (!g) return null;
+      const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data; let n = 0, s1 = 0, s2 = 0; for (let i = 0; i < d.length; i += 16) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3; n++; s1 += v; s2 += v * v; }
+      g.addSound(g.S.x + 10, g.S.y, 1.5, 1.0); for (let k = 0; k < 40; k++) g.step(); const heard = Math.max(g.senses.audioL, g.senses.audioR);
+      return { age: g.body.age, n: g.brain.n, v4: g.V4, mode: window.__stageMode, sd: Math.sqrt(Math.max(0, s2 / n - (s1 / n) ** 2)), heard, things: g.pellets.length + g.odors.length + g.fields.length, diary: window.__lifeApi.diary.length, court: window.__game.S.t }; });
+    if (!r) return "✗ 生活模式没有启动";
+    if (!(r.v4 && r.age > 2 && r.sd > 5 && r.heard > 50 && r.mode === "life")) return "✗ " + JSON.stringify(r);
+    if (Math.abs(r.court - t0) > 1e-9) return `✗ 球场那只没有冻结（${t0} → ${r.court}）`;
+    return `${r.n} 个神经元的 v4 大脑已经活了 ${r.age.toFixed(0)} s；放一声响，听觉神经元到 ${r.heard.toFixed(0)} Hz；世界里有 ${r.things} 样东西，意识流 ${r.diary} 条；球场冻结`;
+  });
   await step("切回球场后三维场景恢复渲染", async () => {
     await page.click("#viewCourt");
     await new Promise(r => setTimeout(r, 1500));
@@ -340,7 +387,8 @@ function chromePath() {
   for (const [name, v] of ui) {
     // 失败词要写全：2026-09-19 "6 秒内一子未落" 被当成通过，因为它不以任何一个前缀开头
     const BAD = ["异常", "只", "没有", "残留", "文本", "6 秒内", "画面是", "脑图 ", "长连="];
-    const ok = v === true || (typeof v === "string" && !BAD.some(b2 => v.startsWith(b2)));
+    // 前缀表很脆（靠它漏判过两次）。新写的测试一律用「✗ 」开头表示失败；失败分支里直接转储的 JSON 也算失败。
+    const ok = v === true || (typeof v === "string" && !v.startsWith("✗") && !v.startsWith("{") && !BAD.some(b2 => v.startsWith(b2)));
     console.log(`  ${ok ? "✓" : "✗"} ${name}${typeof v === "string" ? "  " + v : ""}`);
     if (!ok) uiBad++;
   }

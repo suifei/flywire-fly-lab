@@ -36,7 +36,25 @@ def lint(src):
 
 
 lint(html)
-for key, text in [("/*__SUBCIRCUIT__*/", (ROOT / "results/dodge/subcircuit_v3.json").read_text()),
+def _compact(j, keep=None):
+    """子回路 JSON → 紧凑格式：post Int32→Uint16，w Float32→Int16×比例。转换后解码回去必须与原数组逐位相同，否则报错。
+    只用标准库（CI 里没有 numpy）。"""
+    from array import array
+    post = array("i"); post.frombytes(base64.b64decode(j["post"])); w = array("f"); w.frombytes(base64.b64decode(j["w"]))
+    assert min(post) >= 0 and max(post) < 65536
+    scale = array("f", [min(abs(v) for v in w if v != 0)])[0]
+    q = array("h", [int(round(v / scale)) for v in w])                      # 超出 Int16 会直接抛 OverflowError
+    back = array("f", [array("f", [x * scale])[0] for x in q])
+    assert back.tobytes() == w.tobytes(), "Int16 × 比例 还原不回原来的 float32 权重"
+    out = {k: v for k, v in j.items() if k not in ("post", "w") and (keep is None or k in keep)}
+    out["post_u16"] = base64.b64encode(array("H", post).tobytes()).decode(); out["w_i16"] = base64.b64encode(q.tobytes()).decode(); out["w_scale"] = scale
+    return json.dumps(out, separators=(",", ":"))
+def _slim_v4():
+    """生活模式用的子回路 v4：只留大脑引擎与 game_core 真正要读的字段（权重、分组、fids、meta）。"""
+    return _compact(json.loads((ROOT / "results/dodge/subcircuit_v4.json").read_text()), keep=("meta", "groups", "fids", "indptr"))
+for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/dodge/subcircuit_v3.json").read_text()))),
+                  ("/*__SUBCIRCUIT_V4__*/", _slim_v4()),
+                  ("/*__LIFE__*/", (ROOT / "results/dodge/life_summary.json").read_text()),
                   ("/*__SUB_NT__*/", (ROOT / "results/dodge/subcircuit_nt_v3.json").read_text()),
                   ("/*__PERTURB__*/", (ROOT / "results/dodge/perturb.json").read_text()),
                   ("/*__REPRO__*/", (ROOT / "results/reproduction.json").read_text()),

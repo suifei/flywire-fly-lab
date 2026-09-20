@@ -105,7 +105,7 @@ python dodge/subcircuit.py export --wmin 5 --K 3   # → results/dodge/subcircui
 python3 dodge/export_gait.py                # gait loop from results/fba_replay/replay.json → results/dodge/gait.json
 node dodge/parity_test.js                   # JS engine vs Python reference vs full brain; prints steps/s
 node dodge/autoplay.js 120 5                # headless lesion games → results/dodge/autoplay.json (~4 min)
-python3 dodge/build.py                      # inline JSON + brain.js + game_core.js into template → results/dodge/fly_dodge.html (Artifact "果蝇闪避"; republish same path)
+python3 dodge/build.py                      # inline JSON + brain.js + game_core.js into template → results/dodge/fly_dodge.html (Artifact; page title is now "数字果蝇实验室", was "果蝇闪避"; republish same path)
 ```
 
 ```bash
@@ -154,6 +154,10 @@ for k in 0 1 2; do node gomoku/replay_outcomes.js $k 3 & done; wait; node gomoku
 node gomoku/import_wine.js                   # 外部考卷：external/gomoku_wine（HuggingFace Karesis/Gomoku，MIT）→ ds_wine，**只考不训**
 node gomoku/play_lines.js --dump-cls         # 老师的线型类别表 → ds2/teacher_cls.json（训练脚本的阶段一要用）
 conda activate flygym && python -u gomoku/train_lines.py --steps 300 --l2 1e-4 1e-3   # 六个臂 ~35 min，1.6 GB → train_lines.json + linetable_<arm>.json
+python -u gomoku/train_lines.py --labels 1 2 3 4 5 6 8 --steps 300 --l2 1e-4 --feat-sets "" _v2b1 _v3b1 _v4b1   # 「推理 N 步」的 7 个读出层（特征只加载一次，~40 min，5.6 GB → memguard）
+node gomoku/depth_models.js                  # 这 7 个模型的实战评测（下棋时不搜索）→ depth_models.json
+#   **用户的要求（2026-09-20）：页面上的多步推理必须是训练出来的模型，不能是下棋时现跑的搜索。** 页面的「推理步数」= 换读出层；
+#   alpha-beta 只作为默认关闭、明确标注「算法，不是果蝇」的「外挂搜索」保留。别把两者混着说。
 node gomoku/play_lines.js 20                 # 所有臂同一个引擎，差别只在价值表 → play_lines.json（含深度 8 的老师，~1 h）
 node gomoku/selfplay_rl.js 80 48 0.05 0.5    # 阶段三：自对弈强化（三因子规则，δ 在连接组外面算）→ rl.json（~5 min）
 node gomoku/collect_lines.js && node gomoku/export_page.js && python3 dodge/build.py   # 汇总 → lines_summary.json / page_tables.json → 页面

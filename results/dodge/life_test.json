@@ -1,0 +1,262 @@
+{
+ "subcircuit": "subcircuit_v4",
+ "seconds": 120,
+ "seeds": 1,
+ "conds": {
+  "intact": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 1,
+    "sugar_feeds": 1,
+    "feed_rate": 1,
+    "eaten_sugar": 0,
+    "eaten_water": 0,
+    "feed_s": 0.6,
+    "jumps": 1,
+    "dodge": 2,
+    "hit": 0,
+    "mean_energy": 0.746,
+    "mean_hydration": 0.44,
+    "final_energy": 0.51,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 1,
+     "sugar_feeds": 1,
+     "feed_rate": 1,
+     "eaten_sugar": 0,
+     "eaten_water": 0,
+     "feed_s": 0.6,
+     "jumps": 1,
+     "dodge": 2,
+     "hit": 0,
+     "mean_energy": 0.746,
+     "mean_hydration": 0.44,
+     "final_energy": 0.51,
+     "final_hydration": 0.08
+    }
+   ]
+  },
+  "deaf": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 1,
+    "sugar_feeds": 1,
+    "feed_rate": 1,
+    "eaten_sugar": 0,
+    "eaten_water": 0,
+    "feed_s": 0.6,
+    "jumps": 1,
+    "dodge": 1,
+    "hit": 0,
+    "mean_energy": 0.745,
+    "mean_hydration": 0.44,
+    "final_energy": 0.51,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 1,
+     "sugar_feeds": 1,
+     "feed_rate": 1,
+     "eaten_sugar": 0,
+     "eaten_water": 0,
+     "feed_s": 0.6,
+     "jumps": 1,
+     "dodge": 1,
+     "hit": 0,
+     "mean_energy": 0.745,
+     "mean_hydration": 0.44,
+     "final_energy": 0.51,
+     "final_hydration": 0.08
+    }
+   ]
+  },
+  "anosmic": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 1,
+    "sugar_feeds": 1,
+    "feed_rate": 1,
+    "eaten_sugar": 0,
+    "eaten_water": 0,
+    "feed_s": 0.6,
+    "jumps": 1,
+    "dodge": 3,
+    "hit": 0,
+    "mean_energy": 0.758,
+    "mean_hydration": 0.44,
+    "final_energy": 0.524,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 1,
+     "sugar_feeds": 1,
+     "feed_rate": 1,
+     "eaten_sugar": 0,
+     "eaten_water": 0,
+     "feed_s": 0.6,
+     "jumps": 1,
+     "dodge": 3,
+     "hit": 0,
+     "mean_energy": 0.758,
+     "mean_hydration": 0.44,
+     "final_energy": 0.524,
+     "final_hydration": 0.08
+    }
+   ]
+  },
+  "starved": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 1,
+    "sugar_feeds": 1,
+    "feed_rate": 1,
+    "eaten_sugar": 1,
+    "eaten_water": 0,
+    "feed_s": 6.7,
+    "jumps": 2,
+    "dodge": 2,
+    "hit": 0,
+    "mean_energy": 0.1,
+    "mean_hydration": 0.44,
+    "final_energy": 0.1,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 1,
+     "sugar_feeds": 1,
+     "feed_rate": 1,
+     "eaten_sugar": 1,
+     "eaten_water": 0,
+     "feed_s": 6.7,
+     "jumps": 2,
+     "dodge": 2,
+     "hit": 0,
+     "mean_energy": 0.1,
+     "mean_hydration": 0.44,
+     "final_energy": 0.1,
+     "final_hydration": 0.08
+    }
+   ]
+  },
+  "sated": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 0,
+    "sugar_feeds": 0,
+    "feed_rate": null,
+    "eaten_sugar": 0,
+    "eaten_water": 0,
+    "feed_s": 0,
+    "jumps": 0,
+    "dodge": 3,
+    "hit": 0,
+    "mean_energy": 1,
+    "mean_hydration": 0.44,
+    "final_energy": 1,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 0,
+     "sugar_feeds": 0,
+     "feed_rate": null,
+     "eaten_sugar": 0,
+     "eaten_water": 0,
+     "feed_s": 0,
+     "jumps": 0,
+     "dodge": 3,
+     "hit": 0,
+     "mean_energy": 1,
+     "mean_hydration": 0.44,
+     "final_energy": 1,
+     "final_hydration": 0.08
+    }
+   ]
+  },
+  "isn_on": {
+   "mean": {
+    "sounds": 5,
+    "startled": 0,
+    "startle_rate": 0,
+    "sugar_contacts": 1,
+    "sugar_feeds": 1,
+    "feed_rate": 1,
+    "eaten_sugar": 0,
+    "eaten_water": 0,
+    "feed_s": 0.6,
+    "jumps": 0,
+    "dodge": 2,
+    "hit": 0,
+    "mean_energy": 0.759,
+    "mean_hydration": 0.44,
+    "final_energy": 0.525,
+    "final_hydration": 0.08
+   },
+   "runs": [
+    {
+     "sounds": 5,
+     "startled": 0,
+     "startle_rate": 0,
+     "sugar_contacts": 1,
+     "sugar_feeds": 1,
+     "feed_rate": 1,
+     "eaten_sugar": 0,
+     "eaten_water": 0,
+     "feed_s": 0.6,
+     "jumps": 0,
+     "dodge": 2,
+     "hit": 0,
+     "mean_energy": 0.759,
+     "mean_hydration": 0.44,
+     "final_energy": 0.525,
+     "final_hydration": 0.08
+    }
+   ]
+  }
+ },
+ "H1": {
+  "intact": 0,
+  "deaf": 0,
+  "passed": false
+ },
+ "H2": {
+  "intact_per10min": 0,
+  "anosmic_per10min": 0,
+  "passed": false
+ },
+ "H3": {
+  "starved": 1,
+  "sated": null,
+  "passed": true
+ }
+}

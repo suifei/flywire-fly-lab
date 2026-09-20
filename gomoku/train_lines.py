@@ -73,6 +73,8 @@ ap.add_argument("--test-seeds", nargs="*", type=int, default=[783, 784, 785])
 ap.add_argument("--feat-sets", nargs="*", default=[""])   # 特征集后缀，多个就横向拼接：""=视角1单时间窗，"_v1b3"=视角1分3段，"_v2b3"=视角2分3段
 ap.add_argument("--deploy-k", type=int, default=3)     # 部署（页面、对弈）用训练种子的前 K 个做试次平均；测试组也是 K 个 → 口径对齐
 ap.add_argument("--no-augment", action="store_true")
+ap.add_argument("--labels", nargs="*", type=int, default=[])   # 「推理 N 步」模型：对每个 N，用深度 N 搜索的最佳着当标签各训一个读出层（只训 fly_intact，特征只加载一次）
+ap.add_argument("--cap-shuffled", action="store_true")   # 打乱接线的臂只随机取与真实接线一样多的特征列（多视角时它有 14,070 维 ≈ 线型总数，内存也放不下）
 ap.add_argument("--feat-dir", default="")          # 特征所在子目录（默认 results/gomoku/ 本身）
 ap.add_argument("--l2", nargs="*", type=float, default=[1e-5, 1e-4, 1e-3, 1e-2])
 args = ap.parse_args()
@@ -141,27 +143,41 @@ PRIOR = torch.from_numpy(np.log(_ATT[_cls] + 1).astype(np.float32))          # �
 ONES = torch.ones(NP, 1); CLS_T = torch.from_numpy(_cls.astype(np.int64))
 
 AUG = not args.no_augment
+DIM_INTACT = []; CAP_INFO = {}
 def feats(arm):
     """返回 P = {"train": 部署用的 Φ̄（训练种子前 K 个的平均）, "test": 测试种子的 Φ̄, "per_seed": [每个训练种子的 Φ]}（已标准化），
     以及 (mu, sd, 保留的列)。统计量只用训练种子。"""
     per = None
     if arm in ("fly_intact", "fly_shuffled"):
         a = arm.split("_")[1]
-        raw = [load_feat(a, s) for s in args.train_seeds]
-        allm = np.mean(raw, axis=0); keep = allm.sum(0) > 0
-        tr_ = np.mean(raw[:args.deploy_k], axis=0)
-        te_ = np.mean([load_feat(a, s) for s in args.test_seeds], axis=0)
-        mu = allm[:, keep].mean(0); sd = allm[:, keep].std(0) + 1e-6
-        per = [torch.from_numpy(((r[:, keep] - mu) / sd).astype(np.float16)) for r in raw]   # 半精度存：4 个视角 × 6 个种子用 float32 要 2.6 GB
-        del raw
+        # 逐个种子加载（4 个视角时一个种子的原始特征就有 ~1 GB，一次全读要 5.7 GB）
+        allm = None
+        for s_ in args.train_seeds:
+            r = load_feat(a, s_); allm = r.copy() if allm is None else allm + r; del r
+        allm /= len(args.train_seeds); keep = allm.sum(0) > 0
+        if arm == "fly_shuffled" and args.cap_shuffled and DIM_INTACT and keep.sum() > DIM_INTACT[0]:
+            on = np.nonzero(keep)[0]; pick = np.random.default_rng(20260920).choice(on, size=DIM_INTACT[0], replace=False)
+            CAP_INFO.update(active=int(len(on)), used=int(DIM_INTACT[0])); keep = np.zeros_like(keep); keep[pick] = True
+        mu = allm[:, keep].mean(0); sd = allm[:, keep].std(0) + 1e-6; del allm
+        per = []; tr_sum = None
+        for k_, s_ in enumerate(args.train_seeds):
+            r = load_feat(a, s_)[:, keep]
+            if k_ < args.deploy_k: tr_sum = r.copy() if tr_sum is None else tr_sum + r
+            per.append(torch.from_numpy(np.round(r * r).astype(np.uint8))); del r      # 存**原始计数**（uint8）；用的时候再开方、标准化。14,070 维 × 6 个种子：float16 要 2.5 GB，uint8 1.2 GB
+        te_sum = None
+        for s_ in args.test_seeds:
+            r = load_feat(a, s_)[:, keep]; te_sum = r.copy() if te_sum is None else te_sum + r; del r
+        trk = tr_sum / args.deploy_k; tek = te_sum / len(args.test_seeds)
+        return {"train": torch.from_numpy((trk - mu) / sd), "test": torch.from_numpy((tek - mu) / sd), "per_seed": per,
+                "mu_t": torch.from_numpy(mu), "sd_t": torch.from_numpy(sd)}, mu, sd, np.nonzero(keep)[0]
     else:
         if arm == "raw24": tr_ = raw24(); keep = np.ones(24, bool)
         else:
-            dim = int((np.mean([load_feat("intact", s) for s in args.train_seeds], axis=0).sum(0) > 0).sum())
+            dim = DIM_INTACT[0] if DIM_INTACT else int((load_feat("intact", args.train_seeds[0]).sum(0) > 0).sum())   # 与果蝇脑同维度
             g = np.random.default_rng(20260919); W = g.normal(size=(24, dim)).astype(np.float32); b = g.normal(size=dim).astype(np.float32)
             tr_ = np.maximum(raw24() @ W + b, 0); keep = np.ones(dim, bool)
         te_ = tr_; mu = tr_[:, keep].mean(0); sd = tr_[:, keep].std(0) + 1e-6
-    return {"train": torch.from_numpy((tr_[:, keep] - mu) / sd), "test": torch.from_numpy((te_[:, keep] - mu) / sd), "per_seed": per}, mu, sd, np.nonzero(keep)[0]
+    return {"train": torch.from_numpy((tr_[:, keep] - mu) / sd), "test": torch.from_numpy((te_[:, keep] - mu) / sd), "per_seed": None, "mu_t": None, "sd_t": None}, mu, sd, np.nonzero(keep)[0]
 
 LSE = args.form == "lse"
 def scores(a, dv, A=None, D=None):                               # 每个候选点的 logit
@@ -193,24 +209,40 @@ def train(arm, l2, steps):
         A_of = lambda which: a
     else:
         P, mu, sd, keep = FE[arm]; D = P["train"].shape[1]
-        X = {k: torch.cat([v, ONES], 1) for k, v in P.items() if k != "per_seed"}  # 末列 = 偏置
+        X = {k: torch.cat([P[k], ONES], 1) for k in ("train", "test")}            # 末列 = 偏置
         per = P["per_seed"] if (AUG and P.get("per_seed")) else None
         rng = np.random.default_rng(7)
         def draw():                                                            # 噪声增广：随机抽 K 个训练种子取平均
             idx = rng.choice(len(per), size=args.deploy_k, replace=False)
-            acc = per[idx[0]].float()
-            for i in idx[1:]: acc = acc + per[i].float()
-            return torch.cat([acc / len(idx), ONES], 1)
-        if args.init == "distill":                                             # 阶段一：岭回归闭式解（增广时把 8 次抽样叠起来一起解）
-            reg = 10.0 * torch.eye(D + 1); reg[D, D] = 0
+            return std_mean(idx)
+        def std_mean(idx):                                                     # 若干个种子的 √计数 取平均 → 标准化 → 加偏置列
+            acc = torch.sqrt(per[idx[0]].float())
+            for i in idx[1:]: acc += torch.sqrt(per[i].float())
+            acc /= len(idx); acc -= P["mu_t"]; acc /= P["sd_t"]
+            return torch.cat([acc, ONES], 1)
+        if args.init == "distill":                                             # 阶段一：岭回归闭式解
+            def ridge(G, Gy, alpha):
+                G.diagonal()[:D] += alpha                                       # 偏置不罚；原地加、解完再减回去，不另开 D×D 的矩阵
+                w_ = torch.linalg.solve(G, Gy); G.diagonal()[:D] -= alpha
+                return w_
+            r2_of = lambda fit: float(1 - ((fit - PRIOR) ** 2).sum() / ((PRIOR - PRIOR.mean()) ** 2).sum())
+            # 岭系数由**每个臂自己选**：用前一半训练种子拟合，在后一半训练种子上看 R²（测试种子不碰）。
+            # 第一版固定为 10：4 个视角的打乱接线有 14,070 维 ≈ 线型总数 14,641，直接去插值噪声，一致率崩到 23%——那是我们给它的不公平。
+            alpha = 10.0
+            if per and len(per) >= 2 * args.deploy_k:
+                Ga, Gya = X["train"].T @ X["train"], X["train"].T @ PRIOR       # 前 K 个训练种子的平均 = 部署特征，不用再算一遍
+                Xb = std_mean(list(range(args.deploy_k, 2 * args.deploy_k))); cand = []
+                for al in (10.0, 30.0, 100.0, 300.0, 1000.0, 3000.0): cand.append((r2_of(Xb @ ridge(Ga, Gya, al)), al))
+                del Xb, Ga, Gya; alpha = max(cand)[1]; info["ridge_alpha_sweep"] = [dict(alpha=a_, r2_other_seeds=round(r_, 4)) for r_, a_ in cand]
+            info["ridge_alpha"] = alpha
             if per:
-                XtX = torch.zeros(D + 1, D + 1); Xty = torch.zeros(D + 1); M = 8
-                for _ in range(M): Xd = draw(); XtX += Xd.T @ Xd / M; Xty += Xd.T @ PRIOR / M
-                w0 = torch.linalg.solve(XtX + reg, Xty)
-            else: w0 = torch.linalg.solve(X["train"].T @ X["train"] + reg, X["train"].T @ PRIOR)
+                XtX = torch.zeros(D + 1, D + 1); Xty = torch.zeros(D + 1); M_ = 8
+                for _ in range(M_): Xd = draw(); XtX += Xd.T @ Xd / M_; Xty += Xd.T @ PRIOR / M_; del Xd
+                w0 = ridge(XtX, Xty, alpha); del XtX
+            else: w0 = ridge(X["train"].T @ X["train"], X["train"].T @ PRIOR, alpha)
             Xt = X["train"]
-            fit = Xt @ w0; info["distill_r2"] = round(float(1 - ((fit - PRIOR) ** 2).sum() / ((PRIOR - PRIOR.mean()) ** 2).sum()), 4)
-            info["distill_r2_newseeds"] = round(float(1 - ((X["test"] @ w0 - PRIOR) ** 2).sum() / ((PRIOR - PRIOR.mean()) ** 2).sum()), 4)
+            fit = Xt @ w0; info["distill_r2"] = round(r2_of(fit), 4)
+            info["distill_r2_newseeds"] = round(r2_of(X["test"] @ w0), 4)
         else: w0 = torch.zeros(D + 1)
         if args.init_from:
             jj = json.load(open(f"{R}/{args.init_from}")); assert jj["keep"] == keep.tolist(), "保留的特征列不一致"
@@ -272,7 +304,7 @@ def teacher_table():
 out = dict(feat_sets=args.feat_sets, form=args.form, train_seeds=args.train_seeds, test_seeds=args.test_seeds, deploy_k=args.deploy_k, augment=AUG, label_depth=args.label, feat=dict(dir=args.feat_dir or ".", hz=lm["hz"], ms=lm["ms"], bins=lm["bins"]), wine_random_top1=(EXT.random_top1 if EXT else None), wine_n=(EXT.n if EXT else None), n_train=int(tr.sum()), n_val=int(val.sum()), n_test=int(test.sum()),
            random_top1=round(float(np.mean(1 / np.diff(off)[test])), 4), criteria=__doc__.split("判据")[1].split("训练用种子")[0].strip(), arms={})
 FE = {}
-for arm in args.arms:
+for arm in ([] if args.labels else args.arms):
     t0 = time.time()
     if arm == "teacher_table":
         a, dv = teacher_table(); z = scores(a, dv)
@@ -280,6 +312,7 @@ for arm in args.arms:
         if EXT: out["arms"][arm]["wine_top1"], out["arms"][arm]["wine_top3"] = EXT.top(a, dv)
         print(f"{arm:14} 测试 top-1 {out['arms'][arm]['test_top1']:.3f}  top-3 {out['arms'][arm]['test_top3']:.3f}  Wine top-1 {out['arms'][arm].get('wine_top1')}（不训练）"); continue
     if arm != "free_table": FE[arm] = feats(arm)
+    if arm == "fly_intact": DIM_INTACT.append(int(FE[arm][0]["train"].shape[1]))
     sweep = []
     for l2 in (args.l2 if arm != "free_table" else [1e-6, 1e-5]):
         table, params, curve, lam, info = train(arm, l2, args.steps)
@@ -287,7 +320,7 @@ for arm in args.arms:
         print(f"  {arm} l2={l2:g}  训练 {curve[-1]['train_top1']:.3f}  验证 {curve[-1]['val_top1']:.3f}  λ={lam:.3f}", flush=True)
     _, l2, table, params, curve, lam, info = max(sweep, key=lambda x: x[0])
     with torch.no_grad():
-        res = dict(l2=l2, dim=int(params[0].shape[0]), tied=not args.untied, lam=round(lam, 4), **info, curve=curve, sweep=[dict(l2=s_[1], val_top1=s_[0]) for s_ in sweep])
+        res = dict(l2=l2, dim=int(params[0].shape[0]), tied=not args.untied, lam=round(lam, 4), **info, **({"capped": dict(CAP_INFO)} if arm == "fly_shuffled" and CAP_INFO else {}), curve=curve, sweep=[dict(l2=s_[1], val_top1=s_[0]) for s_ in sweep])
         for which in ("train", "test"):
             a, dv = table(which); z = scores(a, dv); t1, t3 = metrics(z, test)
             res[f"test_top1_{which}seeds"] = t1; res[f"test_top3_{which}seeds"] = t3
@@ -318,6 +351,39 @@ for arm in args.arms:
     FE.pop(arm, None)
     res["seconds"] = round(time.time() - t0, 1); out["arms"][arm] = res
     print(f"{arm:14} 维度 {res['dim']:5d}  测试 top-1 {res['test_top1']:.3f}（换一组种子：{res['test_top1_testseeds']:.3f}）  top-3 {res['test_top3_trainseeds']:.3f}  Wine top-1 {res.get('wine_top1')}  λ={res['lam']}   {res['seconds']} s", flush=True)
+
+# ── 「推理 N 步」模型 ─────────────────────────────────────────────────────
+# 用户的要求（2026-09-20）：多步推理必须是**训练出来的**，不能是下棋时现跑的搜索算法。
+# 做法：数据集里每个局面都有深度 1–6 与 8 的搜索最佳着；对每个 N 各训练一个读出层去模仿「想 N 步的结果」。
+# 下棋时只做模型推理：线型 → 果蝇脑特征 → 这个读出层 → 落子分最大的点。搜索只出现在**造训练标签**的时候。
+if args.labels:
+    FE["fly_intact"] = feats("fly_intact"); DIM_INTACT.append(int(FE["fly_intact"][0]["train"].shape[1]))
+    P, mu, sd, keep = FE["fly_intact"]; dm = dict(labels=args.labels, feat_sets=args.feat_sets, l2=args.l2[0], steps=args.steps, models={})
+    for d_ in args.labels:
+        t0 = time.time()
+        lab = np.array([s_["best"][str(d_)] for s_ in S]); tgt = pos_of(lab)
+        ok = (tgt >= 0) & (tgt8 >= 0); test = (game >= meta["test_from_game"]) & ok; tr_all = (game < meta["test_from_game"]) & ok
+        val = tr_all & (game >= val_from); tr = tr_all & (game < val_from); tgt_t = torch.from_numpy(np.where(tgt >= 0, tgt, 0))
+        table, params, curve, lam, info = train("fly_intact", args.l2[0], args.steps)
+        with torch.no_grad():
+            a, dv = table("train"); z = scores(a, dv); a2, d2 = table("test"); z2 = scores(a2, d2)
+            r = dict(lam=round(lam, 4), agree_own_label=metrics(z, test, tgt)[0], agree_depth8=metrics(z, test)[0], agree_depth8_newseeds=metrics(z2, test)[0],
+                     wine_top1=(EXT.top(a, dv)[0] if EXT else None), stage1_agree_depth8=info.get("stage1_test_top1"), seconds=round(time.time() - t0, 1))
+            wfull = params[0].detach().numpy().astype(np.float32)
+            def pack(aa, dd):
+                fa = np.zeros(65536, dtype=np.float32); fd = np.zeros(65536, dtype=np.float32)
+                fa[allc] = torch.exp(aa.clamp(max=30)).numpy(); fd[allc] = torch.exp(dd.clamp(max=30)).numpy()
+                return base64.b64encode(fa[allc].tobytes()).decode(), base64.b64encode(fd[allc].tobytes()).decode()
+            att, deff = pack(a, dv); att_w, deff_w = pack(a2, d2)
+            json.dump(dict(arm="fly_intact", form=args.form, label_depth=d_, tied=True, lam=lam, att=att, deff=deff, codes=allc.tolist(), att_white=att_w, deff_white=deff_w,
+                           w_a=base64.b64encode(wfull[:-1].tobytes()).decode(), bias=float(wfull[-1]),
+                           mu=base64.b64encode(mu.astype(np.float32).tobytes()).decode(), sd=base64.b64encode(sd.astype(np.float32).tobytes()).decode(),
+                           keep=keep.tolist(), hz=lm["hz"], ms=lm["ms"], bins=lm["bins"], views=FEAT_META, seeds=args.train_seeds[:args.deploy_k], seeds_white=args.test_seeds),
+                      open(f"{R}/linetable_fly_intact_d{d_}.json", "w"))
+        dm["models"][str(d_)] = r
+        print(f"推理 {d_} 步的模型：与自己的标签一致 {r['agree_own_label']:.3f}  与深度 8 一致 {r['agree_depth8']:.3f}（换种子 {r['agree_depth8_newseeds']:.3f}）  Wine {r['wine_top1']}   {r['seconds']} s", flush=True)
+    json.dump(dm, open(f"{R}/depth_models_train.json", "w"), ensure_ascii=False, indent=1)
+    print("→ results/gomoku/depth_models_train.json"); sys.exit(0)
 
 A = out["arms"]
 if all(k in A for k in ("fly_intact", "raw24", "fly_shuffled")):

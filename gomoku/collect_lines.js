@@ -14,7 +14,14 @@ const rd = f => (fs.existsSync(`${R}/${f}`) ? JSON.parse(fs.readFileSync(`${R}/$
 const out = { generated_by: "gomoku/collect_lines.js", class_names: T2.NAMES };
 const train = rd("train_lines.json"), play = rd("play_lines.json"), rl = rd("rl.json"), probe = rd("line_class_probe.json"), depth = rd("depth_labels.json");
 for (const [k, f] of [["dataset", "dataset_summary.json"], ["table_noise", "table_noise.json"], ["depth_timing", "depth_timing.json"], ["teacher_ladder", "teacher_ladder.json"],
-                      ["score_forms", "score_forms.json"], ["search_width", "search_width.json"], ["vcf_value", "vcf_value.json"], ["seed_averaging", "seed_averaging.json"], ["opto_leak", "opto_leak.json"], ["rl_small", "rl_small.json"]]) { const d = rd(f); if (d) out[k] = k === "rl_small" ? { iters: d.iters, games_per_iter: d.games_per_iter, lr: d.lr, final: d.final, win_rate_vs_supervised: d.win_rate_vs_supervised, criterion_passed: d.criterion_passed } : d; }
+                      ["score_forms", "score_forms.json"], ["depth_models", "depth_models.json"], ["search_width", "search_width.json"], ["vcf_value", "vcf_value.json"], ["seed_averaging", "seed_averaging.json"], ["opto_leak", "opto_leak.json"], ["rl_small", "rl_small.json"]]) { const d = rd(f); if (d) out[k] = k === "rl_small" ? { iters: d.iters, games_per_iter: d.games_per_iter, lr: d.lr, final: d.final, win_rate_vs_supervised: d.win_rate_vs_supervised, criterion_passed: d.criterion_passed } : d; }
+// 多视角：稳健精度随视角数的变化、两次换表对决 + 独立确认、单视角时的关键数字（留档对照）
+{ const tv = rd("two_views.json"); if (tv) out.views_r2 = tv;
+  const c1 = rd("compare_mv_attempt1.json"), c2 = rd("compare_linetable_fly_intact_mv2.json"), c3 = rd("compare_linetable_fly_intact_mv2_confirm.json");
+  if (c2) out.view_adoption = { attempt1_fixed_ridge: c1, attempt2: c2, confirm: c3 };
+  const t1 = rd("train_lines_1view.json"), p1 = rd("play_lines_1view.json");
+  if (t1 && p1) out.one_view = { fly_intact: (({ dim, distill_r2, distill_r2_newseeds, test_top1, test_top1_testseeds, wine_top1, seed_drop }) => ({ dim, distill_r2, distill_r2_newseeds, test_top1, test_top1_testseeds, wine_top1, seed_drop }))(t1.arms.fly_intact),
+    fly_shuffled: { dim: t1.arms.fly_shuffled.dim, test_top1: t1.arms.fly_shuffled.test_top1 }, play_fly_intact: p1.engine.fly_intact, head_to_head: p1.head_to_head }; }
 if (train) out.train = train;
 if (play) out.play = play;
 if (probe) out.class_probe = probe;

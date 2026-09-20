@@ -67,5 +67,7 @@ out.summary = { lands_at_200: ok, only_at_high_rate: weak, no_landing: none };
 console.log(`\n≤200 Hz 就有落点：${ok.join("、") || "（无）"}`);
 console.log(`只有高频才有落点：${weak.join("、") || "（无）"}`);
 console.log(`完全没有落点：    ${none.join("、") || "（无）"}`);
-fs.writeFileSync(ROOT + "/results/dodge/sensor_drive.json", JSON.stringify(out, null, 1));
-console.log("→ results/dodge/sensor_drive.json");
+// 文件名跟着子回路走：v3 保持原名（页面在读它），其余加后缀。2026-09-20 测 v4 时把 v3 的结果覆盖过一次（已从 git 恢复）。
+const OUTF = "sensor_drive" + (NAME === "subcircuit_v3" ? "" : "_" + NAME.replace("subcircuit_", "")) + ".json";
+fs.writeFileSync(ROOT + "/results/dodge/" + OUTF, JSON.stringify(out, null, 1));
+console.log("→ results/dodge/" + OUTF);

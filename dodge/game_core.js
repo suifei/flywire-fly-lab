@@ -85,6 +85,29 @@
     // 温度 / 湿度场：G.fields 里每个源 {type:"heat"|"damp", x, y, sigma, strength}
     // 强度 1.0 对应 fieldRate Hz。同样是**物理量**，没有任何"太热就走开"之类的规则。
     fieldRate: 200,
+    // ── v4：听觉 / 嗅觉 / 内感受 + 自主生活（2026-09-20）。**全部默认关**，已发布的数字不受影响 ──
+    // 原则不变：世界只提供物理量，送到真实的感受器上；转不转、跳不跳、吃不吃由连接组决定。
+    // 声源 G.sounds：{x, y, level, t, dur}。到达触角的声强按 level / (1 + (d/soundRef)²) 衰减（手写），换算成 AUDIO 神经元的频率。
+    //   左右耳差：声源在哪一侧，哪一侧略强（±earBias，手写）。sensor_drive_v4.json：双侧 100 Hz 就能让巨纤维放电，单侧不行。
+    audioRate: 200, soundRef: 60, earBias: 0.25,
+    // 气味源 G.odors：{x, y, kind: "vinegar" | "geosmin", sigma, strength}。两根触角各自采样浓度（高斯羽流，手写）→ OLFA / OLFR。
+    //   sensor_drive_v4.json：这两路在这个子回路里**没有落到任何运动读出上**——它闻得到，但闻到之后往哪走，模型里没有通路。
+    olfRate: 200,
+    // 身体状态（能量 / 水分）：属于**身体**，不是大脑。它们只改两样东西，都不是决策：
+    //   ① 味觉感受器的灵敏度：饿了糖感受器更敏感、渴了水感受器更敏感（文献：Inagaki et al. 2012 饥饿经多巴胺提高糖 GRN 的敏感度；增益大小手选）
+    //   ② 走路速度：能量低了走得慢（手写）
+    //   physiology = false 时完全不起作用。与旧的 thirst 手写阈值规则互斥：physiology 打开时关掉那条规则。
+    physiology: false, energyDrop: 0.002, energyFly: 0.012, energyEat: 0.35, hydraDrop: 0.003, hydraDrink: 0.5, gainMin: 0.1, gainMax: 1.6,
+    //   physiology 打开时「MN9 超过多少 Hz 算开吃」统一用 lifeFeedThreshold（糖、水一视同仁，手选）。原来的 30 Hz 水永远过不了：
+    //   水感受器开到 320 Hz，MN9 也只有 22 Hz（实测）；页面球场模式里是靠一条手写的"渴了就降阈值"规则绕过去的，这里不用那条规则。
+    lifeFeedThreshold: 10,
+    // 内感受神经元 ISN（4 个）：文献（González-Segarra 2023）里饥饿提高、口渴降低它的活动。isnDrive = true 时按这个关系驱动真实的 ISN。
+    //   **默认关**：sense_modulation.json 实测，这个模型里驱动 ISN 会把吃糖的 MN9 从 44 Hz 压到 2.5 Hz——与文献方向相反
+    //   （ISN 用神经肽 dILP3，LIF 模型只有预测的快递质符号）。打开它会得到一只饿了反而不吃的果蝇；保留开关只为如实展示这一点。
+    isnDrive: false, isnRate: 200,
+    // 自主生活：世界自己运转（昼夜、糖 / 水 / 苦、气味、声音、热源、水洼、风、灰尘、来袭的球）。节奏参数全部手选。
+    arenaR: 0,   // > 0 = 圆形场地（半径 mm），像真实实验用的培养皿；矩形场地的墙角会把只靠触感避墙的果蝇卡死（两根触角同时压墙，左右相等，转向差为 0）
+    life: false, dayLength: 180, lifeNearFrac: 0.7, lifeCull: 170, lifeFoodR: 7, lifeFoodAmount: 4, lifeFood: [6, 14], lifeWater: [9, 18], lifeSound: [18, 40], lifeHeat: [40, 80], lifeBall: [20, 45],
     odorNav: false, odorSigma: 15, odorTurn: 120, odorMin: 0.01, antennaAhead: 1.0, antennaSep: 0.6, pelletAround: 25,
   };
   const TG = ["DNa01_left", "DNa01_right", "DNa02_left", "DNa02_right", "DNp01_left", "DNp01_right"];
@@ -240,7 +263,7 @@
 
     G.setLesion = (name, on) => {
       G.lesion[name] = on;
-      if (["LC4", "LPLC2", "LC16", "SUGAR", "BITTER", "JO"].includes(name) && has(name + "_left")) {
+      if (["LC4", "LPLC2", "LC16", "SUGAR", "BITTER", "JO", "TOUCH", "THERMO", "HYGRO", "AUDIO", "OLFA", "OLFR", "ISN"].includes(name) && has(name + "_left")) {
         brain.setSilenced(name + "_left", on); brain.setSilenced(name + "_right", on);   // 输入：切断传出突触
       }                                                 // GF / DNa / MN9 / aDN1 / MDN：切除运动输出（readout 置 0）
     };
@@ -278,6 +301,32 @@
         mn9: Math.round(o.mn9 || 0), adn1: Math.round(o.adn1 || 0), mdn: Math.round(o.mdn || 0), gf: Math.round(o.gf) } };
     };
 
+    // —— v4：它此刻"在想什么" ——
+    // 每一个词的触发量都是**实测的**：感觉词 = 此刻送进那一路感受器的频率；身体词 = 能量 / 水分；动作词 = 连接组读出神经元的平滑发放率。
+    // 句子模板与阈值是手写的（和 G.speech 一样）。它不是语言模型，也不是果蝇真的会说话——是把正在发生的神经活动翻译成一句人话。
+    G.mind = () => {
+      const o = G.readout(), S = G.S, Sn = G.senses, B = G.body, felt = [], fThr = CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold;
+      const loom = Math.max(G.loom.L || 0, G.loom.R || 0), aud = Math.max(Sn.audioL, Sn.audioR), vin = Math.max(Sn.olfaL, Sn.olfaR), geo = Math.max(Sn.olfrL, Sn.olfrR);
+      if (loom > CFG.loomMax * 0.25) felt.push(["视", "有东西冲过来", loom]);
+      if (aud > 20) felt.push(["听", aud > 120 ? "好响的嗡嗡声" : "有嗡嗡声", aud]);
+      if (vin > 20) felt.push(["嗅", vin > 120 ? "醋味很浓，附近有烂果子" : "闻到一点醋味", vin]);
+      if (geo > 20) felt.push(["嗅", "一股霉味", geo]);
+      if (G.gust.sugar > 0) felt.push(["味", "甜的", G.gust.sugar]); if (G.gust.bitter > 0) felt.push(["味", "苦的", G.gust.bitter]); if (G.gust.water > 0) felt.push(["味", "是水", G.gust.water]);
+      if (G.touch.L + G.touch.R > 0) felt.push(["触", "撞到墙了", Math.max(G.touch.L, G.touch.R)]);
+      if (G.dust.length) felt.push(["触", "触角上有灰", CFG.joRate]);
+      if (G.wind.joL + G.wind.joR > 2 * CFG.speechWind) felt.push(["触", "有风", (G.wind.joL + G.wind.joR) / 2]);
+      if (G.field.thermo > 0.3) felt.push(["温", "这里好热", G.field.thermo * CFG.fieldRate]); if (G.field.hygro > 0.3) felt.push(["湿", "这里潮乎乎的", G.field.hygro * CFG.fieldRate]);
+      const body = []; if (CFG.physiology) { if (B.energy < 0.3) body.push("饿了"); if (B.hydration < 0.3) body.push("渴了"); if (B.energy > 0.9 && B.hydration > 0.9) body.push("吃饱喝足"); }
+      if (CFG.light < 0.3) body.push("天黑了，看不太清");
+      const act = S.z > 0.01 ? "我在飞" : o.gf > CFG.gfThreshold ? "快飞！" : o.mdn > CFG.mdnThreshold ? "往后退" : (G.onPellet && o.mn9 > fThr) ? (G.onPellet.type === "water" ? "喝水" : "吃") : (o.adn1 > CFG.groomThreshold && G.dust.length) ? "梳一梳触角"
+        : Math.abs(o.dnaL - o.dnaR) > 8 ? (o.dnaL > o.dnaR ? "往左拐" : "往右拐") : null;
+      const parts = felt.map(f => f[1]).concat(body);
+      return { felt, body, action: act, sentence: parts.join("，") + (act ? (parts.length ? "——" : "") + act : "") + (parts.length || act ? "。" : ""),
+        hz: { loom: Math.round(loom), audio: Math.round(aud), vinegar: Math.round(vin), geosmin: Math.round(geo), sugar: Math.round(G.gust.sugar), bitter: Math.round(G.gust.bitter), water: Math.round(G.gust.water),
+              touch: Math.round(Math.max(G.touch.L, G.touch.R)), thermo: Math.round(G.field.thermo * CFG.fieldRate), hygro: Math.round(G.field.hygro * CFG.fieldRate), isn: Math.round(Sn.isn),
+              gf: Math.round(o.gf), dnaL: Math.round(o.dnaL), dnaR: Math.round(o.dnaR), mn9: Math.round(o.mn9 || 0), adn1: Math.round(o.adn1 || 0), mdn: Math.round(o.mdn || 0) } };
+    };
+
     G.readout = () => {
       const r = k => (G.lesion.DNa && k < 4) || (G.lesion.GF && k >= 4) ? 0 : ema[k];
       const out = { dnaL: r(0) + r(2), dnaR: r(1) + r(3), gf: (r(4) + r(5)) / 2, raw: Array.from(ema) };
@@ -292,6 +341,12 @@
 
     // —— 风：随机游走的风场（强度 0–1、方向），每步更新 ——
     G.fields = [];                    // 温度 / 湿度源；G.addField / G.clearFields
+    G.sounds = []; G.odors = [];      // v4：声源与气味源
+    G.senses = { audioL: 0, audioR: 0, olfaL: 0, olfaR: 0, olfrL: 0, olfrR: 0, isn: 0, gainSugar: 1, gainWater: 1 };
+    G.body = { energy: 0.8, hydration: 0.8, age: 0, meals: 0, drinks: 0, startles: 0 };
+    G.V4 = !!(SUB.groups && SUB.groups.AUDIO_left);
+    G.addSound = (x, y, level = 1, dur = 0.8) => { const o = { x, y, level, t: 0, dur }; G.sounds.push(o); G.onEvent && G.onEvent("sound", o); return o; };
+    G.addOdor = (x, y, kind = "vinegar", sigma = 28, strength = 1, life = 60) => { const o = { x, y, kind, sigma, strength, base: strength, life, t: 0 }; G.odors.push(o); G.onEvent && G.onEvent("odor", o); return o; };
     G.wallTheta = {};                 // 四面墙上一帧的张角，用来算 dθ/dt
     G.wind = { speed: CFG.windSpeed, dir: CFG.windDir, joL: 0, joR: 0 };
     function windStep(dt) {
@@ -451,7 +506,7 @@
       if (S.z <= 0.01) {
         const hx = S.x + Math.cos(S.h) * CFG.headOffset, hy = S.y + Math.sin(S.h) * CFG.headOffset;
         for (const p of G.pellets) {
-          if (Math.hypot(p.x - hx, p.y - hy) < CFG.pelletR + 0.3) {
+          if (Math.hypot(p.x - hx, p.y - hy) < (p.r || CFG.pelletR) + 0.3) {
             G.onPellet = p;
             if (!p.touched) { p.touched = true; G.score["contacts_" + p.type] = (G.score["contacts_" + p.type] || 0) + 1; }
             if (p.type === "water") water = CFG.gustRate;
@@ -475,7 +530,8 @@
         const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
         for (const [side, a] of [["L", 0.61], ["R", -0.61]]) {
           const ax = S.x + Math.cos(S.h + a) * CFG.antennaLen, ay = S.y + Math.sin(S.h + a) * CFG.antennaLen;
-          const over = Math.max(Math.abs(ax) - hw, Math.abs(ay) - hh);   // > 0 = 这根触角压在围栏上
+          const over = CFG.arenaR > 0 ? Math.hypot(ax, ay) - (CFG.arenaR - CFG.courtPad)      // 圆形场地：径向越界量
+                                      : Math.max(Math.abs(ax) - hw, Math.abs(ay) - hh);   // > 0 = 这根触角压在围栏上
           if (over > 0) {
             const v = Math.min(1, over / CFG.antennaLen) * CFG.touchRate;
             if (side === "L") touchL = v; else touchR = v;
@@ -506,6 +562,38 @@
       if (has("HYGRO_left")) {
         const h2 = Math.min(CFG.fieldRate, hygro * CFG.fieldRate);
         brain.setRate("HYGRO_left", h2); brain.setRate("HYGRO_right", h2);
+      }
+      // —— v4：听觉、嗅觉、内感受 + 身体状态对味觉感受器灵敏度的调制 ——
+      if (G.V4) {
+        const ear = a => [S.x + Math.cos(S.h + a) * CFG.antennaLen, S.y + Math.sin(S.h + a) * CFG.antennaLen];
+        const [lx, ly] = ear(0.61), [rx, ry] = ear(-0.61);
+        let aL = 0, aR = 0;
+        for (const o of G.sounds) {
+          const env = Math.sin(Math.PI * Math.min(1, o.t / o.dur));                  // 声音的包络：起 → 落
+          const at = (x, y) => o.level * env / (1 + ((Math.hypot(o.x - x, o.y - y)) / CFG.soundRef) ** 2);
+          const rel = Math.sin(Math.atan2(o.y - S.y, o.x - S.x) - S.h);              // + = 声源在左
+          aL += at(lx, ly) * (1 + CFG.earBias * rel); aR += at(rx, ry) * (1 - CFG.earBias * rel);
+        }
+        let vL = 0, vR = 0, gL = 0, gR = 0;
+        for (const o of G.odors) {
+          const c = (x, y) => o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma));
+          if (o.kind === "vinegar") { vL += c(lx, ly); vR += c(rx, ry); } else { gL += c(lx, ly); gR += c(rx, ry); }
+        }
+        const cap = (v, m) => Math.min(m, Math.max(0, v) * m), Sn = G.senses;
+        Sn.audioL = cap(aL, CFG.audioRate); Sn.audioR = cap(aR, CFG.audioRate);
+        Sn.olfaL = cap(vL, CFG.olfRate); Sn.olfaR = cap(vR, CFG.olfRate); Sn.olfrL = cap(gL, CFG.olfRate); Sn.olfrR = cap(gR, CFG.olfRate);
+        brain.setRate("AUDIO_left", Sn.audioL); brain.setRate("AUDIO_right", Sn.audioR);
+        brain.setRate("OLFA_left", Sn.olfaL); brain.setRate("OLFA_right", Sn.olfaR);
+        brain.setRate("OLFR_left", Sn.olfrL); brain.setRate("OLFR_right", Sn.olfrR);
+        // 身体状态 → 感受器灵敏度（不是决策）：缺什么，对什么更敏感
+        if (CFG.physiology) {
+          const gain = need => CFG.gainMin + (CFG.gainMax - CFG.gainMin) * need;   // need ∈ [0,1]
+          Sn.gainSugar = gain(1 - G.body.energy); Sn.gainWater = gain(1 - G.body.hydration);
+          sugar = Math.min(CFG.gustRate * CFG.gainMax, sugar * Sn.gainSugar); water = Math.min(CFG.gustRate * CFG.gainMax, water * Sn.gainWater);
+        }
+        // 内感受神经元：饥饿 ↑、口渴 ↓（文献的方向）。默认关，原因见 DEFAULTS 里的注释
+        Sn.isn = CFG.isnDrive ? CFG.isnRate * Math.max(0, Math.min(1, 0.5 + (1 - G.body.energy) * 0.5 - (1 - G.body.hydration) * 0.5)) : 0;
+        brain.setRate("ISN_left", Sn.isn); brain.setRate("ISN_right", Sn.isn);
       }
       G.gust = { sugar, bitter, water };
       brain.setRate("SUGAR_left", sugar); brain.setRate("SUGAR_right", sugar);
@@ -610,13 +698,14 @@
         let state = "walk";
         if (V3) {
           if (out.mdn > CFG.mdnThreshold) state = "back";
-          else if (G.onPellet && out.mn9 > (G.onPellet.type === "water"
-                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : CFG.feedThreshold)) state = "feed";
+          else if (G.onPellet && out.mn9 > (G.onPellet.type === "water" && !CFG.physiology
+                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : (CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold))) state = "feed";
           else if (S.groomT > 0 || (out.adn1 > CFG.groomThreshold && G.dust.length)) state = "groom";
         }
         if (state !== S.state) { G.onEvent && G.onEvent("state", { from: S.state, to: state }); if (state === "groom" && S.groomT <= 0) { S.groomT = CFG.groomDur; G.score.groom++; } }
         S.state = state;
-        const speed = state === "walk" ? CFG.walkSpeed : state === "back" ? -CFG.backSpeed : 0;
+        const vigor = CFG.physiology ? 0.45 + 0.55 * G.body.energy : 1;      // 能量低了走得慢（身体，不是决策）
+        const speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
         S.speed = speed;
         if (state === "walk" || state === "back") { S.h += omega * dt; S.omega = omega; } else S.omega = 0;
         S.x += Math.cos(S.h) * speed * dt;
@@ -648,7 +737,8 @@
       // 就往哪侧转"的对照，那是这个游戏要测的东西。
       if (CFG.courtW) {
         const hw = CFG.courtW / 2 - CFG.courtPad, hh = CFG.courtH / 2 - CFG.courtPad;
-        const cx = Math.max(-hw, Math.min(hw, S.x)), cy = Math.max(-hh, Math.min(hh, S.y));
+        let cx = Math.max(-hw, Math.min(hw, S.x)), cy = Math.max(-hh, Math.min(hh, S.y));
+        if (CFG.arenaR > 0) { const rr = Math.hypot(S.x, S.y), lim = CFG.arenaR - CFG.courtPad; if (rr > lim) { cx = S.x * lim / rr; cy = S.y * lim / rr; } else { cx = S.x; cy = S.y; } }
         if (cx !== S.x || cy !== S.y) { S.x = cx; S.y = cy; S.wall = (S.wall || 0) + dt; }
         else S.wall = 0;
       }
@@ -691,7 +781,8 @@
           if (G.dustTimer <= 0) { G.dustTimer = CFG.dustEvery; G.addDust(rand() < 0.5 ? "left" : "right"); }
         }
         // 走远的颗粒回收
-        G.pellets = G.pellets.filter(p => Math.hypot(p.x - S.x, p.y - S.y) < 80 || (G.onEvent && G.onEvent("removePellet", p), false));
+        if (!CFG.life) G.pellets = G.pellets.filter(p => Math.hypot(p.x - S.x, p.y - S.y) < 80 || (G.onEvent && G.onEvent("removePellet", p), false));   // 自主生活时食物散在整个场地上，不回收
+        else if (G.pellets.length > 14) { const p = G.pellets.shift(); G.onEvent && G.onEvent("removePellet", p); }
       }
 
       if (G.mode === "auto") {
@@ -702,8 +793,50 @@
           G.launch(S.x + Math.cos(a) * CFG.autoDist, S.y + Math.sin(a) * CFG.autoDist);
         }
       }
+      // —— v4：声音 / 气味随时间消散；身体状态；自主生活的世界调度 ——
+      for (const o of G.sounds) o.t += dt;
+      G.sounds = G.sounds.filter(o => o.t < o.dur || (G.onEvent && G.onEvent("removeSound", o), false));
+      for (const o of G.odors) { o.t += dt; if (o.pellet && !G.pellets.includes(o.pellet)) o.t = Math.max(o.t, o.life - 3); o.strength = o.base * Math.min(1, Math.max(0, (o.life - o.t) / 3)); }
+      G.odors = G.odors.filter(o => o.t < o.life || (G.onEvent && G.onEvent("removeOdor", o), false));
+      if (CFG.physiology) {
+        const B = G.body; B.age += dt;
+        const eating = S.state === "feed" && G.onPellet;
+        B.energy = Math.max(0, Math.min(1, B.energy - (S.z > 0.01 ? CFG.energyFly : CFG.energyDrop) * dt + (eating && G.onPellet.type !== "water" && G.onPellet.type !== "bitter" ? CFG.energyEat * dt : 0)));
+        B.hydration = Math.max(0, Math.min(1, B.hydration - CFG.hydraDrop * dt + (eating && G.onPellet.type === "water" ? CFG.hydraDrink * dt : 0)));
+      }
+      if (CFG.life) lifeStep(dt);
       S.hitFlash = Math.max(0, S.hitFlash - dt);
     };
+
+    // 自主生活：世界自己运转。**这里只造世界，不碰果蝇**——每一样东西都只通过上面的感觉输入进到脑子里。
+    const LT = { food: 3, water: 6, sound: 12, heat: 25, ball: 15 };
+    function lifeStep(dt) {
+      const S = G.S, hw = (CFG.courtW || 200) / 2 - 12, hh = (CFG.courtH || 140) / 2 - 12, OPEN = !CFG.courtW;
+      // courtW = 0 → **没有墙的开放世界**：东西出现在它周围，离远了就消失（页面的生活模式用这个）。
+      // 为什么不要墙：只靠触感它避不开墙——矩形场地卡死在墙角（两根触角同时压墙，转向差为 0），圆形场地也有 93–97% 的时间贴在墙上（实测）。
+      // 这颗脑子里没有腹神经索的腿部反射；那条局限记在报告里，不在这里用一条"卡住就掉头"的规则掩盖。
+      if (OPEN) { const far = o => Math.hypot(o.x - S.x, o.y - S.y) > CFG.lifeCull;
+        for (const p of G.pellets.filter(far)) { G.pellets.splice(G.pellets.indexOf(p), 1); G.onEvent && G.onEvent("removePellet", p); }
+        for (const f of G.fields.filter(far)) { G.fields.splice(G.fields.indexOf(f), 1); G.onEvent && G.onEvent("removeField", f); } }
+      const between = ([a, b]) => a + rand() * (b - a);
+      const inside = (x, y) => { if (!(CFG.arenaR > 0)) return [x, y]; const rr = Math.hypot(x, y), lim = CFG.arenaR - 12; return rr > lim ? [x * lim / rr, y * lim / rr] : [x, y]; };
+      const spot = () => { if (OPEN) { const a = rand() * 2 * Math.PI, d = 35 + rand() * 75; return [S.x + Math.cos(a) * d, S.y + Math.sin(a) * d]; } if (CFG.arenaR > 0) { const a = rand() * 2 * Math.PI, r0 = Math.sqrt(rand()) * (CFG.arenaR - 12); return [Math.cos(a) * r0, Math.sin(a) * r0]; } return [(rand() * 2 - 1) * hw, (rand() * 2 - 1) * hh]; };
+      // 吃的喝的七成放在它附近（20–50 mm，偏前方），三成随机。第一版全场均匀撒：嗅觉不通到转向、它又贴着墙走，10 分钟平均只碰到 0.3 次糖，一直在挨饿。
+      // 这是**世界**的设计（球场模式里糖粒也是出现在它前方），不是给果蝇写的规则。
+      const near = () => { if (rand() > CFG.lifeNearFrac) return spot(); const a = S.h + (rand() * 2 - 1) * 1.2, d = 20 + rand() * 30;
+        if (OPEN) return [S.x + Math.cos(a) * d, S.y + Math.sin(a) * d];
+        return inside(Math.max(-hw, Math.min(hw, S.x + Math.cos(a) * d)), Math.max(-hh, Math.min(hh, S.y + Math.sin(a) * d))); };
+      // 昼夜：光照按正弦变化（0.15–1）。只是视觉前端的光照系数，和页面上的光照滑块同一个量
+      G.clock = ((G.clock || 0) + dt) % CFG.dayLength; CFG.light = 0.575 + 0.425 * Math.cos(2 * Math.PI * G.clock / CFG.dayLength);
+      if ((LT.food -= dt) <= 0) { LT.food = between(CFG.lifeFood); const [x, y] = near(), bad = rand() < 0.2;
+        // 食物是**一块**烂果子（半径 lifeFoodR），不是 2 mm 的糖粒：嗅觉在这个模型里不通到转向，果蝇只能靠撞，2 mm 的目标 10 分钟也撞不到一次
+        const p = G.addPellet(x, y, bad ? "bitter" : "sugar"); p.r = CFG.lifeFoodR; p.amount = CFG.lifeFoodAmount;
+        const od = G.addOdor(x, y, bad ? "geosmin" : "vinegar", 26, 1, 90); od.pellet = p; }      // 烂果子有醋味，发霉的有土臭素味
+      if ((LT.water -= dt) <= 0) { LT.water = between(CFG.lifeWater); const [x, y] = near(); const p = G.addPellet(x, y, "water"); p.r = CFG.lifeFoodR; p.amount = CFG.lifeFoodAmount; if (G.fields.length < 4) G.addField("damp", x, y, 22, 0.8); }
+      if ((LT.sound -= dt) <= 0) { LT.sound = between(CFG.lifeSound); const a = rand() * 2 * Math.PI, d = 25 + rand() * 70; G.addSound(S.x + Math.cos(a) * d, S.y + Math.sin(a) * d, 0.6 + rand() * 0.9, 0.6 + rand() * 0.8); }
+      if ((LT.heat -= dt) <= 0) { LT.heat = between(CFG.lifeHeat); if (G.fields.filter(f => f.type === "heat").length < 2) { const [x, y] = spot(); G.addField("heat", x, y, 30, 1); } else { const f = G.fields.find(f2 => f2.type === "heat"); G.fields.splice(G.fields.indexOf(f), 1); G.onEvent && G.onEvent("removeField", f); } }
+      if ((LT.ball -= dt) <= 0) { LT.ball = between(CFG.lifeBall); const a = S.h + (rand() * 2 - 1) * Math.PI * 0.8; G.launch(S.x + Math.cos(a) * CFG.autoDist, S.y + Math.sin(a) * CFG.autoDist); }
+    }
 
     // —— 论文式扰动（Shiu 2024 补充表 1D / 11B–F）的对外接口 ——
     // 页面把它们做成滑块和按钮，玩家能直接看到"接线和参数到底重不重要"。
