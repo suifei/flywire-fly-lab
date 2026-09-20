@@ -45,7 +45,7 @@ const chromePath = () => [process.env.CHROME_PATH,
     args: ["--no-sandbox", "--allow-file-access-from-files"] });
   const page = await browser.newPage();
   await page.setViewport({ width: 1200, height: 900 });
-  await page.goto(/^https?:/.test(PAGE) ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
+  await page.goto((/^https?:/.test(PAGE) ? PAGE : "file://" + PAGE) + "?scene=court", { waitUntil: "load", timeout: 180000 });   // 量的是球场地板上的视野扇区；页面默认进的是大自然（之前漏了这个参数，靠「大自然还没加载完」的时间差侥幸通过）
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
 
   const rows = [];

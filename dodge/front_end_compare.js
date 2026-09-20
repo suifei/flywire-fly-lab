@@ -47,7 +47,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   await page.setViewport({ width: 1200, height: 900 });
   const errs = [];
   page.on("pageerror", e => errs.push(e.message));
-  await page.goto(/^https?:/.test(PAGE) ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
+  await page.goto((/^https?:/.test(PAGE) ? PAGE : "file://" + PAGE) + "?scene=court", { waitUntil: "load", timeout: 180000 });
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
 
   const REPS = +(process.env.REPS || 3);      // 噪声底本身在波动（单次 p95 在 39–74 Hz 之间跳），必须重复
