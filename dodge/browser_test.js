@@ -369,8 +369,8 @@ function chromePath() {
   await step("篮球场「五感全开」：3D 果蝇换成 v5 大脑，气味 / 热源 / 食物画进球场，六条腿各按自己的相位，关掉后球场版原样恢复", async () => {
     await page.click("#viewCourt"); await new Promise(r => setTimeout(r, 800));
     const c0 = await page.evaluate(() => ({ t: window.__game.S.t, x: window.__game.S.x, y: window.__game.S.y }));
-    await page.click("#fiveOn");
-    const p0 = await page.evaluate(() => ({ x: window.__life.S.x, y: window.__life.S.y }));          // 刚切过去的那一刻：应当站在球场版那只的位置上
+    // 同一个同步块里「按下开关 + 读两只的位置」：慢机器上 click 与下一次 evaluate 之间隔着好几帧，两只都会走动（CI 上差了 9 mm）
+    const p0 = await page.evaluate(() => { document.getElementById("fiveOn").click(); return { x: window.__life.S.x, y: window.__life.S.y, cx: window.__game.S.x, cy: window.__game.S.y }; });
     for (let k = 0; k < 60; k++) { await new Promise(r => setTimeout(r, 400)); if (await page.evaluate(t0 => window.__life3d && window.__life.S.t > t0 + 1.0, await page.evaluate(() => window.__life ? window.__life.S.t : 0))) break; }
     const r = await page.evaluate(() => { const g = window.__life, api = window.__lifeApi; api.drop("fruitA"); api.drop("heatB"); api.drop("sound"); api.legs().amputate("RM", true); for (let k = 0; k < 20; k++) g.step();
       return { mode: window.__stageMode, l3: window.__life3d, n: g.brain.n, courtW: g.CFG.courtW, touch: g.CFG.touch, x: g.S.x, y: g.S.y, hasMB: !!g.MB, legs: !!g.legs, rows: ["lifeRow", "lifeLearnRow", "lifeBodyRow"].map(id => !document.getElementById(id).hidden),
@@ -383,7 +383,7 @@ function chromePath() {
     const back = await page.evaluate(() => ({ mode: window.__stageMode, t: window.__game.S.t, l3: !!window.__life3d, neu: document.getElementById("nNeu").textContent, vis: window.__l3s.group.visible }));
     await page.evaluate(() => { try { localStorage.removeItem("fly-court-five"); } catch (e) {} });
     if (!(r.mode === "life" && r.l3 && r.n > 15000 && r.courtW > 0 && r.touch && r.hasMB && r.legs && r.rows.every(Boolean) && r.hudPE === "none")) return "✗ 没有切到五感全开：" + JSON.stringify(r);
-    if (Math.hypot(p0.x - c0.x, p0.y - c0.y) > 8) return "✗ 它没有出现在球场版那只所在的位置：" + JSON.stringify({ p0, c0 });
+    if (Math.hypot(p0.x - p0.cx, p0.y - p0.cy) > 0.01) return "✗ 它没有出现在球场版那只所在的位置：" + JSON.stringify(p0);
     if (!(r2.counts.odors >= 2 && r2.counts.fields >= 1 && r2.counts.pellets >= 1 && r2.legHidden >= 6 && r2.inCourt)) return "✗ 3D 场景里的东西不对：" + JSON.stringify(r2);
     if (Math.abs(tCourt - c0.t) > 0.3) return `✗ 五感全开期间球场版那只没有冻结（${c0.t} → ${tCourt}）`;
     if (!(back.mode === "court" && !back.l3 && back.t > tCourt && !back.vis)) return "✗ 关掉后球场版没有恢复：" + JSON.stringify(back);
