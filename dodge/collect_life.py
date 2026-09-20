@@ -11,7 +11,7 @@ sr = rd("sensor_reach_v4.json")
 if sr: out["reach"] = {k: {"n": v["n"], "hops": v["hops"], "top_descending": [t["cell_type"] for t in v["top_descending"][:5]]} for k, v in sr["groups"].items()}
 sd = rd("sensor_drive_v4.json")
 if sd: out["drive_summary"] = sd.get("summary")
-for k, f in (("modulation", "sense_modulation.json"), ("sound_priming", "sound_priming.json")):
+for k, f in (("modulation", "sense_modulation.json"), ("sound_priming", "sound_priming.json"), ("wall_limits", "wall_limits.json")):
     d = rd(f)
     if d: out[k] = d
 lt = rd("life_test.json")

@@ -144,6 +144,16 @@ python dodge/collect_v4_results.py && python3 dodge/build.py  # page inlines res
 conda activate flygym && python connectome_vision_loop.py --duration 1.0 --frontend-only   # ~1 min, 831 MB → results/connectome_loop_frontend_looming/
 python vision/frontend_check.py results/connectome_loop_frontend_looming/log.csv   # applies report §26's 4 pre-declared criteria mechanically
 ```bash
+# 五感 + 生活模式（docs/log/report.md §47）：子回路 v4 = v3 + 听觉 / 两个嗅小球 / 内感受 ISN。**球场与五子棋仍用 v3**，已发布数字不动
+conda activate flygym && python dodge/sensor_reach_v4.py          # 这几类感觉到六个运动输出的跳数（只读，~1 min）
+cd dodge && python subcircuit_v4.py compare && python subcircuit_v4.py export; cd ..   # 6,296 神经元；AUDIO 里与 JO 重叠的 17 个留在 JO
+node dodge/sensor_drive.js subcircuit_v4     # 每路单独驱动的落点 → sensor_drive_v4.json（**文件名跟着子回路走**；v3 保持原名，页面在读它）
+node dodge/sense_modulation.js               # 嗅觉 / ISN / 声音叠在吃糖、逼近、碰触上的调制（5 个种子）
+node dodge/sound_priming.js 100              # 声音让逼近反应提前（探索性）；node dodge/wall_limits.js  # 只靠触感避不开墙（~8 min）
+node dodge/life_test.js 600 3                # 自己过 10 分钟 × 3 个种子 × 6 个条件（~50 min）；判据 H1–H3 写在脚本头
+python3 dodge/collect_life.py && python3 scripts/render_report47.py   # → life_summary.json（页面卡片）+ 日志 §47（渲染，不要手改）
+#   game_core 里 v4 的东西（G.sounds / G.odors / G.body / G.mind / CFG.life / physiology / isnDrive / arenaR）**全部默认关**，published 数字不受影响
+#   dodge/build.py 内联子回路时转成紧凑格式（post→Uint16、w→Int16×比例，解码后逐位相同，构建时断言）；原始 JSON 不变
 # 五子棋 v2：线型版（docs/log/report.md §46）。**v1（整盘棋铺进脑子）的全部数字作废**，脚本保留只为留档：
 #   make_dataset.js / extract_features.js / train_readout.py / play_test.js / fly.js / teacher.js
 # 线型 = 候选点某个方向两侧各 4 格，每格 ∈ {空, 我方, 对方, 边界}；合法线型恰好 14,641 种，果蝇脑把每一种都跑一遍
