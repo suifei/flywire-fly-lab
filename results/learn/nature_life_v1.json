@@ -1,0 +1,51 @@
+{
+ "note": "第一版的大自然：食物只有从浆果丛现掉下来的浆果，地上没有现成的果子。它一直往前走，浆果落在身后；3 分钟只碰到 0.7 次糖。之后在世界里加了「早先掉在地上的果子」（windfall）。court 那一组没跑完。",
+ "worlds": {
+  "nature": {
+   "path_mm": 3007.667,
+   "slope_factor": 0.995,
+   "blocked_s": 4.6,
+   "touch_s": 4.067,
+   "jumps": 7,
+   "dodge": 4,
+   "hit": 0,
+   "bonk": 0,
+   "berries": 21.667,
+   "sugar_contacts": 0.667,
+   "feed_s": 0.6,
+   "drink_s": 0.2,
+   "rain_s": 18.367,
+   "rain_hits": 1,
+   "hot_s": 0.3,
+   "pam_s": 0.4,
+   "ppl1_s": 0.3,
+   "memA_reward": 0.287,
+   "memB_punish": 0,
+   "energy": 0.557,
+   "hydration": 0.363
+  },
+  "flat": {
+   "path_mm": 3237,
+   "slope_factor": 1,
+   "blocked_s": 0,
+   "touch_s": 0,
+   "jumps": 5.333,
+   "dodge": 5,
+   "hit": 0,
+   "bonk": 0,
+   "berries": 0,
+   "sugar_contacts": 2.333,
+   "feed_s": 1.3,
+   "drink_s": 0.067,
+   "rain_s": 0,
+   "rain_hits": 0,
+   "hot_s": 16.9,
+   "pam_s": 1.233,
+   "ppl1_s": 16.9,
+   "memA_reward": 0.734,
+   "memB_punish": 0.692,
+   "energy": 0.85,
+   "hydration": 0.293
+  }
+ }
+}

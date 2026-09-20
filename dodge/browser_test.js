@@ -68,7 +68,7 @@ function chromePath() {
 
   const target = isUrl ? PAGE : "file://" + PAGE;
   console.log(`打开 ${isUrl ? PAGE : path.relative(ROOT, PAGE)} …`);
-  await page.goto(target, { waitUntil: "load", timeout: 180000 });
+  await page.goto(target + "?scene=court", { waitUntil: "load", timeout: 180000 });   // 前面这些检查针对球场版（v3）；页面默认进的是大自然，最后单独测
 
   // 等资产装配完成（eNote 被填上说明 bootFlyEye 跑通了）
   await page.waitForFunction(
@@ -389,6 +389,26 @@ function chromePath() {
     if (!(back.mode === "court" && !back.l3 && back.t > tCourt && !back.vis)) return "✗ 关掉后球场版没有恢复：" + JSON.stringify(back);
     return `球场里换成 ${r.n} 个神经元的那只（顶部说明写 ${r.neu}）；3D 场景里气味 ${r2.counts.odors}、热源 ${r2.counts.fields}、食物 ${r2.counts.pellets}；截掉右中腿后它的 ${r2.legHidden} 个部件不再画；关掉后球场版从 ${tCourt.toFixed(1)} s 继续到 ${back.t.toFixed(1)} s（说明改回 ${back.neu}）`;
   });
+  await step("大自然：开放世界的 3D 地形、植被、天气都在；浆果按重力落下并停稳成食物；果蝇站在地形上；切回球场原样恢复", async () => {
+    await page.click("#viewCourt"); await new Promise(r => setTimeout(r, 500)); await page.click("#fiveNature");
+    for (let k = 0; k < 80; k++) { await new Promise(r => setTimeout(r, 400)); if (await page.evaluate(() => !!(window.__nat3d && window.__life && window.__life.world && window.__nat3d.counts().grass > 0))) break; }
+    const r = await page.evaluate(() => { const g = window.__life, W = g.world, api = window.__lifeApi; if (!W || !window.__nat3d) return null;
+      api.drop("berry"); const b = g.balls.find(q => q.kind === "berry"), z0 = b.z - W.h(b.x, b.y); let fell = null, steps = 0; while (g.balls.includes(b) && steps < 1200) { g.step(); steps++; if (fell === null && b.rolling) fell = steps * g.chunkDt; }
+      const food = g.pellets.filter(p => p.berry && !p.windfall).sort((p, q) => Math.hypot(p.x - b.x, p.y - b.y) - Math.hypot(q.x - b.x, q.y - b.y))[0], foodOdors = g.odors.filter(o => o.pellet === food).map(o => o.kind); api.drop("rain"); for (let k = 0; k < 2400; k++) g.step(); /* 12 s：地面湿透的时间常数是 8 s */ const S = g.S, m = g.mind();
+      return { n: g.brain.n, courtW: g.CFG.courtW, counts: window.__nat3d.counts(), z0, fell, settled: !g.balls.includes(b), food: !!food, foodOdors, rain: W.weather.rain, audio: Math.max(g.senses.audioL, g.senses.audioR), hygro: g.field.hygro,
+               groundErr: Math.abs(S.ground - W.h(S.x, S.y)), sentence: m.sentence, courtVisible: !!window.__flyScene.scene.children.find(o => o.visible && o.type === "Group" && o.children.some(c => c.isSpotLight)) }; });
+    await new Promise(r2 => setTimeout(r2, 800));
+    const zOk = await page.evaluate(() => { const g = window.__life, sc = window.__flyScene.scene; let fz = null; sc.traverse(o => { if (o.isGroup && o.children.some(c => c.isGroup && c.children.some(m => m.name === "Thorax"))) fz = o.position.z; }); return { fz, want: g.S.ground + g.S.z, bg: !!sc.background, fog: !!sc.fog }; });
+    await page.click("#fiveOff"); await new Promise(r3 => setTimeout(r3, 1200));
+    const back = await page.evaluate(() => ({ mode: window.__stageMode, fog: !!window.__flyScene.scene.fog, natVisible: window.__nat3d.group.visible })); await page.evaluate(() => { try { localStorage.removeItem("fly-court-five"); } catch (e) {} });
+    if (!r) return "✗ 大自然没有启动";
+    if (!(r.n > 15000 && r.courtW === 0 && r.counts.grass > 1000 && r.counts.rocks > 5 && r.counts.bushes > 0)) return "✗ 世界不对：" + JSON.stringify(r);
+    const tAna = Math.sqrt(2 * r.z0 / 9810); if (!(r.fell !== null && Math.abs(r.fell - tAna) < 0.12 && r.settled && r.food && r.foodOdors.includes("A"))) return "✗ 浆果的物理不对：" + JSON.stringify({ z0: r.z0, fell: r.fell, tAna, settled: r.settled, food: r.food, odors: r.foodOdors });
+    if (!(r.rain > 0.5 && r.audio > 40 && r.hygro > 0.3)) return "✗ 下雨没有变成声音和湿度：" + JSON.stringify({ rain: r.rain, audio: r.audio, hygro: r.hygro });
+    if (!(r.groundErr < 1e-6 && zOk.fz !== null && Math.abs(zOk.fz - zOk.want) < 1.5 && zOk.fog)) return "✗ 果蝇没有站在地形上：" + JSON.stringify({ r: r.groundErr, zOk });
+    if (!(back.mode === "court" && !back.fog && !back.natVisible)) return "✗ 切回球场后没有恢复：" + JSON.stringify(back);
+    return `草 ${r.counts.grass} 片、石头 ${r.counts.rocks} 块、浆果丛 ${r.counts.bushes} 丛、水洼 ${r.counts.puddles} 个；浆果从 ${r.z0.toFixed(0)} mm 落下，${r.fell.toFixed(2)} s 后转为滚动（自由落体 ${tAna.toFixed(2)} s + 弹跳），停稳后变成带气味（${r.foodOdors.join(" + ")}）的食物；下雨 → 听觉 ${r.audio.toFixed(0)} Hz、湿度 ${r.hygro.toFixed(2)}；它说：「${r.sentence}」`;
+  });
   await step("切回球场后三维场景恢复渲染", async () => {
     await page.click("#viewCourt");
     await new Promise(r => setTimeout(r, 1500));
@@ -442,6 +462,14 @@ function chromePath() {
     });
     await page.click("#heatOn");
     return (r.fields === 1 && r.thermo > 0.5) ? `热源上温度读数 ${r.thermo}` : `fields=${r.fields} thermo=${r.thermo}`;
+  });
+  await step("不带参数打开页面：默认进的是大自然（第一次来的访客看到的就是它）", async () => {
+    await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
+    await page.goto(target, { waitUntil: "load", timeout: 180000 });
+    for (let k = 0; k < 120; k++) { await new Promise(r => setTimeout(r, 500)); if (await page.evaluate(() => !!(window.__nat3d && window.__life && window.__life.S.t > 1.0))) break; }
+    const r = await page.evaluate(() => ({ nat: !!window.__nat3d, mode: window.__stageMode, l3: !!window.__life3d, world: !!(window.__life && window.__life.world), t: window.__life ? window.__life.S.t : 0, pressed: document.getElementById("fiveNature").getAttribute("aria-pressed"), mast: !document.getElementById("mastNature").hidden }));
+    if (!(r.nat && r.l3 && r.world && r.t > 1 && r.pressed === "true" && r.mast)) return "✗ " + JSON.stringify(r);
+    return `默认世界 = 大自然，大脑已经跑了 ${r.t.toFixed(1)} s`;
   });
   let uiBad = 0;
   for (const [name, v] of ui) {

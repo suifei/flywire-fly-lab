@@ -43,7 +43,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   const errs = [];
   page.on("pageerror", e => errs.push("pageerror: " + e.message));
   page.on("console", m => { if (m.type() === "error") errs.push("console: " + m.text()); });
-  await page.goto(isUrl ? PAGE : "file://" + PAGE, { waitUntil: "load", timeout: 180000 });
+  await page.goto((isUrl ? PAGE : "file://" + PAGE) + "?scene=court", { waitUntil: "load", timeout: 180000 });   // 这些检查针对球场版（v3）；页面默认进的是大自然
   await page.waitForFunction(() => window.__eyeDiag && window.__eyeDiag.head(), { timeout: 180000 });
 
   const R = await page.evaluate(async IN_CI => {

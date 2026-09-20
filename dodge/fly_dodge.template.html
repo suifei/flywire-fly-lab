@@ -261,10 +261,12 @@ code { font: 12px var(--mono); }
         </nav>
       </div>
       <div class="modes" role="tablist" aria-label="游戏模式">
-        <button id="viewCourt" class="mode" role="tab" aria-pressed="true"><b>篮球场</b><small>躲球 · 觅食 · 梳理 · 任务</small></button>
+        <button id="viewCourt" class="mode" role="tab" aria-pressed="true"><b>大自然 / 篮球场</b><small>3D 世界 · 五感全开 · 任务</small></button>
         <button id="viewGomoku" class="mode" role="tab" aria-pressed="false"><b>五子棋</b><small>和果蝇下棋 · 看它怎么想</small></button>
         <button id="viewLife" class="mode" role="tab" aria-pressed="false"><b>生活</b><small>五感全开 · 它自己过日子</small></button>
       </div>
+      <p id="mastNature" hidden>一个没有边界的 3D 大自然：起伏的地形、石头、蘑菇、花、浆果丛、水洼、昼夜、风和雨，<b>有重力</b>——浆果熟了会掉下来、弹几下、顺坡滚，停稳后发酵；石头挡路；上坡走得慢；太阳把石板晒烫；风把气味吹向下风；甲虫会爬过来。
+        果蝇只通过真实的感受器知道这个世界；往哪转、飞不飞、吃不吃，由这颗 <b>15,055</b> 个神经元的连接组决定——没有一条"看见甲虫就跑""闻到果子就过去"的规则。</p>
       <p id="mastCourt">朝果蝇扔球、喂糖粒苦粒、往触角上撒灰。决定往哪转、何时起飞、吃不吃、要不要梳理的，是在你浏览器里实时运行的 <span id="nNeu">4,599</span> 个 FlyWire 连接组神经元；起飞后是真实果蝇的逃逸飞行轨迹。</p>
       <p id="mastLife" hidden>世界自己运转：昼夜、烂果子和水洼、气味、嗡嗡声、热源、风、灰尘、偶尔飞来的球。每一样都只作为<b>物理量</b>送到真实的感受器上（视、听、嗅、味、触，外加温度和湿度）；
         往哪转、飞不飞、吃不吃，全由这颗 <span id="nNeu4"></span> 个神经元的连接组决定——没有一条"闻到就过去""听到就跑"的规则。
@@ -339,12 +341,13 @@ code { font: 12px var(--mono); }
       </div>
       <div class="controls">
         <div class="row" id="fiveRow">
-          <label class="k" title="篮球场里这只 3D 果蝇用哪一颗大脑">大脑</label>
-          <div class="seg" role="group" aria-label="大脑">
-            <button id="fiveOff" aria-pressed="true" title="子回路 v3：5,563 个神经元。任务模式、突变体、光遗传、敲除与扰动的已发布数字都是在它上面量的">球场版 · 5,563</button>
-            <button id="fiveOn" aria-pressed="false" title="子回路 v5：15,055 个神经元 = 视、听、嗅、味、触、温、湿 + 身体状态 + 蘑菇体学习回路 + 多巴胺 + 六条腿推着走的身体。和「生活」标签里是同一只，记忆也是同一份">五感全开 · 15,055（听 · 嗅 · 蘑菇体 · 多巴胺 · 六条腿）</button>
+          <label class="k" title="这只 3D 果蝇活在哪个世界、用哪一颗大脑">世界</label>
+          <div class="seg" role="group" aria-label="世界">
+            <button id="fiveNature" aria-pressed="false" title="没有边界的 3D 大自然：起伏的地形、石头、蘑菇、花、浆果丛、水洼、昼夜、风和雨。有重力——浆果熟了会掉下来、弹几下、顺坡滚；石头挡路；上坡走得慢；太阳把石板晒烫；风把气味吹向下风。大脑是五感全开的 15,055 个神经元">大自然 · 开放世界 · 五感全开</button>
+            <button id="fiveOn" aria-pressed="false" title="子回路 v5：15,055 个神经元 = 视、听、嗅、味、触、温、湿 + 身体状态 + 蘑菇体学习回路 + 多巴胺 + 六条腿推着走的身体，放在有边界的篮球场里">篮球场 · 五感全开</button>
+            <button id="fiveOff" aria-pressed="true" title="子回路 v3：5,563 个神经元。任务模式、突变体、光遗传、敲除与扰动的已发布数字都是在它上面量的">篮球场 · 球场版 5,563（任务 / 突变体）</button>
           </div>
-          <span class="sub" id="fiveNote" style="margin:0">打开后，下面多出「生活 / 学习 / 身体」三行控件。</span>
+          <span class="sub" id="fiveNote" style="margin:0">球场版：任务、突变体、光遗传那些已发布的数字都是在这颗 5,563 个神经元的大脑上量的。</span>
         </div>
         <div class="row" id="lifeRow" hidden>
           <label class="k">生活</label>
@@ -352,7 +355,8 @@ code { font: 12px var(--mono); }
             <div class="seg" role="group" aria-label="时间流速" id="lifeSpeedSeg"><button data-v="1" aria-pressed="true">×1</button><button data-v="2" aria-pressed="false">×2</button></div>
             <span class="row" style="gap:6px" title="往世界里放东西。放进去的只是物理量，果蝇怎么反应由连接组决定">
               <button class="btn" data-drop="fruit">烂果子</button><button class="btn" data-drop="mold">发霉的</button><button class="btn" data-drop="water">水</button>
-              <button class="btn" data-drop="sound">嗡一声</button><button class="btn" data-drop="heat">热源</button><button class="btn" data-drop="ball">扔球</button>
+              <button class="btn" data-drop="sound">嗡一声</button><button class="btn" data-drop="heat">热源</button><button class="btn" data-drop="ball" id="dropBall">扔球</button>
+              <button class="btn" data-drop="berry" data-nature hidden title="从它头顶 30 mm 处放下一颗浆果：自由落体、弹几下、顺坡滚，停稳后发酵">头顶掉一颗浆果</button><button class="btn" data-drop="rain" data-nature hidden>下一场雨</button>
             </span>
             <label class="toggle" title="切断听觉神经元的全部传出突触"><input type="checkbox" id="lifeDeaf"> 失聪</label>
             <label class="toggle" title="切断两个嗅小球感受神经元的传出突触"><input type="checkbox" id="lifeAnosmic"> 失嗅</label>
@@ -658,6 +662,20 @@ code { font: 12px var(--mono); }
       <p class="sub" id="lfNote3"></p>
       <p class="sub"><b>哪些是手写的：</b>世界的节奏与强度；声强随距离的衰减与左右耳差；气味羽流的形状；身体状态（能量、水分）的消耗速率，以及它对味觉感受器灵敏度的调制幅度（方向有文献依据）；
         「MN9 超过 10 Hz 算开吃」这条读出阈值；「它在想什么」的句子模板与阈值（每个词的触发量是实测的频率）。<b>它不是语言模型，也不是果蝇会说话。</b></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1" id="cNature">
+      <h3>大自然：一个有重力、有天气、没有边界的 3D 世界</h3>
+      <p>第一个标签默认进的就是它（「世界」开关可以切回篮球场）。地形、石头、蘑菇、花、草、浆果丛、水洼都按种子确定性生成，<b>游戏核心和 3D 渲染用的是同一个世界对象</b>——画出来的石头就是它撞上的石头。
+        物理用真实单位：重力 9,810 mm/s²，浆果从枝头掉下来、按地形法线反弹、顺坡滚、停稳后发酵；石头不可穿透；上坡走得慢；太阳把深色石板晒烫；洼地下雨蓄水、晴天蒸发；风把气味吹向下风。
+        <b>果蝇只通过真实的感受器知道这一切</b>（坡度 → 步速，实心物件 → 挡路 + 触角被压，石板 → 温度感受器，雨 → 湿度感受器和听觉神经元，发酵的浆果 → 嗅觉感受神经元，甲虫和下落的浆果 → 逼近视觉），没有新增任何一条行为规则。
+        威胁从「飞来的球」换成了「爬过来的甲虫」：毫米尺度上，60 mm/s 的抛体 0.1 秒就落地、滚几毫米就停，慢慢滚过来的球不物理。</p>
+      <h4 style="margin:.9em 0 .3em">物理自检（判据写在跑之前，都是能手算的量）</h4>
+      <div class="tbl"><table id="tNatPhys"></table></div>
+      <h4 style="margin:.9em 0 .3em">它在里面过得怎么样</h4>
+      <div class="tbl"><table id="tNatLife"></table></div>
+      <p class="sub" id="natNote"></p>
+      <p class="sub"><b>如实说明：</b>默认的视觉前端仍是手写的逼近检测，石头、草、地形<b>不在</b>它的视觉里——它绕开石头靠的是被挡住之后贴着滑过去加上触角触碰。复眼视窗里「只靠眼睛躲」那条真实像素通路现在也接到了这一只上，但它一走动满地的草就成了假逼近，所以默认关。
+        果蝇自己的身体是运动学，不会摔倒；受重力支配的是浆果。水洼是水位，不是流体。地形的幅度、物件的密度、恢复系数 0.35、滚动阻力 0.15、坡度系数、天气节奏全部手选。</p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cLearn">
       <h3>学习、多巴胺、六条腿：哪些成立，哪些是阴性</h3>
@@ -1031,6 +1049,7 @@ code { font: 12px var(--mono); }
 <script id="sub4-data" type="application/json">/*__SUBCIRCUIT_LIFE__*/</script>
 <script id="life-data" type="application/json">/*__LIFE__*/</script>
 <script id="learn-data" type="application/json">/*__LEARN__*/</script>
+<script id="nature-data" type="application/json">/*__NATURE__*/</script>
 <script id="sub-nt" type="application/json">/*__SUB_NT__*/</script>
 <script id="perturb-data" type="application/json">/*__PERTURB__*/</script>
 <script id="repro-data" type="application/json">/*__REPRO__*/</script>
@@ -1057,6 +1076,8 @@ code { font: 12px var(--mono); }
 <script>/*__BRAIN_JS__*/</script>
 <script>/*__PLASTICITY_JS__*/</script>
 <script>/*__LEGS_JS__*/</script>
+<script>/*__NATURE_JS__*/</script>
+<script>/*__NATURE3D_JS__*/</script>
 <script>/*__GAME_CORE_JS__*/</script>
 <script>/*__MISSIONS_JS__*/</script>
 <script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
@@ -1693,7 +1714,7 @@ code { font: 12px var(--mono); }
     const r = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    if (ray.ray.intersectPlane(plane, hit3)) RG.launch(hit3.x, hit3.y);
+    if (ray.ray.intersectPlane(plane, hit3)) { const b = RG.launch(hit3.x, hit3.y); if (RG.world && b) { b.kind = "beetle"; RG.addSound(b.x, b.y, 1.2, 0.5); } }
   });
   const segSet = (btns, active) => btns.forEach(b => b.setAttribute("aria-pressed", String(b === active)));
   $("modeClick").onclick = () => { game.mode = "click"; segSet([$("modeClick"), $("modeAuto")], $("modeClick")); $("coach").hidden = false; };
@@ -2634,8 +2655,13 @@ code { font: 12px var(--mono); }
       if (w === world) return; world = w;
       for (const k of ["pellets", "odors", "fields", "sounds", "balls", "dust"]) g[k].length = 0; g.onPellet = null;
       const C = g.CFG, c0 = window.__game;
+      g.world = null; g.ambient = null; g.S.ground = 0; g.S.pitch = 0; g.S.roll = 0;
       if (w === "3d") { C.courtW = c0.CFG.courtW; C.courtH = c0.CFG.courtH; C.touch = true; C.wallVision = $("wallOn") ? $("wallOn").checked : true; g.S.x = c0.S.x; g.S.y = c0.S.y; g.S.h = c0.S.h; }
+      else if (w === "nature") { C.courtW = 0; C.touch = true; C.wallVision = false; g.S.x = 0; g.S.y = 0;       // 大自然：没有墙；实心物件会压到触角，所以触感开着
+        let seed = 0; try { seed = +localStorage.getItem("fly-nature-seed") || 0; if (!seed) { seed = 1 + Math.floor(Math.random() * 1e6); localStorage.setItem("fly-nature-seed", String(seed)); } } catch (e) { seed = 20260920; }
+        g.attachWorld(window.FlyNature.create(seed)); window.__natureWorld = g.world; }
       else { C.courtW = 0; C.touch = false; C.wallVision = false; g.S.x = 0; g.S.y = 0; }
+      for (const bt of document.querySelectorAll("#lifeRow [data-nature]")) bt.hidden = w !== "nature"; $("dropBall").textContent = w === "nature" ? "来一只甲虫" : "扔球";
       g.S.z = 0; g.S.jumpT = -1; g.S.clip = null; if (legs) legs.reset();
     }
     function drop(kind) {
@@ -2648,7 +2674,10 @@ code { font: 12px var(--mono); }
       else if (kind === "fruitA") { const p = g.addPellet(x, y, "sugar"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; g.addOdor(x, y, "A", 26, 1, 90).pellet = p; }
       else if (kind === "heatB") { const f = g.addField("heat", x, y, 30, 1); g.addOdor(x, y, "B", 30, 1, 60).field = f; setTimeout(() => { const k = g.fields.indexOf(f); if (k >= 0) g.fields.splice(k, 1); }, 60000); }
       else if (kind === "odorA" || kind === "odorB") g.addOdor(x, y, kind === "odorA" ? "A" : "B", 26, 1, 45);
-      else if (kind === "ball") g.launch(S.x + Math.cos(a) * 110, S.y + Math.sin(a) * 110);
+      else if (kind === "ball") { const b = g.launch(S.x + Math.cos(a) * 110, S.y + Math.sin(a) * 110); if (g.world) { b.kind = "beetle"; g.addSound(b.x, b.y, 1.2, 0.5); } }
+      else if (kind === "berry" && g.world) { const bx = S.x + Math.cos(S.h) * 14 + (Math.random() - 0.5) * 8, by = S.y + Math.sin(S.h) * 14 + (Math.random() - 0.5) * 8;
+        const b = { id: g.nextId++, kind: "berry", bad: false, r: 2.6, x: bx, y: by, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20, vz: 0, prevTheta: null, minD: Infinity, done: false, age: 0, outcome: null, physical: true }; b.z = g.world.h(bx, by) + 30; g.balls.push(b); }
+      else if (kind === "rain" && g.world) { g.world.weather.rainT = 30; g.world.weather.nextRain = 200; note("（下雨了）"); }
     }
     function tick(dt) {
       if (!on) return; ensure();
@@ -2714,6 +2743,9 @@ code { font: 12px var(--mono); }
         LEGN.forEach((L, r) => { const yy = by + 19 + r * rp; x.fillStyle = "#555"; x.fillText(LEGCN[L], bx + 6, yy + rh - 0.5); x.fillStyle = "rgba(0,0,0,.07)"; x.fillRect(rx, yy, rw, rh);
           for (let i = 0; i < gaitHist.length; i++) { const v = gaitHist[i][r]; if (!v) continue; x.fillStyle = v === 2 ? "#c0392b" : "#1a1c20"; x.fillRect(rx + rw * i / 160, yy, Math.ceil(rw / 160), rh); } });
         let yy = by + 19 + 6 * rp + 12; x.font = "600 11px " + fnt; x.fillStyle = "#222";
+        if (g.world) { const wx = g.world.weather, gr = g.world.grad(g.S.x, g.S.y), sl = Math.hypot(gr[0], gr[1]); x.font = "10px " + fnt; x.fillStyle = "#1d4f7a";
+          x.fillText((wx.rain > 0.3 ? "雨" : g.CFG.light < 0.3 ? "夜" : "晴") + " · 地面湿 " + Math.round(wx.wet * 100) + "% · 脚下 " + (g.S.ground || 0).toFixed(1) + " mm · 坡度 " + Math.round(Math.atan(sl) * 57.3) + "°" + (g.S.bump ? " · 被挡住" : ""), bx + bw - 176, by + 13); }
+        x.font = "600 11px " + fnt; x.fillStyle = "#222";
         x.fillText("蘑菇体：" + Math.round(MBs.kcActive) + " 个凯尼恩细胞在放电 · 指令 " + Math.round((g.S.cmd || {}).v || 0) + " → 实际 " + Math.round(g.S.speed || 0) + " mm/s" + (legs.state.stable ? "" : " · 失稳拖行"), bx + 6, yy); yy += 6;
         const bar = (lab, v, max, c, txt, x1, w1) => { x.font = "10px " + fnt; x.fillStyle = "#555"; x.fillText(lab, x1, yy + 8); const b0 = x1 + 62, b1 = w1 - 62 - 34; x.fillStyle = "rgba(0,0,0,.09)"; x.fillRect(b0, yy, b1, 8); x.fillStyle = c; x.fillRect(b0, yy, b1 * Math.max(0, Math.min(1, v / max)), 8); x.fillStyle = "#222"; x.fillText(txt, b0 + b1 + 4, yy + 8); };
         const half = (bw - 12) / 2; bar("奖赏 PAM", MBs.danHz.PAM, 40, "#d08a2a", MBs.danHz.PAM.toFixed(0) + " Hz", bx + 6, half); bar("惩罚 PPL1", MBs.danHz.PPL1, 40, "#7c5cd6", MBs.danHz.PPL1.toFixed(0) + " Hz", bx + 6 + half, half); yy += 12;
@@ -2741,19 +2773,20 @@ code { font: 12px var(--mono); }
       head("它在想什么"); x.font = "11px " + fnt;
       const lines = diary.slice(-Math.max(2, Math.floor((colBottom - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
     }
-    function show(v, threeD) {
-      on = v; view = v && threeD ? "3d" : "2d"; cv.hidden = !v; cv.style.pointerEvents = view === "3d" ? "none" : ""; window.__life3d = view === "3d";
+    function show(v, threeD) {                                // threeD: false = 俯视开放世界；true / "court" = 3D 篮球场；"nature" = 3D 大自然
+      on = v; view = v && threeD ? "3d" : "2d"; const wantWorld = !v ? world : threeD === "nature" ? "nature" : threeD ? "3d" : "2d"; cv.hidden = !v; cv.style.pointerEvents = view === "3d" ? "none" : ""; window.__life3d = view === "3d";
       $("lifeRow").hidden = !v; $("lifeLearnRow").hidden = !v; $("lifeBodyRow").hidden = !v; $("mastLife").hidden = !v || view === "3d"; $("fiveRow").hidden = v && view !== "3d";
-      segSet([$("fiveOff"), $("fiveOn")], view === "3d" ? $("fiveOn") : $("fiveOff"));
-      if (v && view === "3d") { ensure(); setWorld("3d"); window.__stageMode = "life"; { const e2 = $("says"); if (e2) e2.hidden = true; }
+      segSet([$("fiveOff"), $("fiveOn"), $("fiveNature")], view !== "3d" ? $("fiveOff") : wantWorld === "nature" ? $("fiveNature") : $("fiveOn"));
+      if (v && view === "3d") { ensure(); setWorld(wantWorld); window.__stageMode = "life"; { const e2 = $("says"); if (e2) e2.hidden = true; }
         for (const id of ["eyecam", "windvane"]) { const e2 = $(id); if (e2) e2.hidden = false; }
         const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
-        $("mastCourt").hidden = false; $("nNeu").textContent = SUB4.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = "现在球场里是 15,055 个神经元的那只（和「生活」标签里同一只、同一份记忆）。球场版那只已冻结；任务 / 突变体 / 光遗传仍属于球场版。";
-        $("coach").textContent = "五感全开：球场里的 3D 果蝇换成了带听觉、嗅觉、蘑菇体、多巴胺和六条腿的那颗大脑。粉 / 紫的光晕是可学的气味 A / B，绿是醋味，红是热源，白圈是声音。点场地照样发球。"; }
-      else if (v) { ensure(); setWorld("2d"); window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
+        $("mastCourt").hidden = wantWorld === "nature"; $("mastNature").hidden = wantWorld !== "nature"; $("nNeu").textContent = SUB4.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = wantWorld === "nature" ? "没有边界的大自然，有重力和天气。15,055 个神经元（和「生活」标签里同一只、同一份记忆）；它只通过感受器知道这个世界。" : "现在球场里是 15,055 个神经元的那只（和「生活」标签里同一只、同一份记忆）。球场版那只已冻结；任务 / 突变体 / 光遗传仍属于球场版。";
+        $("coach").textContent = wantWorld === "nature" ? "大自然：没有边界，有重力和天气。浆果熟了会掉下来、弹几下、顺坡滚；石头挡路；上坡走得慢；石板被太阳晒烫；风把气味吹向下风；甲虫会爬过来（点地面也能放一只）。拖动旋转视角。"
+          : "五感全开：球场里的 3D 果蝇换成了带听觉、嗅觉、蘑菇体、多巴胺和六条腿的那颗大脑。粉 / 紫的光晕是可学的气味 A / B，绿是醋味，红是热源，白圈是声音。点场地照样发球。"; }
+      else if (v) { ensure(); setWorld("2d"); $("mastNature").hidden = true; window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
         const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
         $("mastCourt").hidden = true; $("coach").textContent = "主画面换成了它生活的世界（俯视，视图跟着它走，网格 20 mm）。这个世界没有墙。球场那只已冻结。想看它学习：放一个「A 味的果子」等它吃，或者放「只有 A 味」、趁它闻着的时候喷一下多巴胺；左下角的浮层显示六条腿的步态和它记住了什么。"; }
-      else { GMSTATS.rates = null; GMSTATS.drive = null; if (g) save(); $("nNeu").textContent = SUB.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = "打开后，下面多出「生活 / 学习 / 身体」三行控件。";
+      else { GMSTATS.rates = null; GMSTATS.drive = null; $("mastNature").hidden = true; if (g) save(); $("nNeu").textContent = SUB.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = "球场版：任务、突变体、光遗传那些已发布的数字都是在这颗 5,563 个神经元的大脑上量的。";
         if (window.__stageMode === "life") { window.__stageMode = "court"; const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = ""; const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = ""; $("mastCourt").hidden = false; } }
     }
     for (const bt of document.querySelectorAll("#lifeRow [data-drop]")) bt.onclick = () => drop(bt.dataset.drop);
@@ -2776,8 +2809,28 @@ code { font: 12px var(--mono); }
     for (const bt of document.querySelectorAll("#lifeRemote [data-remote]")) { const k = bt.dataset.remote;
       const set = hz => { ensure(); g.brain.setDrive("remote_" + k, REMOTE[k].flatMap(gn => g.SUB.groups[gn] || []), hz); bt.setAttribute("aria-pressed", hz > 0 ? "true" : "false"); };
       bt.addEventListener("pointerdown", e => { e.preventDefault(); set(150); }); for (const ev of ["pointerup", "pointerleave", "pointercancel"]) bt.addEventListener(ev, () => set(0)); }
-    const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on, is3d: () => on && view === "3d", legs: () => legs };
+    const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on, is3d: () => on && view === "3d", isNature: () => on && view === "3d" && world === "nature", legs: () => legs };
     window.__lifeApi = api; return api;
+  })();
+  // 大自然卡片：nature_test.json + nature_life.json
+  (function buildNatureCard() {
+    let N; try { N = JSON.parse(document.getElementById("nature-data").textContent); } catch (e) { return; }
+    try { const T = N.test, yn = b => b ? "成立" : "不成立", L = N.life;
+      tableHTML("tNatPhys", ["判据", "实测", ""], [
+        ["自由落体：30 mm 落地时间与 √(2h/g) 相差 ≤ 5 ms", T.N1_free_fall.t_sim + " s 对 " + T.N1_free_fall.t_analytic + " s", yn(T.N1_free_fall.pass)],
+        ["反弹不生能量：弹起高度单调下降", T.N2_no_energy_gain.peaks_mm.join(" → ") + " mm（上限 " + T.N2_no_energy_gain.bound_mm + "）", yn(T.N2_no_energy_gain.pass)],
+        ["平地上 3 秒内停稳", T.N3_comes_to_rest.rest_s.toFixed(2) + " s", yn(T.N3_comes_to_rest.pass)],
+        ["陡坡上往下滚，缓坡上停得住", "坡度 " + T.N4_rolls_downhill_only_when_steep.steep_slope + "：1 秒降 " + T.N4_rolls_downhill_only_when_steep.dropped_mm + " mm；平地移动 " + T.N4_rolls_downhill_only_when_steep.flat_moved_mm + " mm", yn(T.N4_rolls_downhill_only_when_steep.pass)],
+        ["地形确定且连续", "相邻 0.1 mm 最大高差 " + T.N5_deterministic_continuous.max_step_mm + " mm", yn(T.N5_deterministic_continuous.pass)],
+        ["上坡慢、下坡快", "步速系数 " + T.N6_slope_speed.uphill + " / " + T.N6_slope_speed.downhill, yn(T.N6_slope_speed.pass)],
+        ["实心物件不可穿透", "半径 " + T.N7_solid.rock_r + " mm 的石头，圆心被推到 " + T.N7_solid.pushed_to + " mm 外", yn(T.N7_solid.pass)],
+        ["风把气味吹向下风", "下风 " + T.N8_wind_plume.downwind + "、上风 " + T.N8_wind_plume.upwind + "、无风 " + T.N8_wind_plume.calm, yn(T.N8_wind_plume.pass)],
+        ["闭环里走 60 秒：脚下 = 地形高度，从不穿进实心物件", "走了 " + T.N9_closed_loop_walk.path_mm + " mm，最大穿入 " + T.N9_closed_loop_walk.max_penetration_mm + " mm", yn(T.N9_closed_loop_walk.pass)]]);
+      const R = [["总路程 mm", "path_mm", 0], ["平均步速系数（坡度）", "slope_factor", 2], ["被实心物件挡住 s", "blocked_s", 1], ["触角有触碰 s", "touch_s", 1], ["起飞", "jumps", 1], ["躲开（甲虫 / 球）", "dodge", 1], ["被撞", "hit", 1], ["掉下来的浆果", "berries", 1],
+        ["碰到糖", "sugar_contacts", 1], ["吃了 s", "feed_s", 1], ["喝水 s", "drink_s", 1], ["淋雨 s", "rain_s", 1], ["被晒烫 / 烤热 s", "hot_s", 1], ["多巴胺 PAM / PPL1 s", null, 1], ["A 的奖赏记忆", "memA_reward", -1]];
+      tableHTML("tNatLife", ["", "大自然", "平地开放世界（「生活」标签）", "篮球场"], R.map(([lab, k, d]) => [lab, ...["nature", "flat", "court"].map(w => k === null ? L[w].pam_s.toFixed(1) + " / " + L[w].ppl1_s.toFixed(1) : d < 0 ? Math.round(L[w][k] * 100) + "%" : L[w][k].toFixed(d))]), r => false);
+      document.getElementById("natNote").textContent = "五感全开那只（15,055 个神经元 + 六条腿），" + N.life_meta.seconds + " 秒 × " + N.life_meta.seeds + " 个种子的均值；只报告，不设判据。";
+    } catch (e) { console.error("大自然卡片渲染失败", e); window.__natureCardError = String(e); }
   })();
   // 学习卡片：全部从 results/learn/learn_summary.json 取数
   (function buildLearnCard() {
@@ -2861,16 +2914,18 @@ code { font: 12px var(--mono); }
     const tabs = [$("viewCourt"), $("viewGomoku"), $("viewLife")];
     $("viewLife").addEventListener("click", () => { if (GM) GM.setStage("court"); LIFE.show(true); segSet(tabs, $("viewLife")); });
     for (const id of ["viewCourt", "viewGomoku"]) $(id).addEventListener("click", () => { if (LIFE.isOn()) { LIFE.show(false); } segSet(tabs, $(id)); }, true);
-    // 五感全开：球场里的 3D 果蝇换成 v5 大脑。选择记在本机，下次打开「篮球场」时照旧。
-    const FIVEKEY = "fly-court-five";
-    const setFive = v => { try { localStorage.setItem(FIVEKEY, v ? "1" : "0"); } catch (e) {} if (v) { if (GM) GM.setStage("court"); LIFE.show(true, true); segSet(tabs, $("viewCourt")); } else if (LIFE.isOn()) LIFE.show(false); };
-    $("fiveOn").onclick = () => setFive(true); $("fiveOff").onclick = () => setFive(false);
-    $("viewCourt").addEventListener("click", () => { let v = "0"; try { v = localStorage.getItem(FIVEKEY); } catch (e) {} if (v === "1") setFive(true); });
+    // 世界：大自然（开放世界，五感全开）/ 篮球场 · 五感全开 / 篮球场 · 球场版。选择记在本机；没选过的默认进大自然。
+    // URL 里带 ?scene=court|five|nature 可以指定（自动化测试用 ?scene=court，那些检查假定的是球场版）。
+    const FIVEKEY = "fly-court-five", sceneOf = () => { const q = /[?&]scene=(court|five|nature)/.exec(location.search); if (q) return q[1]; let v = null; try { v = localStorage.getItem(FIVEKEY); } catch (e) {} return v === "0" ? "court" : v === "1" ? "five" : "nature"; };
+    const setFive = (v, noSave) => { const mode = v === true ? "five" : v === false ? "court" : v; if (!noSave) try { localStorage.setItem(FIVEKEY, mode === "court" ? "0" : mode === "five" ? "1" : "2"); } catch (e) {}
+      if (mode === "court") { if (LIFE.isOn()) LIFE.show(false); } else { if (GM) GM.setStage("court"); LIFE.show(true, mode === "nature" ? "nature" : "court"); segSet(tabs, $("viewCourt")); } };
+    $("fiveOn").onclick = () => setFive("five"); $("fiveOff").onclick = () => setFive("court"); $("fiveNature").onclick = () => setFive("nature");
+    $("viewCourt").addEventListener("click", () => { const m = sceneOf(); if (m !== "court") setFive(m); });
     $("viewGomoku").addEventListener("click", () => { $("fiveRow").hidden = true; }); $("viewCourt").addEventListener("click", () => { $("fiveRow").hidden = false; });
     window.__setFive = setFive;
     // 任务 / 突变体属于球场版：一用就切回去
-    for (const id of ["mOpen", "mutNew"]) { const e2 = $(id); if (e2) e2.addEventListener("click", () => { if (LIFE.is3d()) setFive(false); }, true); }
-    try { if (localStorage.getItem(FIVEKEY) === "1" && !/[?&]five=0/.test(location.search)) setTimeout(() => setFive(true), 0); } catch (e) {}
+    for (const id of ["mOpen", "mutNew"]) { const e2 = $(id); if (e2) e2.addEventListener("click", () => { if (LIFE.is3d()) setFive("court", true); }, true); }
+    if (sceneOf() !== "court") setTimeout(() => setFive(sceneOf()), 0);
   }
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
@@ -3548,13 +3603,15 @@ code { font: 12px var(--mono); }
   let rasterAcc = 0, brainAcc = 0, frameN = 0;
   // ── 五感全开时球场里多出来的东西：气味羽流、热源 / 潮湿区、声波、成块的食物、来球、触角上的灰 ──
   // 这些都是给人看的标记；果蝇感受到的是 game_core 里按同一组坐标算出来的物理量。
-  let lightWasL3 = false;
+  let lightWasL3 = false, NAT = null, NATW = null, natWas = false, camPrevZ = 0;
   const L3S = (() => {
     const grp = new THREE.Group(); grp.visible = false; scene.add(grp);
     const tc = document.createElement("canvas"); tc.width = tc.height = 128; { const c = tc.getContext("2d"), gr = c.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.55, "rgba(255,255,255,.45)"); gr.addColorStop(1, "rgba(255,255,255,0)"); c.fillStyle = gr; c.fillRect(0, 0, 128, 128); }
     const tex = new THREE.CanvasTexture(tc), disc = new THREE.CircleGeometry(1, 48), ring = new THREE.RingGeometry(0.93, 1, 72), food = new THREE.CylinderGeometry(1, 1, 0.5, 40), ballG = new THREE.SphereGeometry(1, 28, 18), dustG = new THREE.SphereGeometry(0.09, 10, 8);
     const ODOR = { vinegar: 0xa0be3c, geosmin: 0x786046, A: 0xeb78aa, B: 0x5a46a0 }, FOOD = { sugar: 0xce7828, bitter: 0x605446, water: 0x4696e6, mixed: 0xce7828 };
-    const glow = (color, op) => new THREE.Mesh(disc, new THREE.MeshBasicMaterial({ map: tex, color, transparent: true, opacity: op, depthWrite: false }));
+    const glow = (color, op) => new THREE.Mesh(new THREE.PlaneGeometry(2, 2, 14, 14), new THREE.MeshBasicMaterial({ map: tex, color, transparent: true, opacity: op, depthWrite: false }));
+    // 大自然里把光晕「铺」在地形上：每个顶点取它脚下的地形高度
+    const drape = (m, Wd, lift) => { const P = m.geometry.attributes.position, c = Math.cos(m.rotation.z), sn = Math.sin(m.rotation.z); for (let i = 0; i < P.count; i++) { const lx = P.getX(i) * m.scale.x, ly = P.getY(i) * m.scale.y; P.setZ(i, Wd ? (Wd.h(m.position.x + lx * c - ly * sn, m.position.y + lx * sn + ly * c) + lift) / m.scale.z : 0); } P.needsUpdate = true; };
     const kinds = { fields: new Map(), odors: new Map(), sounds: new Map(), pellets: new Map(), balls: new Map(), dust: new Map() }; let zc = 0;
     const make = { fields: f => { const m = glow(f.type === "heat" ? 0xe24a33 : 0x408cdc, 0.42); m.position.z = 0.05 + (zc++ % 40) * 0.003; return m; },
       odors: o => { const m = glow(ODOR[o.kind] || 0x786046, 0.3); m.position.z = 0.2 + (zc++ % 40) * 0.003; return m; },
@@ -3562,18 +3619,19 @@ code { font: 12px var(--mono); }
       pellets: p => { const m = new THREE.Mesh(food, new THREE.MeshStandardMaterial({ color: FOOD[p.type] || 0xce7828, roughness: p.type === "water" ? 0.15 : 0.7, transparent: p.type === "water", opacity: p.type === "water" ? 0.8 : 1 })); m.rotation.x = Math.PI / 2; m.castShadow = true; m.userData.z = p.type === "water" ? 0.34 : 0.25; return m; },   // 水洼略高一点，和叠在一起的果子不抢深度
       balls: () => { const m = new THREE.Mesh(ballG, new THREE.MeshStandardMaterial({ color: css("--ball"), roughness: 0.35 })); m.castShadow = true; return m; },
       dust: () => new THREE.Mesh(dustG, new THREE.MeshStandardMaterial({ color: 0x8a8f8c, roughness: 1 })) };
-    function sync(g) {
+    function sync(g, Wd) {                                           // Wd = 大自然的世界对象（有地形）；食物、甲虫、浆果由 nature3d 画
       grp.visible = !!g; if (!g) return;
-      for (const kind of Object.keys(kinds)) { const M = kinds[kind], list = g[kind] || [], live = new Set(list);
+      for (const kind of Object.keys(kinds)) { const M = kinds[kind], list = Wd && (kind === "pellets" || kind === "balls") ? [] : g[kind] || [], live = new Set(list);
         for (const [o, m] of M) if (!live.has(o)) { grp.remove(m); M.delete(o); }
         for (const o of list) if (!M.has(o)) { const m = make[kind](o); grp.add(m); M.set(o, m); } }
-      for (const [f, m] of kinds.fields) { m.position.x = f.x; m.position.y = f.y; m.scale.setScalar(f.sigma * 2); m.material.opacity = 0.42 * Math.min(1, f.strength); }
-      for (const [o, m] of kinds.odors) { m.position.x = o.x; m.position.y = o.y; m.scale.setScalar(o.sigma * 2.2); m.material.opacity = 0.3 * Math.min(1, o.strength); }
-      for (const [o, g3] of kinds.sounds) { const u = o.t / o.dur; g3.position.x = o.x; g3.position.y = o.y; g3.children.forEach((r, k) => { r.scale.setScalar(Math.max(0.01, u * [0.4, 0.7, 1][k] * 60)); r.material.opacity = (1 - u) * 0.9; }); }
+      const sp = Wd && g.CFG.wind && g.wind ? g.wind.speed : 0, wd = g.wind ? g.wind.dir : 0;
+      for (const [f, m] of kinds.fields) { m.position.x = f.x; m.position.y = f.y; m.scale.set(f.sigma * 2, f.sigma * 2, 1); m.material.opacity = 0.42 * Math.min(1, f.strength); if (Wd) { m.position.z = 0; drape(m, Wd, 0.3); } }
+      for (const [o, m] of kinds.odors) { m.rotation.z = wd; m.position.x = o.x + Math.cos(wd) * o.sigma * 1.1 * sp; m.position.y = o.y + Math.sin(wd) * o.sigma * 1.1 * sp; m.scale.set(o.sigma * 2.2 * (1 + 1.1 * sp), o.sigma * 2.2 * (1 - 0.25 * sp), 1); m.material.opacity = 0.3 * Math.min(1, o.strength); if (Wd) { m.position.z = 0; drape(m, Wd, 0.5); } }   // 羽流被风吹歪（与 nature.js 的 plume 同一个形状）
+      for (const [o, g3] of kinds.sounds) { const u = o.t / o.dur; g3.position.x = o.x; g3.position.y = o.y; g3.position.z = (Wd ? Wd.h(o.x, o.y) : 0) + 0.6; g3.children.forEach((r, k) => { r.scale.setScalar(Math.max(0.01, u * [0.4, 0.7, 1][k] * 60)); r.material.opacity = (1 - u) * 0.9; }); }
       for (const [p, m] of kinds.pellets) { const r = (p.r || g.CFG.pelletR) * Math.sqrt(Math.max(0.15, p.amount / (p.r ? g.CFG.lifeFoodAmount : 1))); m.position.set(p.x, p.y, m.userData.z); m.scale.set(r, 1, r); }
       for (const [b, m] of kinds.balls) { m.position.set(b.x, b.y, g.CFG.ballR); m.scale.setScalar(g.CFG.ballR); if (b.outcome === "hit") m.material.color.set(css("--critical")); }
       let di = 0; for (const [d, m] of kinds.dust) { const ant = parts[meshIdx[d.side === "left" ? "LPedicel" : "RPedicel"]]; if (!ant) continue;
-        pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), g.S.h); m.position.set(g.S.x + pv.x, g.S.y + pv.y, g.S.z + pv.z); m.visible = fly.visible; di++; }
+        pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), g.S.h); m.position.set(g.S.x + pv.x, g.S.y + pv.y, g.S.z + pv.z + (Wd ? g.S.ground || 0 : 0)); m.visible = fly.visible; di++; }
     }
     return { sync, group: grp, counts: () => Object.fromEntries(Object.entries(kinds).map(([k, M]) => [k, M.size])) };
   })();
@@ -3581,6 +3639,7 @@ code { font: 12px var(--mono); }
   function frame(now) {
     const dtReal = Math.min(0.05, Math.max(0, (now - prev) / 1000)); prev = now;
     const l3 = !!(LIFE && LIFE.is3d()); RG = l3 ? LIFE.game() : game; RS = RG.S;      // 五感全开：画的是 v5 那只
+    const nat = !!(l3 && LIFE.isNature() && RG.world), gz = nat ? RS.ground || 0 : 0;   // 大自然：有地形，果蝇站在 gz 高的地面上
     if ((frameN++ % SHADOW_EVERY) === 0) renderer.shadowMap.needsUpdate = true;
     if (S.jumpT < 0 && CFG.takeoff !== pendingTakeoff) CFG.takeoff = pendingTakeoff;
     const inFlight = !!(RS.clip && RS.jumpT >= 0);
@@ -3616,11 +3675,16 @@ code { font: 12px var(--mono); }
       vx = P.x; vy = P.y; vz = P.z;
     }
     poseFly();
-    fly.position.set(RS.x, RS.y, RS.z); fly.rotation.z = RS.h;
+    fly.rotation.order = "ZYX"; fly.position.set(RS.x, RS.y, RS.z + gz); fly.rotation.set(nat && RS.z <= 0.01 ? RS.roll || 0 : 0, nat && RS.z <= 0.01 ? RS.pitch || 0 : 0, RS.h);   // 身体顺着坡面
+    if (flying) flyer.position.z += gz; vz += gz;
+    if (nat) { if (NATW !== RG.world) { if (NAT) scene.remove(NAT.group); NAT = FlyNature3D.build(THREE, scene, RG.world, css); NATW = RG.world; window.__nat3d = NAT; } if (!natWas) { camera.position.set(vx - 10, vy - 64, gz + 56); controls.target.set(vx, vy, gz); camPrev = [vx, vy]; camPrevZ = gz; }   // 刚进大自然：相机抬高一点，别埋在草里
+      NAT.show(true); NAT.update(dtReal, RG, camera); hemi.intensity = 0; sun.intensity = 0; renderer.toneMappingExposure = 1; natWas = true; }
+    else { if (NAT) NAT.show(false); if (natWas) { natWas = false; applyLight(CFG.light === undefined ? 1 : CFG.light); } }
+    floor.visible = !nat; gridGroup.visible = !nat; if (courtGroup) { courtGroup.group.visible = !nat; for (const Lc of courtGroup.lights || []) Lc.visible = !nat; }
     if (flyShadow.visible) { flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = RS.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8)); }
     for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) { e.m.position.set(b.x, b.y, CFG.ballR); e.sh.position.set(b.x, b.y, 0.01); e.m.visible = !l3; } }
     for (const [, gm] of pelletMeshes) gm.visible = !l3;
-    L3S.sync(l3 ? RG : null);
+    L3S.sync(l3 ? RG : null, nat ? RG.world : null);
     let di = 0;
     for (const [, e] of dustMeshes) {
       const ant = parts[meshIdx[e.side === "left" ? "LPedicel" : "RPedicel"]];
@@ -3650,14 +3714,15 @@ code { font: 12px var(--mono); }
       $("windArrow").style.transform = `rotate(${(-RG.wind.dir * 180 / Math.PI).toFixed(0)}deg)`;
       $("windTxt").textContent = `风 ${(RG.wind.speed * 100).toFixed(0)}% · JO ${((RG.wind.joL + RG.wind.joR) / 2).toFixed(0)} Hz`;
     }
-    if (l3) { applyLight(RG.CFG.light === undefined ? 1 : RG.CFG.light); lightWasL3 = true; } else if (lightWasL3) { applyLight(CFG.light === undefined ? 1 : CFG.light); lightWasL3 = false; }   // 五感全开时场馆灯光跟着它那个世界的昼夜走
+    if (l3 && !nat) { applyLight(RG.CFG.light === undefined ? 1 : RG.CFG.light); lightWasL3 = true; } else if (lightWasL3) { applyLight(CFG.light === undefined ? 1 : CFG.light); lightWasL3 = false; }   // 五感全开时场馆灯光跟着它那个世界的昼夜走
     // **主画面被五子棋占用时，整个三维球场都不渲染**——包括 4 张阴影贴图和复眼的
     // 立方体贴图读回。这是帧率最高的一档，也是把棋盘做成"替换主画面"而不是
     // "再加一块画布"的主要原因（用户反馈：原来那样帧率更低）。
     const gomokuOwnsStage = (window.__stageMode === "gomoku" || window.__stageMode === "life") && !l3;
     if (!gomokuOwnsStage) {
       const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
-      camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
+      camera.position.x += dx; camera.position.y += dy; camera.position.z += gz - camPrevZ; camPrevZ = gz; controls.target.set(vx, vy, gz);
+      if (nat) { const floorZ = RG.world.h(camera.position.x, camera.position.y) + 2.5; if (camera.position.z < floorZ) camera.position.z = floorZ; }   // 相机别钻到地底下
       controls.update();
       renderer.render(scene, camera);
       // 果蝇第一人称复眼视窗：每秒只刷几次（读回 GPU 像素会打断流水线）
