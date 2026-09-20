@@ -119,6 +119,16 @@ results/gomoku/*
 !results/gomoku/search_width.json
 !results/gomoku/vcf_value.json
 !results/gomoku/seed_averaging.json
+!results/gomoku/two_views.json
+!results/gomoku/depth_models.json
+!results/gomoku/depth_models_train.json
+!results/gomoku/train_lines_mv.json
+!results/gomoku/play_lines_mv.json
+!results/gomoku/compare_mv_attempt1.json
+!results/gomoku/compare_linetable_fly_intact_mv2.json
+!results/gomoku/compare_linetable_fly_intact_mv2_confirm.json
+!results/gomoku/train_lines_1view.json
+!results/gomoku/play_lines_1view.json
 !results/gomoku/lines_summary.json
 !results/gomoku/page_tables.json
 

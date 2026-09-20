@@ -54,6 +54,9 @@
         new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide }));
       cloth.rotation.x = Math.PI / 2; cloth.position.set(0.2, 0, CFG.flagH - S * 0.42);
       g.add(cloth);
+      // 旗杆底下垫一颗扁棋子：只有细杆和小旗的话，从上往下看几乎看不出落在哪个交叉点上
+      const stone = new THREE.Mesh(new THREE.SphereGeometry(S * 0.4, 18, 10), new THREE.MeshLambertMaterial({ color }));
+      stone.scale.set(1, 1, 0.32); stone.position.z = S * 0.12; g.add(stone);
       g.castShadow = true;
       return g;
     }

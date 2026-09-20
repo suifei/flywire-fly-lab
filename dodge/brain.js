@@ -31,8 +31,11 @@
       this.n = data.meta.n;
       this.groups = data.groups;
       this.indptr = decodeB64(data.indptr, Int32Array);
-      this.post = decodeB64(data.post, Int32Array);
-      this.w0 = decodeB64(data.w, Float32Array);
+      // 紧凑格式（页面内联时用，见 dodge/build.py）：靶点下标 < 65,536 → Uint16；权重 = 整数个突触 × 常数 → Int16 + 比例。
+      // 解码后与原格式**逐位相同**（build.py 转换时核对过），只是页面小 40%。原始 JSON 文件不变。
+      this.post = data.post_u16 ? Int32Array.from(decodeB64(data.post_u16, Uint16Array)) : decodeB64(data.post, Int32Array);
+      if (data.w_i16) { const q = decodeB64(data.w_i16, Int16Array), sc = data.w_scale; this.w0 = new Float32Array(q.length); for (let i = 0; i < q.length; i++) this.w0[i] = q[i] * sc; }
+      else this.w0 = decodeB64(data.w, Float32Array);
       this.w = new Float32Array(this.w0);
       this.dt = P.dt;
       this.D = Math.round(P.t_dly / P.dt);

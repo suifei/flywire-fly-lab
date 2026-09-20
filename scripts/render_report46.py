@@ -16,6 +16,9 @@ NAME = dict(fly_intact="果蝇脑 · 真实连接组", fly_shuffled="果蝇脑 �
             rand_relu="同维度的随机 ReLU 网络", free_table="每种线型一个自由参数", teacher_table="老师的手写分值（不训练）")
 fi, fs_, rw, rr = A["fly_intact"], A["fly_shuffled"], A["raw24"], A["rand_relu"]
 yes = lambda b: "**成立**" if b else "**不成立**"
+_cap = fs_.get("capped")
+CAPTXT = (f"这一版两个臂的读出维度相同（打乱接线活跃的特征列有 {_cap['active']:,} 个，随机取了 {_cap['used']:,} 个）——维度相同它仍然不输；" if _cap
+          else f"打乱之后活跃的神经元多一倍（{fs_['dim'] - 1:,} 对 {fi['dim'] - 1:,}），读出维度更高；")
 
 rows_train = "\n".join(
     f"| {NAME[k]} | {v.get('dim', '—')} | {v.get('distill_r2', '—')} | {pct(v.get('stage1_test_top1'))} | {pct(v['test_top1'])} | "
@@ -28,6 +31,8 @@ lad = " / ".join(f"深度 {r['depth']}：{wl(r)}" for r in S["teacher_ladder"]["
 noise = "\n".join(f"| {r['r2']} | {wl(r)} | {pct(r['win_rate'])} |" for r in S["table_noise"]["rows"])
 tim = "\n".join(f"| {r['depth']} | {r.get('nodes', '—'):,} | {r.get('seconds', '—')} |" for r in S["depth_timing"]["rows"] if r.get("nodes")) if "depth_timing" in S else ""
 sw = S.get("search_width", {}).get("rows", []); vv = S.get("vcf_value", {}).get("rows", [])
+DM = S.get("depth_models")
+NV = len(T.get("feat_sets", [""])); VR = S.get("views_r2", {}); VA = S.get("view_adoption"); OV = S.get("one_view")
 sa = S["seed_averaging"]; ol = S["opto_leak"]; sf = S["score_forms"]; pr = S["class_probe"]; rs = S.get("rl_small")
 sv = S["shape_values"]; cn = S["class_names"]
 shape_tbl = "| 类别 | " + " | ".join(cn) + " |\n|---|" + "---|" * 9 + "\n| 这类有多少种线型 | " + " | ".join(str(c) for c in S["class_counts"]) + " |\n" + \
@@ -62,7 +67,7 @@ v1 把 225 格 × 2 个通道随机铺到感觉神经元上：同一个「活三
 v2 的单位是**线型**：候选点某个方向两侧各 4 格，每格 ∈ {{空, 我方, 对方, 边界}}。合法线型恰好 **{DS['patterns_total']:,}** 种
 （边界只能从外侧连续进来：(81+27+9+3+1)² ），少到可以让果蝇脑**把每一种都跑一遍**：
 8 格 × 3 种状态 = 24 个通道，各接约 61 个真实感觉神经元（分配表固定种子打乱，是任意的），160 Hz 泊松驱动 300 ms，
-数 {fi['dim'] - 1:,} 个会放电的下游神经元的脉冲。**脑子里一个突触都不训练**，训练的只有一层线性读出：
+数下游神经元的脉冲，3 个泊松种子取平均。这样的分配表一共用了 **{NV} 套**（「视角」，见 46.8），拼起来是 {fi['dim'] - 1:,} 维特征。**脑子里一个突触都不训练**，训练的只有一层线性读出：
 
     a[线型] = Φ̄·w （这条线的对数价值）      落子分 = Σ_4方向 e^{{a[进攻线]}} + λ·Σ_4方向 e^{{a[防守线]}}      防守线 = 同一条线互换视角
 
@@ -108,7 +113,7 @@ v2 的单位是**线型**：候选点某个方向两侧各 4 格，每格 ∈ {{
 
 - **B 脑子有用**（比不经过脑子高 ≥ 5 个百分点）→ {yes(T['criterion_B_brain_helps'])}：{pct(fi['test_top1'])} 对 {pct(rw['test_top1'])}。
 - **C 接线有用**（比打乱接线高 ≥ 5 个百分点）→ {yes(T['criterion_C_wiring_helps_top1'])}：{pct(fi['test_top1'])} 对 {pct(fs_['test_top1'])}。
-  打乱之后活跃的神经元多一倍（{fs_['dim'] - 1:,} 对 {fi['dim'] - 1:,}），读出维度更高；**同维度的随机 ReLU 网络（{pct(rr['test_top1'])}）也不输果蝇脑**。
+  {CAPTXT}**同维度的随机 ReLU 网络（{pct(rr['test_top1'])}）也不输果蝇脑**。
   所以能说的是「这颗脑子是一个够用的非线性展开」，**不能说「真实接线对下棋有特殊贡献」**。
 - **D 不是噪声哈希**（换一组从未见过的泊松种子，掉幅 ≤ 5 个百分点）→ {yes(T['criterion_D_not_noise_hash'])}：掉 {fi['seed_drop'] * 100:.1f} 个百分点。
 
@@ -163,10 +168,40 @@ v2 的单位是**线型**：候选点某个方向两侧各 4 格，每格 ∈ {{
 """ + (f"- 探索性地再跑一次（{rs['iters']} 轮 × {rs['games_per_iter']} 局，学习率 {rs['lr']}）：{wl(rs['final']['d4_vs_supervised_d4'])}（{pct(rs['win_rate_vs_supervised'])}）→ {'通过' if rs['criterion_passed'] else '同样不通过'}。\n" if rs else "") + f"""
 每轮几十局的胜负信号太吵，推不动一个 {fi['dim']:,} 维的读出层。**页面上的果蝇用的是监督训练（阶段一 + 二）的表**，强化版只在图里展示训练曲线。
 
-### 46.8 能说什么、不能说什么
+### 46.8 多给几套输入分配（视角）：读出更准，棋也更好一点——第二次尝试才过
+
+「视角」= 把 24 个通道分给另一批输入神经元的另一张随机分配表。每个视角都要把 14,641 种线型重跑一遍（× 9 个种子 × 两个臂，后台跑了约 4 小时）。
+换一组种子后对评分表的拟合 R²（`two_views.json`）：""" + ("、".join(f"{k} **{v['r2_new_seeds']}**" for k, v in VR.items()) if VR else "—") + f"""。到 3–4 个视角就饱和了，这颗脑子可靠的上限在 R² ≈ 0.90。
+
+换不换表，判据事先写死：**新表对旧表，同一个引擎都想 6 步，200 局，胜率 ≥ 55% 才换**。
+""" + (f"""
+| | 新表对旧表（想 6 步） | 只凭直觉 | 各自对老师搜 6 步 |
+|---|---|---|---|
+| 第一次（阶段一的岭系数固定为 10） | **{wl(VA['attempt1_fixed_ridge']['head_to_head'])}（{pct(VA['attempt1_fixed_ridge']['win_rate'])}）→ 不换** | {wl(VA['attempt1_fixed_ridge']['greedy_head_to_head'])} | 新 {wl(VA['attempt1_fixed_ridge']['vs_teacher_d6']['new'])}、旧 {wl(VA['attempt1_fixed_ridge']['vs_teacher_d6']['old'])} |
+| 第二次（每个臂自己选岭系数后重训） | **{wl(VA['attempt2']['head_to_head'])}（{pct(VA['attempt2']['win_rate'])}）→ 换** | {wl(VA['attempt2']['greedy_head_to_head'])} | 新 {wl(VA['attempt2']['vs_teacher_d6']['new'])}、旧 {wl(VA['attempt2']['vs_teacher_d6']['old'])} |
+| 独立确认（换一批开局） | {wl(VA['confirm']['head_to_head'])}（{pct(VA['confirm']['win_rate'])}） | {wl(VA['confirm']['greedy_head_to_head'])} | 新 {wl(VA['confirm']['vs_teacher_d6']['new'])}、旧 {wl(VA['confirm']['vs_teacher_d6']['old'])} |
+
+第一次没过的原因是个真缺陷：岭系数固定为 10，维度一多就去拟合噪声（同一次训练里打乱接线的臂有 14,070 维 ≈ 线型总数，一致率直接崩到 23%）。
+改成每个臂用前一半训练种子拟合、在后一半训练种子上选岭系数（测试种子不碰），选出来的是 {fi.get('ridge_alpha', '—')}。
+**这是第二次尝试，两次都写在这里**；确认赛用的是另一批开局。提升是小幅的：对老师搜 6 步，新旧两张表没有差别。
+""" if VA else "") + (f"""
+单视角时的数字留档（`*_1view.json`）：一致率 {pct(OV['fly_intact']['test_top1'])}、换种子 {pct(OV['fly_intact']['test_top1_testseeds'])}、Wine {pct(OV['fly_intact']['wine_top1'])}、阶段一 R² {OV['fly_intact']['distill_r2']}；
+想 6 步对老师搜 4 / 6 / 8 步 {wl(OV['play_fly_intact']['d6']['teacher2_d4'])} / {wl(OV['play_fly_intact']['d6']['teacher2_d6'])} / {wl(OV['play_fly_intact']['d6']['teacher2_d8'])}。46.5–46.7 的表都是 {NV} 个视角的结果。
+多视角时打乱接线的臂**只随机取与真实接线一样多的特征列**（它活跃的神经元多一倍，全取有 14,070 维，既不公平也放不进内存）。
+""" if OV else "") + f"""
+### 46.9 「推理必须是训练出来的」：多步推理能训练进读出层多少（`gomoku/depth_models.js`）
+
+用户的要求（2026-09-20）：页面上的多步推理必须是训练好的模型给的，不能是下棋时现跑的搜索算法。
+数据集里每个局面本来就标了向前搜 1–6、8 步各自的最佳着，于是对每个 N 各训练一个读出层；**下棋时只做模型推理**（线型 → 果蝇脑特征 → 这个读出层 → 落子分最大的点），页面的「推理步数」选的就是用哪一个。
+""" + ("| 推理步数 | 与自己的标签一致 | 与深度 8 一致 | 对随机 | 对旧老师 | 对老师搜 1 步 | 对老师搜 2 步 | 对老师搜 4 步 | 对「1 步」的模型 |\n|---|---|---|---|---|---|---|---|---|\n" +
+  "\n".join(f"| {d} | {pct(DM['train'][d]['agree_own_label'])} | {pct(DM['train'][d]['agree_depth8'])} | {wl(v['random'])} | {wl(v['old_teacher'])} | {wl(v['teacher2_d1'])} | {wl(v['teacher2_d2'])} | {wl(v['teacher2_d4'])} | {wl(DM['vs_d1_model'].get(d))} |" for d, v in DM["vs"].items()) +
+  f"\n\n判据（写在训练之前）：{DM['criterion']['text']} → **{'成立' if DM['criterion']['passed'] else '不成立'}**（{pct(DM['criterion']['win_rate'])}，和棋算未胜）。\n"
+  "**多步推理基本训练不进这种读出层**：它只能给每条线一个价值再相加，「向前看」需要的组合推理表达不了。7 个模型彼此差不多，都在旧老师（只看 1 步的手写启发式）的水平；\n"
+  "同一张表交给搜索，棋力的差距全部来自搜索（46.6）。页面默认用纯模型推理，alpha-beta 只作为默认关闭、标明「算法，不是果蝇」的外挂。\n" if DM else "（尚未训练）\n") + f"""
+### 46.10 能说什么、不能说什么
 
 - **能说**：果蝇脑 + 一层线性读出，学会了给每条线估价，顺序全对；放进只懂规则的搜索，想 6 步能和搜 4–6 步的手写老师下平或占优。v1 是几乎随机。
-- **不能说**：「真实连接组对下棋有特殊贡献」（打乱接线、随机网络都不输）；「果蝇在思考」（向前推演是搜索做的）；「多巴胺让它学会了下棋」（阴性，而且 δ 不是它自己的）。
+- **不能说**：「真实连接组对下棋有特殊贡献」（打乱接线、随机网络都不输）；「果蝇在思考」（外挂搜索里向前推演是算法做的；纯模型推理时它没有向前看的能力，见 46.9）；「多巴胺让它学会了下棋」（阴性，而且 δ 不是它自己的）。
 - 页面卡片、台账、这一节都从 `results/gomoku/lines_summary.json` 取数。
 <!-- §46:end -->"""
 

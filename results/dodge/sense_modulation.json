@@ -1,0 +1,185 @@
+{
+ "note": "5 个种子 × 1 s；判据：差 > 2 SD 且 > 20%",
+ "rows": [
+  {
+   "base": "吃糖（SUGAR 60 Hz）",
+   "readout": "MN9",
+   "base_hz": {
+    "mean": 44.1,
+    "sd": 4.74
+   },
+   "mod": "＋醋味 OLFA 200",
+   "hz": {
+    "mean": 48.3,
+    "sd": 11.25
+   },
+   "diff": 4.2,
+   "modulates": false
+  },
+  {
+   "base": "吃糖（SUGAR 60 Hz）",
+   "readout": "MN9",
+   "base_hz": {
+    "mean": 44.1,
+    "sd": 4.74
+   },
+   "mod": "＋土臭素 OLFR 200",
+   "hz": {
+    "mean": 49.1,
+    "sd": 4.99
+   },
+   "diff": 5,
+   "modulates": false
+  },
+  {
+   "base": "吃糖（SUGAR 60 Hz）",
+   "readout": "MN9",
+   "base_hz": {
+    "mean": 44.1,
+    "sd": 4.74
+   },
+   "mod": "＋饥渴 ISN 200",
+   "hz": {
+    "mean": 2.5,
+    "sd": 0.61
+   },
+   "diff": -41.6,
+   "modulates": true
+  },
+  {
+   "base": "吃糖（SUGAR 60 Hz）",
+   "readout": "MN9",
+   "base_hz": {
+    "mean": 44.1,
+    "sd": 4.74
+   },
+   "mod": "＋声音 AUDIO 60",
+   "hz": {
+    "mean": 43.4,
+    "sd": 10.4
+   },
+   "diff": -0.7,
+   "modulates": false
+  },
+  {
+   "base": "逼近（LPLC2 60 Hz）",
+   "readout": "GF",
+   "base_hz": {
+    "mean": 147.7,
+    "sd": 3.33
+   },
+   "mod": "＋醋味 OLFA 200",
+   "hz": {
+    "mean": 154.7,
+    "sd": 2.66
+   },
+   "diff": 7,
+   "modulates": false
+  },
+  {
+   "base": "逼近（LPLC2 60 Hz）",
+   "readout": "GF",
+   "base_hz": {
+    "mean": 147.7,
+    "sd": 3.33
+   },
+   "mod": "＋土臭素 OLFR 200",
+   "hz": {
+    "mean": 149.8,
+    "sd": 0.76
+   },
+   "diff": 2.1,
+   "modulates": false
+  },
+  {
+   "base": "逼近（LPLC2 60 Hz）",
+   "readout": "GF",
+   "base_hz": {
+    "mean": 147.7,
+    "sd": 3.33
+   },
+   "mod": "＋饥渴 ISN 200",
+   "hz": {
+    "mean": 146.2,
+    "sd": 0.97
+   },
+   "diff": -1.5,
+   "modulates": false
+  },
+  {
+   "base": "逼近（LPLC2 60 Hz）",
+   "readout": "GF",
+   "base_hz": {
+    "mean": 147.7,
+    "sd": 3.33
+   },
+   "mod": "＋声音 AUDIO 60",
+   "hz": {
+    "mean": 155.2,
+    "sd": 1.72
+   },
+   "diff": 7.5,
+   "modulates": false
+  },
+  {
+   "base": "碰触（TOUCH 100 Hz）",
+   "readout": "DNa",
+   "base_hz": {
+    "mean": 5.95,
+    "sd": 0.33
+   },
+   "mod": "＋醋味 OLFA 200",
+   "hz": {
+    "mean": 0.65,
+    "sd": 0.29
+   },
+   "diff": -5.3,
+   "modulates": true
+  },
+  {
+   "base": "碰触（TOUCH 100 Hz）",
+   "readout": "DNa",
+   "base_hz": {
+    "mean": 5.95,
+    "sd": 0.33
+   },
+   "mod": "＋土臭素 OLFR 200",
+   "hz": {
+    "mean": 5.7,
+    "sd": 0.45
+   },
+   "diff": -0.25,
+   "modulates": false
+  },
+  {
+   "base": "碰触（TOUCH 100 Hz）",
+   "readout": "DNa",
+   "base_hz": {
+    "mean": 5.95,
+    "sd": 0.33
+   },
+   "mod": "＋饥渴 ISN 200",
+   "hz": {
+    "mean": 6.05,
+    "sd": 0.45
+   },
+   "diff": 0.1,
+   "modulates": false
+  },
+  {
+   "base": "碰触（TOUCH 100 Hz）",
+   "readout": "DNa",
+   "base_hz": {
+    "mean": 5.95,
+    "sd": 0.33
+   },
+   "mod": "＋声音 AUDIO 60",
+   "hz": {
+    "mean": 4.45,
+    "sd": 0.54
+   },
+   "diff": -1.5,
+   "modulates": true
+  }
+ ]
+}

@@ -1,0 +1,426 @@
+{
+ "wmin": 3,
+ "max_hop": 4,
+ "groups": {
+  "嗅觉（全部 ORN）": {
+   "n": 1850,
+   "hops": {
+    "DNa01": 3,
+    "DNa02": 3,
+    "DNp01（巨纤维）": 2,
+    "MDN（后退）": 3,
+    "aDN1（梳理）": 2,
+    "MN9（伸喙）": 3
+   },
+   "n_descending_within_2_hops": 158,
+   "top_descending": [
+    {
+     "cell_type": "DNb05",
+     "hop": 1,
+     "n": 2,
+     "score": 2539.0
+    },
+    {
+     "cell_type": "DNp32",
+     "hop": 1,
+     "n": 2,
+     "score": 249.0
+    },
+    {
+     "cell_type": "DNp05",
+     "hop": 2,
+     "n": 2,
+     "score": 191.0
+    },
+    {
+     "cell_type": "DNg56",
+     "hop": 2,
+     "n": 2,
+     "score": 166.0
+    },
+    {
+     "cell_type": "DNp06",
+     "hop": 2,
+     "n": 2,
+     "score": 160.0
+    },
+    {
+     "cell_type": "DNc01",
+     "hop": 1,
+     "n": 2,
+     "score": 126.0
+    },
+    {
+     "cell_type": "DNp12",
+     "hop": 2,
+     "n": 2,
+     "score": 123.0
+    },
+    {
+     "cell_type": "DNbe007",
+     "hop": 2,
+     "n": 2,
+     "score": 118.0
+    },
+    {
+     "cell_type": "DNpe021",
+     "hop": 2,
+     "n": 2,
+     "score": 82.0
+    },
+    {
+     "cell_type": "DNp02",
+     "hop": 2,
+     "n": 2,
+     "score": 77.0
+    }
+   ]
+  },
+  "嗅觉 · ORN_DM1（醋，吸引）": {
+   "n": 68,
+   "hops": {
+    "DNa01": 3,
+    "DNa02": 3,
+    "DNp01（巨纤维）": 3,
+    "MDN（后退）": 3,
+    "aDN1（梳理）": 3,
+    "MN9（伸喙）": 4
+   },
+   "n_descending_within_2_hops": 15,
+   "top_descending": [
+    {
+     "cell_type": "DNb05",
+     "hop": 2,
+     "n": 2,
+     "score": 307.0
+    },
+    {
+     "cell_type": "DNp32",
+     "hop": 2,
+     "n": 2,
+     "score": 73.0
+    },
+    {
+     "cell_type": "DNc01",
+     "hop": 2,
+     "n": 2,
+     "score": 40.0
+    },
+    {
+     "cell_type": "DNc02",
+     "hop": 2,
+     "n": 2,
+     "score": 18.0
+    },
+    {
+     "cell_type": "DNp29",
+     "hop": 2,
+     "n": 2,
+     "score": 12.0
+    },
+    {
+     "cell_type": "DNge054",
+     "hop": 2,
+     "n": 1,
+     "score": 7.0
+    },
+    {
+     "cell_type": "DNg86",
+     "hop": 2,
+     "n": 1,
+     "score": 6.0
+    },
+    {
+     "cell_type": "DNg35",
+     "hop": 2,
+     "n": 1,
+     "score": 3.0
+    },
+    {
+     "cell_type": "DNg57",
+     "hop": 2,
+     "n": 1,
+     "score": 3.0
+    },
+    {
+     "cell_type": "DNp62",
+     "hop": 2,
+     "n": 1,
+     "score": 3.0
+    }
+   ]
+  },
+  "嗅觉 · ORN_DA2（土臭素，厌恶）": {
+   "n": 39,
+   "hops": {
+    "DNa01": 3,
+    "DNa02": 3,
+    "DNp01（巨纤维）": 3,
+    "MDN（后退）": 3,
+    "aDN1（梳理）": 3,
+    "MN9（伸喙）": 4
+   },
+   "n_descending_within_2_hops": 10,
+   "top_descending": [
+    {
+     "cell_type": "DNb05",
+     "hop": 2,
+     "n": 2,
+     "score": 154.0
+    },
+    {
+     "cell_type": "DNp32",
+     "hop": 2,
+     "n": 2,
+     "score": 37.0
+    },
+    {
+     "cell_type": "DNc01",
+     "hop": 2,
+     "n": 1,
+     "score": 13.0
+    },
+    {
+     "cell_type": "DNg30",
+     "hop": 2,
+     "n": 2,
+     "score": 7.0
+    },
+    {
+     "cell_type": "DNc02",
+     "hop": 2,
+     "n": 2,
+     "score": 6.0
+    },
+    {
+     "cell_type": "DNpe046",
+     "hop": 2,
+     "n": 1,
+     "score": 4.0
+    }
+   ]
+  },
+  "信息素": {
+   "n": 429,
+   "hops": {
+    "DNa01": 3,
+    "DNa02": 3,
+    "DNp01（巨纤维）": 3,
+    "MDN（后退）": 3,
+    "aDN1（梳理）": 2,
+    "MN9（伸喙）": 3
+   },
+   "n_descending_within_2_hops": 103,
+   "top_descending": [
+    {
+     "cell_type": "DNb05",
+     "hop": 2,
+     "n": 2,
+     "score": 811.0
+    },
+    {
+     "cell_type": "DNge054",
+     "hop": 2,
+     "n": 2,
+     "score": 443.0
+    },
+    {
+     "cell_type": "DNg35",
+     "hop": 2,
+     "n": 2,
+     "score": 383.0
+    },
+    {
+     "cell_type": "DNpe002",
+     "hop": 2,
+     "n": 2,
+     "score": 271.0
+    },
+    {
+     "cell_type": "DNge041",
+     "hop": 2,
+     "n": 2,
+     "score": 188.0
+    },
+    {
+     "cell_type": "DNg15",
+     "hop": 2,
+     "n": 2,
+     "score": 176.0
+    },
+    {
+     "cell_type": "DNge133",
+     "hop": 2,
+     "n": 2,
+     "score": 173.0
+    },
+    {
+     "cell_type": "DNge011",
+     "hop": 2,
+     "n": 2,
+     "score": 145.0
+    },
+    {
+     "cell_type": "DNg84",
+     "hop": 2,
+     "n": 2,
+     "score": 137.0
+    },
+    {
+     "cell_type": "DNge124",
+     "hop": 2,
+     "n": 2,
+     "score": 136.0
+    }
+   ]
+  },
+  "听觉": {
+   "n": 387,
+   "hops": {
+    "DNa01": 2,
+    "DNa02": 2,
+    "DNp01（巨纤维）": 1,
+    "MDN（后退）": 2,
+    "aDN1（梳理）": 2,
+    "MN9（伸喙）": 3
+   },
+   "n_descending_within_2_hops": 694,
+   "top_descending": [
+    {
+     "cell_type": "DNg108",
+     "hop": 2,
+     "n": 2,
+     "score": 2168.0
+    },
+    {
+     "cell_type": "DNp12",
+     "hop": 1,
+     "n": 2,
+     "score": 2130.0
+    },
+    {
+     "cell_type": "DNp02",
+     "hop": 1,
+     "n": 2,
+     "score": 1810.0
+    },
+    {
+     "cell_type": "DNg24",
+     "hop": 1,
+     "n": 2,
+     "score": 1623.0
+    },
+    {
+     "cell_type": "DNp06",
+     "hop": 2,
+     "n": 2,
+     "score": 1590.0
+    },
+    {
+     "cell_type": "DNg29",
+     "hop": 1,
+     "n": 2,
+     "score": 1475.0
+    },
+    {
+     "cell_type": "DNg09",
+     "hop": 1,
+     "n": 8,
+     "score": 1386.0
+    },
+    {
+     "cell_type": "DNg56",
+     "hop": 2,
+     "n": 2,
+     "score": 1128.0
+    },
+    {
+     "cell_type": "DNge091",
+     "hop": 1,
+     "n": 17,
+     "score": 1043.0
+    },
+    {
+     "cell_type": "DNp01",
+     "hop": 1,
+     "n": 2,
+     "score": 1033.0
+    }
+   ]
+  },
+  "内感受 ISN（饥渴）": {
+   "n": 4,
+   "hops": {
+    "DNa01": 3,
+    "DNa02": 3,
+    "DNp01（巨纤维）": 3,
+    "MDN（后退）": 3,
+    "aDN1（梳理）": 2,
+    "MN9（伸喙）": 3
+   },
+   "n_descending_within_2_hops": 278,
+   "top_descending": [
+    {
+     "cell_type": "DNg27",
+     "hop": 1,
+     "n": 2,
+     "score": 669.0
+    },
+    {
+     "cell_type": "DNg70",
+     "hop": 1,
+     "n": 2,
+     "score": 468.0
+    },
+    {
+     "cell_type": "DNp104",
+     "hop": 2,
+     "n": 2,
+     "score": 366.0
+    },
+    {
+     "cell_type": "DNg80",
+     "hop": 1,
+     "n": 2,
+     "score": 344.0
+    },
+    {
+     "cell_type": "DNge019",
+     "hop": 2,
+     "n": 12,
+     "score": 275.0
+    },
+    {
+     "cell_type": "DNg68",
+     "hop": 1,
+     "n": 2,
+     "score": 269.0
+    },
+    {
+     "cell_type": "DNp68",
+     "hop": 2,
+     "n": 2,
+     "score": 265.0
+    },
+    {
+     "cell_type": "DNg26",
+     "hop": 1,
+     "n": 4,
+     "score": 264.0
+    },
+    {
+     "cell_type": "DNg63",
+     "hop": 1,
+     "n": 2,
+     "score": 217.0
+    },
+    {
+     "cell_type": "DNp58",
+     "hop": 1,
+     "n": 2,
+     "score": 212.0
+    }
+   ]
+  }
+ }
+}

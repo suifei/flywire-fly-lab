@@ -24,7 +24,7 @@
   };
   // 表 JSON → 按线型编码索引的两张 Float32Array。codes 省略时用 allCodes() 的顺序（导出时就是这个顺序）
   function loadTable(j) {
-    const codes = j.codes || Array.from(L.allCodes()), a = f32(j.att), d = f32(j.deff);
+    const codes = j.codes || Array.from(L.allCodes()), a = f32(j.att), d = j.deff ? f32(j.deff) : a.map(v => v * j.lam);   // 单表模型：防守 = λ × 进攻，页面数据里不重复存
     const att = new Float32Array(L.NCODE), def = new Float32Array(L.NCODE);
     for (let k = 0; k < codes.length; k++) { att[codes[k]] = a[k]; def[codes[k]] = d[k]; }
     const t = { att, def, combo: false, linear: j.form === "lse" };
@@ -43,7 +43,8 @@
     return out;
   }
 
-  function makeLinePlayer(SUB, BrainClass, tableJson, opt = {}) {
+  function makeLinePlayer(SUB, BrainClass, tableJson0, opt = {}) {
+    let tableJson = tableJson0;
     const tab = loadTable(tableJson);
     const live = !!(tableJson.w_a && BrainClass && SUB);
     let brain = null, map = null, views = null, wa, wd, mu, sd, keep;
@@ -91,8 +92,27 @@
     }
     const toValue = (v, kind) => (tableJson.form === "lse" ? Math.exp(Math.min(v, 30)) * (kind === "att" ? 1 : tableJson.lam) : (kind === "att" ? v : v * tableJson.lam));
 
-    return {
+    const api = {
       tab, live, brain, shuffled: !!opt.shuffle, lastStats: null,
+      // 换一个读出层（「推理 N 步」的模型）：特征、分配表、脑子都不变，只换 w / λ / 价值表。真脑核对的缓存随之作废。
+      useTable(j2) {
+        const t2 = loadTable(Object.assign({}, tableJson, j2)); tab.att = t2.att; tab.def = t2.def; engine = null; liveCache.clear();
+        tableJson = Object.assign({}, tableJson, j2); if (live && j2.w_a) wa = f32(j2.w_a);
+        if (j2.seeds) { SEEDS.length = 0; for (const s0 of j2.seeds) SEEDS.push(s0); }
+        this.depthLabel = j2.label_depth;
+      },
+      // 模型的"想法"：每个合法候选点的落子分与概率（训练时的 softmax：p ∝ 落子分）。按分数从高到低。
+      policy(board, me) {
+        const cells = scoreCells(tab, board, me).sort((p, q) => q[1] - p[1]); let Z = 0; for (const c of cells) Z += c[1];
+        return cells.map(([i, s]) => ({ cell: i, score: s, p: Z > 0 ? s / Z : 0 }));
+      },
+      // 模型"预想"的后续：同一个模型替双方轮流走 n 步（每一步都是落子分最大的点；有人成五就停）。只用来展示，不参与选点。
+      imagine(board, me, n) {
+        const b = board.slice(), seq = []; let c = me;
+        for (let k = 0; k < n; k++) { const pol = this.policy(b, c); if (!pol.length) break; const mv = pol[0].cell; seq.push({ cell: mv, color: c, p: pol[0].p }); b[mv] = c;
+          if (G.wins(b, mv % G.N, (mv / G.N) | 0, c)) { seq[seq.length - 1].wins = true; break; } c = c === G.BLACK ? G.WHITE : G.BLACK; }
+        return seq;
+      },
       // 选点：depth ≤ 1 = 直觉（落子分最大）；否则把同一张表交给增量搜索引擎（engine.js）。
       // o.budgetMs 给了就做限时迭代加深；o.vcf 先试连续冲四杀棋（纯规则）。返回 {move, scores, depth, how, nodes, ms}
       choose(board, me, o = {}) {
@@ -152,6 +172,7 @@
         return { ...c, lines: st.lines, liveCheck: st.liveCheck };
       },
     };
+    return api;
   }
 
   const API = { loadTable, scoreCells, makeLinePlayer };

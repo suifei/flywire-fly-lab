@@ -173,7 +173,7 @@
     // 根：迭代加深。opt: {depth} 固定深度 ｜ {budgetMs} 限时。返回 {move, depth, score, nodes, ms, pv_scores}
     function think(board, me, o = {}) {
       const t0 = Date.now(); setBoard(board); nodes = 0; aborted = false;
-      // 宽度 K = 每层只展开落子分最高的 K 个点。同等节点预算（2 万）下 K=6 对 K=10 是 62–38（100 局，见 side_experiments.js width）：
+      // 宽度 K = 每层只展开落子分最高的 K 个点。同等节点预算（每步 2 万）下 K=6 明显好于 K=10（100 局，数字见 results/gomoku/search_width.json，由 side_experiments.js width 产生）：
       // 收窄之后搜得更深。4–6 之间在 100 局的噪声里分不出高下，取 6。根节点保持 16，免得一开始就漏掉好点。
       const K = o.K ?? 6, K0 = o.K0 ?? 16, maxDepth = o.depth ?? 30;
       deadline = o.budgetMs ? t0 + o.budgetMs : Infinity;

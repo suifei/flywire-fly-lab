@@ -1,4 +1,4 @@
-<title>果蝇闪避</title>
+<title>数字果蝇实验室</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%230d1117%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%233fb984%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M16%204%2026%2010%2026%2022%2016%2028%206%2022%206%2010Z%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%223.5%22%20fill%3D%22%23e8b339%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="数字果蝇游乐场：4,599 个 FlyWire 连接组神经元在浏览器里实时决定躲球、起飞、进食、梳理与后退">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,6 +60,14 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .title { display: grid; gap: 4px; }
 .title h1 { margin: 0; font: 400 clamp(40px, 5.4vw, 64px)/0.95 var(--display); letter-spacing: .02em; }
 .title p { margin: 0; color: var(--muted); max-width: 60ch; text-wrap: pretty; }
+.modes { display: inline-flex; gap: 8px; margin: 10px 0 10px; flex-wrap: wrap; }
+.mode { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 9px 16px 10px; border-radius: 10px; cursor: pointer;
+  border: 1.5px solid var(--rule); background: var(--panel-2); color: var(--ink-2); font: inherit; min-width: 150px; text-align: left; }
+.mode b { font: 600 15px/1.1 var(--sans); }
+.mode small { font: 11.5px/1.2 var(--sans); color: var(--muted); }
+.mode:hover { border-color: var(--ink-2); }
+.mode[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.mode[aria-pressed="true"] small { color: var(--panel); opacity: .75; }
 .title-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 14px; }
 .repo { display: flex; gap: 8px; align-self: center; }
 .repo-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
@@ -111,6 +119,7 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 #gmStage { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
   background: var(--panel-2); cursor: crosshair; touch-action: none; z-index: 2; }
 #gmStage[hidden] { display: none !important; }
+#lifeStage[hidden] { display: none !important; }
 .brainbox { position: relative; background: var(--panel-2); border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
 .brainbox canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .brainbox canvas:active { cursor: grabbing; }
@@ -180,6 +189,8 @@ canvas#raster { width: 100%; height: 280px; display: block; background: var(--pa
 .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
 .card h3 { margin: 0; font: 600 15px/1.3 var(--sans); text-wrap: balance; }
 .card p, .card li { color: var(--ink-2); max-width: 68ch; }
+/* 68ch 是给半宽卡片定的（长行难读）。整行宽的卡片套用它，右边会空出一半——用户反馈后取消。 */
+.card[style*="grid-column"] p, .card[style*="grid-column"] li { max-width: none; }
 .card p { margin: 0; }
 .card ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
 .tag { display: inline-block; font: 500 10.5px/1 var(--mono); padding: 3px 5px; border-radius: 4px; border: 1px solid currentColor; margin-right: 6px; vertical-align: 1px; }
@@ -235,7 +246,7 @@ code { font: 12px var(--mono); }
   <header class="mast">
     <div class="title">
       <div class="title-row">
-        <h1>果蝇闪避</h1>
+        <h1>数字果蝇实验室</h1>
         <nav class="repo" aria-label="仓库链接">
           <a class="repo-btn" href="https://github.com/suifei/flywire-fly-lab" target="_blank" rel="noopener"
              title="在 GitHub 上看源码">
@@ -249,7 +260,15 @@ code { font: 12px var(--mono); }
           </a>
         </nav>
       </div>
-      <p>朝果蝇扔球、喂糖粒苦粒、往触角上撒灰。决定往哪转、何时起飞、吃不吃、要不要梳理的，是在你浏览器里实时运行的 <span id="nNeu">4,599</span> 个 FlyWire 连接组神经元；起飞后是真实果蝇的逃逸飞行轨迹。</p>
+      <div class="modes" role="tablist" aria-label="游戏模式">
+        <button id="viewCourt" class="mode" role="tab" aria-pressed="true"><b>篮球场</b><small>躲球 · 觅食 · 梳理 · 任务</small></button>
+        <button id="viewGomoku" class="mode" role="tab" aria-pressed="false"><b>五子棋</b><small>和果蝇下棋 · 看它怎么想</small></button>
+        <button id="viewLife" class="mode" role="tab" aria-pressed="false"><b>生活</b><small>五感全开 · 它自己过日子</small></button>
+      </div>
+      <p id="mastCourt">朝果蝇扔球、喂糖粒苦粒、往触角上撒灰。决定往哪转、何时起飞、吃不吃、要不要梳理的，是在你浏览器里实时运行的 <span id="nNeu">4,599</span> 个 FlyWire 连接组神经元；起飞后是真实果蝇的逃逸飞行轨迹。</p>
+      <p id="mastLife" hidden>世界自己运转：昼夜、烂果子和水洼、气味、嗡嗡声、热源、风、灰尘、偶尔飞来的球。每一样都只作为<b>物理量</b>送到真实的感受器上（视、听、嗅、味、触，外加温度和湿度）；
+        往哪转、飞不飞、吃不吃，全由这颗 <span id="nNeu4"></span> 个神经元的连接组决定——没有一条"闻到就过去""听到就跑"的规则。</p>
+      <p id="mastGomoku" hidden>和果蝇下五子棋（含黑方禁手）。每条线值多少，是同一颗果蝇脑（一个突触都不训练）加一层训练出来的线性读出给的；「推理步数」选的是用哪一个读出层——每个都是拿「向前看 N 步的结果」当标签训练出来的，下棋时不做搜索。</p>
     </div>
     <div class="score" aria-live="polite">
       <div class="stat"><span>躲开</span><b id="sDodge">0</b></div>
@@ -264,6 +283,7 @@ code { font: 12px var(--mono); }
     <div class="stage-card">
       <div class="stage" id="stage">
         <canvas id="gmStage" hidden></canvas>
+        <canvas id="lifeStage" hidden style="position:absolute; inset:0; width:100%; height:100%; display:block"></canvas>
         <div class="overlay">
           <span class="pill" id="pState">行走中</span>
           <span class="pill" id="pClock">大脑 0.00 s · 1.00× 实时</span>
@@ -317,28 +337,36 @@ code { font: 12px var(--mono); }
         </div>
       </div>
       <div class="controls">
-        <div class="row" id="viewRow">
-          <label class="k" id="lblView">主画面</label>
-          <div class="seg" role="group" aria-labelledby="lblView">
-            <button id="viewCourt" aria-pressed="true">篮球场</button>
-            <button id="viewGomoku" aria-pressed="false">五子棋</button>
-          </div>
+        <div class="row" id="lifeRow" hidden>
+          <label class="k">生活</label>
+          <span class="row" style="gap:6px 10px">
+            <div class="seg" role="group" aria-label="时间流速" id="lifeSpeedSeg"><button data-v="1" aria-pressed="true">×1</button><button data-v="2" aria-pressed="false">×2</button></div>
+            <span class="row" style="gap:6px" title="往世界里放东西。放进去的只是物理量，果蝇怎么反应由连接组决定">
+              <button class="btn" data-drop="fruit">烂果子</button><button class="btn" data-drop="mold">发霉的</button><button class="btn" data-drop="water">水</button>
+              <button class="btn" data-drop="sound">嗡一声</button><button class="btn" data-drop="heat">热源</button><button class="btn" data-drop="ball">扔球</button>
+            </span>
+            <label class="toggle" title="切断听觉神经元的全部传出突触"><input type="checkbox" id="lifeDeaf"> 失聪</label>
+            <label class="toggle" title="切断两个嗅小球感受神经元的传出突触"><input type="checkbox" id="lifeAnosmic"> 失嗅</label>
+            <label class="toggle" title="按文献（饥饿提高、口渴降低）驱动真实的 4 个内感受神经元 ISN。这个模型里它的效果与文献相反：饿了反而不吃。默认关，开着看它出错"><input type="checkbox" id="lifeISN"> ISN 通路</label>
+            <button class="btn" id="lifeReset">重新开始</button>
+            <span class="pill" id="lifePill">未开始</span>
+          </span>
+        </div>
+        <div class="row" id="viewRow" hidden>
+          <label class="k" id="lblView">五子棋</label>
           <span id="gmInline" class="row" style="gap:6px 10px" hidden>
             <div class="seg" role="group" aria-label="对局模式">
               <button id="gmHuman" aria-pressed="true">我 vs 果蝇</button>
               <button id="gmSelf" aria-pressed="false">果蝇自对弈</button>
               <button id="gmTeach" aria-pressed="false">果蝇 vs 老师</button>
             </div>
-            <div class="seg" role="group" aria-label="果蝇想几步" id="gmDepthSeg" title="直觉 = 只看落子分；其余 = 用同一张线型价值表向前搜这么多步。搜索在后台线程里跑，不卡界面">
-              <button data-d="1" aria-pressed="false">直觉</button>
-              <button data-d="4" aria-pressed="false">4</button>
-              <button data-d="6" aria-pressed="false">6</button>
-              <button data-d="8" aria-pressed="true">8 步</button>
-              <button data-d="10" aria-pressed="false">10</button>
-              <button data-d="12" aria-pressed="false">12</button>
-              <button data-d="14" aria-pressed="false">14</button>
+            <label class="k" title="每个步数对应一个**训练出来的读出层**：训练时拿「向前搜 N 步得到的最佳着」当标签。下棋时只做模型推理，不搜索。随时可切，立即生效">推理步数</label>
+            <div class="seg" role="group" aria-label="推理步数" id="gmDepthSeg"></div>
+            <label class="toggle" title="外挂：把果蝇的价值表交给 alpha-beta 搜索算法现场往前搜。这是算法，不是果蝇——棋力强得多，默认关"><input type="checkbox" id="gmSearch"> 外挂搜索</label>
+            <div class="seg" role="group" aria-label="搜索深度" id="gmSearchSeg" hidden>
+              <button data-d="4" aria-pressed="false">4</button><button data-d="6" aria-pressed="false">6</button><button data-d="8" aria-pressed="true">8</button>
+              <button data-d="10" aria-pressed="false">10</button><button data-d="12" aria-pressed="false">12</button><button data-d="14" aria-pressed="false">14</button>
             </div>
-            <label class="toggle" title="先找连续冲四的杀棋（纯规则：每一手都逼对方必须挡，最多算 12 手）"><input type="checkbox" id="gmVcf" checked> 杀棋</label>
             <label class="toggle" title="每走一步，把这一步的 8 条线放进真实的果蝇脑里重跑，与价值表逐个比对。关掉下得快"><input type="checkbox" id="gmLive" checked> 真脑核对</label>
             <div class="seg" role="group" aria-label="可视化">
               <button id="gmView2d" aria-pressed="true">平面</button>
@@ -583,12 +611,16 @@ code { font: 12px var(--mono); }
       <p><b>① 每条线值多少——果蝇脑 + 一层线性读出。</b>对一个候选点，沿 4 个方向各取一条线（两侧各 4 格，
         每格 = 空 / 我方 / 对方 / 边界）。这样的线型一共只有 <b id="gmNPat">14,641</b> 种，少到可以让这颗
         <b>5,563 个神经元的果蝇脑把每一种都跑一遍</b>：8 个格子 × 3 种状态 = 24 个通道，各接约 61 个真实感觉神经元，
-        泊松驱动 300 ms，数下游神经元的脉冲，对 3 个随机种子取平均。<b>脑子里一个突触都不训练</b>，
+        泊松驱动 300 ms，数下游神经元的脉冲，对 3 个随机种子取平均<span id="gmNViews"></span>。<b>脑子里一个突触都不训练</b>，
         训练的只有一层线性读出，它把放电换成这条线的<b>对数价值</b>。落子分 = 4 条进攻线 + λ × 4 条防守线的价值之和。</p>
-      <p><b>② 向前推演几步——搜索，不是果蝇。</b>「想 N 步」是把同一张价值表交给 alpha-beta 搜索。
-        搜索<b>只懂规则</b>（成五 = 赢、对手能成五就必须挡、黑方禁手），不含任何棋形分值；「杀棋」是连续冲四的纯规则搜索。
-        ③ 禁手与胜负由规则引擎判。每走一步，页面会把这一步的 8 条线<b>放进真脑里现场重跑</b>，与价值表逐个比对——
-        这时左边的 spike 图、下行神经元、感觉输入显示的就是下棋这只果蝇的放电。</p>
+      <p><b>② 「推理 N 步」也是训练出来的，不是下棋时现算的。</b>数据集里每个局面都标了「向前搜 1–6 步、8 步」各自的最佳着；
+        对每个 N，用它当标签各训练一个读出层。棋盘上方的<b>推理步数</b>选的就是用哪一个——下棋时只有模型推理：线型 → 果蝇脑的放电 → 这个读出层 → 落子分最大的点，<b>没有任何搜索</b>。
+        随时可切，正在想的那一步会立刻按新的重想。棋盘上画的就是它的想法：<b>橙色圆圈</b> = 模型给各候选点的概率，<b>编号的虚子</b> = 它预想的后续（同一个模型替双方轮流走 N 步）。
+        ③ 禁手与胜负由规则引擎判。每走一步，页面会把这一步的线型<b>放进真脑里现场重跑</b>，与价值表比对——
+        这时左边的 spike 图、下行神经元、感觉输入显示的就是下棋这只果蝇的放电。
+        ④ <b>外挂搜索</b>（默认关）才是 alpha-beta 算法：把同一张价值表交给它往前搜，只懂规则、不含棋形分值。它强得多，但那是算法的功劳，页面上单独标着。</p>
+      <div class="tbl"><table id="tGomokuDepth"></table></div>
+      <p class="sub" id="gmDepthNote"></p>
       <h4 style="margin:.9em 0 .3em">训练过程</h4>
       <p class="sub">两个阶段。<b>阶段一</b>：把「落子评分算法」当训练数据——让读出层去拟合老师对全部线型的对数分值
         （训练局面里只出现过其中 <span id="gmNSeen">6,266</span> 种，只靠着法标签的话，其余的价值会随意漂移，搜索一走进没见过的局面就崩）。
@@ -616,7 +648,7 @@ code { font: 12px var(--mono); }
       <h4 style="margin:.9em 0 .3em">同一套训练，换六种特征各做一遍</h4>
       <div class="tbl"><table id="tGomoku"></table></div>
       <p class="sub" id="gmNote"></p>
-      <h4 style="margin:.9em 0 .3em">真下几盘</h4>
+      <h4 style="margin:.9em 0 .3em">真下几盘（外挂搜索：同一个搜索引擎，换不同的价值表）</h4>
       <div class="tbl"><table id="tGomokuPlay"></table></div>
       <p class="sub" id="gmPlayNote"></p>
       <p class="sub"><b>v1 的全部数字作废。</b>这张卡片以前写的是「果蝇脑的一致率 0.025、只比随机高一点；连接组对下棋没有贡献」。
@@ -916,6 +948,8 @@ code { font: 12px var(--mono); }
 <div class="tip" id="tip" hidden></div>
 
 <script id="sub-data" type="application/json">/*__SUBCIRCUIT__*/</script>
+<script id="sub4-data" type="application/json">/*__SUBCIRCUIT_V4__*/</script>
+<script id="life-data" type="application/json">/*__LIFE__*/</script>
 <script id="sub-nt" type="application/json">/*__SUB_NT__*/</script>
 <script id="perturb-data" type="application/json">/*__PERTURB__*/</script>
 <script id="repro-data" type="application/json">/*__REPRO__*/</script>
@@ -1388,7 +1422,7 @@ code { font: 12px var(--mono); }
   // 它只在"思考"的那 100 ms 里放电，所以读数是一阵一阵的——这不是卡，是它真的在想。
   const GMSTATS = { rates: null, drive: null, t: 0 };
   function updatePanels() {
-    const gmMode = window.__stageMode === "gomoku";
+    const gmMode = window.__stageMode === "gomoku" || window.__stageMode === "life";
     const gs = gmMode ? GMSTATS : null;
     const out = (gs && gs.rates) ? {
       dnaL: (gs.rates.DNa01_left + gs.rates.DNa02_left) || 0,
@@ -1427,7 +1461,7 @@ code { font: 12px var(--mono); }
     else { st.textContent = paused ? "已暂停" : "行走中"; st.className = "pill"; }
     {
       const h = document.querySelector("#brainSub");
-      if (h) h.textContent = (gmMode ? "下棋的那只 · " : "") + SUB.meta.n.toLocaleString() + " 个神经元 · 真实胞体坐标";
+      if (h) h.textContent = (window.__stageMode === "life" ? "自己过日子的那只 · " : gmMode ? "下棋的那只 · " : "") + SUB.meta.n.toLocaleString() + " 个神经元 · 真实胞体坐标";
     }
     const tp = $("thirstPill");
     if (tp) {
@@ -1862,7 +1896,7 @@ code { font: 12px var(--mono); }
     const PT = JSON.parse(document.getElementById("gomoku-readout").textContent);
     const TR = JSON.parse(document.getElementById("gomoku-train").textContent);
     let player = null;
-    const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK, depth: 8, vcf: true, liveCheck: true,
+    const S = { on: false, mode: "human", view: "2d", board: G5.newBoard(), turn: G5.BLACK, depth: 8, search: false, searchDepth: 8, vcf: true, liveCheck: true, thought: null,
                 over: null, busy: false, last: -1, hover: -1, fliers: [], history: [], thinkMs: 0, thinker: G5.BLACK,
                 info: null, check: null, phase: "" };
 
@@ -1884,6 +1918,17 @@ code { font: 12px var(--mono); }
       player = players.black;
     };
     const playerFor = turn => (turn === G5.BLACK ? players.black : players.white) || players.black;
+    // 「推理 N 步」= 换一个训练出来的读出层（PT.depths[N]）。脑子、特征、分配表都不变。
+    const DEPTHS = PT.depths ? Object.keys(PT.depths).map(Number).sort((x, y) => x - y) : [];
+    function applyDepth() {
+      if (!PT.depths || !PT.depths[S.depth]) return;
+      ensurePlayer(); const d = PT.depths[S.depth];
+      if (players.black) players.black.useTable({ label_depth: d.label_depth, lam: d.lam, bias: d.bias, att: d.att, deff: null, w_a: d.w_a, seeds: d.seeds });
+      if (players.white) players.white.useTable({ label_depth: d.label_depth, lam: d.lam, bias: d.bias, att: d.att_white || d.att, deff: null, w_a: d.w_a, seeds: d.seeds_white || d.seeds });
+      if (worker) { try { worker.terminate(); } catch (e) {} worker = null; workerOk = null; pending.clear(); }   // 搜索用的表也得换
+    }
+    // 正在想的时候改了步数 / 开关了搜索：这一步**立刻**按新设定重想
+    function rethink() { if (S.busy && !S.over) { checker = null; S.thought = null; S.busy = false; S.phase = ""; timer = 0; if (pending.size && worker) { try { worker.terminate(); } catch (e) {} worker = null; workerOk = null; pending.clear(); } } }
 
     // 搜索放到 Worker 里跑（深度 8–10 要几秒到十几秒，不能卡住界面）。Worker 起不来（比如被 CSP 拦了）就退回主线程同步跑。
     let worker = null, workerOk = null, reqId = 0; const pending = new Map();
@@ -1904,16 +1949,18 @@ code { font: 12px var(--mono); }
         worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
         worker.onmessage = e => { const m = e.data; if (m.ready) { workerOk = true; return; } const cb = pending.get(m.id); if (cb) { pending.delete(m.id); cb(m); } };
         worker.onerror = () => { workerOk = false; for (const [id, cb] of pending) { pending.delete(id); cb(null); } };
-        worker.postMessage({ init: { black: { att: PT.black.att, lam: PT.black.lam }, white: { att: (PT.white || PT.black).att, lam: PT.black.lam } } });
+        const dd = PT.depths && PT.depths[S.depth];
+        worker.postMessage({ init: dd ? { black: { att: dd.att, lam: dd.lam }, white: { att: dd.att_white || dd.att, lam: dd.lam } }
+                                      : { black: { att: PT.black.att, lam: PT.black.lam }, white: { att: (PT.white || PT.black).att, lam: PT.black.lam } } });
       } catch (e) { workerOk = false; }
     }
     // 返回 Promise<{move, depth, how, nodes, ms}>
     function chooseMove(side, board, me) {
-      const sync = () => { const c = playerFor(me).choose(board, me, { depth: S.depth, vcf: S.vcf }); return { move: c.move, depth: c.depth, how: c.how, nodes: c.nodes, ms: c.ms }; };
+      const sync = () => { const c = playerFor(me).choose(board, me, { depth: S.searchDepth, vcf: S.vcf }); return { move: c.move, depth: c.depth, how: c.how, nodes: c.nodes, ms: c.ms }; };
       startWorker();
       if (!worker || workerOk === false) return Promise.resolve(sync());
       return new Promise(res => { const id = ++reqId; pending.set(id, m => res(m || sync()));
-        worker.postMessage({ id, side, board: Array.from(board), me, depth: S.depth, vcf: S.vcf }); });
+        worker.postMessage({ id, side, board: Array.from(board), me, depth: S.searchDepth, vcf: S.vcf }); });
     }
 
     // —— 布局：棋盘按画布短边居中，留出右侧信息栏 ——
@@ -1939,6 +1986,27 @@ code { font: 12px var(--mono); }
       ctx.fillStyle = color === G5.BLACK ? "#7a3f38" : "#c2524a";
       ctx.beginPath(); ctx.arc(r * 0.78, 0, r * 0.28, 0, 6.2832); ctx.fill();
       ctx.restore();
+    }
+
+    // 模型的想法：候选点概率（圆圈越实、越大 = 把握越大）+ 预想的后续（编号虚子，一颗一颗出现）。
+    // 平面与立体共用：xy(i) 给出格点的屏幕坐标，cellPx(i) 给出该处一格有多少像素（立体时随透视变化）。
+    function drawThought(ctx, xy, cellPx, darkTheme) {
+      const T = S.thought; if (!T) return;
+      const fnt = getComputedStyle(document.body).fontFamily || "sans-serif";
+      for (const c of T.pol) {
+        const [x, y] = xy(c.cell), cs = cellPx(c.cell), r = cs * (0.16 + 0.3 * Math.sqrt(c.p));
+        ctx.fillStyle = "rgba(224,86,42," + (0.15 + 0.6 * Math.sqrt(c.p)).toFixed(2) + ")"; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+        if (c.p >= 0.04) { ctx.fillStyle = darkTheme ? "#fff" : "#3a1c0c"; ctx.font = "600 " + Math.max(8, cs * 0.26) + "px " + fnt; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText((c.p * 100).toFixed(0) + "%", x, y - cs * 0.52); }
+      }
+      const shown = T.done ? T.seq.length : Math.min(T.seq.length, Math.floor(Math.max(0, T.t - 0.35) / 0.22));
+      for (let k = 0; k < shown; k++) {
+        const q = T.seq[k], [x, y] = xy(q.cell), cs = cellPx(q.cell), blk = q.color === G5.BLACK;
+        ctx.globalAlpha = k === 0 ? 0.85 : 0.5; ctx.fillStyle = blk ? "#14161a" : "#f6f8f7"; ctx.strokeStyle = blk ? "#000" : "#96a29e"; ctx.lineWidth = 1.2;
+        ctx.setLineDash(k === 0 ? [] : [3, 2]); ctx.beginPath(); ctx.arc(x, y, cs * 0.36, 0, 6.2832); ctx.fill(); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        ctx.fillStyle = blk ? "#fff" : "#14161a"; ctx.font = "700 " + Math.max(9, cs * 0.36) + "px " + fnt; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(k + 1), x, y + 0.5);
+      }
+      ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
     }
 
     // ——— 平面棋盘（默认，最快最好点）———
@@ -2006,6 +2074,7 @@ code { font: 12px var(--mono); }
         ctx.strokeStyle = palette["--gf"] || "#1baf7a"; ctx.lineWidth = 2.5;
         ctx.beginPath(); ctx.arc(x, y, L.cell * 0.56, 0, 6.2832); ctx.stroke();
       }
+      drawThought(ctx, i => cellXY(L, i), () => L.cell, darkTheme);
       // 悬停预览
       if (S.on && S.hover >= 0 && S.mode === "human" && S.turn === G5.BLACK && !S.over && S.board[S.hover] === G5.EMPTY) {
         const [x, y] = cellXY(L, S.hover);
@@ -2036,19 +2105,20 @@ code { font: 12px var(--mono); }
       if (S.last >= 0) line("最后一手 " + String.fromCharCode(65 + S.last % G5.N) + (((S.last / G5.N) | 0) + 1));
       if (S.info) {
         const who = S.thinker === G5.WHITE ? "白蝇" : "黑蝇", f = S.info;
-        line(who + (f.how === "vcf" ? " 找到杀棋" : f.how === "greedy" ? " 凭直觉" : f.how === "block" ? " 被迫挡" : f.how === "win" ? " 成五" : " 想了 " + f.depth + " 步"));
-        line((f.nodes ? f.nodes.toLocaleString() + " 个局面 · " : "") + (f.ms / 1000).toFixed(f.ms < 1000 ? 2 : 1) + " s", palette["--muted"]);
+        if (f.how === "model") { line(who + " · 推理 " + f.depth + " 步的模型"); line("首选点的把握 " + (f.p * 100).toFixed(0) + "% · 没有搜索", palette["--muted"]); }
+        else { line(who + " · 外挂搜索" + (f.how === "vcf" ? "：找到杀棋" : f.how === "block" ? "：被迫挡" : f.how === "win" ? "：成五" : " " + f.depth + " 步"));
+          line((f.nodes ? f.nodes.toLocaleString() + " 个局面 · " : "") + (f.ms / 1000).toFixed(f.ms < 1000 ? 2 : 1) + " s（算法，不是果蝇）", palette["--muted"]); }
       }
       if (S.phase) line(S.phase, palette["--gf"]);
-      if (S.check) line("真脑重跑 " + S.check.runs + " 次" + (S.check.cached ? " · 复用 " + S.check.cached + " 条" : "") + (S.check.skipped ? " · 未核 " + S.check.skipped : ""), palette["--muted"]),
-                   line("与表的偏差 " + S.check.max_rel_diff.toExponential(1), palette["--muted"]);
+      if (S.check) { line("真脑重跑 " + S.check.runs + " 次，偏差 " + S.check.max_rel_diff.toExponential(1), palette["--muted"]);
+        if (S.check.cached || S.check.skipped) line("复用 " + S.check.cached + " 条" + (S.check.skipped ? " · 留待后面核 " + S.check.skipped + " 条" : ""), palette["--muted"]); }
       if (S.mode === "self") line("两只果蝇对战", palette["--muted"]);
       y += 6;
       ctx.font = "11px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
       ctx.fillStyle = palette["--muted"] || "#888";
       const lines2 = S.mode === "self"
         ? ["黑白各一只果蝇", "各自一份 " + SUB.meta.n.toLocaleString() + " 神经元大脑", "接线与读出层相同，泊松种子不同"]
-        : ["每条线值多少：果蝇脑 + 线性读出", "向前推演几步：搜索（只懂规则）", "禁手由规则引擎判定"];
+        : ["每条线值多少：果蝇脑 + 训练出的读出层", "圆圈 = 模型给各点的概率", "编号的虚子 = 它预想的后续", "禁手由规则引擎判定"];
       for (const t of lines2) {
         ctx.fillText(t, x, y); y += 15;
       }
@@ -2109,7 +2179,27 @@ code { font: 12px var(--mono); }
       const ctx = cv.getContext("2d");
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(r.c, 0, 0);
+      // 叠在三维画面上的二维标注：格点投影到屏幕，想法与悬停预览都画在这一层（数字在三维里不好画）
+      const dark3 = (palette["--panel-2"] || "").match(/^#?[0-3]/) || matchMedia("(prefers-color-scheme: dark)").matches;
+      drawThought(ctx, proj3d, cellPx3d, dark3);
+      if (S.hover >= 0 && S.mode === "human" && S.turn === G5.BLACK && !S.over && !S.busy && S.board[S.hover] === G5.EMPTY) {
+        const [hx, hy] = proj3d(S.hover), hr = cellPx3d(S.hover) * 0.36, bad = G5.forbidden(S.board, S.hover % G5.N, (S.hover / G5.N) | 0);
+        ctx.globalAlpha = 0.55; ctx.fillStyle = bad ? "#d03b3b" : "#14161a"; ctx.beginPath(); ctx.arc(hx, hy, hr, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
+      }
       drawPanel(ctx, layout());
+    }
+    // 格点 → 屏幕坐标（棋盘组在原点、没有旋转，局部坐标就是世界坐标）
+    function proj3d(i) { const r = R3, v = r.board.cellPos(i).clone().project(r.cam); return [(v.x + 1) / 2 * cv.clientWidth, (1 - v.y) / 2 * cv.clientHeight]; }
+    function cellPx3d(i) { const x = i % G5.N, j = x < G5.N - 1 ? i + 1 : i - 1, a = proj3d(i), b = proj3d(j); return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    // 屏幕坐标 → 格点：从相机发一条射线，与盘面（z = 0）求交，取最近的交叉点；离得太远不算
+    function pick3d(clientX, clientY) {
+      const r = ensure3d(); if (!r) return -1;
+      const rect = cv.getBoundingClientRect(), ndc = new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height * 2 - 1));
+      const rc = new THREE.Raycaster(); rc.setFromCamera(ndc, r.cam);
+      const hit = new THREE.Vector3(); if (!rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), hit)) return -1;
+      const Sz = r.board.cell, span = r.board.span, gx = (hit.x + span / 2) / Sz, gy = (span / 2 - hit.y) / Sz, x = Math.round(gx), y = Math.round(gy);
+      if (x < 0 || y < 0 || x >= G5.N || y >= G5.N || Math.hypot(gx - x, gy - y) > 0.45) return -1;
+      return G5.idx(x, y);
     }
     function courier3d(i, c) {
       const r = ensure3d(); if (!r) return;
@@ -2131,23 +2221,32 @@ code { font: 12px var(--mono); }
       if (Math.hypot(e.clientX - rect.left - cx, e.clientY - rect.top - cy) > L.cell * 0.55) return -1;
       return G5.idx(x, y);
     }
-    let drag = null;
+    let drag = null;                                             // [起点x, 起点y, 起始yaw, 起始pitch, 是否已经拖动]
+    const humanTurn = () => S.on && S.mode === "human" && S.turn === G5.BLACK && !S.over && !S.busy;
     cv.addEventListener("pointermove", e => {
-      if (S.view === "3d" && drag && R3) {
-        R3.yaw = drag[2] + (e.clientX - drag[0]) * 0.008;
-        R3.pitch = Math.max(0.25, Math.min(1.45, drag[3] + (e.clientY - drag[1]) * 0.006));
+      if (S.view === "3d") {
+        if (drag && R3) {
+          if (!drag[4] && Math.hypot(e.clientX - drag[0], e.clientY - drag[1]) > 5) { drag[4] = true; cv.style.cursor = "grabbing"; }
+          if (drag[4]) { R3.yaw = drag[2] + (e.clientX - drag[0]) * 0.008; R3.pitch = Math.max(0.25, Math.min(1.45, drag[3] + (e.clientY - drag[1]) * 0.006)); S.hover = -1; return; }
+        }
+        S.hover = humanTurn() ? pick3d(e.clientX, e.clientY) : -1;
+        cv.style.cursor = S.hover >= 0 ? "pointer" : "grab";
         return;
       }
       S.hover = cellAt(e);
     });
     cv.addEventListener("pointerleave", () => { S.hover = -1; drag = null; });
     cv.addEventListener("pointerdown", e => {
-      if (S.view === "3d") { drag = [e.clientX, e.clientY, R3 ? R3.yaw : 0, R3 ? R3.pitch : 0.95]; cv.setPointerCapture(e.pointerId); return; }
-      if (!S.on || S.mode !== "human" || S.turn !== G5.BLACK || S.over || S.busy) return;
+      if (S.view === "3d") { drag = [e.clientX, e.clientY, R3 ? R3.yaw : 0, R3 ? R3.pitch : 0.95, false]; cv.setPointerCapture(e.pointerId); return; }
+      if (!humanTurn()) return;
       const i = cellAt(e); if (i < 0) return;
       play(i);
     });
-    cv.addEventListener("pointerup", () => { drag = null; });
+    cv.addEventListener("pointerup", e => {
+      // 立体：没拖动过 = 一次点击 → 落子（第一版立体模式只能转视角，根本落不了子）
+      if (S.view === "3d" && drag && !drag[4] && humanTurn()) { const i = pick3d(e.clientX, e.clientY); if (i >= 0) play(i); }
+      drag = null; if (S.view === "3d") cv.style.cursor = "grab";
+    });
 
     function play(i) {
       if (S.over || i < 0 || S.board[i] !== G5.EMPTY) return false;
@@ -2185,31 +2284,45 @@ code { font: 12px var(--mono); }
       // 真脑核对：每帧只跑一条线型（约 0.1–0.3 s），跑完才落子——这段时间里三块面板显示的就是这只果蝇的放电
       if (checker) {
         const r = checker.gen.next();
-        if (r.done) { const st = r.value; S.check = st.liveCheck; GMSTATS.rates = st.rates; GMSTATS.drive = st.drive; GMSTATS.t = performance.now(); const mv = checker.move; checker = null; finishMove(mv); }
+        if (r.done) { const st = r.value; S.check = st.liveCheck; GMSTATS.rates = st.rates; GMSTATS.drive = st.drive; GMSTATS.t = performance.now(); const mv = checker.move; checker = null; S.thought = null; finishMove(mv); }
         else S.phase = "真脑核对第 " + r.value.runs + " 次…";
       }
+      stepThought(dt);
       if (S.view === "2d") draw2d(dt); else draw3d(dt);
       if (S.over || S.busy || S.fliers.length) return;
       timer -= dt; if (timer > 0) return;
       if (S.mode === "human" && S.turn === G5.BLACK) { say("轮到你（黑）"); return; }
       const who = S.mode === "teach" ? (S.turn === G5.BLACK ? "fly" : "teacher") : "fly";
-      const side = S.turn, board = S.board.slice();
-      say(who === "fly" ? ((side === G5.BLACK ? "黑蝇" : "白蝇") + (S.depth > 1 ? "在想（" + S.depth + " 步）…" : "在想…")) : "老师在想…");
+      const side = S.turn, board = S.board.slice(), name = side === G5.BLACK ? "黑蝇" : "白蝇";
       S.busy = true; ensurePlayer();
-      if (who === "teacher") { setTimeout(() => finishMove(T5.bestMove(board, side, { depth: 4 }).move), 0); return; }
-      chooseMove(side === G5.BLACK ? "black" : "white", board, side).then(c => {
-        if (!S.busy || !S.on) return;                            // 期间被重置或切走了
-        S.info = c; S.thinkMs = c.ms; S.thinker = side;
-        const p = playerFor(side);
-        // 多视角的表每种线型要跑 视角数 × 种子数 次：每步最多新核对 2 种最要紧的线型（已核对过的直接复用），其余留给后面的步
-        const nRuns = (PT.black.views ? PT.black.views.length : 1) * (PT.black.seeds ? PT.black.seeds.length : 1);
-        if (S.liveCheck && p && p.live && c.move >= 0) checker = { gen: p.inspectGen(board, side, c.move, { maxNew: nRuns > 3 ? 2 : 8 }), move: c.move };
-        else { S.check = null; finishMove(c.move); }
+      if (who === "teacher") { say("老师在想…"); setTimeout(() => { if (S.busy) finishMove(T5.bestMove(board, side, { depth: 4 }).move); }, 0); return; }
+      const p = playerFor(side);
+      // 模型的"想法"：每个候选点的概率 + 它预想的后续（同一个模型替双方轮流走 N 步）。两者都是纯模型推理的输出。
+      const pol = p.policy(board, side), seq = p.imagine(board, side, Math.max(1, S.depth));
+      S.thought = { side, pol: pol.slice(0, 7), seq, t: 0, move: pol.length ? pol[0].cell : -1, searching: S.search, done: false };
+      S.thinker = side;
+      say(name + (S.search ? "：外挂搜索 " + S.searchDepth + " 步…" : "：推理 " + S.depth + " 步的模型在想…"));
+      if (S.search) chooseMove(side === G5.BLACK ? "black" : "white", board, side).then(c => {
+        if (!S.busy || !S.thought || S.thought.side !== side) return;          // 期间被重置 / 改了设定
+        S.info = c; S.thinkMs = c.ms; S.thought.move = c.move; S.thought.searchDone = true;
       });
+      else S.info = { how: "model", depth: S.depth, ms: 0, nodes: 0, p: pol.length ? pol[0].p : 0 };
+    }
+    // 思考动画推进：先亮出候选点的概率，再一颗一颗摆出预想的后续；摆完（搜索模式还要等搜索回来）→ 真脑核对 → 落子
+    function stepThought(dt) {
+      const T = S.thought; if (!T || T.done) return;
+      T.t += dt;
+      const shown = Math.floor(Math.max(0, T.t - 0.35) / 0.22), allShown = shown >= T.seq.length;
+      if (!allShown || (T.searching && !T.searchDone)) return;
+      T.done = true;
+      const side = T.side, mv = T.move, p = playerFor(side);
+      const nRuns = (PT.black.views ? PT.black.views.length : 1) * (PT.black.seeds ? PT.black.seeds.length : 1);
+      if (S.liveCheck && p && p.live && mv >= 0) checker = { gen: p.inspectGen(S.board.slice(), side, mv, { maxNew: nRuns > 3 ? 2 : 8 }), move: mv };
+      else { S.check = null; S.thought = null; finishMove(mv); }
     }
     function reset() {
       S.board = G5.newBoard(); S.turn = G5.BLACK; S.over = null; S.busy = false;
-      S.last = -1; S.fliers.length = 0; S.history.length = 0; S.thinkMs = 0; S.info = null; S.check = null; S.phase = ""; checker = null;
+      S.last = -1; S.fliers.length = 0; S.history.length = 0; S.thinkMs = 0; S.info = null; S.check = null; S.phase = ""; checker = null; S.thought = null;
       // 还有没算完的搜索（比如想 14 步要半分钟）就直接把后台线程掐掉重开，不然新局的第一步得排在它后面
       if (pending.size && worker) { try { worker.terminate(); } catch (e) {} worker = null; workerOk = null; pending.clear(); }
       if (R3) { R3.board.clear(); R3.board.markAt(null); for (const f of R3.fliers) R3.scene.remove(f.g); R3.fliers.length = 0; }
@@ -2232,6 +2345,9 @@ code { font: 12px var(--mono); }
       for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = S.on; }
       const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = S.on ? "none" : "";
       segSet([$("viewCourt"), $("viewGomoku")], S.on ? $("viewGomoku") : $("viewCourt"));
+      $("viewRow").hidden = !S.on; $("mastCourt").hidden = S.on; $("mastGomoku").hidden = !S.on;
+      { const sc = document.querySelector(".score"); if (sc) sc.style.visibility = S.on ? "hidden" : ""; }
+      if (S.on) applyDepth();
       window.__stageMode = which;
       if (!S.on) { GMSTATS.rates = null; GMSTATS.drive = null; }
       if (S.on) { ensurePlayer(); reset(); $("coach").textContent =
@@ -2245,8 +2361,13 @@ code { font: 12px var(--mono); }
     $("gmTeach").onclick = () => setMode("teach");
     $("gmView2d").onclick = () => setView("2d");
     $("gmView3d").onclick = () => setView("3d");
-    for (const bt of $("gmDepthSeg").querySelectorAll("button")) bt.onclick = () => { S.depth = +bt.dataset.d; segSet([...$("gmDepthSeg").querySelectorAll("button")], bt); };
-    $("gmVcf").onchange = e => { S.vcf = e.target.checked; };
+    // 推理步数：有哪些训练好的读出层就列哪些；点了立刻生效（正在想的那一步也按新的重想）
+    { const seg = $("gmDepthSeg"), list = DEPTHS.length ? DEPTHS : [1];
+      if (!list.includes(S.depth)) S.depth = list[list.length - 1];
+      seg.innerHTML = list.map(d => `<button data-d="${d}" aria-pressed="${d === S.depth}">${d}${d === S.depth ? " 步" : ""}</button>`).join("");
+      for (const bt of seg.querySelectorAll("button")) bt.onclick = () => { S.depth = +bt.dataset.d; segSet([...seg.querySelectorAll("button")], bt); applyDepth(); rethink(); }; }
+    $("gmSearch").onchange = e => { S.search = e.target.checked; $("gmSearchSeg").hidden = !S.search; rethink(); };
+    for (const bt of $("gmSearchSeg").querySelectorAll("button")) bt.onclick = () => { S.searchDepth = +bt.dataset.d; segSet([...$("gmSearchSeg").querySelectorAll("button")], bt); if (S.search) rethink(); };
     $("gmLive").onchange = e => { S.liveCheck = e.target.checked; };
     $("gmNew").onclick = reset;
     $("gmUndo").onclick = () => undo(S.mode === "human" ? 2 : 1);
@@ -2261,6 +2382,8 @@ code { font: 12px var(--mono); }
       const set = (id, t) => { const e2 = document.getElementById(id); if (e2) e2.textContent = t; };
       if (TR.class_counts) set("gmNPat", TR.class_counts.reduce((x, y) => x + y, 0).toLocaleString());
       if (TR.dataset) set("gmNSeen", TR.dataset.patterns_seen_in_dataset.toLocaleString());
+      { const nv = (TR.train && TR.train.feat_sets) ? TR.train.feat_sets.length : 1;
+        if (nv > 1) set("gmNViews", `；这样的「通道 → 神经元」分配表一共用了 ${nv} 套，拼起来喂给读出层（多一套，读出就准一点，3–4 套饱和）`); }
       if (TR.depth_timing) { const rows = TR.depth_timing.rows.filter(r => r.seconds !== undefined && r.depth >= 8), seg = document.getElementById("gmDepthSeg");   // 用时提示从实测文件来，不写死
         if (seg) seg.title += "。实测用时（开局局面，单线程）：" + rows.map(r => r.depth + " 步 " + (r.seconds < 1 ? r.seconds.toFixed(2) : r.seconds.toFixed(1)) + " 秒").join("、") +
           "；每多搜一步节点数约 ×" + TR.depth_timing.nodes_growth_per_ply; }
@@ -2278,8 +2401,17 @@ code { font: 12px var(--mono); }
         if (fi && fs2 && rw) set("gmNote",
           `「一致率」= 果蝇的第一选择与深度 8 搜索的最佳着相同的比例；「外部考卷」= 与 Wine 引擎（别人写的、与我们的老师无关，${(TR.train.wine_n || 0).toLocaleString()} 个局面，只考不训）着法相同的比例。` +
           `事先写好的判据：B 脑子有用（比不经过脑子高 ≥ 5 个百分点）→ ${TR.train.criterion_B_brain_helps ? "成立" : "不成立"}（${pct(fi.test_top1)} 对 ${pct(rw.test_top1)}）；` +
-          `C 接线有用（比打乱接线高 ≥ 5 个百分点）→ ${TR.train.criterion_C_wiring_helps_top1 ? "成立" : "不成立"}（${pct(fi.test_top1)} 对 ${pct(fs2.test_top1)}——打乱之后活跃的神经元多一倍，读出维度更高）；` +
+          `C 接线有用（比打乱接线高 ≥ 5 个百分点）→ ${TR.train.criterion_C_wiring_helps_top1 ? "成立" : "不成立"}（${pct(fi.test_top1)} 对 ${pct(fs2.test_top1)}——${fs2.capped ? "两个臂读出维度相同，打乱接线仍然不输" : "打乱之后活跃的神经元多一倍，读出维度更高"}）；` +
           `D 不是噪声哈希（换一组没见过的泊松种子，掉幅 ≤ 5 个百分点）→ ${TR.train.criterion_D_not_noise_hash ? "成立" : "不成立"}（掉 ${(fi.seed_drop * 100).toFixed(1)} 个百分点）。`);
+      }
+      const td = document.getElementById("tGomokuDepth"), DMs = TR.depth_models;
+      if (td && DMs) {
+        const cellD = r => r ? `${r.win}–${r.loss}${r.draw ? "–" + r.draw : ""}` : "—";
+        td.innerHTML = "<tr><th>推理步数（用哪个读出层）</th><th>与自己的训练标签一致</th><th>与深度 8 搜索一致</th><th>对随机</th><th>对旧老师</th><th>对老师搜 1 步</th><th>对老师搜 2 步</th><th>对「1 步」的模型</th></tr>" +
+          Object.entries(DMs.vs).map(([d, v]) => `<tr><td>${d} 步</td><td>${pct(DMs.train[d].agree_own_label)}</td><td>${pct(DMs.train[d].agree_depth8)}</td><td>${cellD(v.random)}</td><td>${cellD(v.old_teacher)}</td>` +
+            `<td>${cellD(v.teacher2_d1)}</td><td>${cellD(v.teacher2_d2)}</td><td>${cellD(DMs.vs_d1_model[d])}</td></tr>`).join("");
+        set("gmDepthNote", `下棋时都不搜索，每一步 = 模型落子分最大的点；每格 = 胜–负（–和）。事先写好的判据：${DMs.criterion.text} → ${DMs.criterion.passed ? "成立" : "不成立"}（${pct(DMs.criterion.win_rate)}）。` +
+          "纯模型推理比「模型 + 外挂搜索」弱得多（见下面「真下几盘」）——多步推理能训练进读出层多少，这张表就是答案。");
       }
       const tp = document.getElementById("tGomokuPlay");
       if (tp && PL.engine) {
@@ -2368,10 +2500,127 @@ code { font: 12px var(--mono); }
       } else if (playBtn) { playBtn.hidden = true; slider.hidden = true; lab.hidden = true; }
       redraw(); window.addEventListener("resize", redraw); window.__gmVizRedraw = redraw;
     })();
-    const api = { tick, state: S, setStage, workerState: () => workerOk };
+    const api = { tick, state: S, setStage, workerState: () => workerOk, depths: DEPTHS, pick3d: (cx, cy) => pick3d(cx, cy) };
     window.__gm = api;
     return api;
   })();
+
+  // ═══════════════ 生活模式：五感全开，世界自己运转，它自己过日子 ═══════════════
+  // 这里是一只**单独的**果蝇：子回路 v4（比球场那只多了听觉、两个嗅小球、内感受神经元），世界由 game_core 的 lifeStep 调度。
+  // 球场（v3）与五子棋（v3）上已发布的数字都不受影响。页面在这里只做三件事：画世界、把读数显示出来、让你往世界里丢东西。
+  const LIFE = (() => {
+    const cv = $("lifeStage"); if (!cv) return null;
+    let SUB4 = null, g = null, map43 = null, speed = 1, carry = 0, on = false, lastLine = "", diaryT = 0;
+    const diary = [], KEY = "fly-life-v1";
+    const LS = JSON.parse(document.getElementById("life-data").textContent || "{}");
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ body: g.body, diary: diary.slice(-40), born: born })); } catch (e) {} };
+    let born = Date.now();
+    function ensure() {
+      if (g) return;
+      SUB4 = JSON.parse(document.getElementById("sub4-data").textContent);
+      $("nNeu4").textContent = SUB4.meta.n.toLocaleString("en-US");
+      const pos3 = new Map(SUB.fids.map((f, i) => [String(f), i])); map43 = Int32Array.from(SUB4.fids, f => pos3.has(String(f)) ? pos3.get(String(f)) : -1);
+      g = window.FlyDodgeGame.createGame(SUB4, ConnectomeBrain, { seed: (Date.now() % 100000) + 7, mode: "manual", ballSpeed: 60,
+        cfg: { ...ENC.ache, takeoff: "clip", autoPellets: false, autoDust: true, dustEvery: 40, wallVision: false, touch: false, wind: true,
+               courtW: 0, life: true, physiology: true } });   // 没有墙的开放世界，与 dodge/life_test.js 同一套设定（为什么不要墙：见 game_core 的 lifeStep）
+      if (g.setFlightClips && FLIGHT.clips) g.setFlightClips(FLIGHT.clips);
+      g.onSpike = i => { const k = map43[i]; if (k >= 0) { spikeBuf.push(k); brainBuf.push(k); } };
+      g.onEvent = (type, o) => { if (type === "sound") note("嗡——"); };
+      try { const st = JSON.parse(localStorage.getItem(KEY) || "null"); if (st && st.body) { Object.assign(g.body, st.body); born = st.born || born; for (const d of st.diary || []) diary.push(d); note("（它还活着，接着上次过）"); } } catch (e) {}
+      window.__life = g;
+    }
+    function note(t) { diary.push({ t: g ? g.body.age : 0, s: t }); if (diary.length > 60) diary.shift(); }
+    function drop(kind) {
+      ensure(); const S = g.S, a = S.h + (Math.random() - 0.5) * 1.6, d = 18 + Math.random() * 25, x = S.x + Math.cos(a) * d, y = S.y + Math.sin(a) * d;
+      if (kind === "fruit" || kind === "mold") { const p = g.addPellet(x, y, kind === "mold" ? "bitter" : "sugar"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; g.addOdor(x, y, kind === "mold" ? "geosmin" : "vinegar", 26, 1, 90).pellet = p; }
+      else if (kind === "water") { const p = g.addPellet(x, y, "water"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; }
+      else if (kind === "sound") g.addSound(x, y, 1.5, 1.0);
+      else if (kind === "heat") g.addField("heat", x, y, 30, 1);
+      else if (kind === "ball") g.launch(S.x + Math.cos(a) * 110, S.y + Math.sin(a) * 110);
+    }
+    function tick(dt) {
+      if (!on) return; ensure();
+      carry += dt * speed; let n = 0;
+      while (carry >= g.chunkDt && n < 10) { g.step(); carry -= g.chunkDt; n++; } if (n === 10) carry = 0;
+      const m = g.mind(), o = m.hz;
+      // 面板：把这一只的读数喂给下行神经元 / 感觉输入那两块（与五子棋共用同一个入口）
+      GMSTATS.rates = { DNa01_left: o.dnaL, DNa02_left: 0, DNa01_right: o.dnaR, DNa02_right: 0, DNp01_left: o.gf, DNp01_right: o.gf, MN9_left: o.mn9, MN9_right: o.mn9, aDN1_left: o.adn1, aDN1_right: o.adn1, MDN_left: o.mdn, MDN_right: o.mdn };
+      GMSTATS.drive = { LC4_left: g.loom.lc4L || 0, LC4_right: g.loom.lc4R || 0, LPLC2_left: g.loom.lplc2L || 0, LPLC2_right: g.loom.lplc2R || 0, SUGAR_left: o.sugar, SUGAR_right: o.sugar, BITTER_left: o.bitter, BITTER_right: o.bitter,
+                        JO_left: g.joInput ? g.joInput.L : 0, JO_right: g.joInput ? g.joInput.R : 0 };
+      GMSTATS.t = performance.now();
+      diaryT -= dt; if (m.sentence && m.sentence !== lastLine && diaryT <= 0) { lastLine = m.sentence; note(m.sentence); diaryT = 1.2; }
+      if (Math.floor(g.body.age) % 15 === 0 && n) save();
+      $("lifePill").textContent = "第 " + (Math.floor(g.body.age / g.CFG.dayLength) + 1) + " 天 · " + (g.CFG.light < 0.3 ? "夜" : g.CFG.light < 0.6 ? "晨昏" : "昼");
+      draw(m);
+    }
+    function draw(m) {
+      const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
+      if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+      const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const fnt = getComputedStyle(document.body).fontFamily || "sans-serif", ink = palette["--ink-2"] || "#333", mut = palette["--muted"] || "#888";
+      x.fillStyle = palette["--panel-2"] || "#eee"; x.fillRect(0, 0, W, H);
+      // 开放世界：视图跟着它走（它永远在中间），地上画网格，才看得出它在动
+      const cw = 240, ch = 240 * (H - 24) / Math.max(1, W * 0.7 - 24), vw = W * 0.7, sc = (vw - 24) / cw, ox = 12 + (vw - 24) / 2, oy = H / 2, fx = g.S.x, fy = g.S.y;
+      const X = wx => ox + (wx - fx) * sc, Y = wy => oy - (wy - fy) * sc;
+      // 地面（颜色随昼夜）
+      const L = g.CFG.light, day = [214, 178, 120], night = [38, 44, 66], col = day.map((v, k) => Math.round(night[k] + (v - night[k]) * L));
+      const x0 = 12, y0 = 12, gw = vw - 24, gh = H - 24;
+      x.fillStyle = `rgb(${col})`; x.fillRect(x0, y0, gw, gh);
+      x.save(); x.beginPath(); x.rect(x0, y0, gw, gh); x.clip(); x.strokeStyle = L > 0.5 ? "rgba(90,60,25,.16)" : "rgba(255,255,255,.08)"; x.lineWidth = 1; x.beginPath();
+      for (let gx = Math.floor((fx - cw / 2) / 20) * 20; gx < fx + cw / 2 + 20; gx += 20) { x.moveTo(X(gx), y0); x.lineTo(X(gx), y0 + gh); }
+      for (let gy = Math.floor((fy - ch / 2) / 20) * 20; gy < fy + ch / 2 + 20; gy += 20) { x.moveTo(x0, Y(gy)); x.lineTo(x0 + gw, Y(gy)); }
+      x.stroke(); x.restore(); x.strokeStyle = ink; x.lineWidth = 2; x.strokeRect(x0, y0, gw, gh);
+      const blob = (wx, wy, r, rgb, a0) => { const gr = x.createRadialGradient(X(wx), Y(wy), 0, X(wx), Y(wy), r * sc); gr.addColorStop(0, `rgba(${rgb},${a0})`); gr.addColorStop(1, `rgba(${rgb},0)`); x.fillStyle = gr; x.beginPath(); x.arc(X(wx), Y(wy), r * sc, 0, 6.2832); x.fill(); };
+      x.save(); x.beginPath(); x.rect(x0, y0, gw, gh); x.clip();
+      for (const f of g.fields) blob(f.x, f.y, f.sigma * 2, f.type === "heat" ? "226,74,51" : "64,140,220", 0.45 * f.strength);        // 热源 / 水洼的湿气
+      for (const o of g.odors) blob(o.x, o.y, o.sigma * 2.2, o.kind === "vinegar" ? "160,190,60" : "120,96,70", 0.4 * o.strength);     // 醋味 / 霉味的羽流
+      for (const o of g.sounds) { const u = o.t / o.dur; x.strokeStyle = `rgba(250,250,255,${(1 - u) * 0.9})`; x.lineWidth = 2; for (const k of [0.4, 0.7, 1]) { x.beginPath(); x.arc(X(o.x), Y(o.y), u * k * 60 * sc, 0, 6.2832); x.stroke(); } }
+      for (const p of g.pellets) { x.fillStyle = p.type === "water" ? "rgba(70,150,230,.85)" : p.type === "bitter" ? "rgba(96,84,70,.9)" : "rgba(206,120,40,.9)"; x.beginPath(); x.arc(X(p.x), Y(p.y), (p.r || g.CFG.pelletR) * sc * Math.sqrt(Math.max(0.15, p.amount / g.CFG.lifeFoodAmount)), 0, 6.2832); x.fill(); }
+      for (const b of g.balls) { x.fillStyle = "#c0392b"; x.beginPath(); x.arc(X(b.x), Y(b.y), Math.max(3, g.CFG.ballR * sc), 0, 6.2832); x.fill(); }
+      // 果蝇：在飞的时候画影子 + 放大
+      const S = g.S, up = Math.min(1, S.z / 12), fr = (6.5 + 4 * up) * Math.max(1, sc * 0.55);
+      if (up > 0) { x.fillStyle = "rgba(0,0,0,.25)"; x.beginPath(); x.ellipse(X(S.x), Y(S.y), fr, fr * 0.6, 0, 0, 6.2832); x.fill(); }
+      x.save(); x.translate(X(S.x), Y(S.y) - up * 14); x.rotate(-S.h);
+      x.globalAlpha = 0.5; x.fillStyle = "#dfe6ee"; for (const sg of [1, -1]) { x.beginPath(); x.ellipse(-fr * 0.2, sg * fr * 0.7, fr * 0.9, fr * 0.35, sg * (up > 0 ? 0.9 : 0.35), 0, 6.2832); x.fill(); } x.globalAlpha = 1;
+      x.fillStyle = "#1a1c20"; x.beginPath(); x.ellipse(0, 0, fr, fr * 0.6, 0, 0, 6.2832); x.fill(); x.fillStyle = "#b8493f"; x.beginPath(); x.arc(fr * 0.8, 0, fr * 0.3, 0, 6.2832); x.fill(); x.restore();
+      x.restore();
+      if (g.wind && g.wind.speed > 0.2) { const wx0 = x0 + 26, wy0 = y0 + 26, a = g.wind.dir; x.strokeStyle = ink; x.lineWidth = 2; x.beginPath(); x.moveTo(wx0 - Math.cos(a) * 12, wy0 + Math.sin(a) * 12); x.lineTo(wx0 + Math.cos(a) * 12, wy0 - Math.sin(a) * 12); x.stroke(); x.fillStyle = ink; x.font = "10px " + fnt; x.fillText("风", wx0 + 16, wy0 + 4); }
+      // 右栏：身体、五感、它的决定、意识流
+      let px = vw + 6, py = 8; const pw = W - px - 10, o = m.hz, B = g.body;
+      const head = t => { py += 10; x.fillStyle = ink; x.font = "600 12.5px " + fnt; x.fillText(t, px, py); py += 9; };
+      const meter = (lab, v, max, c, txt) => { x.fillStyle = mut; x.font = "11px " + fnt; x.fillText(lab, px, py + 8); const bx = px + 34, bw = pw - 34 - 46; x.fillStyle = "rgba(128,128,128,.22)"; x.fillRect(bx, py, bw, 9);
+        x.fillStyle = c; x.fillRect(bx, py, bw * Math.max(0, Math.min(1, v / max)), 9); x.fillStyle = ink; x.fillText(txt, bx + bw + 5, py + 8); py += 14; };
+      head("身体（不属于大脑）"); meter("能量", B.energy, 1, "#d08a2a", (B.energy * 100).toFixed(0) + "%"); meter("水分", B.hydration, 1, "#3c8de0", (B.hydration * 100).toFixed(0) + "%"); py += 4;
+      head("五感 → 真实感受器（Hz）");
+      meter("视", o.loom, 200, "#7c5cd6", o.loom); meter("听", o.audio, 200, "#d65c9a", o.audio); meter("嗅·醋", o.vinegar, 200, "#9ab83a", o.vinegar); meter("嗅·霉", o.geosmin, 200, "#7a6046", o.geosmin);
+      meter("味", Math.max(o.sugar, o.bitter, o.water), 320, "#ce7828", o.sugar ? "甜 " + o.sugar : o.bitter ? "苦 " + o.bitter : o.water ? "水 " + o.water : 0); meter("触", o.touch, 200, "#4aa08a", o.touch);
+      meter("温", o.thermo, 200, "#e24a33", o.thermo); meter("湿", o.hygro, 200, "#408cdc", o.hygro); if (g.CFG.isnDrive) meter("ISN", o.isn, 200, "#888", o.isn); py += 4;
+      head("连接组的决定（读出，Hz）");
+      meter("起飞", o.gf, 250, palette["--gf"] || "#1baf7a", o.gf); meter("左转", o.dnaL, 120, "#5b7fd6", o.dnaL); meter("右转", o.dnaR, 120, "#d6795b", o.dnaR); meter("伸喙", o.mn9, 100, "#ce7828", o.mn9); meter("梳理", o.adn1, 60, "#4aa08a", o.adn1); meter("后退", o.mdn, 60, "#888", o.mdn); py += 4;
+      head("它在想什么"); x.font = "11px " + fnt;
+      const lines = diary.slice(-Math.max(3, Math.floor((H - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
+    }
+    function show(v) {
+      on = v; cv.hidden = !v; $("lifeRow").hidden = !v; $("mastLife").hidden = !v;
+      if (v) { ensure(); window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
+        const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
+        $("mastCourt").hidden = true; $("coach").textContent = "主画面换成了它生活的世界（俯视，视图跟着它走，网格 20 mm）。这个世界没有墙。球场那只已冻结。"; }
+      else { GMSTATS.rates = null; GMSTATS.drive = null; if (g) save(); }
+    }
+    for (const bt of document.querySelectorAll("#lifeRow [data-drop]")) bt.onclick = () => drop(bt.dataset.drop);
+    for (const bt of $("lifeSpeedSeg").querySelectorAll("button")) bt.onclick = () => { speed = +bt.dataset.v; segSet([...$("lifeSpeedSeg").querySelectorAll("button")], bt); };
+    $("lifeDeaf").onchange = e => { ensure(); g.setLesion("AUDIO", e.target.checked); note(e.target.checked ? "（听觉神经元的传出突触被切断了）" : "（听觉恢复）"); };
+    $("lifeAnosmic").onchange = e => { ensure(); g.setLesion("OLFA", e.target.checked); g.setLesion("OLFR", e.target.checked); note(e.target.checked ? "（嗅觉被切断了）" : "（嗅觉恢复）"); };
+    $("lifeISN").onchange = e => { ensure(); g.CFG.isnDrive = e.target.checked; note(e.target.checked ? "（内感受神经元 ISN 开始按饥渴放电）" : "（ISN 停）"); };
+    $("lifeReset").onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} g = null; diary.length = 0; born = Date.now(); ensure(); };
+    const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on };
+    window.__lifeApi = api; return api;
+  })();
+  if (LIFE) {
+    const tabs = [$("viewCourt"), $("viewGomoku"), $("viewLife")];
+    $("viewLife").addEventListener("click", () => { if (GM) GM.setStage("court"); LIFE.show(true); segSet(tabs, $("viewLife")); });
+    for (const id of ["viewCourt", "viewGomoku"]) $(id).addEventListener("click", () => { if (LIFE.isOn()) { LIFE.show(false); } segSet(tabs, $(id)); }, true);
+  }
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
   const PEERS = [
@@ -3054,7 +3303,7 @@ code { font: 12px var(--mono); }
     if (!paused) {
       // **五子棋占用主画面时，球场里那只果蝇整个冻结**：不跑大脑、不动身体、不发球、
       // 同伴也停。切回来时从冻结的那一刻继续（carry 清零，避免攒出一大堆积压步）。
-      const frozen = window.__stageMode === "gomoku";
+      const frozen = window.__stageMode === "gomoku" || window.__stageMode === "life";
       if (frozen) carry = 0;
       else carry += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);   // 慢放：大脑与世界一起放慢，结果不变
       let n = 0;
@@ -3069,6 +3318,7 @@ code { font: 12px var(--mono); }
       if (rasterAcc >= 1 / 30) { drawRaster(rasterAcc); rasterAcc = 0; }
       if (brainAcc >= 1 / 20) { BRAIN.draw(brainAcc); brainAcc = 0; }
       if (GM) GM.tick(Math.min(0.1, dtReal));
+      if (LIFE) LIFE.tick(Math.min(0.1, dtReal));
       if (COMP) COMP.draw();
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
@@ -3093,7 +3343,7 @@ code { font: 12px var(--mono); }
       e.m.position.set(S.x + pv.x, S.y + pv.y, S.z + pv.z); e.m.visible = fly.visible; di++;
     }
     // 说话气泡：把果蝇的世界坐标投影到屏幕上
-    if (window.__stageMode === "gomoku") { const e2 = $("says"); if (e2) e2.hidden = true; }
+    if (window.__stageMode === "gomoku" || window.__stageMode === "life") { const e2 = $("says"); if (e2) e2.hidden = true; }
     else if ($("saysOn").checked) {
       if (!window._sayT || S.t - window._sayT > CFG.speechEvery) {
         window._sayT = S.t; window._say = game.speech();
@@ -3117,7 +3367,7 @@ code { font: 12px var(--mono); }
     // **主画面被五子棋占用时，整个三维球场都不渲染**——包括 4 张阴影贴图和复眼的
     // 立方体贴图读回。这是帧率最高的一档，也是把棋盘做成"替换主画面"而不是
     // "再加一块画布"的主要原因（用户反馈：原来那样帧率更低）。
-    const gomokuOwnsStage = window.__stageMode === "gomoku";
+    const gomokuOwnsStage = window.__stageMode === "gomoku" || window.__stageMode === "life";
     if (!gomokuOwnsStage) {
       const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
       camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);

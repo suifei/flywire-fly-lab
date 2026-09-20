@@ -7,7 +7,13 @@ ROOT = Path(__file__).resolve().parent.parent; R = ROOT / "results/gomoku"
 J = lambda f: json.loads((R / f).read_text())
 T = J("train_lines.json"); A = T["arms"]; P = J("play_lines.json"); RL = J("rl.json"); RS = J("rl_small.json"); OL = J("opto_leak.json")
 SC = json.loads((ROOT / "results/shuffle_controls.json").read_text()); DS = J("dataset_summary.json"); TN = J("table_noise.json"); SW = J("search_width.json"); DT = J("depth_timing.json")
+DMO = J("depth_models.json") if (R / "depth_models.json").exists() else None
+SUM = J("lines_summary.json"); VA = SUM.get("view_adoption"); OV = SUM.get("one_view"); VR = SUM.get("views_r2", {})
+NV = len(T.get("feat_sets", [""]))
 fi, fs_, rw, rr, ft, tt = (A[k] for k in ("fly_intact", "fly_shuffled", "raw24", "rand_relu", "free_table", "teacher_table"))
+cap = A["fly_shuffled"].get("capped")
+CAPTXT = (f"这一版两个臂的读出维度相同：打乱接线活跃的特征列有 {cap['active']:,} 个，随机取了与真实接线一样多的 {cap['used']:,} 个——维度相同仍然不输，" if cap
+          else f"打乱之后活跃的神经元多一倍（读出维度 {A['fly_shuffled']['dim'] - 1} 对 {A['fly_intact']['dim'] - 1}），给读出层的特征更丰富——")
 pct = lambda v: f"{v * 100:.1f}%"; wl = lambda r: f"{r['win']}–{r['loss']}" + (f"–{r['draw']}" if r.get("draw") else "")
 E = P["engine"]["fly_intact"]; HH = P["head_to_head"]; cA, cA2, cC2 = P["criterion_A"], P["criterion_A2"], P["criterion_C2"]
 status_strength = "reproduced" if (cA["passed"] and cA2["passed"]) else "partial"
@@ -26,7 +32,7 @@ new = f'''    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋�
                  ("old_behaviour.abs_diff_vs_true_A", {OL['old_behaviour']['abs_diff_vs_true_A']}, 0), ("fixed.abs_diff_A_first_vs_again", 0, 0)]),
     dict(id="gomoku_lines", what="线型版：果蝇脑 + 一层线性读出，能学会给五子棋的每条线估价吗",
          status="reproduced",
-         result="**能**。14,641 种线型每一种都在果蝇脑里跑一遍（脑里一个突触都不训练），线性读出给出每条线的对数价值。"
+         result="**能**。14,641 种线型每一种都在果蝇脑里跑一遍（{NV} 套输入分配 × 3 个泊松种子；脑里一个突触都不训练），线性读出给出每条线的对数价值。"
                 "测试一致率 **{pct(fi['test_top1'])}**（随机 {pct(T['random_top1'])}、不经过脑子 {pct(rw['test_top1'])}）；"
                 "外部考卷 Wine（别人的引擎，只考不训）**{pct(fi['wine_top1'])}**；换一组从未见过的泊松种子只掉 {fi['seed_drop'] * 100:.1f} 个百分点。"
                 "它从没见过棋形类别，自己排出的价值顺序（成五 > 活四 > 冲四、活三 > …）全部正确",
@@ -44,7 +50,7 @@ new = f'''    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋�
          result="**不**。测试一致率：真实接线 {pct(fi['test_top1'])}、打乱接线 **{pct(fs_['test_top1'])}**、同维度随机 ReLU 网络 **{pct(rr['test_top1'])}**；"
                 "正面交锋（同一个引擎）直觉 {wl(HH['d1'])}、想 4 步 {wl(HH['d4'])}、想 6 步 {wl(HH['d6'])}",
          caveat="事先写好的判据 C（一致率高 ≥ 5 个点）与 C2（想 4 步正面交锋 ≥ 60%）都不成立。"
-                "打乱之后活跃的神经元多一倍（读出维度 {fs_['dim'] - 1} 对 {fi['dim'] - 1}），给读出层的特征更丰富——"
+                "{CAPTXT}"
                 "所以能说的是「这颗脑子是一个够用的非线性展开」，不能说「真实接线对下棋有特殊贡献」",
          script="gomoku/play_lines.js", result_file="results/gomoku/play_lines.json", log="§46.5–46.6",
          verify=[("head_to_head.d4.win", {HH['d4']['win']}, 0), ("head_to_head.d4.loss", {HH['d4']['loss']}, 0), ("criterion_C2.passed", {cC2['passed']}, 0)]),
@@ -60,7 +66,30 @@ new = f'''    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋�
          verify=[("engine.fly_intact.d6.old_teacher.win", {E['d6']['old_teacher']['win']}, 0), ("engine.fly_intact.d6.teacher2_d4.win", {E['d6']['teacher2_d4']['win']}, 0),
                  ("engine.fly_intact.d10.teacher2_d8.win", {E['d10']['teacher2_d8']['win']}, 0), ("engine.fly_intact.d1.old_teacher.win", {E['d1']['old_teacher']['win']}, 0),
                  ("criterion_A.passed", {cA['passed']}, 0), ("criterion_A2.passed", {cA2['passed']}, 0)]),
-    dict(id="gomoku_rl", what="自对弈强化（「多巴胺」式三因子规则）能让它更强吗",
+''' + (f'''    dict(id="gomoku_multiview", what="多给果蝇脑几套输入分配（视角），读出层能更准、棋下得更好吗",
+         status="reproduced",
+         result="**能，但很快饱和**。换一组种子后对评分表的拟合 R²：1 个视角 {VR['视角1']['r2_new_seeds']}、2 个 {VR['视角1+2']['r2_new_seeds']}、3 个 {VR['视角1–3']['r2_new_seeds']}、4 个 **{VR['视角1–4']['r2_new_seeds']}**。"
+                "4 个视角的表对单视角的表（同一个引擎都想 6 步）**{wl(VA['attempt2']['head_to_head'])}（{pct(VA['attempt2']['win_rate'])}）**，换一批开局再下 200 局 {wl(VA['confirm']['head_to_head'])}；"
+                "一致率 {pct(OV['fly_intact']['test_top1'])} → **{pct(fi['test_top1'])}**，外部考卷 Wine {pct(OV['fly_intact']['wine_top1'])} → **{pct(fi['wine_top1'])}**",
+         caveat="事先写死的换用判据是「新表对旧表 200 局胜率 ≥ 55%」。**第一次没过**（{wl(VA['attempt1_fixed_ridge']['head_to_head'])}，{pct(VA['attempt1_fixed_ridge']['win_rate'])}）："
+                "当时阶段一的岭系数固定为 10，维度一多就去拟合噪声。改成每个臂用另一半训练种子自己选岭系数之后重训，才是上面的结果——所以这是**第二次尝试**，两次都在这里。"
+                "视角 = 把 24 个通道分给另一批输入神经元的另一张随机分配表；靠分时间段加维度是死路（样本内 R² 0.976、换种子 0.386）。"
+                "对老师搜 6 步新旧两张表没有差别（{wl(VA['attempt2']['vs_teacher_d6']['new'])} 对 {wl(VA['attempt2']['vs_teacher_d6']['old'])}），提升是小幅的",
+         script="gomoku/compare_tables.js", result_file="results/gomoku/compare_linetable_fly_intact_mv2.json", log="§46.8",
+         verify=[("head_to_head.win", {VA['attempt2']['head_to_head']['win']}, 0), ("head_to_head.loss", {VA['attempt2']['head_to_head']['loss']}, 0), ("adopt", {VA['attempt2']['adopt']}, 0)]),
+''' if VA else "") + (f'''    dict(id="gomoku_depth_models", what="多步推理能训练进读出层吗（用户的要求：推理必须来自训练好的模型，不能是下棋时现跑的搜索）",
+         status="negative",
+         result="**基本训练不进去**。对 N = 1–6、8 各训练一个读出层（标签 = 向前搜 N 步的最佳着），下棋时只做模型推理、不搜索。"
+                "7 个模型棋力几乎一样：对旧老师 {wl(DMO['vs']['1']['old_teacher'])}（1 步）到 {wl(DMO['vs']['8']['old_teacher'])}（8 步），对老师搜 2 步 {wl(DMO['vs']['8']['teacher2_d2'])}、搜 4 步 {wl(DMO['vs']['8']['teacher2_d4'])}；"
+                "8 步模型对 1 步模型 **{wl(DMO['vs_d1_model']['8'])}**",
+         caveat="事先写好的判据「{DMO['criterion']['text']}」**不成立**（{pct(DMO['criterion']['win_rate'])}，和棋算未胜）。"
+                "原因是架构上限：读出层只能给每条线一个价值再相加，「向前看」需要的组合推理它表达不了。"
+                "页面按用户的要求默认用纯模型推理（推理步数 = 换读出层），alpha-beta 只作为默认关闭、标明「算法，不是果蝇」的外挂保留；"
+                "同一张表交给搜索想 6 步，对老师搜 4 步是 {wl(E['d6']['teacher2_d4'])}——差距全部来自搜索",
+         script="gomoku/depth_models.js", result_file="results/gomoku/depth_models.json", log="§46.9",
+         verify=[("criterion.passed", {DMO['criterion']['passed']}, 0), ("vs_d1_model.8.win", {DMO['vs_d1_model']['8']['win']}, 0), ("vs_d1_model.8.loss", {DMO['vs_d1_model']['8']['loss']}, 0),
+                 ("vs.8.teacher2_d4.win", {DMO['vs']['8']['teacher2_d4']['win']}, 0)]),
+''' if DMO else "") + f'''    dict(id="gomoku_rl", what="自对弈强化（「多巴胺」式三因子规则）能让它更强吗",
          status="negative",
          result="**不能**。Δw = 学习率 × δ × 资格迹，δ = 这一局的结果 − 近期平均。强化后的表对监督版（同一个引擎都想 4 步，200 局）"
                 "**{wl(RL['final']['d4_vs_supervised_d4'])}（{pct(RL['win_rate_vs_supervised'])}）**，事先定的线是 55%；换更小的步长、更多的局数再跑一次是 {wl(RS['final']['d4_vs_supervised_d4'])}（{pct(RS['win_rate_vs_supervised'])}）",
@@ -71,7 +100,7 @@ new = f'''    dict(id="gomoku_v1_retracted", what="五子棋 v1（把整盘棋�
                  ("win_rate_vs_supervised", {RL['win_rate_vs_supervised']}, 0.0005)]),
 '''
 p = ROOT / "scripts/reproduction_data.py"; s = p.read_text()
-a = s.index('    dict(id="gomoku_reservoir"'); b = s.index('    dict(id="touch_pathway"')
+a = s.index('    dict(id="gomoku_reservoir"') if 'id="gomoku_reservoir"' in s else s.index('    dict(id="gomoku_v1_retracted"'); b = s.index('    dict(id="touch_pathway"')
 s = s[:a] + new + s[b:]
 # 打乱对照那一条
 gi, gs = SC["gomoku"]["intact"]["mean_active_per_position"], SC["gomoku"]["shuffled"]["mean_active_per_position"]
@@ -81,7 +110,7 @@ s = s.replace('"五子棋那一行还顺带解释了 §41.6 的翻盘：打乱�
 s = s.replace('("gomoku.shuffled.mean_active_per_position", 3055.2, 0.1),', f'("gomoku.shuffled.mean_active_per_position", {gs}, 0.1),')
 s = s.replace('("gomoku.intact.mean_active_per_position", 1795.3, 0.1),', f'("gomoku.intact.mean_active_per_position", {gi}, 0.1),')
 # 手选参数
-params = '''    dict(name="五子棋老师的线型分值", value="成五 1e7 / 活四 1e5 / 冲四 2000 / 活三 1500 / 眠三 120 / 活二 100 / 眠二 10 / 单子 1", source="**手选**",
+params = f'''    dict(name="五子棋老师的线型分值", value="成五 1e7 / 活四 1e5 / 冲四 2000 / 活三 1500 / 眠三 120 / 活二 100 / 眠二 10 / 单子 1", source="**手选**",
          code_check=("gomoku/teacher2.js", r"const ATT = \\[0, 1, 10, 100, 120, (1500), 2000, 1e5, 1e7\\]", "1500"),
          note="不是任何论文或引擎的值；老师的棋力主要来自搜索深度。它也是果蝇读出层阶段一的拟合目标（取 ln(分值+1)），所以果蝇学到的价值顺序是老师给的，不是它自己发现的",
          script="gomoku/teacher2.js", log="§46.3"),
@@ -91,9 +120,9 @@ params = '''    dict(name="五子棋老师的线型分值", value="成五 1e7 / 
          script="gomoku/line_features.js", log="§46.4"),
     dict(name="五子棋搜索引擎", value="每层宽度 K = 6（根 16）、先手系数 1.2", source="K 实测选定；先手系数**手选**",
          code_check=("gomoku/engine.js", r"const K = o\\.K \\?\\? (\\d+), K0", "6"),
-         note="同等节点预算下 K=6 对 K=10 是 62–38（100 局）；先手系数 1.0 / 1.5 / 2.0 对 1.2 都在噪声里（46–54、55–45、51–48）。这两个属于搜索，不属于果蝇",
+         note="同等节点预算下 K=6 对 K=10 是 {SW['rows'][0]['win']}–{SW['rows'][0]['loss']}（100 局，search_width.json）；先手系数换成 1.0 / 1.5 / 2.0 临时量过，都在 100 局的噪声里（没有存档，所以不写数字）。这两个属于搜索，不属于果蝇",
          script="gomoku/engine.js", log="§46.6"),
 '''
-if "五子棋老师的线型分值" not in s:
-    k = s.index("]\n\n# ── 本项目自己的结果"); s = s[:k] + params + s[k:]
+s = re.sub(r'    dict\(name="五子棋老师的线型分值".*?script="gomoku/engine\.js", log="§46\.6"\),\n', "", s, flags=re.S)   # 可重复执行：先删旧的三条再加
+k = s.index("]\n\n# ── 本项目自己的结果"); s = s[:k] + params + s[k:]
 p.write_text(s); print("台账已打补丁；gomoku_strength 的状态 =", status_strength)
