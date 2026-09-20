@@ -1,5 +1,7 @@
 # flywire-fly-lab
 
+<p align="center"><a href="https://suifei.github.io/flywire-fly-lab/game.html"><img src="media/cover.jpg" alt="flywire-fly-lab：连接组点亮的果蝇飞过夜色里的大自然" width="100%"></a></p>
+
 
 > **先看 [`REPRODUCTION.md`](REPRODUCTION.md)**：对着论文逐条验了什么、结果如何、哪些做不到。
 > 完整过程日志在 [`docs/log/report.md`](docs/log/report.md)。

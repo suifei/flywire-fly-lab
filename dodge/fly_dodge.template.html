@@ -1,5 +1,10 @@
 <title>数字果蝇实验室</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%230d1117%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%233fb984%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M16%204%2026%2010%2026%2022%2016%2028%206%2022%206%2010Z%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%223.5%22%20fill%3D%22%23e8b339%22%2F%3E%3C%2Fsvg%3E">
+<link rel="icon" type="image/png" href="data:image/png;base64,/*__BRAND_ICON__*/">
+<meta property="og:title" content="数字果蝇实验室 · flywire-fly-lab">
+<meta property="og:description" content="15,055 个真实的果蝇神经元在浏览器里实时放电：五感全开，生活在一个有重力、有天气的 3D 大自然里；还能和它下五子棋。">
+<meta property="og:image" content="https://suifei.github.io/flywire-fly-lab/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://suifei.github.io/flywire-fly-lab/og.jpg">
 <meta name="description" content="数字果蝇游乐场：4,599 个 FlyWire 连接组神经元在浏览器里实时决定躲球、起飞、进食、梳理与后退">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,6 +61,10 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
 .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 16px; }
 
 /* masthead: title + live score */
+/* 项目主视觉：连接组点亮的果蝇飞过夜色里的大自然（左上是五子棋和发酵的果子，右上是神经网络与同伴）。内联成 data URI——单文件页面，Artifact 里不能引用外部图片 */
+.brandhero { position: relative; margin: 0 0 14px; border-radius: 12px; overflow: hidden; line-height: 0; background: #0b1226; }
+.brandhero img { width: 100%; height: clamp(110px, 17vw, 240px); object-fit: cover; object-position: center 40%; display: block; }
+.brandhero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.35)); pointer-events: none; }
 .mast { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 28px; }
 .title { display: grid; gap: 4px; }
 .title h1 { margin: 0; font: 400 clamp(40px, 5.4vw, 64px)/0.95 var(--display); letter-spacing: .02em; }
@@ -255,6 +264,7 @@ code { font: 12px var(--mono); }
 </style>
 
 <div class="wrap">
+  <div class="brandhero"><img alt="数字果蝇实验室：连接组点亮的果蝇飞过夜色里的大自然" src="data:image/jpeg;base64,/*__BRAND_HERO__*/"></div>
   <header class="mast">
     <div class="title">
       <div class="title-row">
