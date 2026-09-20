@@ -12,7 +12,23 @@
 > screen across three sensory pathways. Every negative result and every self-caught mistake is
 > documented. Docs are in Chinese; code comments are in Chinese; issues in English are welcome.
 
-[**▶ 在线试玩（浏览器里 4,599 个真实神经元实时放电）**](https://suifei.github.io/flywire-fly-lab/game.html) · [**完整报告 docs/log/report.md**](docs/log/report.md) · [**数据许可 ⚠**](DATA_LICENSE.md)
+[**▶ 在线试玩（浏览器里 15,055 个真实神经元实时放电，生活在一个 3D 大自然里）**](https://suifei.github.io/flywire-fly-lab/game.html) · [**完整报告 docs/log/report.md**](docs/log/report.md) · [**数据许可 ⚠**](DATA_LICENSE.md)
+
+
+<!-- videos:begin -->
+## 🎬 先看视频
+
+<a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4"><img src="media/nature_open_world.gif" alt="果蝇在大自然开放世界里（点击看完整视频）" width="100%"></a>
+
+<table><tr>
+<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4"><img src="media/nature_open_world.jpg" alt="▶ 大自然 · 开放世界" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4">▶ 大自然 · 开放世界</a></b><br><sub>有重力、有天气、没有边界的 3D 世界；住在里面的是 15,055 个神经元、五感全开的那只<br>43 秒 · 5 MB</sub></td>
+<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/five_senses.mp4"><img src="media/five_senses.jpg" alt="▶ 五感全开" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/five_senses.mp4">▶ 五感全开</a></b><br><sub>视 · 听 · 嗅 · 味 · 触 · 温 · 湿，蘑菇体学习、多巴胺、六条腿<br>3 分 41 秒 · 18 MB</sub></td>
+<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/gomoku.mp4"><img src="media/gomoku.jpg" alt="▶ 与果蝇下五子棋" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/gomoku.mp4">▶ 与果蝇下五子棋</a></b><br><sub>线型 → 果蝇脑 → 一层线性读出；思考过程画在棋盘上<br>3 分 09 秒 · 8 MB</sub></td>
+<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/embodied_physics_body.mp4"><img src="media/embodied_physics_body.jpg" alt="▶ 大脑 + 物理身体闭环" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/embodied_physics_body.mp4">▶ 大脑 + 物理身体闭环</a></b><br><sub>同一颗大脑驱动 NeuroMechFly（MuJoCo）：走到果子前停下吃，走到 B 味热源前自己掉头<br>32 秒 · 4 MB</sub></td>
+</tr></table>
+
+<sub>点封面直接播放（mp4 是从本仓库 `media/` 目录取的 raw 文件；已压成手机上也能流畅播放的 H.264）。想自己玩：<a href="https://suifei.github.io/flywire-fly-lab/game.html"><b>在线试玩</b></a>。</sub>
+<!-- videos:end -->
 
 ---
 
