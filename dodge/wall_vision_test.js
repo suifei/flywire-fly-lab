@@ -38,7 +38,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   await page.setViewport({ width: 1200, height: 900 });
   const errs = [];
   page.on("pageerror", e => errs.push(e.message));
-  await page.goto("file://" + PAGE, { waitUntil: "load", timeout: 180000 });
+  await page.goto("file://" + PAGE + "?scene=court", { waitUntil: "load", timeout: 180000 });
   await page.waitForFunction(() => window.__eyeDiag && window.__game, { timeout: 120000 });
   await new Promise(r => setTimeout(r, 3000));
 
