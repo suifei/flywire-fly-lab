@@ -387,7 +387,7 @@
       const parts = felt.map(f => f[1]).concat(body);
       return { felt, body, action: act, sentence: parts.join("，") + (act ? (parts.length ? "——" : "") + act : "") + (parts.length || act ? "。" : ""),
         hz: { loom: Math.round(loom), audio: Math.round(aud), vinegar: Math.round(vin), geosmin: Math.round(geo), sugar: Math.round(G.gust.sugar), bitter: Math.round(G.gust.bitter), water: Math.round(G.gust.water),
-              touch: Math.round(Math.max(G.touch.L, G.touch.R)), thermo: Math.round(G.field.thermo * CFG.fieldRate), hygro: Math.round(G.field.hygro * CFG.fieldRate), isn: Math.round(Sn.isn),
+              touch: Math.round(Math.max(G.touch.L, G.touch.R)), thermo: Math.round(Math.min(1, G.field.thermo) * CFG.fieldRate), hygro: Math.round(Math.min(1, G.field.hygro) * CFG.fieldRate), isn: Math.round(Sn.isn),
               gf: Math.round(o.gf), dnaL: Math.round(o.dnaL), dnaR: Math.round(o.dnaR), mn9: Math.round(o.mn9 || 0), adn1: Math.round(o.adn1 || 0), mdn: Math.round(o.mdn || 0) } };
     };
 

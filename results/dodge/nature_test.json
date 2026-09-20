@@ -19,23 +19,23 @@
   },
   "N4_rolls_downhill_only_when_steep": {
    "pass": true,
-   "steep_slope": 0.33,
-   "dropped_mm": 5.92,
+   "steep_slope": 0.26,
+   "dropped_mm": 3.04,
    "flat_moved_mm": 0
   },
   "N5_deterministic_continuous": {
    "pass": true,
-   "max_step_mm": 0.0306
+   "max_step_mm": 0.0213
   },
   "N6_slope_speed": {
    "pass": true,
-   "uphill": 0.6,
+   "uphill": 0.69,
    "downhill": 1.25
   },
   "N7_solid": {
    "pass": true,
-   "rock_r": 2.63,
-   "pushed_to": 3.63
+   "rock_r": 2.37,
+   "pushed_to": 3.37
   },
   "N8_wind_plume": {
    "pass": true,
@@ -45,13 +45,13 @@
   },
   "N9_closed_loop_walk": {
    "pass": true,
-   "path_mm": 1066,
+   "path_mm": 1040,
    "max_penetration_mm": 0,
-   "berries_dropped": 3,
+   "berries_dropped": 16,
    "rain_s": 0,
-   "jumps": 2,
-   "fields": 8,
-   "pellets": 13
+   "jumps": 3,
+   "fields": 4,
+   "pellets": 14
   }
  },
  "all_pass": true

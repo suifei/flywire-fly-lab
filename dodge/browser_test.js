@@ -390,6 +390,7 @@ function chromePath() {
     return `球场里换成 ${r.n} 个神经元的那只（顶部说明写 ${r.neu}）；3D 场景里气味 ${r2.counts.odors}、热源 ${r2.counts.fields}、食物 ${r2.counts.pellets}；截掉右中腿后它的 ${r2.legHidden} 个部件不再画；关掉后球场版从 ${tCourt.toFixed(1)} s 继续到 ${back.t.toFixed(1)} s（说明改回 ${back.neu}）`;
   });
   await step("大自然：开放世界的 3D 地形、植被、天气都在；浆果按重力落下并停稳成食物；果蝇站在地形上；切回球场原样恢复", async () => {
+    await page.evaluate(() => { try { localStorage.setItem("fly-nature-seed", "20260920"); } catch (e) {} });     // 测试用固定的世界种子：每次跑的是同一片地
     await page.click("#viewCourt"); await new Promise(r => setTimeout(r, 500)); await page.click("#fiveNature");
     for (let k = 0; k < 80; k++) { await new Promise(r => setTimeout(r, 400)); if (await page.evaluate(() => !!(window.__nat3d && window.__life && window.__life.world && window.__nat3d.counts().grass > 0))) break; }
     const r = await page.evaluate(() => { const g = window.__life, W = g.world, api = window.__lifeApi; if (!W || !window.__nat3d) return null;
@@ -462,6 +463,32 @@ function chromePath() {
     });
     await page.click("#heatOn");
     return (r.fields === 1 && r.thermo > 0.5) ? `热源上温度读数 ${r.thermo}` : `fields=${r.fields} thermo=${r.thermo}`;
+  });
+  await step("铺满窗口 + 沙盒：场景盖满可视区、侧栏停画、大脑与 spike 在场景里渲染；放石头 / 抬地形 / 拆除会真的改世界并存到本机；视角可切", async () => {
+    await page.click("#viewCourt"); await new Promise(r => setTimeout(r, 400)); await page.click("#fiveNature");
+    for (let k = 0; k < 80; k++) { await new Promise(r => setTimeout(r, 400)); if (await page.evaluate(() => !!(window.__nat3d && window.__life && window.__life.world && window.__nat3d.counts().grass > 0))) break; }
+    await page.keyboard.press("f"); await new Promise(r => setTimeout(r, 1200));
+    const a = await page.evaluate(() => { const st = document.getElementById("stage").getBoundingClientRect(), g = window.__life, W = g.world, S = g.S;
+      const px = S.x + 15, py = S.y, h0 = W.h(px, py), v0 = W.version, n0 = W.edits.added.length; window.__digAt = [px, py];   /* 固定一个点：它在走，前后必须量同一处 */ document.querySelector('#hotbar [data-tool="rock"]').click();
+      return { full: !!window.__stageFull, w: st.width, h: st.height, vw: innerWidth, vh: innerHeight, hotbar: !document.getElementById("hotbar").hidden, h0, v0, n0, seed: W.seed }; });
+    // 真的点一下地面（画面正中偏下一点，果蝇前方）
+    const box = await page.evaluate(() => { const r = document.querySelector("#stage canvas").getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.62 }; });
+    await page.mouse.click(box.x, box.y); await new Promise(r => setTimeout(r, 600));
+    const b = await page.evaluate(() => { const g = window.__life, W = g.world, S = g.S, rocks = W.edits.added.filter(i => i.kind === "rock"), rk = rocks[rocks.length - 1];
+      W.dig(window.__digAt[0], window.__digAt[1], 3, 9); const h1 = W.h(window.__digAt[0], window.__digAt[1]); const blocked = rk ? (() => { const q = { x: rk.x + 0.01, y: rk.y }; W.collide(q, 1); return Math.hypot(q.x - rk.x, q.y - rk.y); })() : 0;
+      const saved = JSON.parse(localStorage.getItem("fly-nature-edits-" + W.seed) || "null"); const removed = rk ? W.removeNear(rk.x, rk.y, 5) : null;
+      return { nRock: rocks.length, rockR: rk ? rk.r : 0, blocked, h1, saved: saved ? saved.added.length : -1, removedKind: removed && removed.kind, after: W.edits.added.filter(i => i.kind === "rock").length, version: W.version }; });
+    await page.keyboard.press("c"); await new Promise(r => setTimeout(r, 900)); const cam1 = await page.evaluate(() => ({ fov: window.__flyScene.camera.fov, ctl: window.__flyScene.controls.enabled }));
+    await page.keyboard.press("c"); await new Promise(r => setTimeout(r, 900)); const cam2 = await page.evaluate(() => ({ fov: window.__flyScene.camera.fov, d: Math.hypot(window.__flyScene.camera.position.x - window.__life.S.x, window.__flyScene.camera.position.y - window.__life.S.y) }));
+    await page.keyboard.press("c"); await page.keyboard.press("Escape"); await new Promise(r => setTimeout(r, 800));
+    const c = await page.evaluate(() => ({ full: !!window.__stageFull, w: document.getElementById("stage").getBoundingClientRect().width, vw: innerWidth, ctl: window.__flyScene.controls.enabled }));
+    await page.click("#fiveOff"); await new Promise(r => setTimeout(r, 600));
+    if (!(a.full && Math.abs(a.w - a.vw) < 2 && Math.abs(a.h - a.vh) < 2 && a.hotbar)) return "✗ 没有铺满：" + JSON.stringify(a);
+    if (!(b.nRock === a.n0 + 1 && b.blocked >= b.rockR + 1 - 1e-6 && b.saved >= 1)) return "✗ 点地面没有放下一块真的石头：" + JSON.stringify(b);
+    if (!(Math.abs(b.h1 - a.h0 - 3) < 0.05 && b.removedKind === "rock" && b.after === b.nRock - 1 && b.version > a.v0)) return "✗ 抬地形 / 拆除不对：" + JSON.stringify({ a, b });
+    if (!(cam1.ctl === false && cam2.fov > 80 && cam2.d < 3)) return "✗ 视角没有切换：" + JSON.stringify({ cam1, cam2 });
+    if (!(c.full === false && c.w < c.vw && c.ctl === true)) return "✗ Esc 没有退出铺满：" + JSON.stringify(c);
+    return `场景 ${a.w}×${a.h} = 可视区 ${a.vw}×${a.vh}；点地面放下一块半径 ${b.rockR.toFixed(1)} mm 的石头（挡得住、已存到本机 ${b.saved} 处改动），抬高地形 ${(b.h1 - a.h0).toFixed(1)} mm，再拆掉；视角：跟在身后 → 第一人称（视野 ${cam2.fov}°，相机离它 ${cam2.d.toFixed(1)} mm）→ 轨道；Esc 退出`;
   });
   await step("不带参数打开页面：默认进的是大自然（第一次来的访客看到的就是它）", async () => {
     await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });

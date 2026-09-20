@@ -559,7 +559,7 @@ function initFlyEye(assets) {
       const head = pickHead();
       if (!head) return;
       try {
-        const r = cam.updateAsync(head, [cvL, cvR], EYE_FPS);
+        const r = cam.updateAsync(head, [cvL, cvR], window.__life3d ? 10 : EYE_FPS);      // 五感全开 / 大自然：场景重、大脑也大（15,055 个神经元），复眼视窗降到 10 fps，把时间让给大脑
         if (r && ceSw && ceSw.checked && window.__game) {
           if (!ce) {
             try {
