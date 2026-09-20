@@ -8,7 +8,8 @@
  */
 const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, "..");
 const { ConnectomeBrain } = require("./brain.js"), { createGame } = require("./game_core.js");
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v4.json", "utf8"));
+const SUBNAME = process.env.SUBCIRCUIT || "v4", SUF = SUBNAME === "v4" ? "" : "_" + SUBNAME;   // SUBCIRCUIT=v5 → 在带蘑菇体的 v5 上重测，输出另存为 *_v5.json，不覆盖 v4 的结果
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_" + SUBNAME + ".json", "utf8"));
 const CLIPS = JSON.parse(fs.readFileSync(ROOT + "/results/flight/flight_clips.json", "utf8")).clips;
 const N = +(process.argv[2] || 60);
 function trial(seed, withSound, deaf) {
@@ -28,4 +29,4 @@ for (const [name, ws, deaf] of [["无声", false, false], ["有声", true, false
   out.groups[name] = { jumped: jumped.length, dodged: rows.filter(r => r.dodged).length, lead_ms_median: lead.length ? +lead[lead.length >> 1].toFixed(0) : null, gf_max_mean: +(rows.reduce((a, r) => a + r.gfMax, 0) / N).toFixed(1) };
   console.log(`${name}：起飞 ${jumped.length}/${N}，躲开 ${out.groups[name].dodged}/${N}，起飞提前量中位 ${out.groups[name].lead_ms_median} ms，巨纤维峰值均值 ${out.groups[name].gf_max_mean} Hz`);
 }
-fs.writeFileSync(ROOT + "/results/dodge/sound_priming.json", JSON.stringify(out, null, 1)); console.log("→ results/dodge/sound_priming.json");
+out.subcircuit = SUBNAME; fs.writeFileSync(ROOT + "/results/dodge/sound_priming" + SUF + ".json", JSON.stringify(out, null, 1)); console.log("→ results/dodge/sound_priming" + SUF + ".json");

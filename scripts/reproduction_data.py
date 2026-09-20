@@ -408,6 +408,22 @@ PARAMETERS = [
          code_check=("dodge/game_core.js", r"gainMin: ([\d.]+), gainMax: ([\d.]+)", "0.1/1.6"),
          note="身体状态不直接决定任何行为，只改感受器灵敏度与走路速度。开吃阈值从球场模式的 30 Hz 降到 10 Hz：水感受器开到 320 Hz，MN9 也只有 22 Hz（实测），30 Hz 水永远过不了",
          script="dodge/game_core.js", log="§47.6"),
+    dict(name="蘑菇体回路：两处建模决定", value="触角叶局部神经元（ALLN，429 个）发出的突触一律取抑制性；页面用的 v5 里碰到蘑菇体的边只留 ≥2 个突触的", source="①有文献依据（Wilson & Laurent 2005；Olsen & Wilson 2008；Liu & Wilson 2013），**但属于手选的建模决定**；②工程取舍",
+         code_check=("dodge/subcircuit_v5.py", r"MB_WMIN = (\d+)", "2"),
+         note="①不改的话一闻到气味整个回路就失控；三个臂（原样 / 改抑制性 / 去掉）都跑了，按事先规则取改动最小且判据全过的。②全留是 129 万条边，页面装不下；裁完之后的回路与 Python 做过一致性检验（learning_engine_parity）",
+         script="learn/mb_odor_coding.py", log="§48.1 + §48.5"),
+    dict(name="可塑性规则与强化信号", value="学习率 0.003、KC 资格迹 200 ms、不遗忘；强化 = PAM 或 PPL1 整簇 30 Hz；气味 = 20 个嗅小球的 ORN 200 Hz；热到 0.5 以上算烫", source="规则形式来自文献（Hige 2015；Cohn 2015；Handler 2019），**数值手选**",
+         code_check=("dodge/game_core.js", r"danRate: (\d+), painThermo: ([\d.]+), plastEta: ([\d.]+), plastTauE: (\d+)", "30/0.5/0.003/200"),
+         note="学习率、气味宽度、频率只在另外的种子（5、6、999）上校准过，判据用的 6 对气味没有看过。第一次尝试的学习率 0.02 太大（1 秒配对压到 7%）。「糖 / 烫 → 多巴胺」这根线是手接的，因为连接组自己叫不起多巴胺神经元",
+         script="learn/plasticity.py", log="§48.3"),
+    dict(name="六条腿的身体", value="腿间相位耦合 8、失稳拖行的虚拟脚权重 0.6、着地判据足尖高 < 0.12 mm、重心在胸部原点后 0.2 mm", source="**手选**",
+         code_check=("dodge/legs.js", r"coupling: (\d+), drag: ([\d.]+)", "8/0.6"),
+         note="足尖轨迹与步幅来自 NeuroMechFly 录制的步态周期；「步幅差 → 偏航」的增益在创建时用同一套运动学数值标定，不是手调的",
+         script="dodge/legs.js", log="§48.6"),
+    dict(name="记忆 → 转向的桥（默认关）", value="价 = 奖赏隔室被压掉的比例 − 惩罚隔室被压掉的比例；转向 = 价 × 150 °/s × 两根触角浓度差的符号", source="**整个是手写的**",
+         code_check=("dodge/game_core.js", r"memoryNav: (false), memoryTurn: (\d+)", "false/150"),
+         note="实测记忆走不到运动输出（memory_to_motor，阴性），这座桥只是让页面上能看到「学了之后会怎样」，默认关、单独标着。第一版用 MBON 的瞬时发放，不起作用",
+         script="dodge/game_core.js", log="§48.7"),
 ]
 
 # ── 本项目自己的结果（不是对某篇论文的复现，但同样是"我们知道什么"）──────────
@@ -506,6 +522,65 @@ FINDINGS = [
          script="gomoku/selfplay_rl.js", result_file="results/gomoku/rl.json", log="§46.7",
          verify=[("final.d4_vs_supervised_d4.win", 6, 0), ("criterion_passed", False, 0),
                  ("win_rate_vs_supervised", 0.03, 0.0005)]),
+    dict(id="olfactory_runaway_source", what="嗅觉输入在这个模型里为什么一给就全脑失控（§11.4 挂了六天的问题）",
+         status="reproduced",
+         result="**源头是触角叶局部神经元（ALLN）的递质符号**。把它们发出的突触改成抑制性（文献里它们绝大多数是 GABA / 谷氨酸能）："
+                "蘑菇体回路里活跃的凯尼恩细胞从 **76.5% 降到 3.5%**（真果蝇约 5–10%），不同气味的 KC 集合几乎不重合（Jaccard 0.005）；"
+                "**回到全脑复核**：原样 6 / 6 次失控（其他活跃神经元中位 10212），改后 **0 / 6**（中位 1008）。事先写下的预测成立",
+         caveat="这是对递质符号的纠正（手选的建模决定，登记在 PARAMETERS），不是行为规则。全脑复核用的是自写的 numba LIF（方程、参数、每步顺序与 Brian2 版相同），不是 Brian2 本身。"
+                "不失控之后单侧气味仍然**没有左右偏侧**（LI -0.01 / -0.06，判据 |LI| ≥ 0.2 且符号相反）",
+         script="learn/fullbrain_alln.py", result_file="results/learn/fullbrain_alln.json", log="§48.1",
+         verify=[("arms.raw.n_runaway", 6, 0), ("arms.alln_inh.n_runaway", 0, 0), ("arms.alln_inh.median_active", 1007.5, 0.5), ("prediction_holds", True, 0), ("lateralization.lateralized", False, 0)]),
+    dict(id="dopamine_not_recruited", what="糖 / 苦 / 热 / 湿这些感觉，能不能靠真实接线把多巴胺神经元（PAM / PPL1）叫起来",
+         status="negative",
+         result="**不能**。专门为这个问题裁的回路（16,435 个神经元：蘑菇体 ∪ v4 ∪ 所有「感觉 → DAN」≤3 跳路径）里，四种感觉各三档强度共 12 个条件，没有一个失控，"
+                "而发放 ≥5 Hz 的多巴胺神经元**最多 0 个**。与 §11.1 的全脑结果一致，并补上了热和湿",
+         caveat="结构上是通的（最少 2–3 跳）。推测原因同 §11.1：真实的奖赏通路走章鱼胺 / 神经肽等慢调质，模型只有快递质符号。"
+                "所以学习实验和页面里的强化信号是**手接的一根线**（吃到糖 → PAM、烫 / 苦 → PPL1），等价于实验里用光遗传激活多巴胺神经元",
+         script="learn/reinforcement_route.py", result_file="results/learn/reinforcement_route.json", log="§48.2",
+         verify=[("any_route", False, 0), ("max_dan_ge5hz_without_runaway", 0, 0)]),
+    dict(id="mushroom_body_learning", what="给连接组的蘑菇体加一条文献里的突触规则（多巴胺门控的 KC→MBON 压低），它学得会吗",
+         status="partial",
+         result="**学得会，特异性差一点**。训练后被强化隔室的 MBON 对配对气味的响应降到对照的 **0.00**（L1 ≤ 0.7 成立）；多巴胺与气味错开给则不变（0.99，L3 成立）；"
+                "PAM 与 PPL1 各压低 17 / 13 个 MBON、重合 0.00（L4 成立，MBON11 落在 PPL1 一侧，与解剖一致）；"
+                "**没配对的气味也掉到 0.82（L2 ≥ 0.85 不成立）**",
+         caveat="这是第二次尝试：第一次（mb_conditioning_v1.json）三条判据不过，原因是设计（多巴胺全局归一、学习率过大、气味对本身相似、指标被无关隔室稀释），在看新结果之前改掉、阈值不变。"
+                "打乱 ALPN→KC 接线后照样学得会（0.00，事先写下的预期），特异性更差（0.66）：连接组的贡献在隔室，不在这一层的具体接线。"
+                "强化信号手接；学习率 / 资格迹时间常数手选，只在另外的种子上校准过；气味是合成的（各 20 个嗅小球）",
+         script="learn/mb_conditioning.py", result_file="results/learn/mb_conditioning.json", log="§48.3",
+         verify=[("arms.connectome.median_ratio_paired_csp", 0.00024837521215382706, 0.001), ("arms.connectome.median_ratio_paired_csm", 0.8166666666666667, 0.001), ("arms.connectome.median_ratio_unpaired_csp", 0.9890710382513661, 0.001),
+                 ("arms.connectome.criteria.L2_specific", False, 0), ("arms.connectome.compartment_jaccard", 0.0, 0.001), ("arms.shuffle_pn_kc.criteria.L1_learned", True, 0)]),
+    dict(id="memory_to_motor", what="蘑菇体里形成的记忆，走不走得到运动输出（前进 oDN1 / BDN2、转向 DNa01 / 02、后退 MDN）",
+         status="negative",
+         result="**走不到**。训练后各测 12 次，6 组（气味对 × PAM / PPL1）里，五个读出满足「Welch |t| ≥ 3 且差 ≥ 20%」的组数最多 **0**。"
+                "原因：有运动落点的四类 MBON（12 / 26 / 27 / 35）对气味一个脉冲都没有，被 APL 压死——APL 在真果蝇里不放电，LIF 把它当放电神经元、顶着不应期上限放电",
+         caveat="事先声明只试一次的一刀（切掉 APL→MBON）：有响应的 MBON 类型增到 16 / 35，记忆传到了一些别的下行神经元（探索性），但五个读出仍是 0 组，判据不成立；**这一刀没有采用**。"
+                "所以页面上的「记忆 → 转向的桥」是手写的、默认关",
+         script="learn/memory_to_motor.py", result_file="results/learn/memory_to_motor.json", log="§48.4",
+         verify=[("M2_any_stable", False, 0), ("max_hits", 0, 0), ("n_rows", 6, 0)]),
+    dict(id="learning_engine_parity", what="页面引擎（brain.js 稀疏推进 + plasticity.js）与 Python 在同一份 v5 回路上学到的一样吗",
+         status="reproduced",
+         result="**一样**。同一个条件化流程、4 个种子：未配对气味的 MBON 总发放 719.8 对 720.8 Hz；各 MBON 的突触剩余强度相关 r = 0.9999；四条事先写好的判据全过",
+         caveat="页面引擎那一半是 learn/parity_js.js。两边随机数不同，比的是统计量。稀疏推进不逐位等于稠密推进（回静息用了阈值、同一步内求和顺序不同），所以球场 / 五子棋（v3）不开它",
+         script="learn/parity_py.py", result_file="results/learn/parity.json", log="§48.5",
+         verify=[("all_pass", True, 0), ("strength_pearson", 0.9998756216361215, 0.0001)]),
+    dict(id="six_leg_body", what="让身体由六条腿推着走（支撑脚的运动学解出身体位移），而不是按速度滑行",
+         status="reproduced",
+         result="四条事先写好的判据全过：直行 18.29 mm/s（指令 18）、转向 +60.7 / -60.6 °/s（指令 ±60）、后退 -12.19 mm/s（指令 −12）、任何时刻着地 ≥ 4 条腿。"
+                "截掉左前腿：速度 15.7 mm/s、偏航 +10 °/s",
+         caveat="运动学，没有动力学和打滑；推进相按匀速直线理想化（直接回放录制的足尖轨迹会凭空转出 ±15° 的摆动）。**腿的节律与腿间协调是手写的**——腹神经索连接组给不出三足步态（§12）；大脑给的只是几个下行神经元的发放。截肢后没有适应",
+         script="dodge/legs_test.js", result_file="results/dodge/legs_test.json", log="§48.6",
+         verify=[("all_pass", True, 0), ("tests.T1_straight.path_speed", 18.29049908248401, 0.01), ("tests.T4_support.min_stance", 4, 0)]),
+    dict(id="embodied_learning", what="大脑 + 身体闭环之后，它在身体里学得会吗（页面引擎的六条腿身体；物理仿真的 NeuroMechFly）",
+         status="partial",
+         result="**奖赏记忆两个身体里都成立**：页面引擎里 A 在奖赏隔室的输入剩 25%（对照 99%）；物理身体里 MBON 响应 0 对 70 Hz。"
+                "**惩罚记忆在物理身体里不成立**（只到对照的 89%，判据 ≤ 70%）：它走到 B 味的热源跟前就自己掉头走了，PPL1 只放了 0.5 s。"
+                "二选一（互换设计，每组 40 只，走向 A 的比例，「A 配糖」组 vs「B 配糖」组）：桥关着 78% vs 62%；打开手写的桥 85% vs 50%",
+         caveat="那个掉头没有人写，两个身体里都出现；分开测（learn/uturn_cause.js）主要是**气味 B** 引起的（只放 B：左侧 DNa 66 Hz、0/5 走穿；只放热 3/5 走穿；只放 A 毫无反应）——两种合成气味在连接组里天生不一样。把转向指令置 0 它就一路走穿、被烫 1.3 s、惩罚记忆很强——身体的行为决定了它学到什么。"
+                "物理闭环（learn/embodied_loop.py）只跑了 1 个种子、30 s。桥是手写的（第一版不起作用，见 game_learning_bridge_v1.json），默认关。二选一的第一轮设计（训练过 vs 没训练过、每组 12 只）因天花板效应和样本太小作废，留在 game_learning_choice_v1.json",
+         script="learn/game_learning.js", result_file="results/learn/game_learning.json", log="§48.7",
+         verify=[("criteria.G1_reward_memory", True, 0), ("criteria.G2_punish_memory", True, 0), ("criteria.G3_control_flat", True, 0), ("criteria.G4_no_behavior_without_bridge", True, 0), ("criteria.G5_bridge_works", False, 0),
+                 ("trained.memA.PAM", 0.247556337850842, 0.001)]),
     dict(id="hearing_priming", what="给它听觉之后，声音在行为上有没有用（听觉神经元 1 跳到巨纤维）",
          status="reproduced",
          result="**有，但不是「听到就跑」**。声音单独驱动不了起飞（听觉神经元 200 Hz 时巨纤维读出约 80 Hz，起飞阈值 90）；"

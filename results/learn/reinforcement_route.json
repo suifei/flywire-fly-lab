@@ -1,0 +1,320 @@
+{
+ "n": 16435,
+ "n_edges": 1477243,
+ "conditions": [
+  {
+   "sense": "糖 SUGAR",
+   "rate_hz": 50,
+   "n_stim": 122,
+   "active_others": 172,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "糖 SUGAR",
+   "rate_hz": 100,
+   "n_stim": 122,
+   "active_others": 218,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "糖 SUGAR",
+   "rate_hz": 200,
+   "n_stim": 122,
+   "active_others": 262,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "苦 BITTER",
+   "rate_hz": 50,
+   "n_stim": 42,
+   "active_others": 17,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "苦 BITTER",
+   "rate_hz": 100,
+   "n_stim": 42,
+   "active_others": 52,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "苦 BITTER",
+   "rate_hz": 200,
+   "n_stim": 42,
+   "active_others": 75,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "热 THERMO",
+   "rate_hz": 50,
+   "n_stim": 29,
+   "active_others": 212,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 2,
+    "any_spike": 2,
+    "mean_hz": 2.8125
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "热 THERMO",
+   "rate_hz": 100,
+   "n_stim": 29,
+   "active_others": 370,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 4,
+    "any_spike": 5,
+    "mean_hz": 11.5625
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "热 THERMO",
+   "rate_hz": 200,
+   "n_stim": 29,
+   "active_others": 533,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 5,
+    "any_spike": 5,
+    "mean_hz": 18.125
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "湿 HYGRO",
+   "rate_hz": 50,
+   "n_stim": 74,
+   "active_others": 193,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 6,
+    "any_spike": 6,
+    "mean_hz": 20.625
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "湿 HYGRO",
+   "rate_hz": 100,
+   "n_stim": 74,
+   "active_others": 292,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 6,
+    "any_spike": 6,
+    "mean_hz": 38.4375
+   },
+   "recruits_dan": false
+  },
+  {
+   "sense": "湿 HYGRO",
+   "rate_hz": 200,
+   "n_stim": 74,
+   "active_others": 391,
+   "runaway": false,
+   "PAM": {
+    "n": 307,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL1": {
+    "n": 16,
+    "firing_ge5hz": 0,
+    "any_spike": 0,
+    "mean_hz": 0.0
+   },
+   "PPL2": {
+    "n": 8,
+    "firing_ge5hz": 6,
+    "any_spike": 6,
+    "mean_hz": 64.375
+   },
+   "recruits_dan": false
+  }
+ ],
+ "any_route": false,
+ "max_dan_ge5hz_without_runaway": 0
+}

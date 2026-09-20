@@ -333,7 +333,38 @@ function chromePath() {
     if (!r) return "✗ 生活模式没有启动";
     if (!(r.v4 && r.age > 2 && r.sd > 5 && r.heard > 50 && r.mode === "life")) return "✗ " + JSON.stringify(r);
     if (Math.abs(r.court - t0) > 1e-9) return `✗ 球场那只没有冻结（${t0} → ${r.court}）`;
-    return `${r.n} 个神经元的 v4 大脑已经活了 ${r.age.toFixed(0)} s；放一声响，听觉神经元到 ${r.heard.toFixed(0)} Hz；世界里有 ${r.things} 样东西，意识流 ${r.diary} 条；球场冻结`;
+    return `${r.n} 个神经元的大脑已经活了 ${r.age.toFixed(0)} s；放一声响，听觉神经元到 ${r.heard.toFixed(0)} Hz；世界里有 ${r.things} 样东西，意识流 ${r.diary} 条；球场冻结`;
+  });
+  await step("生活模式：蘑菇体会学（气味 + 多巴胺 → 突触被压低），六条腿推着身体走，神经元遥控有效", async () => {
+    const r = await page.evaluate(() => { const g = window.__life; if (!g || !g.MB || !g.legs) return null;
+      // ① 学习：把它钉在气味 A 的中心，喷 PAM 多巴胺；对照：气味 B 不喷
+      g.CFG.life = false; g.pellets.length = 0; g.odors.length = 0; g.fields.length = 0; g.forget(); const S = g.S;
+      const sniff = (kind, puff) => { g.odors.length = 0; g.addOdor(S.x + 1, S.y, kind, 40, 1, 1e9); for (let k = 0; k < 400; k++) { if (puff && k % 50 === 0) g.puff(puff, 1); g.step(); } g.odors.length = 0; for (let k = 0; k < 100; k++) g.step(); };
+      sniff("A", "PAM"); sniff("B", null); const mA = g.memoryOf("A"), mB = g.memoryOf("B");
+      // ② 腿：直行时身体的位移来自腿；截掉左前腿之后会偏航
+      const walk = () => { const x0 = S.x, y0 = S.y, h0 = S.h; for (let k = 0; k < 300; k++) g.step(); return { d: Math.hypot(S.x - x0, S.y - y0), dh: (S.h - h0) * 180 / Math.PI }; };
+      const w0 = walk(); g.legs.amputate("LF", true); const w1 = walk(); g.legs.amputate("LF", false);
+      // ③ 遥控：按住「DNa 左」→ 读出的左侧 DNa 明显升高
+      const before = g.readout().dnaL; document.querySelector('#lifeRemote [data-remote="dnaL"]').dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); for (let k = 0; k < 60; k++) g.step(); const during = g.readout().dnaL;
+      document.querySelector('#lifeRemote [data-remote="dnaL"]').dispatchEvent(new PointerEvent("pointerup", { bubbles: true })); g.CFG.life = true;
+      return { n: g.brain.n, mA, mB, w0, w1, before, during, stance: g.legs.state.nStance }; });
+    if (!r) return "✗ 生活模式里没有蘑菇体或六条腿";
+    if (!(r.mA && r.mA.PAM < 0.7)) return "✗ 配对过的气味 A 没被记住：" + JSON.stringify(r.mA);
+    if (!(r.mB && r.mB.PAM > 0.85)) return "✗ 没配对的气味 B 也被压低了：" + JSON.stringify(r.mB);
+    if (!(r.w0.d > 3)) return "✗ 六条腿没把身体推动：" + JSON.stringify(r.w0);
+    if (!(r.during > r.before + 30)) return `✗ 遥控无效（DNa 左 ${r.before.toFixed(0)} → ${r.during.toFixed(0)} Hz）`;
+    return `${r.n} 个神经元；气味 A 配奖赏多巴胺后，奖赏隔室的输入剩 ${(r.mA.PAM * 100).toFixed(0)}%（没配对的 B 剩 ${(r.mB.PAM * 100).toFixed(0)}%）；六条腿 1.5 s 走了 ${r.w0.d.toFixed(1)} mm，截掉左前腿后走 ${r.w1.d.toFixed(1)} mm、偏航 ${r.w1.dh.toFixed(0)}°；遥控 DNa 左 ${r.before.toFixed(0)} → ${r.during.toFixed(0)} Hz`;
+  });
+  await step("生活模式：15,055 个神经元在浏览器里跑得动（只报告速度）", async () => {
+    const a = await page.evaluate(() => ({ t: window.__life.body.age, w: performance.now() })); await new Promise(r => setTimeout(r, 4000));
+    const b = await page.evaluate(() => ({ t: window.__life.body.age, w: performance.now(), n: window.__life.brain.n }));
+    const rt = (b.t - a.t) / ((b.w - a.w) / 1000); if (!(rt > 0.05)) return `✗ 几乎不动：${rt.toFixed(3)} × 实时`;
+    return `${rt.toFixed(2)} × 实时（无头浏览器${process.env.CI ? "，CI 软件渲染" : ""}，${b.n} 个神经元，稠密推进）`;
+  });
+  await step("学习卡片：五张表都从 learn_summary.json 渲染出来了", async () => {
+    const r = await page.evaluate(() => ({ err: window.__learnCardError || null, rows: ["tLearnRunaway", "tLearnCond", "tLearnMotor", "tLearnBody", "tLearnLegs"].map(id => document.getElementById(id) ? document.getElementById(id).rows.length : 0), note: (document.getElementById("lnNote2") || {}).textContent || "" }));
+    if (r.err) return "✗ " + r.err; if (r.rows.some(n => n < 3)) return "✗ 有表是空的：" + JSON.stringify(r.rows); if (/undefined|NaN/.test(r.note)) return "✗ 说明文字里有 undefined / NaN";
+    return "各表行数 " + r.rows.join(" / ");
   });
   await step("切回球场后三维场景恢复渲染", async () => {
     await page.click("#viewCourt");

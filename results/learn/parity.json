@@ -1,0 +1,22 @@
+{
+ "js": {
+  "mbon_B_mock": 719.75,
+  "ratio_csp": 0.0,
+  "ratio_csm": 0.7639241445487551,
+  "kc": 452.125
+ },
+ "py": {
+  "mbon_B_mock": 720.75,
+  "ratio_csp": 0.0,
+  "ratio_csm": 0.7573978793604018,
+  "kc": 451.875
+ },
+ "strength_pearson": 0.9998756216361215,
+ "criteria": {
+  "P1_mbon_rate": true,
+  "P2_learning_ratio": true,
+  "P3_strength_r": true,
+  "P4_kc_active": true
+ },
+ "all_pass": true
+}

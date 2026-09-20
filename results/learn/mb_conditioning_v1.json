@@ -1,0 +1,854 @@
+{
+ "params": {
+  "eta": 0.02,
+  "tau_e_ms": 200.0,
+  "dan_hz": 30,
+  "odor_hz": 200,
+  "k_glom": 12,
+  "reps": 5
+ },
+ "arms": {
+  "connectome": {
+   "n": 15055,
+   "n_edges": 1291688,
+   "naive_mbon_sum": [
+    58.0,
+    294.0,
+    611.0,
+    1028.0,
+    24.0,
+    0.0,
+    20.0,
+    166.0,
+    544.0,
+    135.0,
+    31.0,
+    452.0
+   ],
+   "n_responsive": 7,
+   "n_rows": 12,
+   "n_rows_usable": 10,
+   "median_ratio_paired_csp": 0.7515302727877579,
+   "median_ratio_paired_csm": 0.748262854873933,
+   "median_ratio_unpaired_csp": 0.9774556846571758,
+   "depressed_types": {
+    "PPL1": [
+     "MBON11",
+     "MBON25,MBON34",
+     "MBON30",
+     "MBON32",
+     "MBON35"
+    ],
+    "PAM": [
+     "MBON01",
+     "MBON02",
+     "MBON05",
+     "MBON06",
+     "MBON07",
+     "MBON09",
+     "MBON21",
+     "MBON24",
+     "MBON29",
+     "MBON30"
+    ]
+   },
+   "n_depressed": {
+    "PPL1": 7,
+    "PAM": 18
+   },
+   "compartment_jaccard": 0.041666666666666664,
+   "n_motor_hit": 2,
+   "criteria": {
+    "L1_learned": false,
+    "L2_specific": false,
+    "L3_contingent": true,
+    "L4_compartments": true,
+    "B1_reaches_motor": false
+   },
+   "rows": [
+    {
+     "cs_plus": 1,
+     "cs_minus": 2,
+     "reinforcer": "PPL1",
+     "mock_A": 180.0,
+     "mock_B": 57.0,
+     "naive_A": 294.0,
+     "naive_B": 611.0,
+     "ratio_paired_csp": 0.9222222222222223,
+     "ratio_paired_csm": 0.9122807017543859,
+     "ratio_unpaired_csp": 0.9944444444444445,
+     "depressed_mbon": [
+      21,
+      34,
+      44,
+      47
+     ],
+     "depressed_types": [
+      "MBON11",
+      "MBON25,MBON34",
+      "MBON30"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 1,
+     "cs_minus": 2,
+     "reinforcer": "PAM",
+     "mock_A": 180.0,
+     "mock_B": 57.0,
+     "naive_A": 294.0,
+     "naive_B": 611.0,
+     "ratio_paired_csp": 0.48333333333333334,
+     "ratio_paired_csm": 0.0,
+     "ratio_unpaired_csp": 0.9055555555555556,
+     "depressed_mbon": [
+      10,
+      16,
+      21,
+      25,
+      26,
+      41,
+      61,
+      64,
+      67,
+      89,
+      95
+     ],
+     "depressed_types": [
+      "MBON01",
+      "MBON05",
+      "MBON07",
+      "MBON09",
+      "MBON21",
+      "MBON24",
+      "MBON29",
+      "MBON30"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 2,
+     "cs_minus": 3,
+     "reinforcer": "PPL1",
+     "mock_A": 0.0,
+     "mock_B": 142.0,
+     "naive_A": 611.0,
+     "naive_B": 1028.0,
+     "ratio_paired_csp": 0.0,
+     "ratio_paired_csm": 0.9859154929577465,
+     "ratio_unpaired_csp": 0.0,
+     "depressed_mbon": [],
+     "depressed_types": [],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 1.0,
+       "csm_mock": 3.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.5,
+       "csm_mock": 1.5,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 1.5,
+       "csm_mock": 2.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 2,
+     "cs_minus": 3,
+     "reinforcer": "PAM",
+     "mock_A": 0.0,
+     "mock_B": 142.0,
+     "naive_A": 611.0,
+     "naive_B": 1028.0,
+     "ratio_paired_csp": 0.0,
+     "ratio_paired_csm": 0.4225352112676056,
+     "ratio_unpaired_csp": 0.0,
+     "depressed_mbon": [
+      16,
+      25,
+      26,
+      36,
+      37,
+      42,
+      57,
+      64,
+      95
+     ],
+     "depressed_types": [
+      "MBON02",
+      "MBON05",
+      "MBON07",
+      "MBON21",
+      "MBON24"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 5.0,
+       "csm_mock": 3.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 2.5,
+       "csm_mock": 1.5,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 4.5,
+       "csm_mock": 2.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 3,
+     "cs_minus": 7,
+     "reinforcer": "PPL1",
+     "mock_A": 150.0,
+     "mock_B": 170.0,
+     "naive_A": 1028.0,
+     "naive_B": 166.0,
+     "ratio_paired_csp": 0.98,
+     "ratio_paired_csm": 0.9882352941176471,
+     "ratio_unpaired_csp": 0.9933333333333333,
+     "depressed_mbon": [],
+     "depressed_types": [],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 1.0,
+       "csp_mock": 5.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": true
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.5,
+       "csp_mock": 3.5,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": true
+      },
+      "DNa02": {
+       "csp_paired": 2.0,
+       "csp_mock": 5.5,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": true
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": true
+    },
+    {
+     "cs_plus": 3,
+     "cs_minus": 7,
+     "reinforcer": "PAM",
+     "mock_A": 150.0,
+     "mock_B": 170.0,
+     "naive_A": 1028.0,
+     "naive_B": 166.0,
+     "ratio_paired_csp": 0.4,
+     "ratio_paired_csm": 0.5588235294117647,
+     "ratio_unpaired_csp": 0.88,
+     "depressed_mbon": [
+      10,
+      16,
+      25,
+      26,
+      36,
+      41,
+      61,
+      64,
+      95
+     ],
+     "depressed_types": [
+      "MBON01",
+      "MBON05",
+      "MBON07",
+      "MBON09",
+      "MBON21",
+      "MBON29"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 2.0,
+       "csp_mock": 5.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": true
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 2.0,
+       "csp_mock": 3.5,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 3.5,
+       "csp_mock": 5.5,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": true
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": true
+    },
+    {
+     "cs_plus": 7,
+     "cs_minus": 8,
+     "reinforcer": "PPL1",
+     "mock_A": 167.0,
+     "mock_B": 147.0,
+     "naive_A": 166.0,
+     "naive_B": 544.0,
+     "ratio_paired_csp": 0.9880239520958084,
+     "ratio_paired_csm": 1.0476190476190477,
+     "ratio_unpaired_csp": 0.9880239520958084,
+     "depressed_mbon": [
+      3,
+      21,
+      34,
+      44
+     ],
+     "depressed_types": [
+      "MBON11",
+      "MBON25,MBON34",
+      "MBON30",
+      "MBON32"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 7,
+     "cs_minus": 8,
+     "reinforcer": "PAM",
+     "mock_A": 167.0,
+     "mock_B": 147.0,
+     "naive_A": 166.0,
+     "naive_B": 544.0,
+     "ratio_paired_csp": 0.5808383233532934,
+     "ratio_paired_csm": 0.5034013605442177,
+     "ratio_unpaired_csp": 0.9640718562874252,
+     "depressed_mbon": [
+      10,
+      21,
+      25,
+      26,
+      27,
+      41,
+      61,
+      64,
+      89
+     ],
+     "depressed_types": [
+      "MBON01",
+      "MBON05",
+      "MBON09",
+      "MBON21",
+      "MBON29",
+      "MBON30"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 8,
+     "cs_minus": 9,
+     "reinforcer": "PPL1",
+     "mock_A": 151.0,
+     "mock_B": 69.0,
+     "naive_A": 544.0,
+     "naive_B": 135.0,
+     "ratio_paired_csp": 1.0264900662251655,
+     "ratio_paired_csm": 0.8115942028985508,
+     "ratio_unpaired_csp": 1.033112582781457,
+     "depressed_mbon": [
+      3,
+      19,
+      21,
+      34,
+      47
+     ],
+     "depressed_types": [
+      "MBON11",
+      "MBON25,MBON34",
+      "MBON30",
+      "MBON32"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 27.0,
+       "csm_mock": 29.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 56.0,
+       "csm_mock": 64.5,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 21.5,
+       "csm_mock": 21.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 24.5,
+       "csm_mock": 25.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 8,
+     "cs_minus": 9,
+     "reinforcer": "PAM",
+     "mock_A": 151.0,
+     "mock_B": 69.0,
+     "naive_A": 544.0,
+     "naive_B": 135.0,
+     "ratio_paired_csp": 0.5364238410596026,
+     "ratio_paired_csm": 0.057971014492753624,
+     "ratio_unpaired_csp": 0.9668874172185431,
+     "depressed_mbon": [
+      10,
+      16,
+      25,
+      26,
+      36,
+      41,
+      42,
+      57,
+      58,
+      61,
+      64,
+      67,
+      80,
+      89,
+      95
+     ],
+     "depressed_types": [
+      "MBON01",
+      "MBON02",
+      "MBON05",
+      "MBON06",
+      "MBON07",
+      "MBON09",
+      "MBON21",
+      "MBON24",
+      "MBON29"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 24.0,
+       "csm_mock": 29.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 51.0,
+       "csm_mock": 64.5,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 21.0,
+       "csm_mock": 21.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 23.0,
+       "csm_mock": 25.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 9,
+     "cs_minus": 11,
+     "reinforcer": "PPL1",
+     "mock_A": 58.0,
+     "mock_B": 146.0,
+     "naive_A": 135.0,
+     "naive_B": 452.0,
+     "ratio_paired_csp": 1.0689655172413792,
+     "ratio_paired_csm": 1.0068493150684932,
+     "ratio_unpaired_csp": 1.0517241379310345,
+     "depressed_mbon": [
+      19,
+      21,
+      34,
+      47,
+      78
+     ],
+     "depressed_types": [
+      "MBON11",
+      "MBON25,MBON34",
+      "MBON30",
+      "MBON35"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 24.0,
+       "csp_mock": 28.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 60.0,
+       "csp_mock": 61.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 21.0,
+       "csp_mock": 18.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 22.0,
+       "csp_mock": 25.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    },
+    {
+     "cs_plus": 9,
+     "cs_minus": 11,
+     "reinforcer": "PAM",
+     "mock_A": 58.0,
+     "mock_B": 146.0,
+     "naive_A": 135.0,
+     "naive_B": 452.0,
+     "ratio_paired_csp": 0.034482758620689655,
+     "ratio_paired_csm": 0.684931506849315,
+     "ratio_unpaired_csp": 0.8275862068965517,
+     "depressed_mbon": [
+      10,
+      16,
+      25,
+      26,
+      27,
+      36,
+      41,
+      61,
+      64,
+      80,
+      95
+     ],
+     "depressed_types": [
+      "MBON01",
+      "MBON05",
+      "MBON06",
+      "MBON07",
+      "MBON09",
+      "MBON21",
+      "MBON29"
+     ],
+     "motor": {
+      "oDN1": {
+       "csp_paired": 28.0,
+       "csp_mock": 28.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "BDN2": {
+       "csp_paired": 59.5,
+       "csp_mock": 61.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa01": {
+       "csp_paired": 20.5,
+       "csp_mock": 18.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "DNa02": {
+       "csp_paired": 28.5,
+       "csp_mock": 25.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      },
+      "MDN": {
+       "csp_paired": 0.0,
+       "csp_mock": 0.0,
+       "csm_paired": 0.0,
+       "csm_mock": 0.0,
+       "hit": false
+      }
+     },
+     "motor_hit": false
+    }
+   ]
+  }
+ }
+}

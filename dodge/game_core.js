@@ -93,6 +93,16 @@
     // 气味源 G.odors：{x, y, kind: "vinegar" | "geosmin", sigma, strength}。两根触角各自采样浓度（高斯羽流，手写）→ OLFA / OLFR。
     //   sensor_drive_v4.json：这两路在这个子回路里**没有落到任何运动读出上**——它闻得到，但闻到之后往哪走，模型里没有通路。
     olfRate: 200,
+    // —— v5：蘑菇体学习回路（子回路带 mb_tag 时才有）——
+    // 气味 = 哪些嗅小球的感受神经元被驱动（SUB.meta.odors：A / B 各 20 个互不重合的小球；vinegar = DM1；geosmin = DA2）。
+    // 强化信号：连接组自己叫不起多巴胺神经元（learn/reinforcement_route.py，阴性），所以这根线是**手接的**：
+    //   吃到糖 → PAM 整簇 danRate Hz；热到 painThermo 以上、或者吃到苦的 → PPL1 整簇 danRate Hz。
+    //   等价于真果蝇实验里用光遗传激活多巴胺神经元代替糖 / 电击。学到什么、改哪几个隔室，仍由连接组和可塑性规则决定（dodge/plasticity.js）。
+    learning: true, reinforce: true, danRate: 30, painThermo: 0.5, plastEta: 0.003, plastTauE: 200, plastForget: 0,
+    // 记忆 → 行为的桥（**手写，默认关**）：实测这个模型里记忆走不到运动输出（learn/memory_to_motor.py，阴性）。打开后：
+    //   价 = 这种气味在奖赏隔室（PAM）被压掉的比例 − 在惩罚隔室（PPL1）被压掉的比例（文献：PAM 隔室的 MBON 促回避、PPL1 隔室的促趋近，压低前者 = 趋近，Aso 2014 eLife；Owald 2015 Neuron），
+    //   再乘两根触角浓度差的符号 → 转向。隔室归属来自连接组；「读突触 → 价 → 转向」这条链是我们写的。
+    memoryNav: false, memoryTurn: 150, memoryTau: 0.3,
     // 身体状态（能量 / 水分）：属于**身体**，不是大脑。它们只改两样东西，都不是决策：
     //   ① 味觉感受器的灵敏度：饿了糖感受器更敏感、渴了水感受器更敏感（文献：Inagaki et al. 2012 饥饿经多巴胺提高糖 GRN 的敏感度；增益大小手选）
     //   ② 走路速度：能量低了走得慢（手写）
@@ -148,6 +158,23 @@
     const TG2 = ["MN9_left", "MN9_right", "aDN1_left", "aDN1_right", "MDN_left", "MDN_right"].filter(g => SUB.groups[g] && SUB.groups[g].length);
     const has = g => !!(SUB.groups[g] && SUB.groups[g].length);
     const V3 = TG2.length === 6 && has("SUGAR_left") && has("JO_left") && has("LC16_left");
+    // v5：蘑菇体 + 可塑性
+    const V5 = !!SUB.mb_tag, PlastAPI = V5 ? (opts.Plasticity || root.FlyPlasticity || (typeof require === "function" ? require("./plasticity.js") : null)) : null;
+    const MB = V5 ? (() => {
+      const plast = PlastAPI.create(SUB, brain, { eta: CFG.plastEta, tauE: CFG.plastTauE, tauForget: CFG.plastForget }), n = SUB.meta.n, tag = SUB.mb_tag, sides = SUB.sides;
+      const orn = []; for (let i = 0; i < n; i++) if (tag[i] === "ORN" && (sides[i] === "left" || sides[i] === "right")) orn.push(i);
+      const ornIdx = Int32Array.from(orn), ornHz = new Float32Array(orn.length), slot = new Int32Array(n).fill(-1); orn.forEach((i, k) => { slot[i] = k; });
+      const odorSlots = {}; for (const [kind, gl] of Object.entries(SUB.meta.odors)) { const L = [], R = []; for (const g of gl) for (const i of SUB.meta.glomeruli[g] || []) { if (slot[i] < 0) continue; (sides[i] === "left" ? L : R).push(slot[i]); } odorSlots[kind] = { L: Int32Array.from(L), R: Int32Array.from(R) }; }
+      const dan = { PAM: [...SUB.groups.PAM_left, ...SUB.groups.PAM_right], PPL1: [...SUB.groups.PPL1_left, ...SUB.groups.PPL1_right] };
+      // 隔室权重：每个 MBON 的多巴胺输入（≥3 突触的边）里来自 PAM / PPL1 的比例——只看连接组
+      const mLocal = new Int32Array(n).fill(-1); plast.mbonIdx.forEach((i, m) => { mLocal[i] = m; });
+      const frac = { PAM: new Float32Array(plast.mbonIdx.length), PPL1: new Float32Array(plast.mbonIdx.length) }, tot = new Float32Array(plast.mbonIdx.length), isIn = { PAM: new Set(dan.PAM), PPL1: new Set(dan.PPL1) };
+      for (const d of plast.danIdx) for (let e = brain.indptr[d]; e < brain.indptr[d + 1]; e++) { const m = mLocal[brain.post[e]]; if (m < 0) continue; const c = Math.round(Math.abs(brain.w0[e]) / 0.275); if (c < 3) continue; tot[m] += c; for (const k of ["PAM", "PPL1"]) if (isIn[k].has(d)) frac[k][m] += c; }
+      for (let m = 0; m < tot.length; m++) if (tot[m] > 0) { frac.PAM[m] /= tot[m]; frac.PPL1[m] /= tot[m]; }
+      const kcLocal = new Int32Array(n).fill(-1); plast.kcIdx.forEach((i, k) => { kcLocal[i] = k; });
+      return { plast, ornIdx, ornHz, odorSlots, dan, frac, mLocal, kcLocal, mbonCount: new Float32Array(plast.mbonIdx.length), mbonHz: new Float32Array(plast.mbonIdx.length), kcCount: new Float32Array(plast.kcIdx.length),
+               kcProfile: {}, danHz: { PAM: 0, PPL1: 0 }, danCount: { PAM: 0, PPL1: 0 }, drive: { PAM: false, PPL1: false }, puff: { PAM: 0, PPL1: 0 }, conc: {}, valence: 0, kcActive: 0 };
+    })() : null;
     const target2Of = new Int8Array(SUB.meta.n).fill(-1);
     TG2.forEach((g, k) => SUB.groups[g].forEach(i => { target2Of[i] = k; }));
     const ema2 = new Float32Array(TG2.length), counts2 = new Float32Array(TG2.length);
@@ -304,6 +331,34 @@
     // —— v4：它此刻"在想什么" ——
     // 每一个词的触发量都是**实测的**：感觉词 = 此刻送进那一路感受器的频率；身体词 = 能量 / 水分；动作词 = 连接组读出神经元的平滑发放率。
     // 句子模板与阈值是手写的（和 G.speech 一样）。它不是语言模型，也不是果蝇真的会说话——是把正在发生的神经活动翻译成一句人话。
+    // —— v5：多巴胺桥 + 可塑性 + 记忆读数 ——
+    function mbStep(dt) {
+      const S = G.S, eatingSugar = S.state === "feed" && G.onPellet && G.onPellet.type !== "water" && G.onPellet.type !== "bitter", eatingBitter = S.state === "feed" && G.onPellet && G.onPellet.type === "bitter";
+      for (const k of ["PAM", "PPL1"]) MB.puff[k] = Math.max(0, MB.puff[k] - dt);
+      const want = { PAM: MB.puff.PAM > 0 || (CFG.reinforce && eatingSugar), PPL1: MB.puff.PPL1 > 0 || (CFG.reinforce && (eatingBitter || (G.field && G.field.thermo > CFG.painThermo))) };
+      for (const k of ["PAM", "PPL1"]) if (want[k] !== MB.drive[k]) { MB.drive[k] = want[k]; brain.setDrive(k, MB.dan[k], want[k] ? CFG.danRate : 0); G.onEvent && G.onEvent("dopamine", { cluster: k, on: want[k] }); }
+      MB.plast.enabled = CFG.learning; MB.plast.step(dt * 1000);
+      const a = dt / (0.2 + dt); let act = 0, vp = 0, va = 0;
+      for (let m = 0; m < MB.mbonHz.length; m++) { MB.mbonHz[m] += a * (MB.mbonCount[m] / dt - MB.mbonHz[m]); vp += MB.frac.PPL1[m] * MB.mbonHz[m]; va += MB.frac.PAM[m] * MB.mbonHz[m]; }
+      MB.mbonCount.fill(0);
+      for (const k of ["PAM", "PPL1"]) { MB.danHz[k] += a * (MB.danCount[k] / dt / MB.dan[k].length - MB.danHz[k]); MB.danCount[k] = 0; } MB.danCount.other = 0;
+      // 哪种气味此刻最浓 → 把这一段的 KC 活动记到它名下（只用来显示「这种气味的记忆」，不参与任何决定）
+      let top = null, tc = 0.3; for (const [kind, c] of Object.entries(MB.conc)) { const m = Math.max(c.L, c.R); if (m > tc) { tc = m; top = kind; } }
+      for (let q = 0; q < MB.kcCount.length; q++) if (MB.kcCount[q] > 0) act++;
+      if (top) { const prof = MB.kcProfile[top] || (MB.kcProfile[top] = new Float32Array(MB.kcCount.length)); for (let q = 0; q < prof.length; q++) prof[q] += 0.02 * (MB.kcCount[q] / dt - prof[q]); }
+      MB.kcCount.fill(0); MB.kcActive += a * (act - MB.kcActive); MB.top = top;
+      const v = vp + va > 1 ? (vp - va) / (vp + va) : 0; MB.valence += (dt / (CFG.memoryTau + dt)) * (v - MB.valence); MB.mbonPPL1 = vp; MB.mbonPAM = va;
+    }
+    G.V5 = V5; G.MB = MB;
+    G.puff = (cluster, seconds = 1) => { if (MB) MB.puff[cluster] = seconds; };                       // 手动喷多巴胺（页面按钮）
+    // 某种气味的记忆：它的 KC 活动谱（上面在线记的）经过现在的 KC→MBON 权重，给奖赏隔室 / 惩罚隔室的 MBON 的输入还剩原来的多少（1 = 没变）
+    G.memoryOf = kind => {
+      if (!MB || !MB.kcProfile[kind]) return null; const P = MB.plast, prof = MB.kcProfile[kind], out = { PAM: [0, 0], PPL1: [0, 0] };
+      P.forEachEdge((k, m, w0, r) => { const x = prof[k] * w0; if (x <= 0) return; for (const c of ["PAM", "PPL1"]) { out[c][0] += MB.frac[c][m] * x * r; out[c][1] += MB.frac[c][m] * x; } });
+      return { PAM: out.PAM[1] > 0 ? out.PAM[0] / out.PAM[1] : 1, PPL1: out.PPL1[1] > 0 ? out.PPL1[0] / out.PPL1[1] : 1 };
+    };
+    G.forget = () => { if (MB) { MB.plast.reset(); MB.kcProfile = {}; } };
+    G.legs = null; G.attachLegs = legs => { G.legs = legs; return legs; };   // 六条腿的身体（可选）
     G.mind = () => {
       const o = G.readout(), S = G.S, Sn = G.senses, B = G.body, felt = [], fThr = CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold;
       const loom = Math.max(G.loom.L || 0, G.loom.R || 0), aud = Math.max(Sn.audioL, Sn.audioR), vin = Math.max(Sn.olfaL, Sn.olfaR), geo = Math.max(Sn.olfrL, Sn.olfrR);
@@ -311,6 +366,10 @@
       if (aud > 20) felt.push(["听", aud > 120 ? "好响的嗡嗡声" : "有嗡嗡声", aud]);
       if (vin > 20) felt.push(["嗅", vin > 120 ? "醋味很浓，附近有烂果子" : "闻到一点醋味", vin]);
       if (geo > 20) felt.push(["嗅", "一股霉味", geo]);
+      if (MB) for (const kind of ["A", "B"]) { const c = MB.conc[kind]; if (!c) continue; const hz = Math.max(c.L, c.R) * CFG.olfRate; if (hz <= 20) continue;
+        const mem = G.memoryOf(kind), tail = !mem ? "" : mem.PAM < 0.7 && mem.PPL1 < 0.7 ? "——这味道，有过好事也有过坏事" : mem.PAM < 0.7 ? "——这味道，上次有吃的" : mem.PPL1 < 0.7 ? "——这味道，上次很难受" : "";
+        felt.push(["嗅", (kind === "A" ? "果香（气味 A）" : "焦味（气味 B）") + tail, hz]); }
+      if (MB && MB.drive.PAM) felt.push(["多巴胺", "奖赏多巴胺（PAM）在放电", CFG.danRate]); if (MB && MB.drive.PPL1) felt.push(["多巴胺", "惩罚多巴胺（PPL1）在放电", CFG.danRate]);
       if (G.gust.sugar > 0) felt.push(["味", "甜的", G.gust.sugar]); if (G.gust.bitter > 0) felt.push(["味", "苦的", G.gust.bitter]); if (G.gust.water > 0) felt.push(["味", "是水", G.gust.water]);
       if (G.touch.L + G.touch.R > 0) felt.push(["触", "撞到墙了", Math.max(G.touch.L, G.touch.R)]);
       if (G.dust.length) felt.push(["触", "触角上有灰", CFG.joRate]);
@@ -577,14 +636,24 @@
         let vL = 0, vR = 0, gL = 0, gR = 0;
         for (const o of G.odors) {
           const c = (x, y) => o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma));
-          if (o.kind === "vinegar") { vL += c(lx, ly); vR += c(rx, ry); } else { gL += c(lx, ly); gR += c(rx, ry); }
+          if (o.kind === "vinegar") { vL += c(lx, ly); vR += c(rx, ry); } else if (o.kind === "geosmin") { gL += c(lx, ly); gR += c(rx, ry); }
         }
         const cap = (v, m) => Math.min(m, Math.max(0, v) * m), Sn = G.senses;
         Sn.audioL = cap(aL, CFG.audioRate); Sn.audioR = cap(aR, CFG.audioRate);
         Sn.olfaL = cap(vL, CFG.olfRate); Sn.olfaR = cap(vR, CFG.olfRate); Sn.olfrL = cap(gL, CFG.olfRate); Sn.olfrR = cap(gR, CFG.olfRate);
         brain.setRate("AUDIO_left", Sn.audioL); brain.setRate("AUDIO_right", Sn.audioR);
-        brain.setRate("OLFA_left", Sn.olfaL); brain.setRate("OLFA_right", Sn.olfaR);
-        brain.setRate("OLFR_left", Sn.olfrL); brain.setRate("OLFR_right", Sn.olfrR);
+        if (!MB) { brain.setRate("OLFA_left", Sn.olfaL); brain.setRate("OLFA_right", Sn.olfaR); brain.setRate("OLFR_left", Sn.olfrL); brain.setRate("OLFR_right", Sn.olfrR); }
+        else {                       // v5：每种气味驱动它自己那组嗅小球；一个 ORN 同时被几种气味驱动时取最大
+          MB.ornHz.fill(0); const lesion = G.lesion.OLFA || G.lesion.OLFR; MB.conc = {};
+          for (const o of G.odors) {
+            const sl = MB.odorSlots[o.kind]; if (!sl) continue;
+            const c = (x, y) => o.strength * Math.exp(-((o.x - x) ** 2 + (o.y - y) ** 2) / (2 * o.sigma * o.sigma)), cL = c(lx, ly), cR = c(rx, ry), hL = cap(cL, CFG.olfRate), hR = cap(cR, CFG.olfRate);
+            for (const q of sl.L) if (hL > MB.ornHz[q]) MB.ornHz[q] = hL; for (const q of sl.R) if (hR > MB.ornHz[q]) MB.ornHz[q] = hR;
+            const k = MB.conc[o.kind] || (MB.conc[o.kind] = { L: 0, R: 0 }); k.L = Math.max(k.L, Math.min(1, cL)); k.R = Math.max(k.R, Math.min(1, cR));
+          }
+          if (lesion) MB.ornHz.fill(0);
+          brain.setRatesArray(MB.ornIdx, MB.ornHz);
+        }
         // 身体状态 → 感受器灵敏度（不是决策）：缺什么，对什么更敏感
         if (CFG.physiology) {
           const gain = need => CFG.gainMin + (CFG.gainMax - CFG.gainMin) * need;   // need ∈ [0,1]
@@ -628,7 +697,9 @@
         const k = targetOf[i]; if (k >= 0) counts[k]++;
         const k2 = target2Of[i]; if (k2 >= 0) counts2[k2]++;
         G.onSpike && G.onSpike(i);
+        if (MB) { MB.plast.spike(i); const m = MB.mLocal[i]; if (m >= 0) MB.mbonCount[m]++; else { const q = MB.kcLocal[i]; if (q >= 0) MB.kcCount[q]++; else if (SUB.mb_tag[i] === "DAN") MB.danCount[SUB.types[i].startsWith("PAM") ? "PAM" : SUB.types[i].startsWith("PPL1") ? "PPL1" : "other"]++; } }
       });
+      if (MB) mbStep(dt);
       for (let k = 0; k < TG2.length; k++) ema2[k] += (dt / (CFG.ema2Tau + dt)) * (counts2[k] / dt / SUB.groups[TG2[k]].length - ema2[k]);
       for (let k = 0; k < TG.length; k++) {
         const tau = k >= 4 ? CFG.gfTau : CFG.emaTau;
@@ -651,6 +722,12 @@
         G.odor = { L: cL, R: cR };
         if (Math.max(cL, cR) > CFG.odorMin) odorTurn = Math.sign(cL - cR) * CFG.odorTurn;
       } else G.odor = null;
+      if (MB && CFG.memoryNav) {                                   // 手写的桥，默认关
+        // 第二版。第一版用 MBON 此刻的发放算「价」：MBON 只在气味很浓的羽流核心才放电，离远了价恒为 0，二选一没有任何效果（results/learn/game_learning_bridge_v1.json）。
+        // 现在直接读突触里的记忆：价 = 这种气味在奖赏隔室被压掉的比例 − 在惩罚隔室被压掉的比例（G.memoryOf，每 0.5 s 重算一次），只要闻得到（浓度 > 0.02）就起作用。
+        MB.navT = (MB.navT || 0) - dt; if (MB.navT <= 0) { MB.navT = 0.5; MB.navV = {}; for (const kind of Object.keys(MB.conc)) { const m = G.memoryOf(kind); MB.navV[kind] = m ? (1 - m.PAM) - (1 - m.PPL1) : 0; } }
+        for (const [kind, c] of Object.entries(MB.conc)) { const v = (MB.navV || {})[kind] || 0; if (v && Math.max(c.L, c.R) > 0.02 && Math.abs(c.L - c.R) > 1e-5) odorTurn += Math.sign(c.L - c.R) * v * CFG.memoryTurn; }
+      }
       const omega = Math.max(-CFG.turnMax, Math.min(CFG.turnMax, G.mapSign * CFG.turnGain * (out.dnaL - out.dnaR) + odorTurn)) * Math.PI / 180;
       S.cooldown = Math.max(0, S.cooldown - dt);
       if (S.jumpT < 0 && S.cooldown === 0 && out.gf > CFG.gfThreshold) {
@@ -706,10 +783,18 @@
         S.state = state;
         const vigor = CFG.physiology ? 0.45 + 0.55 * G.body.energy : 1;      // 能量低了走得慢（身体，不是决策）
         const speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
+        if (G.legs) {
+          // 六条腿的身体（dodge/legs.js，默认不装）：上面算出的 speed / omega 只是**指令**，身体实际怎么动由支撑腿的运动学解出来。
+          // 截掉一条腿、按住一条腿之后，同样的指令走出来的路就不一样了。
+          const moving = state === "walk" || state === "back", d = G.legs.step(dt, { v: moving ? speed : 0, omega: moving ? omega : 0 });
+          const c = Math.cos(S.h), sn = Math.sin(S.h); S.x += c * d.dx - sn * d.dy; S.y += sn * d.dx + c * d.dy; S.h += d.dth;
+          S.speed = dt > 0 ? d.dx / dt : 0; S.omega = dt > 0 ? d.dth / dt : 0; S.cmd = { v: moving ? speed : 0, omega: moving ? omega : 0 };
+        } else {
         S.speed = speed;
         if (state === "walk" || state === "back") { S.h += omega * dt; S.omega = omega; } else S.omega = 0;
         S.x += Math.cos(S.h) * speed * dt;
         S.y += Math.sin(S.h) * speed * dt;
+        }
         S.phase += speed * dt;                                         // 以 mm 计的步态进度（后退时倒放）
         if (state === "back") G.score.back_s += dt;
         if (state === "feed") G.score.feed_s += dt;                    // 伸喙进食的累计秒数（比"吃完几颗"灵敏：水的驱动弱，常常够不到吃完一颗）
@@ -797,6 +882,7 @@
       for (const o of G.sounds) o.t += dt;
       G.sounds = G.sounds.filter(o => o.t < o.dur || (G.onEvent && G.onEvent("removeSound", o), false));
       for (const o of G.odors) { o.t += dt; if (o.pellet && !G.pellets.includes(o.pellet)) o.t = Math.max(o.t, o.life - 3); o.strength = o.base * Math.min(1, Math.max(0, (o.life - o.t) / 3)); }
+      for (const o of G.odors) if (o.field && !G.fields.includes(o.field)) o.t = Math.max(o.t, o.life - 3), o.life = Math.min(o.life, o.t + 3);
       G.odors = G.odors.filter(o => o.t < o.life || (G.onEvent && G.onEvent("removeOdor", o), false));
       if (CFG.physiology) {
         const B = G.body; B.age += dt;
@@ -831,10 +917,11 @@
       if ((LT.food -= dt) <= 0) { LT.food = between(CFG.lifeFood); const [x, y] = near(), bad = rand() < 0.2;
         // 食物是**一块**烂果子（半径 lifeFoodR），不是 2 mm 的糖粒：嗅觉在这个模型里不通到转向，果蝇只能靠撞，2 mm 的目标 10 分钟也撞不到一次
         const p = G.addPellet(x, y, bad ? "bitter" : "sugar"); p.r = CFG.lifeFoodR; p.amount = CFG.lifeFoodAmount;
-        const od = G.addOdor(x, y, bad ? "geosmin" : "vinegar", 26, 1, 90); od.pellet = p; }      // 烂果子有醋味，发霉的有土臭素味
+        const od = G.addOdor(x, y, bad ? "geosmin" : "vinegar", 26, 1, 90); od.pellet = p;      // 烂果子有醋味，发霉的有土臭素味
+        if (MB && !bad) G.addOdor(x, y, "A", 26, 1, 90).pellet = p; }                           // v5：好果子另带一种可学的气味 A（醋味只占 1 个嗅小球，凯尼恩细胞几乎不响应，学不了）
       if ((LT.water -= dt) <= 0) { LT.water = between(CFG.lifeWater); const [x, y] = near(); const p = G.addPellet(x, y, "water"); p.r = CFG.lifeFoodR; p.amount = CFG.lifeFoodAmount; if (G.fields.length < 4) G.addField("damp", x, y, 22, 0.8); }
       if ((LT.sound -= dt) <= 0) { LT.sound = between(CFG.lifeSound); const a = rand() * 2 * Math.PI, d = 25 + rand() * 70; G.addSound(S.x + Math.cos(a) * d, S.y + Math.sin(a) * d, 0.6 + rand() * 0.9, 0.6 + rand() * 0.8); }
-      if ((LT.heat -= dt) <= 0) { LT.heat = between(CFG.lifeHeat); if (G.fields.filter(f => f.type === "heat").length < 2) { const [x, y] = spot(); G.addField("heat", x, y, 30, 1); } else { const f = G.fields.find(f2 => f2.type === "heat"); G.fields.splice(G.fields.indexOf(f), 1); G.onEvent && G.onEvent("removeField", f); } }
+      if ((LT.heat -= dt) <= 0) { LT.heat = between(CFG.lifeHeat); if (G.fields.filter(f => f.type === "heat").length < 2) { const [x, y] = spot(); const f = G.addField("heat", x, y, 30, 1); if (MB) { const o = G.addOdor(x, y, "B", 30, 1, 1e9); o.field = f; } /* v5：热源带气味 B（"焦味"） */ } else { const f = G.fields.find(f2 => f2.type === "heat"); G.fields.splice(G.fields.indexOf(f), 1); G.onEvent && G.onEvent("removeField", f); } }
       if ((LT.ball -= dt) <= 0) { LT.ball = between(CFG.lifeBall); const a = S.h + (rand() * 2 - 1) * Math.PI * 0.8; G.launch(S.x + Math.cos(a) * CFG.autoDist, S.y + Math.sin(a) * CFG.autoDist); }
     }
 

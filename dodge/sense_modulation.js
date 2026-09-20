@@ -7,7 +7,8 @@
  */
 const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, "..");
 const { ConnectomeBrain } = require("./brain.js");
-const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_v4.json", "utf8"));
+const SUBNAME = process.env.SUBCIRCUIT || "v4", SUF = SUBNAME === "v4" ? "" : "_" + SUBNAME;   // SUBCIRCUIT=v5 → 在带蘑菇体的 v5 上重测，输出另存为 *_v5.json，不覆盖 v4 的结果
+const SUB = JSON.parse(fs.readFileSync(ROOT + "/results/dodge/subcircuit_" + SUBNAME + ".json", "utf8"));
 const rate = (groups, seed) => { const b = new ConnectomeBrain(SUB, seed); for (const [g, hz] of groups) for (const s of ["left", "right"]) if (SUB.groups[g + "_" + s]) b.setRate(g + "_" + s, hz);
   const cnt = new Float32Array(b.n); b.run(Math.round(1000 / b.dt), i => { cnt[i]++; });
   const m = g => { const idx = (SUB.groups[g + "_left"] || []).concat(SUB.groups[g + "_right"] || []); return idx.reduce((a, i) => a + cnt[i], 0) / idx.length; };
@@ -22,4 +23,4 @@ for (const [bn, [base, key]] of Object.entries(BASES)) {
     const diff = r.mean - b0.mean, sig = Math.abs(diff) > 2 * Math.max(b0.sd, r.sd, 0.5) && Math.abs(diff) > 0.2 * Math.max(b0.mean, 1);
     out.rows.push({ base: bn, readout: key, base_hz: b0, mod: mn, hz: r, diff: +diff.toFixed(2), modulates: sig });
     console.log(`   ${mn.padEnd(18)} ${r.mean} ± ${r.sd}   差 ${diff >= 0 ? "+" : ""}${diff.toFixed(1)} Hz  ${sig ? "← 有调制" : ""}`); } }
-fs.writeFileSync(ROOT + "/results/dodge/sense_modulation.json", JSON.stringify(out, null, 1)); console.log("→ results/dodge/sense_modulation.json");
+out.subcircuit = SUBNAME; fs.writeFileSync(ROOT + "/results/dodge/sense_modulation" + SUF + ".json", JSON.stringify(out, null, 1)); console.log("→ results/dodge/sense_modulation" + SUF + ".json");

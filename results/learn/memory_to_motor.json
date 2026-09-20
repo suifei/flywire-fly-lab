@@ -1,0 +1,508 @@
+{
+ "arm": "v5",
+ "n_test": 12,
+ "rows": [
+  {
+   "pair": 0,
+   "reinforcer": "PAM",
+   "readouts": {
+    "oDN1": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "BDN2": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa01": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa02": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNg111",
+     "side": "left",
+     "paired": 16.75,
+     "mock": 16.833333333333332,
+     "t": -0.3040344960525258
+    }
+   ]
+  },
+  {
+   "pair": 0,
+   "reinforcer": "PPL1",
+   "readouts": {
+    "oDN1": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "BDN2": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa01": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa02": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNg111",
+     "side": "left",
+     "paired": 16.833333333333332,
+     "mock": 16.833333333333332,
+     "t": 0.0
+    }
+   ]
+  },
+  {
+   "pair": 1,
+   "reinforcer": "PAM",
+   "readouts": {
+    "oDN1": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "BDN2": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa01": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa02": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNp32",
+     "side": "left",
+     "paired": 51.333333333333336,
+     "mock": 51.583333333333336,
+     "t": -0.6490582375601445
+    },
+    {
+     "type": "DNb05",
+     "side": "right",
+     "paired": 91.41666666666667,
+     "mock": 91.66666666666667,
+     "t": -0.4685212856658182
+    },
+    {
+     "type": "DNb05",
+     "side": "left",
+     "paired": 61.5,
+     "mock": 61.75,
+     "t": -0.3226467826776516
+    }
+   ]
+  },
+  {
+   "pair": 1,
+   "reinforcer": "PPL1",
+   "readouts": {
+    "oDN1": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "BDN2": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa01": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "DNa02": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNb05",
+     "side": "right",
+     "paired": 90.83333333333333,
+     "mock": 91.66666666666667,
+     "t": -1.4065622155408184
+    },
+    {
+     "type": "DNb05",
+     "side": "left",
+     "paired": 61.25,
+     "mock": 61.75,
+     "t": -0.6402639207379702
+    },
+    {
+     "type": "DNp32",
+     "side": "left",
+     "paired": 51.416666666666664,
+     "mock": 51.583333333333336,
+     "t": -0.453439606381628
+    }
+   ]
+  },
+  {
+   "pair": 2,
+   "reinforcer": "PAM",
+   "readouts": {
+    "oDN1": {
+     "paired": 39.916666666666664,
+     "mock": 41.5,
+     "t": -0.8856170720248693,
+     "hit": false,
+     "direction": -1
+    },
+    "BDN2": {
+     "paired": 131.58333333333334,
+     "mock": 131.41666666666666,
+     "t": 0.052509406291558765,
+     "hit": false,
+     "direction": 1
+    },
+    "DNa01": {
+     "paired": 25.166666666666668,
+     "mock": 25.833333333333332,
+     "t": -0.6185537128270844,
+     "hit": false,
+     "direction": -1
+    },
+    "DNa02": {
+     "paired": 22.916666666666668,
+     "mock": 26.25,
+     "t": -2.6736977440092327,
+     "hit": false,
+     "direction": -1
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNp54",
+     "side": "right",
+     "paired": 4.333333333333333,
+     "mock": 1.8333333333333333,
+     "t": 5.051283393111673
+    },
+    {
+     "type": "DNp09",
+     "side": "left",
+     "paired": 7.833333333333333,
+     "mock": 9.666666666666666,
+     "t": -2.9116502204711026
+    },
+    {
+     "type": "DNa02",
+     "side": "left",
+     "paired": 22.916666666666668,
+     "mock": 26.25,
+     "t": -2.6736977440092327
+    },
+    {
+     "type": "DNp05",
+     "side": "right",
+     "paired": 77.16666666666667,
+     "mock": 78.58333333333333,
+     "t": -2.203051319080823
+    },
+    {
+     "type": "DNp35",
+     "side": "right",
+     "paired": 5.416666666666667,
+     "mock": 3.8333333333333335,
+     "t": 2.135211333738292
+    },
+    {
+     "type": "DNg99",
+     "side": "left",
+     "paired": 46.333333333333336,
+     "mock": 45.833333333333336,
+     "t": 1.787050191543812
+    },
+    {
+     "type": "DNg99",
+     "side": "right",
+     "paired": 43.5,
+     "mock": 43.0,
+     "t": 1.593255013631383
+    },
+    {
+     "type": "DNp02",
+     "side": "right",
+     "paired": 17.833333333333332,
+     "mock": 18.666666666666668,
+     "t": -1.5075567228888223
+    }
+   ]
+  },
+  {
+   "pair": 2,
+   "reinforcer": "PPL1",
+   "readouts": {
+    "oDN1": {
+     "paired": 41.0,
+     "mock": 41.5,
+     "t": -0.2551249838734923,
+     "hit": false,
+     "direction": -1
+    },
+    "BDN2": {
+     "paired": 135.0,
+     "mock": 131.41666666666666,
+     "t": 1.1423088209779912,
+     "hit": false,
+     "direction": 1
+    },
+    "DNa01": {
+     "paired": 25.166666666666668,
+     "mock": 25.833333333333332,
+     "t": -0.5566499393061812,
+     "hit": false,
+     "direction": -1
+    },
+    "DNa02": {
+     "paired": 24.0,
+     "mock": 26.25,
+     "t": -1.5332721489838665,
+     "hit": false,
+     "direction": -1
+    },
+    "MDN": {
+     "paired": 0.0,
+     "mock": 0.0,
+     "t": 0.0,
+     "hit": false,
+     "direction": 0
+    }
+   },
+   "top_descending": [
+    {
+     "type": "DNp06",
+     "side": "right",
+     "paired": 36.916666666666664,
+     "mock": 33.75,
+     "t": 3.2012094488620786
+    },
+    {
+     "type": "DNp19",
+     "side": "right",
+     "paired": 39.666666666666664,
+     "mock": 40.916666666666664,
+     "t": -2.0819464151742095
+    },
+    {
+     "type": "DNpe025",
+     "side": "right",
+     "paired": 1.9166666666666667,
+     "mock": 3.0,
+     "t": -1.8999233505234039
+    },
+    {
+     "type": "DNa10",
+     "side": "right",
+     "paired": 54.333333333333336,
+     "mock": 55.083333333333336,
+     "t": -1.774375916764239
+    },
+    {
+     "type": "DNpe045",
+     "side": "right",
+     "paired": 10.416666666666666,
+     "mock": 9.5,
+     "t": 1.626690892713601
+    },
+    {
+     "type": "DNa02",
+     "side": "left",
+     "paired": 24.0,
+     "mock": 26.25,
+     "t": -1.5332721489838665
+    },
+    {
+     "type": "DNg74_a",
+     "side": "right",
+     "paired": 2.75,
+     "mock": 1.75,
+     "t": 1.5284904925581668
+    },
+    {
+     "type": "DNp54",
+     "side": "right",
+     "paired": 1.25,
+     "mock": 1.8333333333333333,
+     "t": -1.5017423632311275
+    }
+   ]
+  }
+ ],
+ "mbon_type_mean_hz": {
+  "MBON26": 0.0,
+  "MBON32": 0.0,
+  "MBON27": 0.0,
+  "MBON31": 0.0,
+  "MBON35": 0.0,
+  "MBON23": 4.416666666666667,
+  "MBON15-like": 0.0,
+  "MBON10": 0.0,
+  "MBON09": 35.9375,
+  "MBON20": 0.0,
+  "MBON15": 0.0,
+  "MBON14": 89.375,
+  "MBON29": 0.0,
+  "MBON28": 28.208333333333332,
+  "MBON25,MBON34": 0.0,
+  "MBON22": 0.0,
+  "MBON07": 8.875,
+  "MBON02": 29.291666666666668,
+  "MBON11": 11.125,
+  "MBON17": 0.0,
+  "MBON30": 0.0,
+  "MBON04": 0.0,
+  "MBON21": 0.0,
+  "MBON05": 0.0,
+  "MBON12": 0.0,
+  "MBON18": 40.666666666666664,
+  "MBON33": 0.0,
+  "MBON16": 0.0,
+  "MBON24": 15.083333333333334,
+  "MBON19": 0.5,
+  "MBON01": 0.0,
+  "MBON03": 0.0,
+  "MBON13": 0.0,
+  "MBON17-like": 0.0,
+  "MBON06": 0.0
+ },
+ "n_mbon_types": 35,
+ "n_mbon_types_responsive": 8,
+ "motor_mbon_mean_hz": {
+  "MBON12": 0.0,
+  "MBON26": 0.0,
+  "MBON27": 0.0,
+  "MBON35": 0.0
+ },
+ "max_kc_frac": 0.14448522310218273,
+ "summary": {
+  "oDN1": {
+   "n_hit": 0,
+   "consistent": false,
+   "stable": false
+  },
+  "BDN2": {
+   "n_hit": 0,
+   "consistent": false,
+   "stable": false
+  },
+  "DNa01": {
+   "n_hit": 0,
+   "consistent": false,
+   "stable": false
+  },
+  "DNa02": {
+   "n_hit": 0,
+   "consistent": false,
+   "stable": false
+  },
+  "MDN": {
+   "n_hit": 0,
+   "consistent": false,
+   "stable": false
+  }
+ },
+ "M2_any_stable": false,
+ "n_rows": 6,
+ "max_hits": 0
+}

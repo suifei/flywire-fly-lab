@@ -267,7 +267,8 @@ code { font: 12px var(--mono); }
       </div>
       <p id="mastCourt">朝果蝇扔球、喂糖粒苦粒、往触角上撒灰。决定往哪转、何时起飞、吃不吃、要不要梳理的，是在你浏览器里实时运行的 <span id="nNeu">4,599</span> 个 FlyWire 连接组神经元；起飞后是真实果蝇的逃逸飞行轨迹。</p>
       <p id="mastLife" hidden>世界自己运转：昼夜、烂果子和水洼、气味、嗡嗡声、热源、风、灰尘、偶尔飞来的球。每一样都只作为<b>物理量</b>送到真实的感受器上（视、听、嗅、味、触，外加温度和湿度）；
-        往哪转、飞不飞、吃不吃，全由这颗 <span id="nNeu4"></span> 个神经元的连接组决定——没有一条"闻到就过去""听到就跑"的规则。</p>
+        往哪转、飞不飞、吃不吃，全由这颗 <span id="nNeu4"></span> 个神经元的连接组决定——没有一条"闻到就过去""听到就跑"的规则。
+        它有<b>蘑菇体</b>：气味和多巴胺同时出现，对应的突触就被压低——它会记住。身体由<b>六条腿</b>推着走，可以截腿，也可以按住按钮直接遥控某几个神经元。</p>
       <p id="mastGomoku" hidden>和果蝇下五子棋（含黑方禁手）。每条线值多少，是同一颗果蝇脑（一个突触都不训练）加一层训练出来的线性读出给的；「推理步数」选的是用哪一个读出层——每个都是拿「向前看 N 步的结果」当标签训练出来的，下棋时不做搜索。</p>
     </div>
     <div class="score" aria-live="polite">
@@ -350,6 +351,35 @@ code { font: 12px var(--mono); }
             <label class="toggle" title="按文献（饥饿提高、口渴降低）驱动真实的 4 个内感受神经元 ISN。这个模型里它的效果与文献相反：饿了反而不吃。默认关，开着看它出错"><input type="checkbox" id="lifeISN"> ISN 通路</label>
             <button class="btn" id="lifeReset">重新开始</button>
             <span class="pill" id="lifePill">未开始</span>
+          </span>
+        </div>
+        <div class="row" id="lifeLearnRow" hidden>
+          <label class="k" title="蘑菇体学习回路：气味 → 凯尼恩细胞 → 蘑菇体输出神经元，多巴胺神经元门控这一层突触的强弱。接线是连接组的，可塑性规则来自文献">学习</label>
+          <span class="row" style="gap:6px 10px">
+            <span class="row" style="gap:6px" title="A、B 是两种可学的气味：各驱动 20 个互不重合的嗅小球的感受神经元">
+              <button class="btn" data-drop="fruitA">A 味的果子</button><button class="btn" data-drop="heatB">B 味的热源</button><button class="btn" data-drop="odorA">只有 A 味</button><button class="btn" data-drop="odorB">只有 B 味</button>
+            </span>
+            <span class="row" style="gap:6px" title="手动让整簇多巴胺神经元放电 2 秒（相当于实验里的光遗传激活）。它正闻着什么，什么就被记住">
+              <button class="btn" id="lifePuffPAM">喷奖赏多巴胺（PAM）</button><button class="btn" id="lifePuffPPL1">喷惩罚多巴胺（PPL1）</button>
+            </span>
+            <label class="toggle" title="关掉 = 突触不再变（已有的记忆保留）"><input type="checkbox" id="lifeLearn" checked> 可塑性</label>
+            <label class="toggle" title="吃到糖 → PAM、被烫 / 吃到苦 → PPL1。这根线是手接的：连接组自己叫不起多巴胺神经元（实测阴性）。关掉后只有手动喷才有多巴胺"><input type="checkbox" id="lifeReinf" checked> 糖 / 烫 → 多巴胺</label>
+            <label class="toggle" title="手写，默认关。实测这个模型里记忆走不到运动输出；打开后，用蘑菇体输出神经元的发放算一个「价」，乘两根触角的浓度差去转向"><input type="checkbox" id="lifeMemNav"> 记忆 → 转向的桥（手写）</label>
+            <button class="btn" id="lifeForget">忘掉一切</button>
+          </span>
+        </div>
+        <div class="row" id="lifeBodyRow" hidden>
+          <label class="k" title="身体由六条腿推着走：支撑相的脚钉在地上，身体的位移和转角由支撑脚的运动学解出来。截掉或按住一条腿，同样的神经指令走出来的路就不一样">身体</label>
+          <span class="row" style="gap:6px 10px">
+            <span class="row" style="gap:4px" id="lifeLegs" title="点一下截掉这条腿，再点一下接回去">
+              <button class="btn" data-leg="LF">左前</button><button class="btn" data-leg="LM">左中</button><button class="btn" data-leg="LH">左后</button>
+              <button class="btn" data-leg="RF">右前</button><button class="btn" data-leg="RM">右中</button><button class="btn" data-leg="RH">右后</button>
+            </span>
+            <label class="k" title="按住 = 直接驱动这几个真实的神经元 150 Hz（和「光遗传手指」一样），看六条腿和身体怎么响应。松开即停">神经元遥控</label>
+            <span class="row" style="gap:4px" id="lifeRemote">
+              <button class="btn" data-remote="dnaL">DNa 左</button><button class="btn" data-remote="dnaR">DNa 右</button><button class="btn" data-remote="mdn">MDN 后退</button>
+              <button class="btn" data-remote="gf">巨纤维</button><button class="btn" data-remote="mn9">MN9 伸喙</button><button class="btn" data-remote="adn1">aDN1 梳理</button>
+            </span>
           </span>
         </div>
         <div class="row" id="viewRow" hidden>
@@ -620,6 +650,31 @@ code { font: 12px var(--mono); }
       <p class="sub" id="lfNote3"></p>
       <p class="sub"><b>哪些是手写的：</b>世界的节奏与强度；声强随距离的衰减与左右耳差；气味羽流的形状；身体状态（能量、水分）的消耗速率，以及它对味觉感受器灵敏度的调制幅度（方向有文献依据）；
         「MN9 超过 10 Hz 算开吃」这条读出阈值；「它在想什么」的句子模板与阈值（每个词的触发量是实测的频率）。<b>它不是语言模型，也不是果蝇会说话。</b></p>
+    </div>
+    <div class="card" style="grid-column: 1 / -1" id="cLearn">
+      <h3>学习、多巴胺、六条腿：哪些成立，哪些是阴性</h3>
+      <p>「生活」模式的果蝇现在用子回路 v5（<span id="lnN"></span>）= v4 ＋ 连接组里的<b>蘑菇体学习回路</b>：嗅觉感受神经元 → 投射神经元 → <b>凯尼恩细胞</b> → <b>蘑菇体输出神经元（MBON）</b>，
+        外加 <b>多巴胺神经元</b>（PAM、PPL1）和全局抑制 APL。接线全部来自 FlyWire；<b>唯一会变的是凯尼恩细胞 → MBON 这一层突触</b>：
+        凯尼恩细胞刚放过电、同一隔室里又有多巴胺，这条突触就被压低（文献里果蝇嗅觉记忆的位置与规则：Hige 2015；Cohn 2015；Handler 2019）。
+        哪个多巴胺神经元管哪个隔室，由连接组里 DAN → MBON 的突触数决定，我们没有写对照表。下面每一张表都是实测，判据都写在跑之前。</p>
+      <h4 style="margin:.9em 0 .3em">① 先得解决一个老问题：一闻到气味就全脑失控</h4>
+      <div class="tbl"><table id="tLearnRunaway"></table></div>
+      <p class="sub" id="lnNote1"></p>
+      <h4 style="margin:.9em 0 .3em">② 它学得会吗</h4>
+      <div class="tbl"><table id="tLearnCond"></table></div>
+      <p class="sub" id="lnNote2"></p>
+      <h4 style="margin:.9em 0 .3em">③ 记住了，会改变行为吗——阴性</h4>
+      <div class="tbl"><table id="tLearnMotor"></table></div>
+      <p class="sub" id="lnNote3"></p>
+      <h4 style="margin:.9em 0 .3em">④ 在身体里学：页面引擎（六条腿的运动学身体）与物理仿真（NeuroMechFly，MuJoCo）</h4>
+      <div class="tbl"><table id="tLearnBody"></table></div>
+      <p class="sub" id="lnNote4"></p>
+      <h4 style="margin:.9em 0 .3em">⑤ 六条腿</h4>
+      <div class="tbl"><table id="tLearnLegs"></table></div>
+      <p class="sub" id="lnNote5"></p>
+      <p class="sub"><b>哪些是手写的：</b>① 触角叶局部神经元一律取抑制性（递质符号的纠正，有文献依据）；② 碰到蘑菇体的边只留 ≥2 个突触的（页面装不下全部 129 万条）；
+        ③ <b>糖 / 烫 → 多巴胺这根线</b>（连接组自己叫不起多巴胺神经元，见 ②）；④ 可塑性规则的三个数（学习率、资格迹 200 ms、不遗忘）；⑤ 气味 A / B 是合成的（各 20 个嗅小球），不是真实气味的受体谱；
+        ⑥ 下行神经元 → 「步频 + 左右步幅」的映射，以及六条腿之间的相位耦合——腹神经索连接组给不出三足步态（上面「腹神经索」一节）；⑦ 「记忆 → 转向的桥」整个是手写的，所以默认关。</p>
     </div>
     <div class="card" style="grid-column: 1 / -1" id="cGomoku">
       <h3>训练果蝇下五子棋：它怎么学的、学到了什么、哪些不是它的功劳</h3>
@@ -964,8 +1019,9 @@ code { font: 12px var(--mono); }
 <div class="tip" id="tip" hidden></div>
 
 <script id="sub-data" type="application/json">/*__SUBCIRCUIT__*/</script>
-<script id="sub4-data" type="application/json">/*__SUBCIRCUIT_V4__*/</script>
+<script id="sub4-data" type="application/json">/*__SUBCIRCUIT_LIFE__*/</script>
 <script id="life-data" type="application/json">/*__LIFE__*/</script>
+<script id="learn-data" type="application/json">/*__LEARN__*/</script>
 <script id="sub-nt" type="application/json">/*__SUB_NT__*/</script>
 <script id="perturb-data" type="application/json">/*__PERTURB__*/</script>
 <script id="repro-data" type="application/json">/*__REPRO__*/</script>
@@ -990,6 +1046,8 @@ code { font: 12px var(--mono); }
 /*__EYECAM_JS__*/</script>
 <script>/*__EYE_JS__*/</script>
 <script>/*__BRAIN_JS__*/</script>
+<script>/*__PLASTICITY_JS__*/</script>
+<script>/*__LEGS_JS__*/</script>
 <script>/*__GAME_CORE_JS__*/</script>
 <script>/*__MISSIONS_JS__*/</script>
 <script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
@@ -2526,10 +2584,10 @@ code { font: 12px var(--mono); }
   // 球场（v3）与五子棋（v3）上已发布的数字都不受影响。页面在这里只做三件事：画世界、把读数显示出来、让你往世界里丢东西。
   const LIFE = (() => {
     const cv = $("lifeStage"); if (!cv) return null;
-    let SUB4 = null, g = null, map43 = null, speed = 1, carry = 0, on = false, lastLine = "", diaryT = 0;
-    const diary = [], KEY = "fly-life-v1";
+    let SUB4 = null, g = null, map43 = null, speed = 1, carry = 0, on = false, lastLine = "", diaryT = 0, legs = null;
+    const diary = [], KEY = "fly-life-v2", gaitHist = [], daNote = {}, LEGN = ["LF", "LM", "LH", "RF", "RM", "RH"], LEGCN = { LF: "左前", LM: "左中", LH: "左后", RF: "右前", RM: "右中", RH: "右后" };
     const LS = JSON.parse(document.getElementById("life-data").textContent || "{}");
-    const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ body: g.body, diary: diary.slice(-40), born: born })); } catch (e) {} };
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ body: g.body, diary: diary.slice(-40), born: born, mem: g.MB ? g.MB.plast.saveSparse() : null, cut: legs ? legs.legs.filter(l => !l.attached).map(l => l.name) : [] })); } catch (e) {} };
     let born = Date.now();
     function ensure() {
       if (g) return;
@@ -2540,9 +2598,13 @@ code { font: 12px var(--mono); }
         cfg: { ...ENC.ache, takeoff: "clip", autoPellets: false, autoDust: true, dustEvery: 40, wallVision: false, touch: false, wind: true,
                courtW: 0, life: true, physiology: true } });   // 没有墙的开放世界，与 dodge/life_test.js 同一套设定（为什么不要墙：见 game_core 的 lifeStep）
       if (g.setFlightClips && FLIGHT.clips) g.setFlightClips(FLIGHT.clips);
+      legs = g.attachLegs(window.FlyLegs.create(GAIT));       // 六条腿推着身体走
+      g.CFG.learning = $("lifeLearn").checked; g.CFG.reinforce = $("lifeReinf").checked; g.CFG.memoryNav = $("lifeMemNav").checked;
       g.onSpike = i => { const k = map43[i]; if (k >= 0) { spikeBuf.push(k); brainBuf.push(k); } };
-      g.onEvent = (type, o) => { if (type === "sound") note("嗡——"); };
-      try { const st = JSON.parse(localStorage.getItem(KEY) || "null"); if (st && st.body) { Object.assign(g.body, st.body); born = st.born || born; for (const d of st.diary || []) diary.push(d); note("（它还活着，接着上次过）"); } } catch (e) {}
+      g.onEvent = (type, o) => { if (type === "sound") note("嗡——"); else if (type === "dopamine" && o.on) { const now = g.body.age; daNote[o.cluster] = daNote[o.cluster] || -99; if (now - daNote[o.cluster] > 5) { daNote[o.cluster] = now; note(o.cluster === "PAM" ? "（奖赏多巴胺神经元 PAM 开始放电）" : "（惩罚多巴胺神经元 PPL1 开始放电）"); } } };
+      try { const st = JSON.parse(localStorage.getItem(KEY) || "null"); if (st && st.body) { Object.assign(g.body, st.body); born = st.born || born; for (const d of st.diary || []) diary.push(d);
+        if (st.mem && g.MB) g.MB.plast.loadSparse(st.mem); for (const L of st.cut || []) legs.amputate(L, true); note("（它还活着，接着上次过——记忆也还在）"); } } catch (e) {}
+      syncLegButtons();
       window.__life = g;
     }
     function note(t) { diary.push({ t: g ? g.body.age : 0, s: t }); if (diary.length > 60) diary.shift(); }
@@ -2552,12 +2614,15 @@ code { font: 12px var(--mono); }
       else if (kind === "water") { const p = g.addPellet(x, y, "water"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; }
       else if (kind === "sound") g.addSound(x, y, 1.5, 1.0);
       else if (kind === "heat") g.addField("heat", x, y, 30, 1);
+      else if (kind === "fruitA") { const p = g.addPellet(x, y, "sugar"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; g.addOdor(x, y, "A", 26, 1, 90).pellet = p; }
+      else if (kind === "heatB") { const f = g.addField("heat", x, y, 30, 1); g.addOdor(x, y, "B", 30, 1, 60).field = f; setTimeout(() => { const k = g.fields.indexOf(f); if (k >= 0) g.fields.splice(k, 1); }, 60000); }
+      else if (kind === "odorA" || kind === "odorB") g.addOdor(x, y, kind === "odorA" ? "A" : "B", 26, 1, 45);
       else if (kind === "ball") g.launch(S.x + Math.cos(a) * 110, S.y + Math.sin(a) * 110);
     }
     function tick(dt) {
       if (!on) return; ensure();
       carry += dt * speed; let n = 0;
-      while (carry >= g.chunkDt && n < 10) { g.step(); carry -= g.chunkDt; n++; } if (n === 10) carry = 0;
+      while (carry >= g.chunkDt && n < 10) { g.step(); carry -= g.chunkDt; n++; if (legs) { gaitHist.push(legs.legs.map(l => !l.attached ? 2 : l.stance && g.S.z <= 0.01 ? 1 : 0)); if (gaitHist.length > 160) gaitHist.shift(); } } if (n === 10) carry = 0;
       const m = g.mind(), o = m.hz;
       // 面板：把这一只的读数喂给下行神经元 / 感觉输入那两块（与五子棋共用同一个入口）
       GMSTATS.rates = { DNa01_left: o.dnaL, DNa02_left: 0, DNa01_right: o.dnaR, DNa02_right: 0, DNp01_left: o.gf, DNp01_right: o.gf, MN9_left: o.mn9, MN9_right: o.mn9, aDN1_left: o.adn1, aDN1_right: o.adn1, MDN_left: o.mdn, MDN_right: o.mdn };
@@ -2589,7 +2654,7 @@ code { font: 12px var(--mono); }
       const blob = (wx, wy, r, rgb, a0) => { const gr = x.createRadialGradient(X(wx), Y(wy), 0, X(wx), Y(wy), r * sc); gr.addColorStop(0, `rgba(${rgb},${a0})`); gr.addColorStop(1, `rgba(${rgb},0)`); x.fillStyle = gr; x.beginPath(); x.arc(X(wx), Y(wy), r * sc, 0, 6.2832); x.fill(); };
       x.save(); x.beginPath(); x.rect(x0, y0, gw, gh); x.clip();
       for (const f of g.fields) blob(f.x, f.y, f.sigma * 2, f.type === "heat" ? "226,74,51" : "64,140,220", 0.45 * f.strength);        // 热源 / 水洼的湿气
-      for (const o of g.odors) blob(o.x, o.y, o.sigma * 2.2, o.kind === "vinegar" ? "160,190,60" : "120,96,70", 0.4 * o.strength);     // 醋味 / 霉味的羽流
+      for (const o of g.odors) blob(o.x, o.y, o.sigma * 2.2, ({ vinegar: "160,190,60", geosmin: "120,96,70", A: "235,120,170", B: "90,70,160" })[o.kind] || "120,96,70", 0.4 * o.strength);     // 醋味 / 霉味 / 可学的气味 A（粉）、B（紫）的羽流
       for (const o of g.sounds) { const u = o.t / o.dur; x.strokeStyle = `rgba(250,250,255,${(1 - u) * 0.9})`; x.lineWidth = 2; for (const k of [0.4, 0.7, 1]) { x.beginPath(); x.arc(X(o.x), Y(o.y), u * k * 60 * sc, 0, 6.2832); x.stroke(); } }
       for (const p of g.pellets) { x.fillStyle = p.type === "water" ? "rgba(70,150,230,.85)" : p.type === "bitter" ? "rgba(96,84,70,.9)" : "rgba(206,120,40,.9)"; x.beginPath(); x.arc(X(p.x), Y(p.y), (p.r || g.CFG.pelletR) * sc * Math.sqrt(Math.max(0.15, p.amount / g.CFG.lifeFoodAmount)), 0, 6.2832); x.fill(); }
       for (const b of g.balls) { x.fillStyle = "#c0392b"; x.beginPath(); x.arc(X(b.x), Y(b.y), Math.max(3, g.CFG.ballR * sc), 0, 6.2832); x.fill(); }
@@ -2598,9 +2663,32 @@ code { font: 12px var(--mono); }
       if (up > 0) { x.fillStyle = "rgba(0,0,0,.25)"; x.beginPath(); x.ellipse(X(S.x), Y(S.y), fr, fr * 0.6, 0, 0, 6.2832); x.fill(); }
       x.save(); x.translate(X(S.x), Y(S.y) - up * 14); x.rotate(-S.h);
       x.globalAlpha = 0.5; x.fillStyle = "#dfe6ee"; for (const sg of [1, -1]) { x.beginPath(); x.ellipse(-fr * 0.2, sg * fr * 0.7, fr * 0.9, fr * 0.35, sg * (up > 0 ? 0.9 : 0.35), 0, 6.2832); x.fill(); } x.globalAlpha = 1;
+      if (legs) { const k = fr / 1.35;                         // 每毫米多少像素（身体半长约 1.35 mm）。身体坐标：x 向前、y 向左；画布 y 向下，所以取负
+        for (const l of legs.legs) { const c0 = l.data.coxa, grounded = up === 0;
+          if (!l.attached) { x.strokeStyle = "#c0392b"; x.lineWidth = 2; x.beginPath(); x.moveTo(c0[0] * k, -c0[1] * k); x.lineTo(c0[0] * k * 1.25, -c0[1] * k * 1.6); x.stroke(); continue; }
+          const f = up > 0 ? [c0[0] * 0.9 - 0.3, c0[1] * 1.3] : (l.foot || l.data.center), kx = (c0[0] + f[0]) / 2, ky = (c0[1] + f[1]) / 2 + l.side * 0.45;   // 膝：中点往外推一点
+          x.strokeStyle = "#1a1c20"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(c0[0] * k, -c0[1] * k); x.lineTo(kx * k, -ky * k); x.lineTo(f[0] * k, -f[1] * k); x.stroke();
+          if (grounded) { x.beginPath(); x.arc(f[0] * k, -f[1] * k, 2.2, 0, 6.2832); if (l.stance) { x.fillStyle = "#1a1c20"; x.fill(); } else { x.fillStyle = "#fff"; x.fill(); x.lineWidth = 1; x.stroke(); } } } }
       x.fillStyle = "#1a1c20"; x.beginPath(); x.ellipse(0, 0, fr, fr * 0.6, 0, 0, 6.2832); x.fill(); x.fillStyle = "#b8493f"; x.beginPath(); x.arc(fr * 0.8, 0, fr * 0.3, 0, 6.2832); x.fill(); x.restore();
       x.restore();
       if (g.wind && g.wind.speed > 0.2) { const wx0 = x0 + 26, wy0 = y0 + 26, a = g.wind.dir; x.strokeStyle = ink; x.lineWidth = 2; x.beginPath(); x.moveTo(wx0 - Math.cos(a) * 12, wy0 + Math.sin(a) * 12); x.lineTo(wx0 + Math.cos(a) * 12, wy0 - Math.sin(a) * 12); x.stroke(); x.fillStyle = ink; x.font = "10px " + fnt; x.fillText("风", wx0 + 16, wy0 + 4); }
+      // 世界视图左下角的浮层：步态图（六条腿的支撑 / 回摆）+ 蘑菇体（多巴胺、记忆）
+      if (legs && g.MB) {
+        const bw = Math.min(340, gw - 16), bh = 166, bx = x0 + 8, by = y0 + gh - bh - 8, MBs = g.MB; x.fillStyle = "rgba(255,255,255,.86)"; x.fillRect(bx, by, bw, bh); x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 1; x.strokeRect(bx + .5, by + .5, bw, bh);
+        x.font = "600 11px " + fnt; x.fillStyle = "#222"; x.fillText("六条腿（黑 = 支撑相，脚钉在地上推身体）", bx + 6, by + 13);
+        const rx = bx + 34, rw = bw - 40, rh = 8, rp = 11; x.font = "9.5px " + fnt;
+        LEGN.forEach((L, r) => { const yy = by + 19 + r * rp; x.fillStyle = "#555"; x.fillText(LEGCN[L], bx + 6, yy + rh - 0.5); x.fillStyle = "rgba(0,0,0,.07)"; x.fillRect(rx, yy, rw, rh);
+          for (let i = 0; i < gaitHist.length; i++) { const v = gaitHist[i][r]; if (!v) continue; x.fillStyle = v === 2 ? "#c0392b" : "#1a1c20"; x.fillRect(rx + rw * i / 160, yy, Math.ceil(rw / 160), rh); } });
+        let yy = by + 19 + 6 * rp + 12; x.font = "600 11px " + fnt; x.fillStyle = "#222";
+        x.fillText("蘑菇体：" + Math.round(MBs.kcActive) + " 个凯尼恩细胞在放电 · 指令 " + Math.round((g.S.cmd || {}).v || 0) + " → 实际 " + Math.round(g.S.speed || 0) + " mm/s" + (legs.state.stable ? "" : " · 失稳拖行"), bx + 6, yy); yy += 6;
+        const bar = (lab, v, max, c, txt, x1, w1) => { x.font = "10px " + fnt; x.fillStyle = "#555"; x.fillText(lab, x1, yy + 8); const b0 = x1 + 62, b1 = w1 - 62 - 34; x.fillStyle = "rgba(0,0,0,.09)"; x.fillRect(b0, yy, b1, 8); x.fillStyle = c; x.fillRect(b0, yy, b1 * Math.max(0, Math.min(1, v / max)), 8); x.fillStyle = "#222"; x.fillText(txt, b0 + b1 + 4, yy + 8); };
+        const half = (bw - 12) / 2; bar("奖赏 PAM", MBs.danHz.PAM, 40, "#d08a2a", MBs.danHz.PAM.toFixed(0) + " Hz", bx + 6, half); bar("惩罚 PPL1", MBs.danHz.PPL1, 40, "#7c5cd6", MBs.danHz.PPL1.toFixed(0) + " Hz", bx + 6 + half, half); yy += 12;
+        for (const kind of ["A", "B"]) { const mem = g.memoryOf(kind); const nm = kind === "A" ? "A 的记忆" : "B 的记忆";
+          if (!mem) { x.font = "10px " + fnt; x.fillStyle = "#777"; x.fillText(nm + "：还没闻到过", bx + 6, yy + 8); }
+          else { bar(nm + " 奖", 1 - mem.PAM, 1, "#d08a2a", Math.round((1 - mem.PAM) * 100) + "%", bx + 6, half); bar("　　　　罚", 1 - mem.PPL1, 1, "#7c5cd6", Math.round((1 - mem.PPL1) * 100) + "%", bx + 6 + half, half); }
+          yy += 12; }
+        x.font = "10px " + fnt; x.fillStyle = "#555"; x.fillText("记忆 = 这气味在奖赏 / 惩罚隔室里的 KC→MBON 输入被压掉了多少" + (g.CFG.memoryNav && MBs.navV ? " · 桥：价 A " + (MBs.navV.A || 0).toFixed(2) + " / B " + (MBs.navV.B || 0).toFixed(2) : ""), bx + 6, yy + 8);
+      }
       // 右栏：身体、五感、它的决定、意识流
       let px = vw + 6, py = 8; const pw = W - px - 10, o = m.hz, B = g.body;
       const head = t => { py += 10; x.fillStyle = ink; x.font = "600 12.5px " + fnt; x.fillText(t, px, py); py += 9; };
@@ -2609,6 +2697,7 @@ code { font: 12px var(--mono); }
       head("身体（不属于大脑）"); meter("能量", B.energy, 1, "#d08a2a", (B.energy * 100).toFixed(0) + "%"); meter("水分", B.hydration, 1, "#3c8de0", (B.hydration * 100).toFixed(0) + "%"); py += 4;
       head("五感 → 真实感受器（Hz）");
       meter("视", o.loom, 200, "#7c5cd6", o.loom); meter("听", o.audio, 200, "#d65c9a", o.audio); meter("嗅·醋", o.vinegar, 200, "#9ab83a", o.vinegar); meter("嗅·霉", o.geosmin, 200, "#7a6046", o.geosmin);
+      if (g.MB) for (const [kind, colr] of [["A", "#eb78aa"], ["B", "#5a46a0"]]) { const c = g.MB.conc[kind], hz = c ? Math.round(Math.max(c.L, c.R) * g.CFG.olfRate) : 0; meter("嗅·" + kind, hz, 200, colr, hz); }
       meter("味", Math.max(o.sugar, o.bitter, o.water), 320, "#ce7828", o.sugar ? "甜 " + o.sugar : o.bitter ? "苦 " + o.bitter : o.water ? "水 " + o.water : 0); meter("触", o.touch, 200, "#4aa08a", o.touch);
       meter("温", o.thermo, 200, "#e24a33", o.thermo); meter("湿", o.hygro, 200, "#408cdc", o.hygro); if (g.CFG.isnDrive) meter("ISN", o.isn, 200, "#888", o.isn); py += 4;
       head("连接组的决定（读出，Hz）");
@@ -2617,10 +2706,10 @@ code { font: 12px var(--mono); }
       const lines = diary.slice(-Math.max(3, Math.floor((H - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
     }
     function show(v) {
-      on = v; cv.hidden = !v; $("lifeRow").hidden = !v; $("mastLife").hidden = !v;
+      on = v; cv.hidden = !v; $("lifeRow").hidden = !v; $("lifeLearnRow").hidden = !v; $("lifeBodyRow").hidden = !v; $("mastLife").hidden = !v;
       if (v) { ensure(); window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
         const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
-        $("mastCourt").hidden = true; $("coach").textContent = "主画面换成了它生活的世界（俯视，视图跟着它走，网格 20 mm）。这个世界没有墙。球场那只已冻结。"; }
+        $("mastCourt").hidden = true; $("coach").textContent = "主画面换成了它生活的世界（俯视，视图跟着它走，网格 20 mm）。这个世界没有墙。球场那只已冻结。想看它学习：放一个「A 味的果子」等它吃，或者放「只有 A 味」、趁它闻着的时候喷一下多巴胺；左下角的浮层显示六条腿的步态和它记住了什么。"; }
       else { GMSTATS.rates = null; GMSTATS.drive = null; if (g) save(); }
     }
     for (const bt of document.querySelectorAll("#lifeRow [data-drop]")) bt.onclick = () => drop(bt.dataset.drop);
@@ -2628,9 +2717,67 @@ code { font: 12px var(--mono); }
     $("lifeDeaf").onchange = e => { ensure(); g.setLesion("AUDIO", e.target.checked); note(e.target.checked ? "（听觉神经元的传出突触被切断了）" : "（听觉恢复）"); };
     $("lifeAnosmic").onchange = e => { ensure(); g.setLesion("OLFA", e.target.checked); g.setLesion("OLFR", e.target.checked); note(e.target.checked ? "（嗅觉被切断了）" : "（嗅觉恢复）"); };
     $("lifeISN").onchange = e => { ensure(); g.CFG.isnDrive = e.target.checked; note(e.target.checked ? "（内感受神经元 ISN 开始按饥渴放电）" : "（ISN 停）"); };
-    $("lifeReset").onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} g = null; diary.length = 0; born = Date.now(); ensure(); };
+    $("lifeReset").onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} g = null; legs = null; diary.length = 0; gaitHist.length = 0; born = Date.now(); ensure(); };
+    // 学习
+    $("lifePuffPAM").onclick = () => { ensure(); g.puff("PAM", 2); }; $("lifePuffPPL1").onclick = () => { ensure(); g.puff("PPL1", 2); };
+    $("lifeLearn").onchange = e => { ensure(); g.CFG.learning = e.target.checked; note(e.target.checked ? "（可塑性打开）" : "（可塑性关掉了：突触不再变）"); };
+    $("lifeReinf").onchange = e => { ensure(); g.CFG.reinforce = e.target.checked; note(e.target.checked ? "（糖 / 烫 → 多巴胺 接上了）" : "（糖 / 烫 → 多巴胺 断开了）"); };
+    $("lifeMemNav").onchange = e => { ensure(); g.CFG.memoryNav = e.target.checked; note(e.target.checked ? "（手写的桥打开：记忆开始影响转向）" : "（手写的桥关掉）"); };
+    $("lifeForget").onclick = () => { ensure(); g.forget(); note("（所有 KC→MBON 突触回到原值：什么都不记得了）"); save(); };
+    // 身体：截腿 / 接回
+    function syncLegButtons() { for (const bt of document.querySelectorAll("#lifeLegs [data-leg]")) { const l = legs && legs.byName[bt.dataset.leg]; bt.setAttribute("aria-pressed", l && !l.attached ? "true" : "false"); bt.style.textDecoration = l && !l.attached ? "line-through" : ""; } }
+    for (const bt of document.querySelectorAll("#lifeLegs [data-leg]")) bt.onclick = () => { ensure(); const l = legs.byName[bt.dataset.leg]; legs.amputate(l.name, l.attached); syncLegButtons(); note(l.attached ? "（" + LEGCN[l.name] + "腿接回去了）" : "（" + LEGCN[l.name] + "腿被截掉了）"); save(); };
+    // 神经元遥控：按住 = 直接驱动真实的神经元
+    const REMOTE = { dnaL: ["DNa01_left", "DNa02_left"], dnaR: ["DNa01_right", "DNa02_right"], mdn: ["MDN_left", "MDN_right"], gf: ["DNp01_left", "DNp01_right"], mn9: ["MN9_left", "MN9_right"], adn1: ["aDN1_left", "aDN1_right"] };
+    for (const bt of document.querySelectorAll("#lifeRemote [data-remote]")) { const k = bt.dataset.remote;
+      const set = hz => { ensure(); g.brain.setDrive("remote_" + k, REMOTE[k].flatMap(gn => g.SUB.groups[gn] || []), hz); bt.setAttribute("aria-pressed", hz > 0 ? "true" : "false"); };
+      bt.addEventListener("pointerdown", e => { e.preventDefault(); set(150); }); for (const ev of ["pointerup", "pointerleave", "pointercancel"]) bt.addEventListener(ev, () => set(0)); }
     const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on };
     window.__lifeApi = api; return api;
+  })();
+  // 学习卡片：全部从 results/learn/learn_summary.json 取数
+  (function buildLearnCard() {
+    let L; try { L = JSON.parse(document.getElementById("learn-data").textContent); } catch (e) { return; }
+    try { render(L); } catch (e) { console.error("学习卡片渲染失败", e); window.__learnCardError = String(e); }
+    function render(L) {
+    const set = (id, t) => { const e2 = document.getElementById(id); if (e2) e2.textContent = t; }, p1 = v => (v * 100).toFixed(1) + "%", p0 = v => Math.round(v * 100) + "%", yn = b => b ? "成立" : "不成立", f2 = v => v == null ? "—" : v.toFixed(2);
+    set("lnN", L.v5.n.toLocaleString() + " 个神经元、" + L.v5.n_edges.toLocaleString() + " 条边；其中凯尼恩细胞 " + L.v5.n_tag.KC.toLocaleString() + "、MBON " + L.v5.n_tag.MBON + "、多巴胺神经元 " + L.v5.n_tag.DAN);
+    const oc = L.odor_coding, fb = L.fullbrain, armName = { raw: "原样（Shiu 模型的递质符号）", alln_inh: "触角叶局部神经元改成抑制性", no_alln: "去掉触角叶局部神经元" };
+    tableHTML("tLearnRunaway", ["接线", "蘑菇体回路：活跃凯尼恩细胞（最大 / 合成气味中位）", "不同气味的重合（Jaccard）", "全脑 13.9 万神经元：其他活跃神经元（中位）", "全脑失控次数"],
+      ["raw", "alln_inh", "no_alln"].map(a => [armName[a], p1(oc[a].max_kc_frac) + " / " + p1(oc[a].median_kc_frac_synthetic), f2(oc[a].cross_odor_jaccard_median), fb[a] ? Math.round(fb[a].median_active).toLocaleString() : "没跑", fb[a] ? fb[a].n_runaway + " / " + fb[a].n_runs : "—"]), r => /抑制性/.test(r[0]));
+    set("lnNote1", "早先（嗅觉诊断那一节）只知道嗅觉输入在这个模型里是全或无的失控，找不到源头。源头是触角叶局部神经元：文献里它们绝大多数是抑制性的，而模型用的递质预测把它们发出的突触有一半标成了兴奋性。" +
+      "改掉之后，全脑 " + fb.alln_inh.n_runs + " 次里失控 " + fb.alln_inh.n_runaway + " 次（原样 " + fb.raw.n_runaway + " / " + fb.raw.n_runs + "），凯尼恩细胞的活跃比例落到百分之几——真果蝇是 5–10%。" +
+      (fb.lateralization && fb.lateralization.left ? "不失控之后回头问当时问不了的问题：单侧给气味，下行神经元有左右偏侧吗？——没有（左刺激 LI " + f2(fb.lateralization.left.LI) + "，右刺激 " + f2(fb.lateralization.right.LI) + "，判据要求符号相反且 |LI| ≥ 0.2）。" : ""));
+    const C = L.conditioning, cr = ["L1_learned", "L2_specific", "L3_contingent", "L4_compartments"], crN = ["学会了（配对过的气味 ≤ 0.7）", "只记这一种（没配对的 ≥ 0.85）", "要同时出现（错开给 ≥ 0.85）", "隔室分工（PAM 与 PPL1 压低的 MBON 重合 < 0.5）"];
+    const val = (a, k) => k === "L1_learned" ? f2(a.median_ratio_paired_csp) : k === "L2_specific" ? f2(a.median_ratio_paired_csm) : k === "L3_contingent" ? f2(a.median_ratio_unpaired_csp) : f2(a.compartment_jaccard);
+    tableHTML("tLearnCond", ["判据（跑之前写死）", "连接组", "打乱 投射神经元 → 凯尼恩细胞 的接线", "第一次尝试（设计有缺陷，留作记录）"], cr.map((k, i) => [crN[i], val(C.connectome, k) + " · " + yn(C.connectome.criteria[k]), val(C.shuffle, k) + " · " + yn(C.shuffle.criteria[k]), val(C.v1, k) + " · " + yn(C.v1.criteria[k])]));
+    set("lnNote2", "数值 = 训练后「被强化的那几个隔室」的 MBON 对气味的响应 ÷ 不给多巴胺的对照训练后的响应，" + C.connectome.n_rows + " 组（气味对 × PAM / PPL1）的中位数。学会了、要同时出现、隔室分工三条成立；「只记这一种」差一点（" + f2(C.connectome.median_ratio_paired_csm) + " 对 0.85）：没配对的那种气味也掉了约两成。" +
+      "相似的气味（一半嗅小球相同）泛化得更多（" + f2(C.connectome.similar_median_ratio_csm) + "）。打乱接线之后照样学得会——和事先写下的预期一致：这一层接线在真果蝇里本来就接近随机，学习靠的是稀疏展开；连接组的贡献在于隔室（PAM 压低 " + C.connectome.n_depressed.PAM + " 个 MBON、PPL1 压低 " + C.connectome.n_depressed.PPL1 + " 个，互不重合）。" +
+      "强化信号走不通连接组：糖、苦、热、湿各三档强度共 " + L.reinforcement.n_conditions + " 个条件，多巴胺神经元发放 ≥5 Hz 的最多 " + L.reinforcement.max_dan + " 个——所以「糖 / 烫 → 多巴胺」那根线是手接的。");
+    const M = L.memory_to_motor, rd = ["oDN1", "BDN2", "DNa01", "DNa02", "MDN"], rdN = { oDN1: "oDN1（前进）", BDN2: "BDN2（前进）", DNa01: "DNa01（转向）", DNa02: "DNa02（转向）", MDN: "MDN（后退）" };
+    tableHTML("tLearnMotor", ["运动读出", "页面用的回路：" + M.v5.n_rows + " 组里显著变化的组数", "切掉 APL → MBON 之后（只试这一次）"], rd.map(k => [rdN[k], M.v5.summary[k].n_hit + " / " + M.v5.n_rows, M.no_apl_mbon.summary[k].n_hit + " / " + M.no_apl_mbon.n_rows]));
+    const tp = M.no_apl_mbon.top.flatMap(r => r.top.map(x => ({ ...x, r: r.reinforcer }))).sort((a, b) => Math.abs(b.t) - Math.abs(a.t))[0];
+    set("lnNote3", "每组训练后各测 " + M.v5.n_test + " 次（换随机种子），判据：Welch |t| ≥ 3 且均值差 ≥ 20%，并在半数以上的组里同向。一个都没有——记忆形成了，但走不到我们接了身体的那五个下行神经元。" +
+      "追查：" + (M.v5.n_responsive != null ? "35 类 MBON 里只有 " + M.v5.n_responsive + " 类对气味有响应，" : "") + "有运动落点的四类（MBON12 / 26 / 27 / 35）一个脉冲都没有，它们收到的 APL 抑制是凯尼恩细胞兴奋的 2–7 倍。APL 在真果蝇里不放电、靠分级电位做局部抑制；这个模型把它当普通放电神经元，它顶着不应期上限放电。" +
+      "切掉 APL → MBON 之后有响应的 MBON 增加到 " + M.no_apl_mbon.n_responsive + " 类，记忆也确实传到了一些下行神经元（探索性：最强的是 " + (tp ? tp.type + " " + tp.mock + " → " + tp.paired + " Hz，t = " + tp.t : "—") + "），但不是那五个，判据仍不成立——按事先说好的，这一刀不采用，也不再改模型去凑行为。所以页面上「记忆 → 转向的桥」是手写的、默认关。");
+    const G = L.game, E = L.embodied, em = E.main_s1, en = E.noreinf_s1, eo = E.openloop_s1;
+    tableHTML("tLearnBody", ["", "页面引擎：六条腿的运动学身体", "物理仿真的身体（NeuroMechFly）"], [
+      ["吃到 A 味的果子之后，A 在奖赏隔室的输入 / 响应", p0(G.trained.memA.PAM) + "（对照 " + p0(G.control.memA.PAM) + "）", Math.round(em.after.A.PAM) + " Hz（对照 " + Math.round(en.after.A.PAM) + " Hz，训练前 " + Math.round(em.before.A.PAM) + "）"],
+      ["被 B 味的热源烫过之后，B 在惩罚隔室的输入 / 响应", p0(G.trained.memB.PPL1) + "（对照 " + p0(G.control.memB.PPL1) + "）", Math.round(em.after.B.PPL1) + " Hz（对照 " + Math.round(en.after.B.PPL1) + " Hz）"],
+      ["吃了几秒 / 多巴胺放了几秒", G.trained.fed_s + " s / PAM " + G.trained.pam_s + " s、PPL1 " + G.trained.ppl1_s + " s", em.eat_seconds.toFixed(1) + " s / PPL1 " + em.ppl1_seconds.toFixed(1) + " s"],
+      ["走到 B 味的热源跟前", "掉头走开（终点 x = " + Math.round(G.trained.end_x) + " mm）", em.turned_back ? "掉头走开（终点 x = " + Math.round(em.end[0]) + " mm）；把大脑的转向指令换成 0：一路走穿（x = " + Math.round(eo.end[0]) + " mm）" : "没有掉头"],
+      ["二选一走向 A 的比例：「A 配奖赏、B 配惩罚」组 vs 反过来的那组（经典条件化；桥关着）", p0(G.choice.bridge_off.A_rewarded.to_A) + " vs " + p0(G.choice.bridge_off.B_rewarded.to_A) + "（没训练过的 " + p0(G.choice.bridge_off.naive.to_A) + "，每组 " + G.choice.bridge_off.naive.n + " 只）", "—"],
+      ["同上，打开手写的桥", p0(G.choice.bridge_on.A_rewarded.to_A) + " vs " + p0(G.choice.bridge_on.B_rewarded.to_A), "—"]]);
+    set("lnNote4", "两个身体跑的是同一颗大脑、同一条可塑性规则。页面引擎与 Python 在同一份回路上做同一个条件化流程：MBON 总发放 " + Math.round(L.parity.js.mbon_B_mock) + " 对 " + Math.round(L.parity.py.mbon_B_mock) + " Hz，各 MBON 的突触剩余强度相关 r = " + L.parity.strength_pearson.toFixed(4) + "。" +
+      "物理身体里：奖赏记忆成立；惩罚记忆只到对照的 " + p0(E.E1_B_ppl1_vs_control) + "（判据 ≤ 70%，不成立）——它走到 B 味的热源跟前就自己掉头走了，只被烫了 " + em.ppl1_seconds.toFixed(1) + " 秒。这个掉头没人写过，两个身体里都出现了；分开测，主要是气味 B 引起的（只放 B：左侧转向神经元 " + Math.round(L.uturn.odorB_only.mean_max_dna_left) + " Hz、" + L.uturn.odorB_only.n_passed_through + " / " + L.uturn.seeds + " 只走穿；只放热：" + L.uturn.heat_only.n_passed_through + " / " + L.uturn.seeds + " 只走穿；只放 A：毫无反应）——这两种合成气味在连接组里天生不一样。" +
+      "页面引擎实测速度约 " + G.realtime_factor + " × 实时（node 单线程）。");
+    const Lg = L.legs, nm = { LF: "左前", LM: "左中", LH: "左后", RF: "右前", RM: "右中", RH: "右后" };
+    tableHTML("tLearnLegs", ["", "实际速度", "偏航", "失稳拖行的时间"], [["六条腿完整，指令 18 mm/s 直行", Lg.tests.T1_straight.path_speed.toFixed(1) + " mm/s", Lg.tests.T1_straight.yaw_deg_s.toFixed(1) + " °/s", p0(Lg.tests.T1_straight.unstable_frac)],
+      ["指令 左转 60 °/s / 右转 60 °/s", "—", Lg.tests.T2_turn.left_yaw.toFixed(0) + " / " + Lg.tests.T2_turn.right_yaw.toFixed(0) + " °/s", "—"],
+      ...Object.entries(Lg.explore).map(([k, t]) => [k.startsWith("amputate_") ? "截掉" + nm[k.slice(9)] + "腿" : "按住左中腿不放", t.speed.toFixed(1) + " mm/s", t.yaw.toFixed(0) + " °/s", p0(t.unstable)])]);
+    set("lnNote5", "身体不再是「按速度滑行、腿只放动画」：支撑相的脚钉在地上，身体每一步的位移和转角由支撑脚的运动学解出来（二维刚体最小二乘）；转向 = 左右步幅不等。足尖轨迹来自 NeuroMechFly 物理仿真录下的一个步态周期。" +
+      "截掉前腿或后腿之后，同样的直行指令走出来是弯的、也慢了；按住一条腿，身体绕着它转。没有适应——真果蝇截肢后会重新调整步态，这里不会。");
+    }
   })();
   // 生活模式的说明卡片：全部从 life_summary.json 取数
   (function buildLifeCard() {

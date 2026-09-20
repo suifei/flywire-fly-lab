@@ -42,6 +42,13 @@ results/screen/water/*
 !results/screen/water/*.json
 
 # 其他章节的结论
+# 学习 / 多巴胺 / 闭环（§48）：结果 JSON 入库；物理闭环的逐窗口日志（embodied_*.json，各 250 KB）不入库，关键数字在 learn_summary.json 里
+!results/learn/
+results/learn/*
+!results/learn/*.json
+results/learn/embodied_*.json
+results/learn/parity_js.json
+results/learn/parity_py.json
 !results/language/
 results/language/*
 !results/language/*.json
