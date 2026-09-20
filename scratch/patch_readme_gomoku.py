@@ -80,4 +80,31 @@ sec = f"""<!-- gomoku:begin （本节由 scratch/patch_readme_gomoku.py 从结�
 """
 if "<!-- gomoku:begin" in s: s = re.sub(r"<!-- gomoku:begin.*?<!-- gomoku:end -->\n", lambda m: sec, s, flags=re.S)
 else: s = s.replace("## 它做不到什么（同样重要）", sec + "\n## 它做不到什么（同样重要）", 1)
+# ── 生活模式一节（<!-- life:begin/end -->）─────────────────────────────────
+LF = ROOT / "results/dodge/life_summary.json"
+if LF.exists():
+    LS = json.loads(LF.read_text()); sp = LS["sound_priming"]["groups"]; lt = LS["life_test"]; C = lt["conds"]; n = LS["sound_priming"]["n"]
+    isn = next(r for r in LS["modulation"]["rows"] if r["base"].startswith("吃糖") and "ISN" in r["mod"])
+    wlim = LS.get("wall_limits")
+    life = f"""<!-- life:begin （本节由 scratch/patch_readme_gomoku.py 从 results/dodge/life_summary.json 渲染）-->
+## 生活模式：五感接到真实的感受器上，剩下的交给连接组
+
+游戏页的第三个模式标签。单独的一只果蝇（子回路 v4：{LS['subcircuit']['n']:,} 个神经元，比球场那只多了**听觉**、两个**嗅小球**和 4 个**内感受神经元**），生活在一个没有墙的开放世界里：
+昼夜、烂果子、水洼、气味、嗡嗡声、热源、风、灰尘、来球都自己发生。每一样只作为**物理量**送到对应的真实感受器上——**没有一条"闻到就过去""听到就跑"的规则**。
+页面实时显示五感的输入、连接组的读出、身体状态和「它在想什么」（每个词的触发量是实测的发放率，句子模板手写）；你可以往世界里丢东西、切断听觉或嗅觉。
+
+所以结果不是功能清单，而是实测——每一路感觉在这个模型里到底通不通到行为：
+
+| | 实测 |
+|---|---|
+| **听觉** | 1 跳到巨纤维。声音单独不让它起飞，但让逼近反应提前：起飞提前量 **{sp['无声']['lead_ms_median']} → {sp['有声']['lead_ms_median']} ms**，躲开 {sp['无声']['dodged']} → {sp['有声']['dodged']} / {n}；失聪后回到 {sp['有声但聋（AUDIO 断突触）']['lead_ms_median']} ms |
+| **嗅觉** | **阴性**：没有落到任何运动读出；10 分钟里碰到糖的次数，完整 {C['intact']['sugar_contacts']}、失嗅 {C['anosmic']['sugar_contacts']} |
+| **内感受 ISN** | **阴性，方向与文献相反**：驱动它把吃糖的 MN9 从 {isn['base_hz']['mean']} 压到 {isn['hz']['mean']} Hz（文献里它促进吃糖）。它用神经肽，LIF 模型没有；默认关闭，没有翻转符号去凑结果 |
+| **身体状态** | 只调味觉感受器的灵敏度：碰到糖后开吃，饿着 {lt['H3']['starved'] * 100:.0f}%、饱着 {lt['H3']['sated'] * 100:.0f}%；还冒出一个没人写过的**饱腹感**（吃一两秒就自己走开） |
+""" + (f"| **墙** | **阴性**：只靠触感避不开墙——3 分钟里矩形场地只走 {wlim['arenas']['rect_touch']['mean']['path_mm']:.0f} mm（卡死在墙角），圆形场地 {wlim['arenas']['round_touch']['mean']['wall_frac'] * 100:.0f}% 的时间贴墙；所以这个世界没有墙 |\n" if wlim else "") + """
+细节见 [docs/log/report.md §47](docs/log/report.md)。
+<!-- life:end -->
+"""
+    if "<!-- life:begin" in s: s = re.sub(r"<!-- life:begin.*?<!-- life:end -->\n", lambda m: life, s, flags=re.S)
+    else: s = s.replace("## 它做不到什么（同样重要）", life + "\n## 它做不到什么（同样重要）", 1)
 p.write_text(s); print("README 已更新")

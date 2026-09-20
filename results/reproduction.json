@@ -1122,6 +1122,32 @@
    "note": "同等节点预算下 K=6 对 K=10 是 65–35（100 局，search_width.json）；先手系数换成 1.0 / 1.5 / 2.0 临时量过，都在 100 局的噪声里（没有存档，所以不写数字）。这两个属于搜索，不属于果蝇",
    "script": "gomoku/engine.js",
    "log": "§46.6"
+  },
+  {
+   "name": "生活模式：声音与气味的物理换算",
+   "value": "听觉神经元上限 200 Hz、声强半衰距离 60 mm、左右耳差 ±25%；嗅觉上限 200 Hz、气味羽流为高斯",
+   "source": "**手选**",
+   "code_check": [
+    "dodge/game_core.js",
+    "audioRate: (\\d+), soundRef: (\\d+), earBias: ([\\d.]+)",
+    "200/60/0.25"
+   ],
+   "note": "没有该模型下的声强 / 气味浓度定标数据。上限 200 Hz 与味觉、温湿度那几路取同一个值。没有为了让它被声音吓飞去调这些数或起飞阈值",
+   "script": "dodge/game_core.js",
+   "log": "§47.4"
+  },
+  {
+   "name": "生活模式：身体状态",
+   "value": "味觉感受器灵敏度增益 0.1–1.6（缺什么对什么更敏感）；MN9 > 10 Hz 算开吃；能量 / 水分的消耗与补充速率",
+   "source": "方向有文献依据（Inagaki 2012），**幅度与速率手选**",
+   "code_check": [
+    "dodge/game_core.js",
+    "gainMin: ([\\d.]+), gainMax: ([\\d.]+)",
+    "0.1/1.6"
+   ],
+   "note": "身体状态不直接决定任何行为，只改感受器灵敏度与走路速度。开吃阈值从球场模式的 30 Hz 降到 10 Hz：水感受器开到 320 Hz，MN9 也只有 22 Hz（实测），30 Hz 水永远过不了",
+   "script": "dodge/game_core.js",
+   "log": "§47.6"
   }
  ],
  "findings": [
@@ -1393,6 +1419,146 @@
      "win_rate_vs_supervised",
      0.03,
      0.0005
+    ]
+   ]
+  },
+  {
+   "id": "hearing_priming",
+   "what": "给它听觉之后，声音在行为上有没有用（听觉神经元 1 跳到巨纤维）",
+   "status": "reproduced",
+   "result": "**有，但不是「听到就跑」**。声音单独驱动不了起飞（听觉神经元 200 Hz 时巨纤维读出约 80 Hz，起飞阈值 90）；它让**逼近反应提前**：同一颗慢球，起飞提前量中位 **435 → 825 ms**，躲开 **24 → 38 / 100**；切断听觉神经元的传出突触之后回到 425 ms、25 / 100",
+   "caveat": "探索性：这个对照是看过生活模式的初跑（声音一次也没把它惊飞）之后才想到的。事先写好的判据 H1「声音后 1 s 内起飞 ≥ 20%」**不成立**（5%，失聪 2%）。没有为了让它被吓飞去调起飞阈值或声音强度。声强随距离的衰减与左右耳差是手写的；效应本身（声音 + 逼近在巨纤维上相加）来自连接组",
+   "script": "dodge/sound_priming.js",
+   "result_file": "results/dodge/sound_priming.json",
+   "log": "§47.4",
+   "verify": [
+    [
+     "groups.无声.lead_ms_median",
+     435,
+     0
+    ],
+    [
+     "groups.有声.lead_ms_median",
+     825,
+     0
+    ],
+    [
+     "groups.有声.dodged",
+     38,
+     0
+    ],
+    [
+     "groups.无声.dodged",
+     24,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "olfaction_no_pathway",
+   "what": "给它嗅觉之后（醋 DM1、土臭素 DA2 两个嗅小球），闻得到的东西会让它走过去或躲开吗",
+   "status": "negative",
+   "result": "**不会**。两路单独驱动各能激活上百个神经元，但没有落到六个运动读出的任何一个上；自己过日子的 10 分钟里，碰到糖的次数完整 7.667、失嗅 8.667，没有差别",
+   "caveat": "事先写好的判据 H2 不成立。与 §10 全脑上「嗅觉没有左右偏侧化」一致。只取了两个嗅小球（全取 1,850 个 ORN 会把触角叶和蘑菇体都卷进子回路）。唯一测到的作用是调制：醋味会压低碰触引起的转向（DNa 6.0 → 0.7 Hz）。「吸引 / 厌恶」是文献给这两个小球的标签，不是写进模型的规则",
+   "script": "dodge/life_test.js",
+   "result_file": "results/dodge/life_test.json",
+   "log": "§47.2 + §47.5",
+   "verify": [
+    [
+     "H2.passed",
+     false,
+     0
+    ],
+    [
+     "conds.intact.mean.sugar_contacts",
+     7.667,
+     0.001
+    ],
+    [
+     "conds.anosmic.mean.sugar_contacts",
+     8.667,
+     0.001
+    ]
+   ]
+  },
+  {
+   "id": "isn_sign",
+   "what": "用真实的内感受神经元 ISN（感知饥渴）代替手写的口渴规则，行不行",
+   "status": "negative",
+   "result": "**不行：模型里 ISN 的作用方向与文献相反**。文献（González-Segarra 2023）：ISN 活动增强 → 吃糖增多、喝水减少。模型里驱动 ISN（200 Hz）把吃糖的 MN9 从 **44.1 Hz 压到 2.5 Hz**；它是一个对伸喙的通用抑制",
+   "caveat": "ISN 用的是神经肽 dILP3，LIF 模型只有预测的快递质符号（与 Usnea 那条同类）。**没有为了得到「饿了想吃」去翻转它的符号。**页面上留了一个默认关闭的「ISN 通路」开关。身体状态改由感受器灵敏度体现（见下一条）",
+   "script": "dodge/sense_modulation.js",
+   "result_file": "results/dodge/sense_modulation.json",
+   "log": "§47.3",
+   "verify": [
+    [
+     "rows.2.base_hz.mean",
+     44.1,
+     0.01
+    ],
+    [
+     "rows.2.hz.mean",
+     2.5,
+     0.01
+    ],
+    [
+     "rows.2.modulates",
+     true,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "body_state",
+   "what": "身体状态（能量 / 水分）只调味觉感受器的灵敏度、不写任何「饿了就吃」的规则，够不够",
+   "status": "reproduced",
+   "result": "**够**。碰到糖后开吃的比例：饿着 **100%**、饱着 **32%**（判据 H3：≥ 1.5 倍，成立）。还出现了没人写过的饱腹感：完整条件下几乎每次碰到糖都开吃（7.667 / 7.667），却一块也没吃完——吃一两秒能量上来，糖感受器变钝，MN9 掉到阈值以下，它就走开了",
+   "caveat": "「缺什么对什么更敏感」有文献依据（Inagaki et al. 2012：饥饿经多巴胺提高糖感受器的敏感度），但增益范围（0.1–1.6）与能量 / 水分的消耗速率全部手选。「MN9 超过多少算开吃」在生活模式里统一为 10 Hz（手选）：原来的 30 Hz 水永远过不了，水感受器开到 320 Hz，MN9 也只有 22 Hz",
+   "script": "dodge/life_test.js",
+   "result_file": "results/dodge/life_test.json",
+   "log": "§47.5–47.6",
+   "verify": [
+    [
+     "H3.passed",
+     true,
+     0
+    ],
+    [
+     "H3.starved",
+     1,
+     0.001
+    ],
+    [
+     "H3.sated",
+     0.315,
+     0.001
+    ]
+   ]
+  },
+  {
+   "id": "touch_cannot_avoid_walls",
+   "what": "只靠触感（加不加围栏视觉），这颗脑子避得开墙吗",
+   "status": "negative",
+   "result": "**避不开**。3 分钟（走满是 3,240 mm）：矩形场地 + 触感只走了 270 mm、97% 的时间贴墙（卡死在墙角：两根触角同时压墙，转向差为 0）；圆形场地 410 mm、贴墙 93%；打开围栏视觉不贴墙了，但没有任何来球也起飞 21 次",
+   "caveat": "脑子里没有腹神经索的腿部反射。**没有用「卡住就掉头」的规则去掩盖**：生活模式改成没有墙的开放世界（同样 3 分钟走 3093 mm）。§38 里「触感让它沿墙走」的结论不变，这里量的是它走不走得开",
+   "script": "dodge/wall_limits.js",
+   "result_file": "results/dodge/wall_limits.json",
+   "log": "§47.6",
+   "verify": [
+    [
+     "arenas.rect_touch.mean.path_mm",
+     270,
+     0.5
+    ],
+    [
+     "arenas.round_touch.mean.wall_frac",
+     0.932,
+     0.001
+    ],
+    [
+     "arenas.open.mean.path_mm",
+     3092.667,
+     0.5
     ]
    ]
   },

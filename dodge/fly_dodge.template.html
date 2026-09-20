@@ -605,6 +605,22 @@ code { font: 12px var(--mono); }
         按那个指标，触感「没用」（85.6% → 85.6%）；换成走过的格子数才看出来果蝇其实一直在沿墙移动。
         <b>指标选错，阴性结果就是假的。</b></p>
     </div>
+    <div class="card" style="grid-column: 1 / -1" id="cLife">
+      <h3>「生活」模式：五感接到真实的感受器上，剩下的交给连接组</h3>
+      <p>顶部第三个标签。这是<b>单独的一只</b>果蝇，用的是新裁的子回路 v4（<span id="lfN"></span>），比球场那只多了<b>听觉</b>、两个<b>嗅小球</b>（醋 / 土臭素）和 4 个<b>内感受神经元</b>。
+        世界自己运转——昼夜、烂果子、水洼、气味、嗡嗡声、热源、风、灰尘、来球——每一样都只作为物理量送到对应的感受器上；<b>没有一条"闻到就过去""听到就跑""卡住就掉头"的规则</b>。
+        所以下面这张表不是功能清单，而是实测：每一路感觉，在这个模型里到底通不通到行为。</p>
+      <div class="tbl"><table id="tLifeSenses"></table></div>
+      <p class="sub" id="lfNote1"></p>
+      <h4 style="margin:.9em 0 .3em">声音单独不让它起飞，但让它对逼近更敏感</h4>
+      <div class="tbl"><table id="tLifeSound"></table></div>
+      <p class="sub" id="lfNote2"></p>
+      <h4 style="margin:.9em 0 .3em">让它自己过 10 分钟</h4>
+      <div class="tbl"><table id="tLifeTest"></table></div>
+      <p class="sub" id="lfNote3"></p>
+      <p class="sub"><b>哪些是手写的：</b>世界的节奏与强度；声强随距离的衰减与左右耳差；气味羽流的形状；身体状态（能量、水分）的消耗速率，以及它对味觉感受器灵敏度的调制幅度（方向有文献依据）；
+        「MN9 超过 10 Hz 算开吃」这条读出阈值；「它在想什么」的句子模板与阈值（每个词的触发量是实测的频率）。<b>它不是语言模型，也不是果蝇会说话。</b></p>
+    </div>
     <div class="card" style="grid-column: 1 / -1" id="cGomoku">
       <h3>训练果蝇下五子棋：它怎么学的、学到了什么、哪些不是它的功劳</h3>
       <p>把「主画面」切到「五子棋」就能和它下（含黑方禁手：长连、四四、三三）。先说清楚分工：</p>
@@ -2616,6 +2632,40 @@ code { font: 12px var(--mono); }
     const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on };
     window.__lifeApi = api; return api;
   })();
+  // 生活模式的说明卡片：全部从 life_summary.json 取数
+  (function buildLifeCard() {
+    let LS; try { LS = JSON.parse(document.getElementById("life-data").textContent); } catch (e) { return; }
+    const set = (id, t) => { const e2 = document.getElementById(id); if (e2) e2.textContent = t; }, wl = r => r ? `${r}` : "—";
+    if (LS.subcircuit) set("lfN", `${LS.subcircuit.n.toLocaleString()} 个神经元、${LS.subcircuit.n_edges.toLocaleString()} 条边`);
+    const ds = LS.drive_summary, t1 = document.getElementById("tLifeSenses");
+    if (t1 && LS.reach && ds) {
+      const ROWS = [["视", "LC4 / LPLC2 / LC16", ["LC4", "LPLC2", "LC16"], "逼近 → 巨纤维起飞、DNa 转向"], ["听", "听觉神经元（新）", ["AUDIO"], "双侧声音 → 巨纤维；单独不够起飞，让逼近反应提前"],
+        ["嗅", "ORN_DM1 醋 / ORN_DA2 土臭素（新）", ["OLFA", "OLFR"], "没有落到任何运动读出；只测到对碰触转向的调制"], ["味", "糖 / 苦 / 水味觉神经元", ["SUGAR", "BITTER"], "糖 → MN9 伸喙；苦是抑制性的，单独驱动本来就不该有落点"],
+        ["触", "头部刚毛 / 触角 JO", ["TOUCH", "JO"], "刚毛 → DNa 转向；JO → aDN1 梳理"], ["温", "温度感受器", ["THERMO"], "只有高频驱动才有落点"], ["湿", "湿度感受器", ["HYGRO"], "没有落点"], ["内", "内感受 ISN（新）", ["ISN"], "单独无落点；叠在吃糖上是强抑制，方向与文献相反"]];
+      const st = g => ds.lands_at_200.includes(g) ? "≤200 Hz 就有" : ds.only_at_high_rate.includes(g) ? "只有高频才有" : "没有";
+      t1.innerHTML = "<tr><th>感觉</th><th>送到哪些真实神经元</th><th>单独驱动，运动读出上有没有落点</th><th>实测到的作用</th></tr>" +
+        ROWS.map(([a, b, gs, d]) => `<tr><td>${a}</td><td>${b}</td><td>${gs.map(g2 => g2 + "：" + st(g2)).join("；")}</td><td>${d}</td></tr>`).join("");
+      const isn = (LS.modulation.rows || []).find(r => r.base.startsWith("吃糖") && r.mod.includes("ISN"));
+      if (isn) set("lfNote1", `「落点」= 这一路单独驱动 1 秒，六个运动读出（DNa01/02、巨纤维、MDN、aDN1、MN9）有任何一个超过 5 Hz。` +
+        `内感受神经元 ISN：吃糖时 MN9 是 ${isn.base_hz.mean} Hz，同时驱动 ISN 掉到 ${isn.hz.mean} Hz——而文献（González-Segarra 2023）里 ISN 活动增强是促进吃糖的。` +
+        `ISN 用神经肽 dILP3，这个模型只有预测的快递质符号。所以没有用它做"饿了想吃"，页面上的「ISN 通路」开关默认关着。`);
+    }
+    const sp = LS.sound_priming, t2 = document.getElementById("tLifeSound");
+    if (t2 && sp) { t2.innerHTML = "<tr><th>同一颗慢球</th><th>起飞</th><th>躲开</th><th>起飞提前量中位</th><th>巨纤维峰值均值</th></tr>" +
+        Object.entries(sp.groups).map(([k, v]) => `<tr><td>${k}</td><td>${v.jumped}/${sp.n}</td><td>${v.dodged}/${sp.n}</td><td>${v.lead_ms_median} ms</td><td>${v.gf_max_mean} Hz</td></tr>`).join("");
+      set("lfNote2", `听觉神经元开到 200 Hz，巨纤维读出最高约 80 Hz，起飞阈值是 90 Hz（按视觉逼近标定的）——没有为了让它被吓飞去调阈值。` +
+        `切断听觉神经元的传出突触之后两个数字都回到无声的水平：效应是经由听觉神经元、在连接组里汇到巨纤维上的。探索性（判据是看过初跑之后才想到的）。`); }
+    const lt = LS.life_test, t3 = document.getElementById("tLifeTest");
+    if (t3 && lt) { const NM = { intact: "完整", deaf: "失聪", anosmic: "失嗅", starved: "能量钉在 0.1", sated: "能量钉在 1.0", isn_on: "打开 ISN 通路" };
+      t3.innerHTML = "<tr><th>条件</th><th>声音后 1 s 内起飞</th><th>碰到糖</th><th>开吃</th><th>吃完的糖</th><th>起飞</th><th>能量均值</th><th>水分均值</th></tr>" +
+        Object.entries(lt.conds).map(([k, v]) => `<tr><td>${NM[k] || k}</td><td>${v.startled}/${v.sounds}</td><td>${v.sugar_contacts}</td><td>${v.sugar_feeds}</td><td>${v.eaten_sugar}</td><td>${v.jumps}</td><td>${v.mean_energy}</td><td>${v.mean_hydration}</td></tr>`).join("");
+      const y = b => b ? "成立" : "不成立";
+      set("lfNote3", `每个条件 ${lt.seeds} 个种子 × ${lt.seconds / 60} 分钟的均值，没有墙的开放世界。事先写好的判据：H1 听到声音就起飞 → ${y(lt.H1.passed)}；H2 嗅觉帮它找到食物 → ${y(lt.H2.passed)}（碰到糖的次数失嗅前后没有差别）；` +
+        `H3 身体状态有用 → ${y(lt.H3.passed)}（碰到糖后开吃：饿着 ${(lt.H3.starved * 100).toFixed(0)}%、饱着 ${(lt.H3.sated * 100).toFixed(0)}%）。` +
+        `还有一个没人写过的饱腹感：完整条件下几乎每次碰到糖都开吃，却一块也没吃完——吃一两秒能量上来，糖感受器变钝，MN9 掉到阈值以下，它就自己走开了。` +
+        (LS.wall_limits ? `这个世界没有墙：只靠触感它避不开墙（3 分钟里矩形场地只走 ${LS.wall_limits.arenas.rect_touch.mean.path_mm.toFixed(0)} mm、卡死在墙角；圆形场地 ${(LS.wall_limits.arenas.round_touch.mean.wall_frac * 100).toFixed(0)}% 的时间贴墙；开放世界走 ${LS.wall_limits.arenas.open.mean.path_mm.toFixed(0)} mm）。` : "")); }
+  })();
+
   if (LIFE) {
     const tabs = [$("viewCourt"), $("viewGomoku"), $("viewLife")];
     $("viewLife").addEventListener("click", () => { if (GM) GM.setStage("court"); LIFE.show(true); segSet(tabs, $("viewLife")); });

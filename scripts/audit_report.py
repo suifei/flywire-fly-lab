@@ -129,6 +129,13 @@ CHECKS = [
      lambda: jget("results/gomoku/rl.json", "final", "d4_vs_supervised_d4", "win"), 0),
     ("§46 训练局面里出现过的线型", r"只出现过 \*\*([\d,]+) / 14,641\*\* 种",
      lambda: jget("results/gomoku/dataset_summary.json", "patterns_seen_in_dataset"), 0),
+    # ── §47 五感 + 生活（整节由 render_report47.py 渲染；抽查几处）──────────────────
+    ("§47 有声时起飞提前量", r"\| 有声 \| \d+/\d+ \| \d+/\d+ \| (\d+) \|",
+     lambda: jget("results/dodge/sound_priming.json", "groups", "有声", "lead_ms_median"), 0),
+    ("§47 饿着开吃的比例", r"饿 (\d+)%、饱 \d+%",
+     lambda: jget("results/dodge/life_test.json", "H3", "starved") * 100, 0.5),
+    ("§47 子回路 v4 神经元数", r"\*\*子回路 v4\*\*：([\d,]+) 个神经元",
+     lambda: jget("results/dodge/sensor_drive_v4.json", "n"), 0),
     ("§44 正面分箱样本数", r"它偏离 50% 太远（n = ([\d,]+)）",
      lambda: jget("results/dodge/takeoff_planning.json", "pre_bins", 0, "n"), 0),
 ]
@@ -155,4 +162,4 @@ for b in bad:
     print("  ✗ " + b)
 if bad:
     sys.exit(1)
-print("✓ 报告 §37–46 的关键数字与结果文件全部一致")
+print("✓ 报告 §37–47 的关键数字与结果文件全部一致")
