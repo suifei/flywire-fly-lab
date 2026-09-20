@@ -1,0 +1,126 @@
+{
+ "seconds": 180,
+ "seeds": 3,
+ "worlds": {
+  "court": {
+   "mean": {
+    "path_mm": 4463,
+    "wall_frac": 0.013,
+    "jumps": 44.333,
+    "dodge": 4.667,
+    "hit": 0,
+    "sugar_contacts": 4.667,
+    "feed_s": 1.867,
+    "pam_s": 1.633,
+    "ppl1_s": 26.6,
+    "memA_reward": 0.851,
+    "memB_punish": 0.938,
+    "energy": 0.84
+   },
+   "runs": [
+    {
+     "path_mm": 4963,
+     "wall_frac": 0,
+     "jumps": 54,
+     "dodge": 5,
+     "hit": 0,
+     "sugar_contacts": 2,
+     "feed_s": 1.5,
+     "pam_s": 1.1,
+     "ppl1_s": 2.2,
+     "memA_reward": 0.758,
+     "memB_punish": 0.889,
+     "energy": 0.63
+    },
+    {
+     "path_mm": 4535,
+     "wall_frac": 0,
+     "jumps": 42,
+     "dodge": 4,
+     "hit": 0,
+     "sugar_contacts": 9,
+     "feed_s": 2.1,
+     "pam_s": 2.1,
+     "ppl1_s": 22.3,
+     "memA_reward": 0.933,
+     "memB_punish": 0.936,
+     "energy": 0.99
+    },
+    {
+     "path_mm": 3891,
+     "wall_frac": 0.039,
+     "jumps": 37,
+     "dodge": 5,
+     "hit": 0,
+     "sugar_contacts": 3,
+     "feed_s": 2,
+     "pam_s": 1.7,
+     "ppl1_s": 55.3,
+     "memA_reward": 0.863,
+     "memB_punish": 0.99,
+     "energy": 0.9
+    }
+   ]
+  },
+  "open": {
+   "mean": {
+    "path_mm": 3237,
+    "wall_frac": 0,
+    "jumps": 5.333,
+    "dodge": 5,
+    "hit": 0,
+    "sugar_contacts": 2.333,
+    "feed_s": 1.3,
+    "pam_s": 1.233,
+    "ppl1_s": 16.9,
+    "memA_reward": 0.734,
+    "memB_punish": 0.692,
+    "energy": 0.85
+   },
+   "runs": [
+    {
+     "path_mm": 3204,
+     "wall_frac": 0,
+     "jumps": 5,
+     "dodge": 5,
+     "hit": 0,
+     "sugar_contacts": 2,
+     "feed_s": 0.8,
+     "pam_s": 0.8,
+     "ppl1_s": 0,
+     "memA_reward": 0.543,
+     "memB_punish": 0.386,
+     "energy": 0.71
+    },
+    {
+     "path_mm": 3231,
+     "wall_frac": 0,
+     "jumps": 5,
+     "dodge": 4,
+     "hit": 0,
+     "sugar_contacts": 2,
+     "feed_s": 1.3,
+     "pam_s": 1.3,
+     "ppl1_s": 21.7,
+     "memA_reward": 0.808,
+     "memB_punish": 0.871,
+     "energy": 0.88
+    },
+    {
+     "path_mm": 3276,
+     "wall_frac": 0,
+     "jumps": 6,
+     "dodge": 6,
+     "hit": 0,
+     "sugar_contacts": 3,
+     "feed_s": 1.8,
+     "pam_s": 1.6,
+     "ppl1_s": 29,
+     "memA_reward": 0.85,
+     "memB_punish": 0.82,
+     "energy": 0.96
+    }
+   ]
+  }
+ }
+}

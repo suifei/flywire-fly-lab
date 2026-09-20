@@ -338,6 +338,14 @@ code { font: 12px var(--mono); }
         </div>
       </div>
       <div class="controls">
+        <div class="row" id="fiveRow">
+          <label class="k" title="篮球场里这只 3D 果蝇用哪一颗大脑">大脑</label>
+          <div class="seg" role="group" aria-label="大脑">
+            <button id="fiveOff" aria-pressed="true" title="子回路 v3：5,563 个神经元。任务模式、突变体、光遗传、敲除与扰动的已发布数字都是在它上面量的">球场版 · 5,563</button>
+            <button id="fiveOn" aria-pressed="false" title="子回路 v5：15,055 个神经元 = 视、听、嗅、味、触、温、湿 + 身体状态 + 蘑菇体学习回路 + 多巴胺 + 六条腿推着走的身体。和「生活」标签里是同一只，记忆也是同一份">五感全开 · 15,055（听 · 嗅 · 蘑菇体 · 多巴胺 · 六条腿）</button>
+          </div>
+          <span class="sub" id="fiveNote" style="margin:0">打开后，下面多出「生活 / 学习 / 身体」三行控件。</span>
+        </div>
         <div class="row" id="lifeRow" hidden>
           <label class="k">生活</label>
           <span class="row" style="gap:6px 10px">
@@ -656,7 +664,8 @@ code { font: 12px var(--mono); }
       <p>「生活」模式的果蝇现在用子回路 v5（<span id="lnN"></span>）= v4 ＋ 连接组里的<b>蘑菇体学习回路</b>：嗅觉感受神经元 → 投射神经元 → <b>凯尼恩细胞</b> → <b>蘑菇体输出神经元（MBON）</b>，
         外加 <b>多巴胺神经元</b>（PAM、PPL1）和全局抑制 APL。接线全部来自 FlyWire；<b>唯一会变的是凯尼恩细胞 → MBON 这一层突触</b>：
         凯尼恩细胞刚放过电、同一隔室里又有多巴胺，这条突触就被压低（文献里果蝇嗅觉记忆的位置与规则：Hige 2015；Cohn 2015；Handler 2019）。
-        哪个多巴胺神经元管哪个隔室，由连接组里 DAN → MBON 的突触数决定，我们没有写对照表。下面每一张表都是实测，判据都写在跑之前。</p>
+        哪个多巴胺神经元管哪个隔室，由连接组里 DAN → MBON 的突触数决定，我们没有写对照表。下面每一张表都是实测，判据都写在跑之前。
+        <b>想在 3D 篮球场里看这一只：</b>「篮球场」控件最上面的「大脑」开关切到「五感全开」——同一只、同一份记忆，气味、热源、声音都画在球场里，六条腿各按自己的相位走；任务、突变体、光遗传仍属于 5,563 个神经元的球场版（那些已发布的数字是在它上面量的）。</p>
       <h4 style="margin:.9em 0 .3em">① 先得解决一个老问题：一闻到气味就全脑失控</h4>
       <div class="tbl"><table id="tLearnRunaway"></table></div>
       <p class="sub" id="lnNote1"></p>
@@ -1173,6 +1182,8 @@ code { font: 12px var(--mono); }
   game.setFlightClips(FLIGHT.clips);
   const rawClips = Object.fromEntries(FLIGHT.clips.map(c => [c.name, c]));
   const { CFG, S } = game;
+  // 画面上画的是哪一只：平时是球场版（game / S）；「五感全开」时换成生活模式那只（v5）。每帧开头在 frame() 里更新。
+  let RG = game, RS = S;
   $("thrTxt").textContent = CFG.gfThreshold;
   let paused = false;
 
@@ -1285,20 +1296,29 @@ code { font: 12px var(--mono); }
   const groomDz = GAIT.frames[0][2] - POSES.groom[0][2];                 // 梳理姿态（固定模型）与步态帧的胸部高度对齐
   const gq2 = new THREE.Quaternion(), pv = new THREE.Vector3(), pivot = new THREE.Vector3(), rotAxis = new THREE.Vector3(0, 1, 0), rotQ = new THREE.Quaternion();
   let groomPhase = 0;
+  const legOfMesh = GAIT.meshes.map(m => { const k = ["LF", "LM", "LH", "RF", "RM", "RH"].indexOf((m.name || "").slice(0, 2)); return k >= 0 && /Coxa|Femur|Tibia|Tarsus/.test(m.name) ? k : -1; });
+  const gqa = new THREE.Quaternion(), gqb = new THREE.Quaternion();
   function poseFly() {
+    const S = RS, L6 = RG.legs || null;                                 // 六条腿的身体（五感全开时有）：每条腿按自己的相位取帧，截掉的腿不画
     const fi = ((Math.floor(S.phase / GAIT.stride_mm * GF) % GF) + GF) % GF;   // 后退时步态倒放（phase 递减）
     const f = GAIT.frames[fi];
     const grooming = S.state === "groom";
     let A = null, B = null, u = 0;
     if (grooming) { groomPhase += 0.016 * 6; u = 0.5 - 0.5 * Math.cos(groomPhase * Math.PI * 2); A = POSES.groom[0]; B = POSES.groom[1]; }
+    const bodyF = L6 ? GAIT.frames[Math.floor(L6.frameOf(L6.legs[0])) % GF] : f;
     parts.forEach((p, k) => {
-      const o = k * 7;
+      const o = k * 7, lk = legOfMesh[k], leg = L6 && lk >= 0 ? L6.legs[lk] : null;
+      p.visible = !(leg && !leg.attached);
       if (grooming) {
         p.position.set(A[o] + (B[o] - A[o]) * u, A[o + 1] + (B[o + 1] - A[o + 1]) * u, A[o + 2] + (B[o + 2] - A[o + 2]) * u + groomDz);
         gq.set(A[o + 4], A[o + 5], A[o + 6], A[o + 3]); gq2.set(B[o + 4], B[o + 5], B[o + 6], B[o + 3]); gq.slerp(gq2, u);
+      } else if (leg) {                                                  // 这条腿自己的相位，两帧之间插值
+        const x = L6.frameOf(leg), i0 = Math.floor(x) % GF, i1 = (i0 + 1) % GF, t = x - Math.floor(x), F0 = GAIT.frames[i0], F1 = GAIT.frames[i1];
+        p.position.set(F0[o] + (F1[o] - F0[o]) * t, F0[o + 1] + (F1[o + 1] - F0[o + 1]) * t, F0[o + 2] + (F1[o + 2] - F0[o + 2]) * t);
+        gqa.set(F0[o + 4], F0[o + 5], F0[o + 6], F0[o + 3]); gqb.set(F1[o + 4], F1[o + 5], F1[o + 6], F1[o + 3]); gq.copy(gqa).slerp(gqb, t);
       } else {
-        p.position.set(f[o], f[o + 1], f[o + 2]);
-        gq.set(f[o + 4], f[o + 5], f[o + 6], f[o + 3]);
+        const ff = L6 ? bodyF : f; p.position.set(ff[o], ff[o + 1], ff[o + 2]);
+        gq.set(ff[o + 4], ff[o + 5], ff[o + 6], ff[o + 3]);
       }
       p.quaternion.copy(gq);
     });
@@ -1392,7 +1412,7 @@ code { font: 12px var(--mono); }
   for (const x of [flyerBox.min.x, flyerBox.max.x]) for (const y of [flyerBox.min.y, flyerBox.max.y]) for (const z of [flyerBox.min.z, flyerBox.max.z]) boxCorners.push(new THREE.Vector3(x, y, z).multiplyScalar(FLY_SCALE));
   // P：game_core 的 clipPose 在“最近一个游戏步 + 尚未结算的时间”处的结果，用来逐帧显示（游戏逻辑仍按 5 ms 一步）
   function poseFlyer(P, ghosts) {
-    const c = S.clip, raw = c && rawClips[c.name];
+    const S = RS, c = S.clip, raw = c && rawClips[c.name];
     if (!raw) return;
     const f = Math.min(c.n - 1, P.frame);
     qYaw.setFromAxisAngle(zAxis, S.jumpDir);
@@ -1535,7 +1555,7 @@ code { font: 12px var(--mono); }
     else { st.textContent = paused ? "已暂停" : "行走中"; st.className = "pill"; }
     {
       const h = document.querySelector("#brainSub");
-      if (h) h.textContent = (window.__stageMode === "life" ? "自己过日子的那只 · " : gmMode ? "下棋的那只 · " : "") + SUB.meta.n.toLocaleString() + " 个神经元 · 真实胞体坐标";
+      if (h) h.textContent = (window.__stageMode === "life" ? "五感全开的那只 · 只画它与球场版共有的 " : gmMode ? "下棋的那只 · " : "") + SUB.meta.n.toLocaleString() + " 个神经元 · 真实胞体坐标";
     }
     const tp = $("thirstPill");
     if (tp) {
@@ -1673,7 +1693,7 @@ code { font: 12px var(--mono); }
     const r = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    if (ray.ray.intersectPlane(plane, hit3)) game.launch(hit3.x, hit3.y);
+    if (ray.ray.intersectPlane(plane, hit3)) RG.launch(hit3.x, hit3.y);
   });
   const segSet = (btns, active) => btns.forEach(b => b.setAttribute("aria-pressed", String(b === active)));
   $("modeClick").onclick = () => { game.mode = "click"; segSet([$("modeClick"), $("modeAuto")], $("modeClick")); $("coach").hidden = false; };
@@ -2584,7 +2604,7 @@ code { font: 12px var(--mono); }
   // 球场（v3）与五子棋（v3）上已发布的数字都不受影响。页面在这里只做三件事：画世界、把读数显示出来、让你往世界里丢东西。
   const LIFE = (() => {
     const cv = $("lifeStage"); if (!cv) return null;
-    let SUB4 = null, g = null, map43 = null, speed = 1, carry = 0, on = false, lastLine = "", diaryT = 0, legs = null;
+    let SUB4 = null, g = null, map43 = null, speed = 1, carry = 0, on = false, lastLine = "", diaryT = 0, legs = null, view = "2d", world = "2d";
     const diary = [], KEY = "fly-life-v2", gaitHist = [], daNote = {}, LEGN = ["LF", "LM", "LH", "RF", "RM", "RH"], LEGCN = { LF: "左前", LM: "左中", LH: "左后", RF: "右前", RM: "右中", RH: "右后" };
     const LS = JSON.parse(document.getElementById("life-data").textContent || "{}");
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ body: g.body, diary: diary.slice(-40), born: born, mem: g.MB ? g.MB.plast.saveSparse() : null, cut: legs ? legs.legs.filter(l => !l.attached).map(l => l.name) : [] })); } catch (e) {} };
@@ -2608,8 +2628,19 @@ code { font: 12px var(--mono); }
       window.__life = g;
     }
     function note(t) { diary.push({ t: g ? g.body.age : 0, s: t }); if (diary.length > 60) diary.shift(); }
+    // 同一只果蝇、同一颗大脑、同一份记忆，两个世界：俯视的开放世界（没有墙），和 3D 的篮球场（有边界，和球场版一样开着触感与围栏视觉）。
+    // 换世界时把地上的东西清掉（坐标系不同），果蝇放到球场版那只所在的位置。
+    function setWorld(w) {
+      if (w === world) return; world = w;
+      for (const k of ["pellets", "odors", "fields", "sounds", "balls", "dust"]) g[k].length = 0; g.onPellet = null;
+      const C = g.CFG, c0 = window.__game;
+      if (w === "3d") { C.courtW = c0.CFG.courtW; C.courtH = c0.CFG.courtH; C.touch = true; C.wallVision = $("wallOn") ? $("wallOn").checked : true; g.S.x = c0.S.x; g.S.y = c0.S.y; g.S.h = c0.S.h; }
+      else { C.courtW = 0; C.touch = false; C.wallVision = false; g.S.x = 0; g.S.y = 0; }
+      g.S.z = 0; g.S.jumpT = -1; g.S.clip = null; if (legs) legs.reset();
+    }
     function drop(kind) {
-      ensure(); const S = g.S, a = S.h + (Math.random() - 0.5) * 1.6, d = 18 + Math.random() * 25, x = S.x + Math.cos(a) * d, y = S.y + Math.sin(a) * d;
+      ensure(); const S = g.S, a = S.h + (Math.random() - 0.5) * 1.6, d = 18 + Math.random() * 25; let x = S.x + Math.cos(a) * d, y = S.y + Math.sin(a) * d;
+      if (g.CFG.courtW) { const hw = g.CFG.courtW / 2 - 10, hh = g.CFG.courtH / 2 - 10; x = Math.max(-hw, Math.min(hw, x)); y = Math.max(-hh, Math.min(hh, y)); }
       if (kind === "fruit" || kind === "mold") { const p = g.addPellet(x, y, kind === "mold" ? "bitter" : "sugar"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; g.addOdor(x, y, kind === "mold" ? "geosmin" : "vinegar", 26, 1, 90).pellet = p; }
       else if (kind === "water") { const p = g.addPellet(x, y, "water"); p.r = g.CFG.lifeFoodR; p.amount = g.CFG.lifeFoodAmount; }
       else if (kind === "sound") g.addSound(x, y, 1.5, 1.0);
@@ -2632,20 +2663,22 @@ code { font: 12px var(--mono); }
       diaryT -= dt; if (m.sentence && m.sentence !== lastLine && diaryT <= 0) { lastLine = m.sentence; note(m.sentence); diaryT = 1.2; }
       if (Math.floor(g.body.age) % 15 === 0 && n) save();
       $("lifePill").textContent = "第 " + (Math.floor(g.body.age / g.CFG.dayLength) + 1) + " 天 · " + (g.CFG.light < 0.3 ? "夜" : g.CFG.light < 0.6 ? "晨昏" : "昼");
-      draw(m);
+      draw(m); return n * g.chunkDt;
     }
     function draw(m) {
       const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
       if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
       const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
       const fnt = getComputedStyle(document.body).fontFamily || "sans-serif", ink = palette["--ink-2"] || "#333", mut = palette["--muted"] || "#888";
-      x.fillStyle = palette["--panel-2"] || "#eee"; x.fillRect(0, 0, W, H);
+      const v3 = view === "3d"; x.clearRect(0, 0, W, H);
+      if (!v3) { x.fillStyle = palette["--panel-2"] || "#eee"; x.fillRect(0, 0, W, H); }
       // 开放世界：视图跟着它走（它永远在中间），地上画网格，才看得出它在动
       const cw = 240, ch = 240 * (H - 24) / Math.max(1, W * 0.7 - 24), vw = W * 0.7, sc = (vw - 24) / cw, ox = 12 + (vw - 24) / 2, oy = H / 2, fx = g.S.x, fy = g.S.y;
       const X = wx => ox + (wx - fx) * sc, Y = wy => oy - (wy - fy) * sc;
       // 地面（颜色随昼夜）
       const L = g.CFG.light, day = [214, 178, 120], night = [38, 44, 66], col = day.map((v, k) => Math.round(night[k] + (v - night[k]) * L));
       const x0 = 12, y0 = 12, gw = vw - 24, gh = H - 24;
+      if (!v3) {
       x.fillStyle = `rgb(${col})`; x.fillRect(x0, y0, gw, gh);
       x.save(); x.beginPath(); x.rect(x0, y0, gw, gh); x.clip(); x.strokeStyle = L > 0.5 ? "rgba(90,60,25,.16)" : "rgba(255,255,255,.08)"; x.lineWidth = 1; x.beginPath();
       for (let gx = Math.floor((fx - cw / 2) / 20) * 20; gx < fx + cw / 2 + 20; gx += 20) { x.moveTo(X(gx), y0); x.lineTo(X(gx), y0 + gh); }
@@ -2672,6 +2705,7 @@ code { font: 12px var(--mono); }
       x.fillStyle = "#1a1c20"; x.beginPath(); x.ellipse(0, 0, fr, fr * 0.6, 0, 0, 6.2832); x.fill(); x.fillStyle = "#b8493f"; x.beginPath(); x.arc(fr * 0.8, 0, fr * 0.3, 0, 6.2832); x.fill(); x.restore();
       x.restore();
       if (g.wind && g.wind.speed > 0.2) { const wx0 = x0 + 26, wy0 = y0 + 26, a = g.wind.dir; x.strokeStyle = ink; x.lineWidth = 2; x.beginPath(); x.moveTo(wx0 - Math.cos(a) * 12, wy0 + Math.sin(a) * 12); x.lineTo(wx0 + Math.cos(a) * 12, wy0 - Math.sin(a) * 12); x.stroke(); x.fillStyle = ink; x.font = "10px " + fnt; x.fillText("风", wx0 + 16, wy0 + 4); }
+      }                                                                                  // 3D：世界由 three.js 画，这张画布只叠 HUD
       // 世界视图左下角的浮层：步态图（六条腿的支撑 / 回摆）+ 蘑菇体（多巴胺、记忆）
       if (legs && g.MB) {
         const bw = Math.min(340, gw - 16), bh = 166, bx = x0 + 8, by = y0 + gh - bh - 8, MBs = g.MB; x.fillStyle = "rgba(255,255,255,.86)"; x.fillRect(bx, by, bw, bh); x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 1; x.strokeRect(bx + .5, by + .5, bw, bh);
@@ -2690,7 +2724,9 @@ code { font: 12px var(--mono); }
         x.font = "10px " + fnt; x.fillStyle = "#555"; x.fillText("记忆 = 这气味在奖赏 / 惩罚隔室里的 KC→MBON 输入被压掉了多少" + (g.CFG.memoryNav && MBs.navV ? " · 桥：价 A " + (MBs.navV.A || 0).toFixed(2) + " / B " + (MBs.navV.B || 0).toFixed(2) : ""), bx + 6, yy + 8);
       }
       // 右栏：身体、五感、它的决定、意识流
-      let px = vw + 6, py = 8; const pw = W - px - 10, o = m.hz, B = g.body;
+      // 3D 时这一栏挪到左上（右上角是复眼视窗），垫半透明底，意识流只写到左下浮层的上沿为止
+      let px = v3 ? 14 : vw + 6, py = 8; const pw = v3 ? 226 : W - px - 10, o = m.hz, B = g.body, colBottom = v3 ? y0 + gh - 166 - 16 : H;
+      if (v3) { x.fillStyle = "rgba(252,252,250,.86)"; x.fillRect(6, 4, pw + 18, colBottom - 4); x.strokeStyle = "rgba(0,0,0,.2)"; x.lineWidth = 1; x.strokeRect(6.5, 4.5, pw + 18, colBottom - 4); }
       const head = t => { py += 10; x.fillStyle = ink; x.font = "600 12.5px " + fnt; x.fillText(t, px, py); py += 9; };
       const meter = (lab, v, max, c, txt) => { x.fillStyle = mut; x.font = "11px " + fnt; x.fillText(lab, px, py + 8); const bx = px + 34, bw = pw - 34 - 46; x.fillStyle = "rgba(128,128,128,.22)"; x.fillRect(bx, py, bw, 9);
         x.fillStyle = c; x.fillRect(bx, py, bw * Math.max(0, Math.min(1, v / max)), 9); x.fillStyle = ink; x.fillText(txt, bx + bw + 5, py + 8); py += 14; };
@@ -2703,14 +2739,22 @@ code { font: 12px var(--mono); }
       head("连接组的决定（读出，Hz）");
       meter("起飞", o.gf, 250, palette["--gf"] || "#1baf7a", o.gf); meter("左转", o.dnaL, 120, "#5b7fd6", o.dnaL); meter("右转", o.dnaR, 120, "#d6795b", o.dnaR); meter("伸喙", o.mn9, 100, "#ce7828", o.mn9); meter("梳理", o.adn1, 60, "#4aa08a", o.adn1); meter("后退", o.mdn, 60, "#888", o.mdn); py += 4;
       head("它在想什么"); x.font = "11px " + fnt;
-      const lines = diary.slice(-Math.max(3, Math.floor((H - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
+      const lines = diary.slice(-Math.max(2, Math.floor((colBottom - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
     }
-    function show(v) {
-      on = v; cv.hidden = !v; $("lifeRow").hidden = !v; $("lifeLearnRow").hidden = !v; $("lifeBodyRow").hidden = !v; $("mastLife").hidden = !v;
-      if (v) { ensure(); window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
+    function show(v, threeD) {
+      on = v; view = v && threeD ? "3d" : "2d"; cv.hidden = !v; cv.style.pointerEvents = view === "3d" ? "none" : ""; window.__life3d = view === "3d";
+      $("lifeRow").hidden = !v; $("lifeLearnRow").hidden = !v; $("lifeBodyRow").hidden = !v; $("mastLife").hidden = !v || view === "3d"; $("fiveRow").hidden = v && view !== "3d";
+      segSet([$("fiveOff"), $("fiveOn")], view === "3d" ? $("fiveOn") : $("fiveOff"));
+      if (v && view === "3d") { ensure(); setWorld("3d"); window.__stageMode = "life"; { const e2 = $("says"); if (e2) e2.hidden = true; }
+        for (const id of ["eyecam", "windvane"]) { const e2 = $(id); if (e2) e2.hidden = false; }
+        const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
+        $("mastCourt").hidden = false; $("nNeu").textContent = SUB4.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = "现在球场里是 15,055 个神经元的那只（和「生活」标签里同一只、同一份记忆）。球场版那只已冻结；任务 / 突变体 / 光遗传仍属于球场版。";
+        $("coach").textContent = "五感全开：球场里的 3D 果蝇换成了带听觉、嗅觉、蘑菇体、多巴胺和六条腿的那颗大脑。粉 / 紫的光晕是可学的气味 A / B，绿是醋味，红是热源，白圈是声音。点场地照样发球。"; }
+      else if (v) { ensure(); setWorld("2d"); window.__stageMode = "life"; for (const id of ["eyecam", "windvane", "says"]) { const e2 = $(id); if (e2) e2.hidden = true; }
         const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = "none"; { const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = "hidden"; }
         $("mastCourt").hidden = true; $("coach").textContent = "主画面换成了它生活的世界（俯视，视图跟着它走，网格 20 mm）。这个世界没有墙。球场那只已冻结。想看它学习：放一个「A 味的果子」等它吃，或者放「只有 A 味」、趁它闻着的时候喷一下多巴胺；左下角的浮层显示六条腿的步态和它记住了什么。"; }
-      else { GMSTATS.rates = null; GMSTATS.drive = null; if (g) save(); }
+      else { GMSTATS.rates = null; GMSTATS.drive = null; if (g) save(); $("nNeu").textContent = SUB.meta.n.toLocaleString("en-US"); $("fiveNote").textContent = "打开后，下面多出「生活 / 学习 / 身体」三行控件。";
+        if (window.__stageMode === "life") { window.__stageMode = "court"; const ov = document.querySelector(".stage .overlay"); if (ov) ov.style.display = ""; const sc2 = document.querySelector(".score"); if (sc2) sc2.style.visibility = ""; $("mastCourt").hidden = false; } }
     }
     for (const bt of document.querySelectorAll("#lifeRow [data-drop]")) bt.onclick = () => drop(bt.dataset.drop);
     for (const bt of $("lifeSpeedSeg").querySelectorAll("button")) bt.onclick = () => { speed = +bt.dataset.v; segSet([...$("lifeSpeedSeg").querySelectorAll("button")], bt); };
@@ -2732,7 +2776,7 @@ code { font: 12px var(--mono); }
     for (const bt of document.querySelectorAll("#lifeRemote [data-remote]")) { const k = bt.dataset.remote;
       const set = hz => { ensure(); g.brain.setDrive("remote_" + k, REMOTE[k].flatMap(gn => g.SUB.groups[gn] || []), hz); bt.setAttribute("aria-pressed", hz > 0 ? "true" : "false"); };
       bt.addEventListener("pointerdown", e => { e.preventDefault(); set(150); }); for (const ev of ["pointerup", "pointerleave", "pointercancel"]) bt.addEventListener(ev, () => set(0)); }
-    const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on };
+    const api = { tick, show, drop, game: () => (ensure(), g), diary, isOn: () => on, is3d: () => on && view === "3d", legs: () => legs };
     window.__lifeApi = api; return api;
   })();
   // 学习卡片：全部从 results/learn/learn_summary.json 取数
@@ -2817,6 +2861,16 @@ code { font: 12px var(--mono); }
     const tabs = [$("viewCourt"), $("viewGomoku"), $("viewLife")];
     $("viewLife").addEventListener("click", () => { if (GM) GM.setStage("court"); LIFE.show(true); segSet(tabs, $("viewLife")); });
     for (const id of ["viewCourt", "viewGomoku"]) $(id).addEventListener("click", () => { if (LIFE.isOn()) { LIFE.show(false); } segSet(tabs, $(id)); }, true);
+    // 五感全开：球场里的 3D 果蝇换成 v5 大脑。选择记在本机，下次打开「篮球场」时照旧。
+    const FIVEKEY = "fly-court-five";
+    const setFive = v => { try { localStorage.setItem(FIVEKEY, v ? "1" : "0"); } catch (e) {} if (v) { if (GM) GM.setStage("court"); LIFE.show(true, true); segSet(tabs, $("viewCourt")); } else if (LIFE.isOn()) LIFE.show(false); };
+    $("fiveOn").onclick = () => setFive(true); $("fiveOff").onclick = () => setFive(false);
+    $("viewCourt").addEventListener("click", () => { let v = "0"; try { v = localStorage.getItem(FIVEKEY); } catch (e) {} if (v === "1") setFive(true); });
+    $("viewGomoku").addEventListener("click", () => { $("fiveRow").hidden = true; }); $("viewCourt").addEventListener("click", () => { $("fiveRow").hidden = false; });
+    window.__setFive = setFive;
+    // 任务 / 突变体属于球场版：一用就切回去
+    for (const id of ["mOpen", "mutNew"]) { const e2 = $(id); if (e2) e2.addEventListener("click", () => { if (LIFE.is3d()) setFive(false); }, true); }
+    try { if (localStorage.getItem(FIVEKEY) === "1" && !/[?&]five=0/.test(location.search)) setTimeout(() => setFive(true), 0); } catch (e) {}
   }
 
   // 同类项目（每一条我都自己打开过仓库页核实，2026-09-19；星数取自当时的 README 页）
@@ -2871,7 +2925,7 @@ code { font: 12px var(--mono); }
     });
   })();
   $("touchOn").onchange = e => { CFG.touch = e.target.checked; };
-  $("wallOn").onchange = e => { CFG.wallVision = e.target.checked; };
+  $("wallOn").onchange = e => { CFG.wallVision = e.target.checked; if (LIFE && LIFE.is3d()) LIFE.game().CFG.wallVision = e.target.checked; };   // 五感全开时同一个开关也管 v5 那只
   // 温度 / 湿度：场地上放一个热源或一片潮湿区，果蝇所在位置的强度按高斯衰减直接喂进
   // THERMO / HYGRO 神经元。**实测湿度推不动任何运动输出、温度要 400 Hz 以上**（见上方那张表），
   // 所以这两个开关主要是让你看到「给了物理量不等于有行为」。
@@ -3492,11 +3546,44 @@ code { font: 12px var(--mono); }
   camera.position.set(-4, -40, 36); controls.target.set(0, 0, 0); controls.update();
   let camPrev = [0, 0], prev = performance.now(), carry = 0, rt = [0, 0];
   let rasterAcc = 0, brainAcc = 0, frameN = 0;
+  // ── 五感全开时球场里多出来的东西：气味羽流、热源 / 潮湿区、声波、成块的食物、来球、触角上的灰 ──
+  // 这些都是给人看的标记；果蝇感受到的是 game_core 里按同一组坐标算出来的物理量。
+  let lightWasL3 = false;
+  const L3S = (() => {
+    const grp = new THREE.Group(); grp.visible = false; scene.add(grp);
+    const tc = document.createElement("canvas"); tc.width = tc.height = 128; { const c = tc.getContext("2d"), gr = c.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.55, "rgba(255,255,255,.45)"); gr.addColorStop(1, "rgba(255,255,255,0)"); c.fillStyle = gr; c.fillRect(0, 0, 128, 128); }
+    const tex = new THREE.CanvasTexture(tc), disc = new THREE.CircleGeometry(1, 48), ring = new THREE.RingGeometry(0.93, 1, 72), food = new THREE.CylinderGeometry(1, 1, 0.5, 40), ballG = new THREE.SphereGeometry(1, 28, 18), dustG = new THREE.SphereGeometry(0.09, 10, 8);
+    const ODOR = { vinegar: 0xa0be3c, geosmin: 0x786046, A: 0xeb78aa, B: 0x5a46a0 }, FOOD = { sugar: 0xce7828, bitter: 0x605446, water: 0x4696e6, mixed: 0xce7828 };
+    const glow = (color, op) => new THREE.Mesh(disc, new THREE.MeshBasicMaterial({ map: tex, color, transparent: true, opacity: op, depthWrite: false }));
+    const kinds = { fields: new Map(), odors: new Map(), sounds: new Map(), pellets: new Map(), balls: new Map(), dust: new Map() }; let zc = 0;
+    const make = { fields: f => { const m = glow(f.type === "heat" ? 0xe24a33 : 0x408cdc, 0.42); m.position.z = 0.05 + (zc++ % 40) * 0.003; return m; },
+      odors: o => { const m = glow(ODOR[o.kind] || 0x786046, 0.3); m.position.z = 0.2 + (zc++ % 40) * 0.003; return m; },
+      sounds: () => { const g3 = new THREE.Group(); for (let k = 0; k < 3; k++) g3.add(new THREE.Mesh(ring, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide }))); g3.position.z = 0.6; return g3; },
+      pellets: p => { const m = new THREE.Mesh(food, new THREE.MeshStandardMaterial({ color: FOOD[p.type] || 0xce7828, roughness: p.type === "water" ? 0.15 : 0.7, transparent: p.type === "water", opacity: p.type === "water" ? 0.8 : 1 })); m.rotation.x = Math.PI / 2; m.castShadow = true; m.userData.z = p.type === "water" ? 0.34 : 0.25; return m; },   // 水洼略高一点，和叠在一起的果子不抢深度
+      balls: () => { const m = new THREE.Mesh(ballG, new THREE.MeshStandardMaterial({ color: css("--ball"), roughness: 0.35 })); m.castShadow = true; return m; },
+      dust: () => new THREE.Mesh(dustG, new THREE.MeshStandardMaterial({ color: 0x8a8f8c, roughness: 1 })) };
+    function sync(g) {
+      grp.visible = !!g; if (!g) return;
+      for (const kind of Object.keys(kinds)) { const M = kinds[kind], list = g[kind] || [], live = new Set(list);
+        for (const [o, m] of M) if (!live.has(o)) { grp.remove(m); M.delete(o); }
+        for (const o of list) if (!M.has(o)) { const m = make[kind](o); grp.add(m); M.set(o, m); } }
+      for (const [f, m] of kinds.fields) { m.position.x = f.x; m.position.y = f.y; m.scale.setScalar(f.sigma * 2); m.material.opacity = 0.42 * Math.min(1, f.strength); }
+      for (const [o, m] of kinds.odors) { m.position.x = o.x; m.position.y = o.y; m.scale.setScalar(o.sigma * 2.2); m.material.opacity = 0.3 * Math.min(1, o.strength); }
+      for (const [o, g3] of kinds.sounds) { const u = o.t / o.dur; g3.position.x = o.x; g3.position.y = o.y; g3.children.forEach((r, k) => { r.scale.setScalar(Math.max(0.01, u * [0.4, 0.7, 1][k] * 60)); r.material.opacity = (1 - u) * 0.9; }); }
+      for (const [p, m] of kinds.pellets) { const r = (p.r || g.CFG.pelletR) * Math.sqrt(Math.max(0.15, p.amount / (p.r ? g.CFG.lifeFoodAmount : 1))); m.position.set(p.x, p.y, m.userData.z); m.scale.set(r, 1, r); }
+      for (const [b, m] of kinds.balls) { m.position.set(b.x, b.y, g.CFG.ballR); m.scale.setScalar(g.CFG.ballR); if (b.outcome === "hit") m.material.color.set(css("--critical")); }
+      let di = 0; for (const [d, m] of kinds.dust) { const ant = parts[meshIdx[d.side === "left" ? "LPedicel" : "RPedicel"]]; if (!ant) continue;
+        pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), g.S.h); m.position.set(g.S.x + pv.x, g.S.y + pv.y, g.S.z + pv.z); m.visible = fly.visible; di++; }
+    }
+    return { sync, group: grp, counts: () => Object.fromEntries(Object.entries(kinds).map(([k, M]) => [k, M.size])) };
+  })();
+  window.__l3s = L3S;
   function frame(now) {
     const dtReal = Math.min(0.05, Math.max(0, (now - prev) / 1000)); prev = now;
+    const l3 = !!(LIFE && LIFE.is3d()); RG = l3 ? LIFE.game() : game; RS = RG.S;      // 五感全开：画的是 v5 那只
     if ((frameN++ % SHADOW_EVERY) === 0) renderer.shadowMap.needsUpdate = true;
     if (S.jumpT < 0 && CFG.takeoff !== pendingTakeoff) CFG.takeoff = pendingTakeoff;
-    const inFlight = !!(S.clip && S.jumpT >= 0);
+    const inFlight = !!(RS.clip && RS.jumpT >= 0);
     if (!paused) {
       // **五子棋占用主画面时，球场里那只果蝇整个冻结**：不跑大脑、不动身体、不发球、
       // 同伴也停。切回来时从冻结的那一刻继续（carry 清零，避免攒出一大堆积压步）。
@@ -3507,7 +3594,7 @@ code { font: 12px var(--mono); }
       while (!frozen && carry >= game.chunkDt && n < 12) { game.step(); mTick(); if (COMP) COMP.step(); carry -= game.chunkDt; n++; }
       if (n === 12) carry = 0;                  // 算不过来时丢弃积压，保持画面流畅（HUD 显示实际速度）
       rt[0] += n * game.chunkDt; rt[1] += dtReal;
-      if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${S.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
+      if (rt[1] > 0.5) { $("pClock").textContent = `大脑 ${RS.t.toFixed(1)} s · ${(rt[0] / rt[1]).toFixed(2)}× 实时${inFlight && $("slowmo").checked ? "（慢放中）" : ""}`; rt = [0, 0]; }
       // raster 与脑图都是侧栏，不必跟满 60 fps：各自攒够时间再画一次。
       // 攒的是**游戏内时间**，所以慢放时它们也跟着慢，画出来的还是对的。
       rasterAcc += dtReal * (inFlight && $("slowmo").checked ? SLOWMO : 1);
@@ -3515,35 +3602,37 @@ code { font: 12px var(--mono); }
       if (rasterAcc >= 1 / 30) { drawRaster(rasterAcc); rasterAcc = 0; }
       if (brainAcc >= 1 / 20) { BRAIN.draw(brainAcc); brainAcc = 0; }
       if (GM) GM.tick(Math.min(0.1, dtReal));
-      if (LIFE) LIFE.tick(Math.min(0.1, dtReal));
+      if (LIFE) { const adv = LIFE.tick(Math.min(0.1, dtReal)) || 0; if (l3) rt[0] += adv; }
       if (COMP) COMP.draw();
     }
     if (window.__flyScene && !window.__flyScene.selfMeshes.length)
       window.__flyScene.selfMeshes = [fly, flyer, flyShadow].filter(Boolean);
-    const flying = !!(S.clip && S.jumpT >= 0);
+    const flying = !!(RS.clip && RS.jumpT >= 0);
     fly.visible = !flying; flyer.visible = flying;
-    let vx = S.x, vy = S.y, vz = S.z;
+    let vx = RS.x, vy = RS.y, vz = RS.z;
     if (flying) {
-      const P = window.FlyDodgeGame.clipPose(S.clip, CFG, S.clipOrigin, S.jumpDir, S.jumpT + (paused ? 0 : carry));
+      const P = window.FlyDodgeGame.clipPose(RS.clip, RG.CFG, RS.clipOrigin, RS.jumpDir, RS.jumpT + (paused ? 0 : carry));
       poseFlyer(P, !$("slowmo").checked);
       vx = P.x; vy = P.y; vz = P.z;
     }
     poseFly();
-    fly.position.set(S.x, S.y, S.z); fly.rotation.z = S.h;
-    if (flyShadow.visible) { flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = S.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8)); }
-    for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) { e.m.position.set(b.x, b.y, CFG.ballR); e.sh.position.set(b.x, b.y, 0.01); } }
+    fly.position.set(RS.x, RS.y, RS.z); fly.rotation.z = RS.h;
+    if (flyShadow.visible) { flyShadow.position.set(vx, vy, 0.01); flyShadow.rotation.z = RS.h; flyShadow.material.opacity = 0.18 * (1 - Math.min(0.7, vz / 8)); }
+    for (const b of game.balls) { const e = ballMeshes.get(b.id); if (e) { e.m.position.set(b.x, b.y, CFG.ballR); e.sh.position.set(b.x, b.y, 0.01); e.m.visible = !l3; } }
+    for (const [, gm] of pelletMeshes) gm.visible = !l3;
+    L3S.sync(l3 ? RG : null);
     let di = 0;
     for (const [, e] of dustMeshes) {
       const ant = parts[meshIdx[e.side === "left" ? "LPedicel" : "RPedicel"]];
       if (!ant) continue;
-      pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), S.h);
-      e.m.position.set(S.x + pv.x, S.y + pv.y, S.z + pv.z); e.m.visible = fly.visible; di++;
+      pv.copy(ant.position).multiplyScalar(FLY_SCALE).add(new THREE.Vector3(0.05 * di, 0.04 * ((di % 3) - 1), 0.25)).applyAxisAngle(new THREE.Vector3(0, 0, 1), RS.h);
+      e.m.position.set(RS.x + pv.x, RS.y + pv.y, RS.z + pv.z); e.m.visible = fly.visible && !l3; di++;
     }
     // 说话气泡：把果蝇的世界坐标投影到屏幕上
-    if (window.__stageMode === "gomoku" || window.__stageMode === "life") { const e2 = $("says"); if (e2) e2.hidden = true; }
+    if ((window.__stageMode === "gomoku" || window.__stageMode === "life") && !l3) { const e2 = $("says"); if (e2) e2.hidden = true; }
     else if ($("saysOn").checked) {
-      if (!window._sayT || S.t - window._sayT > CFG.speechEvery) {
-        window._sayT = S.t; window._say = game.speech();
+      if (!window._sayT || Math.abs(RS.t - window._sayT) > CFG.speechEvery) {
+        window._sayT = RS.t; window._say = l3 ? RG.mind() : game.speech();
       }
       const say = window._say;
       const el = $("says");
@@ -3556,22 +3645,23 @@ code { font: 12px var(--mono); }
         el.style.opacity = pv.z > 1 ? 0 : 1;
       } else el.hidden = true;
     }
-    if (CFG.wind) {
-      stepMotes(dtReal, game.wind, vx, vy);
-      $("windArrow").style.transform = `rotate(${(-game.wind.dir * 180 / Math.PI).toFixed(0)}deg)`;
-      $("windTxt").textContent = `风 ${(game.wind.speed * 100).toFixed(0)}% · JO ${((game.wind.joL + game.wind.joR) / 2).toFixed(0)} Hz`;
+    if (RG.CFG.wind) {
+      stepMotes(dtReal, RG.wind, vx, vy);
+      $("windArrow").style.transform = `rotate(${(-RG.wind.dir * 180 / Math.PI).toFixed(0)}deg)`;
+      $("windTxt").textContent = `风 ${(RG.wind.speed * 100).toFixed(0)}% · JO ${((RG.wind.joL + RG.wind.joR) / 2).toFixed(0)} Hz`;
     }
+    if (l3) { applyLight(RG.CFG.light === undefined ? 1 : RG.CFG.light); lightWasL3 = true; } else if (lightWasL3) { applyLight(CFG.light === undefined ? 1 : CFG.light); lightWasL3 = false; }   // 五感全开时场馆灯光跟着它那个世界的昼夜走
     // **主画面被五子棋占用时，整个三维球场都不渲染**——包括 4 张阴影贴图和复眼的
     // 立方体贴图读回。这是帧率最高的一档，也是把棋盘做成"替换主画面"而不是
     // "再加一块画布"的主要原因（用户反馈：原来那样帧率更低）。
-    const gomokuOwnsStage = window.__stageMode === "gomoku" || window.__stageMode === "life";
+    const gomokuOwnsStage = (window.__stageMode === "gomoku" || window.__stageMode === "life") && !l3;
     if (!gomokuOwnsStage) {
       const dx = vx - camPrev[0], dy = vy - camPrev[1]; camPrev = [vx, vy];
       camera.position.x += dx; camera.position.y += dy; controls.target.set(vx, vy, 0);
       controls.update();
       renderer.render(scene, camera);
       // 果蝇第一人称复眼视窗：每秒只刷几次（读回 GPU 像素会打断流水线）
-      if (window.__eyeTick) window.__eyeTick(vx, vy, vz, S.h);
+      if (window.__eyeTick) window.__eyeTick(vx, vy, vz, RS.h);
     }
     updatePanels();
     requestAnimationFrame(frame);

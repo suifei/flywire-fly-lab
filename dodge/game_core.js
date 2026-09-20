@@ -345,7 +345,8 @@
       // 哪种气味此刻最浓 → 把这一段的 KC 活动记到它名下（只用来显示「这种气味的记忆」，不参与任何决定）
       let top = null, tc = 0.3; for (const [kind, c] of Object.entries(MB.conc)) { const m = Math.max(c.L, c.R); if (m > tc) { tc = m; top = kind; } }
       for (let q = 0; q < MB.kcCount.length; q++) if (MB.kcCount[q] > 0) act++;
-      if (top) { const prof = MB.kcProfile[top] || (MB.kcProfile[top] = new Float32Array(MB.kcCount.length)); for (let q = 0; q < prof.length; q++) prof[q] += 0.02 * (MB.kcCount[q] / dt - prof[q]); }
+      // 同时闻到好几种（烂果子 = 醋味 + A）时每一种都记：原来只记「最浓的那一种」，两种一样浓时永远轮不到 A，生活世界里 A 的记忆一直显示「还没闻到过」
+      for (const [kind, c] of Object.entries(MB.conc)) { if (Math.max(c.L, c.R) <= 0.3) continue; const prof = MB.kcProfile[kind] || (MB.kcProfile[kind] = new Float32Array(MB.kcCount.length)); for (let q = 0; q < prof.length; q++) prof[q] += 0.02 * (MB.kcCount[q] / dt - prof[q]); }
       MB.kcCount.fill(0); MB.kcActive += a * (act - MB.kcActive); MB.top = top;
       const v = vp + va > 1 ? (vp - va) / (vp + va) : 0; MB.valence += (dt / (CFG.memoryTau + dt)) * (v - MB.valence); MB.mbonPPL1 = vp; MB.mbonPAM = va;
     }

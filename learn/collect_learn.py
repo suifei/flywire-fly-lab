@@ -42,6 +42,7 @@ if (D / "sound_priming_v5.json").exists():
     a, b = json.loads((D / "sound_priming.json").read_text()), json.loads((D / "sound_priming_v5.json").read_text())
     cmpv["sound_priming"] = {k: dict(v4_lead=a["groups"][k]["lead_ms_median"], v5_lead=b["groups"][k]["lead_ms_median"], v4_dodged=a["groups"][k]["dodged"], v5_dodged=b["groups"][k]["dodged"]) for k in a["groups"]}; cmpv["sound_priming_n"] = b["n"]
 out["v5_vs_v4"] = cmpv
+if (R / "court_five.json").exists(): cf = J("court_five.json"); out["court_five"] = {"seconds": cf["seconds"], "seeds": cf["seeds"], **{k: v["mean"] for k, v in cf["worlds"].items()}}
 if (R / "uturn_cause.json").exists(): u = J("uturn_cause.json"); out["uturn"] = {k: {kk: vv for kk, vv in v.items() if kk != "rows"} for k, v in u["conds"].items()} | {"seeds": u["seeds"]}
 if "n_mbon_types_responsive" in mm: out["memory_to_motor"]["v5"].update(n_responsive=mm["n_mbon_types_responsive"], n_types=mm["n_mbon_types"], motor_mbon=mm["motor_mbon_mean_hz"])
 (R / "learn_summary.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":"))); print("→ results/learn/learn_summary.json", (R / "learn_summary.json").stat().st_size, "字节")
