@@ -148,6 +148,8 @@ results/gomoku/*
 *.parquet
 *.feather
 *.mp4
+# 例外：README 首页用的四段演示视频（已压成移动端可流畅播放的 720p 级 H.264，3.9–18 MB）
+!media/*.mp4
 *.h5
 *.hdf5
 *.pt
