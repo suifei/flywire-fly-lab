@@ -366,6 +366,29 @@ function chromePath() {
     if (r.err) return "✗ " + r.err; if (r.rows.some(n => n < 3)) return "✗ 有表是空的：" + JSON.stringify(r.rows); if (/undefined|NaN/.test(r.note)) return "✗ 说明文字里有 undefined / NaN";
     return "各表行数 " + r.rows.join(" / ");
   });
+  await step("篮球场「五感全开」：3D 果蝇换成 v5 大脑，气味 / 热源 / 食物画进球场，六条腿各按自己的相位，关掉后球场版原样恢复", async () => {
+    await page.click("#viewCourt"); await new Promise(r => setTimeout(r, 800));
+    const c0 = await page.evaluate(() => ({ t: window.__game.S.t, x: window.__game.S.x, y: window.__game.S.y }));
+    await page.click("#fiveOn");
+    const p0 = await page.evaluate(() => ({ x: window.__life.S.x, y: window.__life.S.y }));          // 刚切过去的那一刻：应当站在球场版那只的位置上
+    for (let k = 0; k < 60; k++) { await new Promise(r => setTimeout(r, 400)); if (await page.evaluate(t0 => window.__life3d && window.__life.S.t > t0 + 1.0, await page.evaluate(() => window.__life ? window.__life.S.t : 0))) break; }
+    const r = await page.evaluate(() => { const g = window.__life, api = window.__lifeApi; api.drop("fruitA"); api.drop("heatB"); api.drop("sound"); api.legs().amputate("RM", true); for (let k = 0; k < 20; k++) g.step();
+      return { mode: window.__stageMode, l3: window.__life3d, n: g.brain.n, courtW: g.CFG.courtW, touch: g.CFG.touch, x: g.S.x, y: g.S.y, hasMB: !!g.MB, legs: !!g.legs, rows: ["lifeRow", "lifeLearnRow", "lifeBodyRow"].map(id => !document.getElementById(id).hidden),
+               canvasHidden: document.querySelector(".stage canvas").hidden, hudPE: document.getElementById("lifeStage").style.pointerEvents, neu: document.getElementById("nNeu").textContent }; });
+    await new Promise(r2 => setTimeout(r2, 1200));
+    const r2 = await page.evaluate(() => { const sc = window.__flyScene.scene; let legHidden = 0; sc.traverse(o => { if (o.isMesh && /^RM(Coxa|Femur|Tibia|Tarsus)/.test(o.name) && !o.visible) legHidden++; });
+      window.__lifeApi.legs().amputate("RM", false); return { counts: window.__l3s.counts(), legHidden, inCourt: Math.abs(window.__life.S.x) <= 160 && Math.abs(window.__life.S.y) <= 86 }; });
+    const tCourt = await page.evaluate(() => window.__game.S.t);
+    await page.click("#fiveOff"); await new Promise(r3 => setTimeout(r3, 1500));
+    const back = await page.evaluate(() => ({ mode: window.__stageMode, t: window.__game.S.t, l3: !!window.__life3d, neu: document.getElementById("nNeu").textContent, vis: window.__l3s.group.visible }));
+    await page.evaluate(() => { try { localStorage.removeItem("fly-court-five"); } catch (e) {} });
+    if (!(r.mode === "life" && r.l3 && r.n > 15000 && r.courtW > 0 && r.touch && r.hasMB && r.legs && r.rows.every(Boolean) && r.hudPE === "none")) return "✗ 没有切到五感全开：" + JSON.stringify(r);
+    if (Math.hypot(p0.x - c0.x, p0.y - c0.y) > 8) return "✗ 它没有出现在球场版那只所在的位置：" + JSON.stringify({ p0, c0 });
+    if (!(r2.counts.odors >= 2 && r2.counts.fields >= 1 && r2.counts.pellets >= 1 && r2.legHidden >= 6 && r2.inCourt)) return "✗ 3D 场景里的东西不对：" + JSON.stringify(r2);
+    if (Math.abs(tCourt - c0.t) > 0.3) return `✗ 五感全开期间球场版那只没有冻结（${c0.t} → ${tCourt}）`;
+    if (!(back.mode === "court" && !back.l3 && back.t > tCourt && !back.vis)) return "✗ 关掉后球场版没有恢复：" + JSON.stringify(back);
+    return `球场里换成 ${r.n} 个神经元的那只（顶部说明写 ${r.neu}）；3D 场景里气味 ${r2.counts.odors}、热源 ${r2.counts.fields}、食物 ${r2.counts.pellets}；截掉右中腿后它的 ${r2.legHidden} 个部件不再画；关掉后球场版从 ${tCourt.toFixed(1)} s 继续到 ${back.t.toFixed(1)} s（说明改回 ${back.neu}）`;
+  });
   await step("切回球场后三维场景恢复渲染", async () => {
     await page.click("#viewCourt");
     await new Promise(r => setTimeout(r, 1500));
