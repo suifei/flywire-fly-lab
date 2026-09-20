@@ -1,0 +1,1105 @@
+{
+ "rate_hz": 100,
+ "read_ms": 400,
+ "arms": {
+  "raw": {
+   "n": 9001,
+   "n_edges": 804266,
+   "odors": {
+    "醋（DM1+VA2）": {
+     "gloms": [
+      "ORN_DM1",
+      "ORN_VA2"
+     ],
+     "kc_frac": 0.7645354452385551,
+     "kc_frac_seed2": 0.764728607301526,
+     "same_odor_jaccard": 0.9997474109623642,
+     "active": {
+      "ALLN": 383,
+      "ALPN": 564,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3958,
+      "MBON": 84,
+      "olfactory": 823
+     },
+     "rate_hz": {
+      "ALLN": 201.9114219114219,
+      "ALPN": 143.7700729927007,
+      "APL": 453.75,
+      "DAN": 70.58157099697884,
+      "DPM": 445.0,
+      "Kenyon_Cell": 77.57774773034576,
+      "MBON": 181.11979166666666,
+      "olfactory": 18.541026766125494
+     }
+    },
+    "土臭素（DA2）": {
+     "gloms": [
+      "ORN_DA2"
+     ],
+     "kc_frac": 0.7629901487347885,
+     "kc_frac_seed2": 0.7627969866718176,
+     "same_odor_jaccard": 0.999746835443038,
+     "active": {
+      "ALLN": 381,
+      "ALPN": 563,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3950,
+      "MBON": 83,
+      "olfactory": 719
+     },
+     "rate_hz": {
+      "ALLN": 201.17715617715618,
+      "ALPN": 143.7700729927007,
+      "APL": 455.0,
+      "DAN": 70.27190332326283,
+      "DPM": 443.75,
+      "Kenyon_Cell": 77.1556886227545,
+      "MBON": 180.46875,
+      "olfactory": 14.348398420359807
+     }
+    },
+    "二氧化碳（V）": {
+     "gloms": [
+      "ORN_V"
+     ],
+     "kc_frac": 0.7626038246088468,
+     "kc_frac_seed2": 0.7626038246088468,
+     "same_odor_jaccard": 0.9994935426690301,
+     "active": {
+      "ALLN": 380,
+      "ALPN": 563,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3948,
+      "MBON": 84,
+      "olfactory": 748
+     },
+     "rate_hz": {
+      "ALLN": 201.78904428904426,
+      "ALPN": 143.33576642335765,
+      "APL": 455.0,
+      "DAN": 70.20392749244712,
+      "DPM": 443.75,
+      "Kenyon_Cell": 77.06103921189879,
+      "MBON": 180.3125,
+      "olfactory": 15.47060114085125
+     }
+    },
+    "合成1": {
+     "gloms": [
+      "ORN_DA2",
+      "ORN_DA4l",
+      "ORN_V",
+      "ORN_VA1d",
+      "ORN_VM1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.7631833107977594,
+     "kc_frac_seed2": 0.7633764728607302,
+     "same_odor_jaccard": 0.999746963562753,
+     "active": {
+      "ALLN": 382,
+      "ALPN": 565,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3951,
+      "MBON": 84,
+      "olfactory": 927
+     },
+     "rate_hz": {
+      "ALLN": 202.45337995337994,
+      "ALPN": 144.83576642335765,
+      "APL": 455.0,
+      "DAN": 70.48338368580059,
+      "DPM": 445.0,
+      "Kenyon_Cell": 77.44253428626617,
+      "MBON": 180.859375,
+      "olfactory": 25.09872751206669
+     }
+    },
+    "合成2": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DL5",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VA4",
+      "ORN_VC4"
+     ],
+     "kc_frac": 0.7639559590496426,
+     "kc_frac_seed2": 0.7639559590496426,
+     "same_odor_jaccard": 1.0,
+     "active": {
+      "ALLN": 382,
+      "ALPN": 564,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3955,
+      "MBON": 84,
+      "olfactory": 843
+     },
+     "rate_hz": {
+      "ALLN": 202.37762237762234,
+      "ALPN": 144.8905109489051,
+      "APL": 453.75,
+      "DAN": 70.96676737160121,
+      "DPM": 445.0,
+      "Kenyon_Cell": 78.22677226192776,
+      "MBON": 181.43229166666666,
+      "olfactory": 21.381088196577444
+     }
+    },
+    "合成3": {
+     "gloms": [
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DM3",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VM3"
+     ],
+     "kc_frac": 0.7629901487347885,
+     "kc_frac_seed2": 0.7626038246088468,
+     "same_odor_jaccard": 0.999493670886076,
+     "active": {
+      "ALLN": 382,
+      "ALPN": 564,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3950,
+      "MBON": 84,
+      "olfactory": 841
+     },
+     "rate_hz": {
+      "ALLN": 202.70396270396267,
+      "ALPN": 144.40875912408757,
+      "APL": 455.0,
+      "DAN": 70.5740181268882,
+      "DPM": 443.75,
+      "Kenyon_Cell": 77.60575622947653,
+      "MBON": 180.75520833333331,
+      "olfactory": 21.282360684510746
+     }
+    },
+    "合成4": {
+     "gloms": [
+      "ORN_DA4m",
+      "ORN_DL3",
+      "ORN_VC2",
+      "ORN_VC4",
+      "ORN_VM4",
+      "ORN_VM5v"
+     ],
+     "kc_frac": 0.7631833107977594,
+     "kc_frac_seed2": 0.7629901487347885,
+     "same_odor_jaccard": 0.9997468995191091,
+     "active": {
+      "ALLN": 387,
+      "ALPN": 567,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3951,
+      "MBON": 83,
+      "olfactory": 846
+     },
+     "rate_hz": {
+      "ALLN": 202.14452214452214,
+      "ALPN": 145.25182481751824,
+      "APL": 455.0,
+      "DAN": 70.69486404833836,
+      "DPM": 445.0,
+      "Kenyon_Cell": 77.71102955379564,
+      "MBON": 181.015625,
+      "olfactory": 23.231680561649846
+     }
+    },
+    "合成5": {
+     "gloms": [
+      "ORN_D",
+      "ORN_DA1",
+      "ORN_DL2v",
+      "ORN_DM6",
+      "ORN_DP1m",
+      "ORN_VL2p"
+     ],
+     "kc_frac": 0.7649217693644969,
+     "kc_frac_seed2": 0.7649217693644969,
+     "same_odor_jaccard": 1.0,
+     "active": {
+      "ALLN": 385,
+      "ALPN": 569,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3960,
+      "MBON": 84,
+      "olfactory": 874
+     },
+     "rate_hz": {
+      "ALLN": 203.9044289044289,
+      "ALPN": 145.33576642335765,
+      "APL": 455.0,
+      "DAN": 70.83836858006042,
+      "DPM": 443.75,
+      "Kenyon_Cell": 77.99690940699246,
+      "MBON": 181.51041666666666,
+      "olfactory": 23.706669591926282
+     }
+    },
+    "合成6": {
+     "gloms": [
+      "ORN_DA4l",
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DL5",
+      "ORN_DM1",
+      "ORN_DM5"
+     ],
+     "kc_frac": 0.7639559590496426,
+     "kc_frac_seed2": 0.7643422831755843,
+     "same_odor_jaccard": 0.9994945665908517,
+     "active": {
+      "ALLN": 382,
+      "ALPN": 564,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3955,
+      "MBON": 84,
+      "olfactory": 860
+     },
+     "rate_hz": {
+      "ALLN": 202.3076923076923,
+      "ALPN": 144.62043795620437,
+      "APL": 455.0,
+      "DAN": 70.74018126888217,
+      "DPM": 443.75,
+      "Kenyon_Cell": 77.70716631253622,
+      "MBON": 181.328125,
+      "olfactory": 22.435278630978498
+     }
+    },
+    "合成7": {
+     "gloms": [
+      "ORN_DC2",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VA5",
+      "ORN_VL1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.762410662545876,
+     "kc_frac_seed2": 0.7626038246088468,
+     "same_odor_jaccard": 0.9992403140035452,
+     "active": {
+      "ALLN": 386,
+      "ALPN": 565,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3947,
+      "MBON": 84,
+      "olfactory": 851
+     },
+     "rate_hz": {
+      "ALLN": 203.17599067599068,
+      "ALPN": 144.05839416058393,
+      "APL": 455.0,
+      "DAN": 70.40030211480362,
+      "DPM": 445.0,
+      "Kenyon_Cell": 77.37347884875409,
+      "MBON": 180.3125,
+      "olfactory": 21.039929793769197
+     }
+    },
+    "合成8": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VC2",
+      "ORN_VC3",
+      "ORN_VM4"
+     ],
+     "kc_frac": 0.7645354452385551,
+     "kc_frac_seed2": 0.7653080934904385,
+     "same_odor_jaccard": 0.9989904088844018,
+     "active": {
+      "ALLN": 386,
+      "ALPN": 571,
+      "APL": 2,
+      "DAN": 221,
+      "DPM": 2,
+      "Kenyon_Cell": 3958,
+      "MBON": 85,
+      "olfactory": 865
+     },
+     "rate_hz": {
+      "ALLN": 202.59324009324007,
+      "ALPN": 145.85036496350364,
+      "APL": 453.75,
+      "DAN": 71.13293051359516,
+      "DPM": 445.0,
+      "Kenyon_Cell": 78.45615221170561,
+      "MBON": 181.74479166666666,
+      "olfactory": 23.03532250987275
+     }
+    }
+   },
+   "max_kc_frac": 0.7649217693644969,
+   "median_kc_frac_synthetic": 0.763569634923701,
+   "cross_odor_jaccard_median": 0.9979772439949431,
+   "same_odor_jaccard_median": 0.999746835443038,
+   "n_responsive_odors": 11,
+   "criteria": {
+    "C1_no_runaway": false,
+    "C2_sparse": false,
+    "C3_specific": false
+   },
+   "all_pass": false
+  },
+  "alln_inh": {
+   "n": 9001,
+   "n_edges": 804266,
+   "odors": {
+    "醋（DM1+VA2）": {
+     "gloms": [
+      "ORN_DM1",
+      "ORN_VA2"
+     ],
+     "kc_frac": 0.031871740390187364,
+     "kc_frac_seed2": 0.03361019895692486,
+     "same_odor_jaccard": 0.9482758620689655,
+     "active": {
+      "ALLN": 50,
+      "ALPN": 26,
+      "APL": 2,
+      "DAN": 2,
+      "DPM": 0,
+      "Kenyon_Cell": 165,
+      "MBON": 8,
+      "olfactory": 135
+     },
+     "rate_hz": {
+      "ALLN": 7.616550116550116,
+      "ALPN": 2.8722627737226274,
+      "APL": 208.75,
+      "DAN": 0.2265861027190332,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.9894726675680896,
+      "MBON": 3.515625,
+      "olfactory": 5.727292672224659
+     }
+    },
+    "土臭素（DA2）": {
+     "gloms": [
+      "ORN_DA2"
+     ],
+     "kc_frac": 0.0,
+     "kc_frac_seed2": 0.0,
+     "same_odor_jaccard": NaN,
+     "active": {
+      "ALLN": 5,
+      "ALPN": 11,
+      "APL": 0,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 0,
+      "MBON": 0,
+      "olfactory": 39
+     },
+     "rate_hz": {
+      "ALLN": 0.2505827505827506,
+      "ALPN": 0.8102189781021898,
+      "APL": 0.0,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.0,
+      "MBON": 0.0,
+      "olfactory": 1.6663010092145676
+     }
+    },
+    "二氧化碳（V）": {
+     "gloms": [
+      "ORN_V"
+     ],
+     "kc_frac": 0.0030905930075333203,
+     "kc_frac_seed2": 0.0038632412594166504,
+     "same_odor_jaccard": 0.8,
+     "active": {
+      "ALLN": 31,
+      "ALPN": 16,
+      "APL": 1,
+      "DAN": 2,
+      "DPM": 0,
+      "Kenyon_Cell": 16,
+      "MBON": 0,
+      "olfactory": 67
+     },
+     "rate_hz": {
+      "ALLN": 4.428904428904429,
+      "ALPN": 2.667883211678832,
+      "APL": 18.75,
+      "DAN": 0.188821752265861,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.04539308479814564,
+      "MBON": 0.0,
+      "olfactory": 2.804958315050461
+     }
+    },
+    "合成1": {
+     "gloms": [
+      "ORN_DA2",
+      "ORN_DA4l",
+      "ORN_V",
+      "ORN_VA1d",
+      "ORN_VM1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.005988023952095809,
+     "kc_frac_seed2": 0.006374348078037473,
+     "same_odor_jaccard": 0.8285714285714286,
+     "active": {
+      "ALLN": 45,
+      "ALPN": 46,
+      "APL": 2,
+      "DAN": 2,
+      "DPM": 0,
+      "Kenyon_Cell": 31,
+      "MBON": 0,
+      "olfactory": 301
+     },
+     "rate_hz": {
+      "ALLN": 6.771561771561771,
+      "ALPN": 5.6678832116788325,
+      "APL": 92.5,
+      "DAN": 0.28700906344410876,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.10092717790226,
+      "MBON": 0.0,
+      "olfactory": 12.948661693725319
+     }
+    },
+    "合成2": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DL5",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VA4",
+      "ORN_VC4"
+     ],
+     "kc_frac": 0.02221363724164574,
+     "kc_frac_seed2": 0.020282016611937414,
+     "same_odor_jaccard": 0.864406779661017,
+     "active": {
+      "ALLN": 87,
+      "ALPN": 40,
+      "APL": 2,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 115,
+      "MBON": 0,
+      "olfactory": 220
+     },
+     "rate_hz": {
+      "ALLN": 8.904428904428904,
+      "ALPN": 6.485401459854014,
+      "APL": 178.75,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.34527718756036313,
+      "MBON": 0.0,
+      "olfactory": 9.358271171566477
+     }
+    },
+    "合成3": {
+     "gloms": [
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DM3",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VM3"
+     ],
+     "kc_frac": 0.014293992659841607,
+     "kc_frac_seed2": 0.015452965037666602,
+     "same_odor_jaccard": 0.8780487804878049,
+     "active": {
+      "ALLN": 45,
+      "ALPN": 47,
+      "APL": 2,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 74,
+      "MBON": 0,
+      "olfactory": 217
+     },
+     "rate_hz": {
+      "ALLN": 7.226107226107225,
+      "ALPN": 4.766423357664233,
+      "APL": 143.75,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.20813212285107205,
+      "MBON": 0.0,
+      "olfactory": 9.237604212373848
+     }
+    },
+    "合成4": {
+     "gloms": [
+      "ORN_DA4m",
+      "ORN_DL3",
+      "ORN_VC2",
+      "ORN_VC4",
+      "ORN_VM4",
+      "ORN_VM5v"
+     ],
+     "kc_frac": 0.006374348078037473,
+     "kc_frac_seed2": 0.006374348078037473,
+     "same_odor_jaccard": 0.8857142857142857,
+     "active": {
+      "ALLN": 37,
+      "ALPN": 40,
+      "APL": 2,
+      "DAN": 1,
+      "DPM": 0,
+      "Kenyon_Cell": 33,
+      "MBON": 0,
+      "olfactory": 269
+     },
+     "rate_hz": {
+      "ALLN": 5.34965034965035,
+      "ALPN": 5.963503649635037,
+      "APL": 105.0,
+      "DAN": 0.060422960725075525,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.11589723778249951,
+      "MBON": 0.0,
+      "olfactory": 11.528082492321193
+     }
+    },
+    "合成5": {
+     "gloms": [
+      "ORN_D",
+      "ORN_DA1",
+      "ORN_DL2v",
+      "ORN_DM6",
+      "ORN_DP1m",
+      "ORN_VL2p"
+     ],
+     "kc_frac": 0.03457600927177902,
+     "kc_frac_seed2": 0.03438284720880819,
+     "same_odor_jaccard": 0.9402173913043478,
+     "active": {
+      "ALLN": 68,
+      "ALPN": 62,
+      "APL": 2,
+      "DAN": 1,
+      "DPM": 0,
+      "Kenyon_Cell": 179,
+      "MBON": 5,
+      "olfactory": 286
+     },
+     "rate_hz": {
+      "ALLN": 13.624708624708624,
+      "ALPN": 6.952554744525547,
+      "APL": 195.0,
+      "DAN": 0.022658610271903325,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.6992466679544137,
+      "MBON": 0.9895833333333333,
+      "olfactory": 12.23014480035103
+     }
+    },
+    "合成6": {
+     "gloms": [
+      "ORN_DA4l",
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DL5",
+      "ORN_DM1",
+      "ORN_DM5"
+     ],
+     "kc_frac": 0.03438284720880819,
+     "kc_frac_seed2": 0.03418968514583736,
+     "same_odor_jaccard": 0.9613259668508287,
+     "active": {
+      "ALLN": 54,
+      "ALPN": 52,
+      "APL": 2,
+      "DAN": 2,
+      "DPM": 0,
+      "Kenyon_Cell": 178,
+      "MBON": 4,
+      "olfactory": 245
+     },
+     "rate_hz": {
+      "ALLN": 10.78088578088578,
+      "ALPN": 5.967153284671532,
+      "APL": 211.25,
+      "DAN": 0.052870090634441085,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.8040370871160903,
+      "MBON": 1.015625,
+      "olfactory": 10.505704256252741
+     }
+    },
+    "合成7": {
+     "gloms": [
+      "ORN_DC2",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VA5",
+      "ORN_VL1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.0030905930075333203,
+     "kc_frac_seed2": 0.003670079196445818,
+     "same_odor_jaccard": 0.6666666666666666,
+     "active": {
+      "ALLN": 57,
+      "ALPN": 33,
+      "APL": 2,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 16,
+      "MBON": 0,
+      "olfactory": 209
+     },
+     "rate_hz": {
+      "ALLN": 5.099067599067599,
+      "ALPN": 2.8941605839416056,
+      "APL": 81.25,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.0362178868070311,
+      "MBON": 0.0,
+      "olfactory": 8.828433523475208
+     }
+    },
+    "合成8": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VC2",
+      "ORN_VC3",
+      "ORN_VM4"
+     ],
+     "kc_frac": 0.012362372030133281,
+     "kc_frac_seed2": 0.013135020282016612,
+     "same_odor_jaccard": 0.8591549295774648,
+     "active": {
+      "ALLN": 51,
+      "ALPN": 42,
+      "APL": 2,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 64,
+      "MBON": 0,
+      "olfactory": 259
+     },
+     "rate_hz": {
+      "ALLN": 9.236596736596736,
+      "ALPN": 7.313868613138686,
+      "APL": 172.5,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.172397141201468,
+      "MBON": 0.0,
+      "olfactory": 11.115620886353662
+     }
+    }
+   },
+   "max_kc_frac": 0.03457600927177902,
+   "median_kc_frac_synthetic": 0.013328182344987444,
+   "cross_odor_jaccard_median": 0.004761904761904762,
+   "same_odor_jaccard_median": 0.8712277800744109,
+   "n_responsive_odors": 10,
+   "criteria": {
+    "C1_no_runaway": true,
+    "C2_sparse": true,
+    "C3_specific": true
+   },
+   "all_pass": true
+  },
+  "no_alln": {
+   "n": 9001,
+   "n_edges": 606719,
+   "odors": {
+    "醋（DM1+VA2）": {
+     "gloms": [
+      "ORN_DM1",
+      "ORN_VA2"
+     ],
+     "kc_frac": 0.04539308479814565,
+     "kc_frac_seed2": 0.04732470542785397,
+     "same_odor_jaccard": 0.9591836734693877,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 65,
+      "APL": 2,
+      "DAN": 4,
+      "DPM": 0,
+      "Kenyon_Cell": 235,
+      "MBON": 11,
+      "olfactory": 135
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 6.445255474452554,
+      "APL": 237.5,
+      "DAN": 0.49093655589123864,
+      "DPM": 0.0,
+      "Kenyon_Cell": 1.52211705621016,
+      "MBON": 7.473958333333333,
+      "olfactory": 5.738262395787626
+     }
+    },
+    "土臭素（DA2）": {
+     "gloms": [
+      "ORN_DA2"
+     ],
+     "kc_frac": 0.0,
+     "kc_frac_seed2": 0.0,
+     "same_odor_jaccard": NaN,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 11,
+      "APL": 0,
+      "DAN": 0,
+      "DPM": 0,
+      "Kenyon_Cell": 0,
+      "MBON": 0,
+      "olfactory": 39
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 0.8248175182481751,
+      "APL": 0.0,
+      "DAN": 0.0,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.0,
+      "MBON": 0.0,
+      "olfactory": 1.6663010092145676
+     }
+    },
+    "二氧化碳（V）": {
+     "gloms": [
+      "ORN_V"
+     ],
+     "kc_frac": 0.005601699826154143,
+     "kc_frac_seed2": 0.005601699826154143,
+     "same_odor_jaccard": 1.0,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 28,
+      "APL": 2,
+      "DAN": 3,
+      "DPM": 0,
+      "Kenyon_Cell": 29,
+      "MBON": 0,
+      "olfactory": 67
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 3.4306569343065694,
+      "APL": 28.75,
+      "DAN": 0.2794561933534743,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.08499130770716631,
+      "MBON": 0.0,
+      "olfactory": 2.804958315050461
+     }
+    },
+    "合成1": {
+     "gloms": [
+      "ORN_DA2",
+      "ORN_DA4l",
+      "ORN_V",
+      "ORN_VA1d",
+      "ORN_VM1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.011396561715279118,
+     "kc_frac_seed2": 0.01216920996716245,
+     "same_odor_jaccard": 0.90625,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 79,
+      "APL": 2,
+      "DAN": 4,
+      "DPM": 0,
+      "Kenyon_Cell": 59,
+      "MBON": 1,
+      "olfactory": 301
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 9.656934306569344,
+      "APL": 121.25,
+      "DAN": 0.7401812688821752,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.21730732084218657,
+      "MBON": 0.10416666666666666,
+      "olfactory": 12.948661693725319
+     }
+    },
+    "合成2": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DL5",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VA4",
+      "ORN_VC4"
+     ],
+     "kc_frac": 0.029940119760479042,
+     "kc_frac_seed2": 0.029553795634537378,
+     "same_odor_jaccard": 0.925,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 64,
+      "APL": 2,
+      "DAN": 3,
+      "DPM": 0,
+      "Kenyon_Cell": 155,
+      "MBON": 2,
+      "olfactory": 220
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 10.912408759124087,
+      "APL": 205.0,
+      "DAN": 0.2794561933534743,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.6364689974888932,
+      "MBON": 0.10416666666666666,
+      "olfactory": 9.36046511627907
+     }
+    },
+    "合成3": {
+     "gloms": [
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DM3",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VM3"
+     ],
+     "kc_frac": 0.025883716438091557,
+     "kc_frac_seed2": 0.028008499130770716,
+     "same_odor_jaccard": 0.9241379310344827,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 81,
+      "APL": 2,
+      "DAN": 4,
+      "DPM": 0,
+      "Kenyon_Cell": 134,
+      "MBON": 0,
+      "olfactory": 217
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 9.872262773722627,
+      "APL": 195.0,
+      "DAN": 0.1812688821752266,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.593490438477883,
+      "MBON": 0.0,
+      "olfactory": 9.238701184730145
+     }
+    },
+    "合成4": {
+     "gloms": [
+      "ORN_DA4m",
+      "ORN_DL3",
+      "ORN_VC2",
+      "ORN_VC4",
+      "ORN_VM4",
+      "ORN_VM5v"
+     ],
+     "kc_frac": 0.009851265211512458,
+     "kc_frac_seed2": 0.009851265211512458,
+     "same_odor_jaccard": 0.9615384615384616,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 64,
+      "APL": 2,
+      "DAN": 3,
+      "DPM": 0,
+      "Kenyon_Cell": 51,
+      "MBON": 0,
+      "olfactory": 269
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 8.44890510948905,
+      "APL": 112.5,
+      "DAN": 0.47583081570996977,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.18929882171141588,
+      "MBON": 0.0,
+      "olfactory": 11.528082492321193
+     }
+    },
+    "合成5": {
+     "gloms": [
+      "ORN_D",
+      "ORN_DA1",
+      "ORN_DL2v",
+      "ORN_DM6",
+      "ORN_DP1m",
+      "ORN_VL2p"
+     ],
+     "kc_frac": 0.057562294765308095,
+     "kc_frac_seed2": 0.058528105080162256,
+     "same_odor_jaccard": 0.9769736842105263,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 132,
+      "APL": 2,
+      "DAN": 6,
+      "DPM": 0,
+      "Kenyon_Cell": 298,
+      "MBON": 11,
+      "olfactory": 286
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 18.802919708029197,
+      "APL": 271.25,
+      "DAN": 0.7628398791540786,
+      "DPM": 0.0,
+      "Kenyon_Cell": 1.765018350395982,
+      "MBON": 5.807291666666666,
+      "olfactory": 12.353005704256251
+     }
+    },
+    "合成6": {
+     "gloms": [
+      "ORN_DA4l",
+      "ORN_DC1",
+      "ORN_DL2d",
+      "ORN_DL5",
+      "ORN_DM1",
+      "ORN_DM5"
+     ],
+     "kc_frac": 0.050028974309445626,
+     "kc_frac_seed2": 0.051381108750241454,
+     "same_odor_jaccard": 0.9662921348314607,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 102,
+      "APL": 2,
+      "DAN": 6,
+      "DPM": 0,
+      "Kenyon_Cell": 259,
+      "MBON": 10,
+      "olfactory": 245
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 12.04744525547445,
+      "APL": 253.75,
+      "DAN": 1.1706948640483383,
+      "DPM": 0.0,
+      "Kenyon_Cell": 1.5356384006181185,
+      "MBON": 5.3125,
+      "olfactory": 10.516673979815709
+     }
+    },
+    "合成7": {
+     "gloms": [
+      "ORN_DC2",
+      "ORN_DM5",
+      "ORN_DP1l",
+      "ORN_VA5",
+      "ORN_VL1",
+      "ORN_VM6m"
+     ],
+     "kc_frac": 0.01680509947846243,
+     "kc_frac_seed2": 0.01525980297469577,
+     "same_odor_jaccard": 0.8444444444444444,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 64,
+      "APL": 2,
+      "DAN": 2,
+      "DPM": 0,
+      "Kenyon_Cell": 87,
+      "MBON": 0,
+      "olfactory": 209
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 7.156934306569343,
+      "APL": 131.25,
+      "DAN": 0.1132930513595166,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.22358508788873863,
+      "MBON": 0.0,
+      "olfactory": 8.828433523475208
+     }
+    },
+    "合成8": {
+     "gloms": [
+      "ORN_DL2v",
+      "ORN_DM2",
+      "ORN_DM6",
+      "ORN_VC2",
+      "ORN_VC3",
+      "ORN_VM4"
+     ],
+     "kc_frac": 0.019702530423024917,
+     "kc_frac_seed2": 0.020282016611937414,
+     "same_odor_jaccard": 0.9528301886792453,
+     "active": {
+      "ALLN": 0,
+      "ALPN": 83,
+      "APL": 2,
+      "DAN": 1,
+      "DPM": 0,
+      "Kenyon_Cell": 102,
+      "MBON": 0,
+      "olfactory": 259
+     },
+     "rate_hz": {
+      "ALLN": 0.0,
+      "ALPN": 12.63138686131387,
+      "APL": 198.75,
+      "DAN": 0.030211480362537763,
+      "DPM": 0.0,
+      "Kenyon_Cell": 0.40467452192389414,
+      "MBON": 0.0,
+      "olfactory": 11.115620886353662
+     }
+    }
+   },
+   "max_kc_frac": 0.057562294765308095,
+   "median_kc_frac_synthetic": 0.022793123430558237,
+   "cross_odor_jaccard_median": 0.01238390092879257,
+   "same_odor_jaccard_median": 0.9560069310743164,
+   "n_responsive_odors": 10,
+   "criteria": {
+    "C1_no_runaway": true,
+    "C2_sparse": true,
+    "C3_specific": true
+   },
+   "all_pass": true
+  }
+ },
+ "main_arm": "alln_inh"
+}

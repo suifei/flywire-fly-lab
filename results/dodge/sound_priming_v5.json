@@ -1,0 +1,26 @@
+{
+ "n": 100,
+ "ball_speed": 35,
+ "note": "探索性；lead = 起飞时刻到这颗球结束（躲开或击中）的毫秒数",
+ "groups": {
+  "无声": {
+   "jumped": 100,
+   "dodged": 24,
+   "lead_ms_median": 435,
+   "gf_max_mean": 241.8
+  },
+  "有声": {
+   "jumped": 100,
+   "dodged": 38,
+   "lead_ms_median": 825,
+   "gf_max_mean": 237.1
+  },
+  "有声但聋（AUDIO 断突触）": {
+   "jumped": 100,
+   "dodged": 25,
+   "lead_ms_median": 425,
+   "gf_max_mean": 244.5
+  }
+ },
+ "subcircuit": "v5"
+}

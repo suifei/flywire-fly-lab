@@ -80,6 +80,8 @@ jobs:
         # 线型枚举 / 增量估值 / 着法合法（含窗口外的长连禁手）/ 杀棋搜索。
         # 需要子回路与价值表的两项（刺激不残留、真脑核对）在 CI 里没有数据会自动跳过——本地必跑。
         run: node gomoku/test_engine.js
+      - name: 六条腿的运动学身体（判据 T1–T4）
+        run: node dodge/legs_test.js
 
       - name: 复现台账校验（每条主张引用的脚本与结果文件必须存在）
         # 台账是「复现了什么」的唯一事实源，REPRODUCTION.md 与游戏页都从它渲染。

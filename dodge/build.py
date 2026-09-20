@@ -49,12 +49,16 @@ def _compact(j, keep=None):
     out = {k: v for k, v in j.items() if k not in ("post", "w") and (keep is None or k in keep)}
     out["post_u16"] = base64.b64encode(array("H", post).tobytes()).decode(); out["w_i16"] = base64.b64encode(q.tobytes()).decode(); out["w_scale"] = scale
     return json.dumps(out, separators=(",", ":"))
-def _slim_v4():
-    """生活模式用的子回路 v4：只留大脑引擎与 game_core 真正要读的字段（权重、分组、fids、meta）。"""
-    return _compact(json.loads((ROOT / "results/dodge/subcircuit_v4.json").read_text()), keep=("meta", "groups", "fids", "indptr"))
+def _slim_life():
+    """生活模式用的子回路 v5（= v4 + 蘑菇体学习回路）：只留大脑引擎与 game_core 真正要读的字段。
+    types 只给多巴胺神经元留着（game_core 用它分 PAM / PPL1），其余置空，省 100 多 KB。"""
+    j = json.loads((ROOT / "results/dodge/subcircuit_v5.json").read_text())
+    j["types"] = [t if tag == "DAN" else "" for t, tag in zip(j["types"], j["mb_tag"])]
+    return _compact(j, keep=("meta", "groups", "fids", "indptr", "mb_tag", "sides", "types"))
 for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/dodge/subcircuit_v3.json").read_text()))),
-                  ("/*__SUBCIRCUIT_V4__*/", _slim_v4()),
+                  ("/*__SUBCIRCUIT_LIFE__*/", _slim_life()),
                   ("/*__LIFE__*/", (ROOT / "results/dodge/life_summary.json").read_text()),
+                  ("/*__LEARN__*/", (ROOT / "results/learn/learn_summary.json").read_text()),
                   ("/*__SUB_NT__*/", (ROOT / "results/dodge/subcircuit_nt_v3.json").read_text()),
                   ("/*__PERTURB__*/", (ROOT / "results/dodge/perturb.json").read_text()),
                   ("/*__REPRO__*/", (ROOT / "results/reproduction.json").read_text()),
@@ -84,6 +88,8 @@ for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/do
                   ("/*__EYECAM_JS__*/", (D / "eyecam.js").read_text()),
                   ("/*__EYE_JS__*/", (D / "eye.js").read_text()),
                   ("/*__BRAIN_JS__*/", (D / "brain.js").read_text()),
+                  ("/*__PLASTICITY_JS__*/", (D / "plasticity.js").read_text()),
+                  ("/*__LEGS_JS__*/", (D / "legs.js").read_text()),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text()),
                   ("/*__MISSIONS_JS__*/", (D / "missions.js").read_text()),
                   ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions_v3.json").read_text()),
