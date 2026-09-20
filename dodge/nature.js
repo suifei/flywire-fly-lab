@@ -23,28 +23,41 @@
       const a = hash(ix, iy, k, seed), b = hash(ix + 1, iy, k, seed), c = hash(ix, iy + 1, k, seed), d = hash(ix + 1, iy + 1, k, seed); return (a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy) * 2 - 1; };
     const base = (x, y) => { let h = 0; for (let k = 0; k < o.amp.length; k++) h += o.amp[k] * vnoise(x / o.wave[k] + 17.3 * k, y / o.wave[k] - 9.1 * k, k); return h; };
 
+    // —— 生物群系：一张很低频的噪声把世界分成四种地方；每种地方里东西的多少不一样（手选）——
+    const BIOMES = [ { key: "meadow", name: "草甸", rock: 1.6, sun: 0.15, mush: 0.2, bush: 0.3, hollow: 0.22, fall: 0.55, flower: 3, leaf: 1.5, grass: [9, 9] },
+                     { key: "woodland", name: "林下", rock: 1.2, sun: 0.05, mush: 0.6, bush: 0.55, hollow: 0.2, fall: 0.75, flower: 1, leaf: 6, grass: [3, 5] },
+                     { key: "gravel", name: "砾石滩", rock: 5.5, sun: 0.55, mush: 0.03, bush: 0.08, hollow: 0.12, fall: 0.2, flower: 0.6, leaf: 0.6, grass: [1, 3] },
+                     { key: "wetland", name: "湿地", rock: 0.6, sun: 0.04, mush: 0.35, bush: 0.2, hollow: 0.55, fall: 0.45, flower: 4, leaf: 1.2, grass: [10, 10] } ];
+    const biomeAt = (x, y) => { const a = vnoise(x / 420 + 3.1, y / 420 - 7.7, 40), b = vnoise(x / 420 - 11.3, y / 420 + 5.9, 41); if (Math.hypot(x, y) < 70) return BIOMES[0]; return a > 0.12 ? (b > 0 ? BIOMES[2] : BIOMES[1]) : a < -0.2 ? BIOMES[3] : BIOMES[0]; };
+    // —— 玩家对世界的改动（沙盒）：加进去的物件、拆掉的物件、抬高 / 挖低的地形。按种子存在本机，重新打开还在 ——
+    const edits = { added: [], removed: new Set(), bumps: [] }; let version = 0;
+    const cellKey = (x, y) => Math.floor(x / CELL) + "," + Math.floor(y / CELL);
     // —— 每个 40 mm 的格子里有什么（确定性；缓存）——
     const cache = new Map();
     function cell(ix, iy) {
       const key = ix + "," + iy; let c = cache.get(key); if (c) return c;
-      let n = 0; const r = () => hash(ix, iy, 100 + n++, seed), at = () => [(ix + 0.08 + 0.84 * r()) * CELL, (iy + 0.08 + 0.84 * r()) * CELL], items = [];
+      let n = 0; const r = () => hash(ix, iy, 100 + n++, seed), at = () => [(ix + 0.08 + 0.84 * r()) * CELL, (iy + 0.08 + 0.84 * r()) * CELL], items = [], B = biomeAt((ix + 0.5) * CELL, (iy + 0.5) * CELL);
       const home = Math.abs(ix) <= 0 && Math.abs(iy) <= 0;                 // 出生的那一格不放挡路的东西
-      const nRock = home ? 0 : Math.floor(r() * 2.6); for (let k = 0; k < nRock; k++) { const [x, y] = at(), rad = 1.4 + 4.2 * r() * r(); items.push({ kind: "rock", x, y, r: rad, hgt: rad * (0.6 + 0.5 * r()), rot: r() * 6.283, tint: r(), solid: true }); }
-      if (r() < 0.22 && !home) { const [x, y] = at(); items.push({ kind: "sunrock", x, y, r: 6 + 5 * r(), rot: r() * 6.283, tint: r(), solid: false, temp: 0 }); }       // 平的深色石板：能走上去，太阳一晒就烫
-      if (r() < 0.3 && !home) { const [x, y] = at(), cap = 2 + 2.6 * r(); items.push({ kind: "mushroom", x, y, r: 0.5 + 0.22 * cap, cap, hgt: 5 + 6 * r(), tint: r(), solid: true }); }
-      if (r() < 0.3 && !home) { const [x, y] = at(); items.push({ kind: "bush", x, y, r: 1.3, hgt: 15 + 8 * r(), spread: 6 + 3.5 * r(), tint: r(), solid: true, next: 4 + 30 * r() }); }   // 浆果丛：果子熟了会掉
-      if (r() < 0.28) { const [x, y] = at(); items.push({ kind: "hollow", x, y, s: 8 + 6 * r(), depth: 1.6 + 1.6 * r(), level: r() < 0.4 ? 0.5 + 0.4 * r() : 0, solid: false }); }     // 洼地：下雨蓄水
-      if (r() < 0.55) { const [x, y] = at(); items.push({ kind: "windfall", x, y, r: 4.5 + 2.5 * r(), bad: r() < 0.15, tint: r(), solid: false, eaten: false }); }   // 早先掉在地上、已经在发酵的果子
-      const nFl = Math.floor(r() * 3); for (let k = 0; k < nFl; k++) { const [x, y] = at(); items.push({ kind: "flower", x, y, hgt: 7 + 9 * r(), tint: r(), rot: r() * 6.283, solid: false }); }
-      const nLf = Math.floor(r() * 3.2); for (let k = 0; k < nLf; k++) { const [x, y] = at(); items.push({ kind: "leaf", x, y, r: 5 + 7 * r(), rot: r() * 6.283, tint: r(), solid: false }); }
-      const nGr = 7 + Math.floor(r() * 9); for (let k = 0; k < nGr; k++) { const [x, y] = at(); items.push({ kind: "grass", x, y, n: 4 + Math.floor(r() * 6), hgt: 4.5 + 8 * r(), rot: r() * 6.283, tint: r(), solid: false }); }
-      c = { ix, iy, items, hollows: items.filter(i => i.kind === "hollow") }; cache.set(key, c);
+      const count = m => { const f = Math.floor(m), q = r(); return f + (q < m - f ? 1 : 0); };
+      const nRock = home ? 0 : count(B.rock * (0.4 + 1.2 * r())); for (let k = 0; k < nRock; k++) { const [x, y] = at(), rad = 1.4 + 4.2 * r() * r(); items.push({ kind: "rock", x, y, r: rad, hgt: rad * (0.6 + 0.5 * r()), rot: r() * 6.283, tint: r(), solid: true }); }
+      if (r() < B.sun && !home) { const [x, y] = at(); items.push({ kind: "sunrock", x, y, r: 6 + 5 * r(), rot: r() * 6.283, tint: r(), solid: false, temp: 0 }); }       // 平的深色石板：能走上去，太阳一晒就烫
+      if (r() < B.mush && !home) { const [x, y] = at(), cap = 2 + 2.6 * r(); items.push({ kind: "mushroom", x, y, r: 0.5 + 0.22 * cap, cap, hgt: 5 + 6 * r(), tint: r(), solid: true }); }
+      if (r() < B.bush && !home) { const [x, y] = at(); items.push({ kind: "bush", x, y, r: 1.3, hgt: 15 + 8 * r(), spread: 6 + 3.5 * r(), tint: r(), solid: true, next: 4 + 30 * r() }); }   // 浆果丛：果子熟了会掉
+      if (r() < B.hollow) { const [x, y] = at(); items.push({ kind: "hollow", x, y, s: 8 + 6 * r(), depth: 1.6 + 1.6 * r(), level: r() < (B.key === "wetland" ? 0.85 : 0.4) ? 0.5 + 0.4 * r() : 0, solid: false }); }     // 洼地：下雨蓄水
+      if (r() < B.fall) { const [x, y] = at(); items.push({ kind: "windfall", x, y, r: 4.5 + 2.5 * r(), bad: r() < 0.15, tint: r(), solid: false, eaten: false }); }   // 早先掉在地上、已经在发酵的果子
+      const nFl = count(B.flower * r()); for (let k = 0; k < nFl; k++) { const [x, y] = at(); items.push({ kind: "flower", x, y, hgt: 7 + 9 * r(), tint: r(), rot: r() * 6.283, solid: false }); }
+      const nLf = count(B.leaf * r()); for (let k = 0; k < nLf; k++) { const [x, y] = at(); items.push({ kind: "leaf", x, y, r: 5 + 7 * r(), rot: r() * 6.283, tint: r(), solid: false }); }
+      const nGr = B.grass[0] + Math.floor(r() * B.grass[1]); for (let k = 0; k < nGr; k++) { const [x, y] = at(); items.push({ kind: "grass", x, y, n: 4 + Math.floor(r() * 6), hgt: (B.key === "wetland" ? 7 : 4.5) + 8 * r(), rot: r() * 6.283, tint: r(), solid: false }); }
+      items.forEach((it, k) => { it.id = key + "#" + k; });
+      let list = items.filter(it => !edits.removed.has(it.id)); for (const it of edits.added) if (cellKey(it.x, it.y) === key) list.push(it);
+      c = { ix, iy, items: list, hollows: list.filter(i => i.kind === "hollow"), bumps: edits.bumps.filter(q => Math.abs(q.x - (ix + 0.5) * CELL) < CELL * 1.5 + 3 * q.s && Math.abs(q.y - (iy + 0.5) * CELL) < CELL * 1.5 + 3 * q.s), biome: B }; cache.set(key, c);
       if (cache.size > 900) { const cx = W.focus[0] / CELL, cy = W.focus[1] / CELL; for (const [k2, v] of cache) if (Math.abs(v.ix - cx) > 10 || Math.abs(v.iy - cy) > 10) cache.delete(k2); }
       return c;
     }
     function h(x, y) {
       let z = base(x, y); const ix = Math.floor(x / CELL), iy = Math.floor(y / CELL);
       for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (const q of cell(ix + dx, iy + dy).hollows) { const d2 = (x - q.x) ** 2 + (y - q.y) ** 2; if (d2 < 9 * q.s * q.s) z -= q.depth * Math.exp(-d2 / (2 * q.s * q.s)); }
+      for (const q of cell(ix, iy).bumps) { const d2 = (x - q.x) ** 2 + (y - q.y) ** 2; if (d2 < 9 * q.s * q.s) z += q.dz * Math.exp(-d2 / (2 * q.s * q.s)); }     // 玩家抬高 / 挖低的地方
       return z;
     }
     const grad = (x, y) => { const e = 0.4; return [(h(x + e, y) - h(x - e, y)) / (2 * e), (h(x, y + e) - h(x, y - e)) / (2 * e)]; };
@@ -71,7 +84,20 @@
       return false;
     }
 
-    const W = { seed, CELL, G_MM, o, h, grad, normal, cell, near, integrate, focus: [0, 0],
+    const invalidate = (x, y, R) => { const x0 = Math.floor((x - R) / CELL) - 1, x1 = Math.floor((x + R) / CELL) + 1, y0 = Math.floor((y - R) / CELL) - 1, y1 = Math.floor((y + R) / CELL) + 1; for (let ix = x0; ix <= x1; ix++) for (let iy = y0; iy <= y1; iy++) cache.delete(ix + "," + iy); version++; };
+    const MAKE = { rock: (x, y, q) => ({ kind: "rock", x, y, r: 2 + 3 * q, hgt: (2 + 3 * q) * 0.8, rot: q * 6.283, tint: q, solid: true }), sunrock: (x, y, q) => ({ kind: "sunrock", x, y, r: 7 + 3 * q, rot: q * 6.283, tint: q, solid: false, temp: 0 }),
+      mushroom: (x, y, q) => ({ kind: "mushroom", x, y, r: 1.1, cap: 2.4 + 2 * q, hgt: 6 + 4 * q, tint: q, solid: true }), bush: (x, y, q) => ({ kind: "bush", x, y, r: 1.3, hgt: 16 + 6 * q, spread: 6.5 + 3 * q, tint: q, solid: true, next: 3 + 5 * q }),
+      flower: (x, y, q) => ({ kind: "flower", x, y, hgt: 8 + 8 * q, tint: q, rot: q * 6.283, solid: false }), grass: (x, y, q) => ({ kind: "grass", x, y, n: 7, hgt: 6 + 7 * q, rot: q * 6.283, tint: q, solid: false }),
+      leaf: (x, y, q) => ({ kind: "leaf", x, y, r: 6 + 5 * q, rot: q * 6.283, tint: q, solid: false }), hollow: (x, y, q) => ({ kind: "hollow", x, y, s: 9 + 4 * q, depth: 2.2 + q, level: 0.85, solid: false }),
+      fruit: (x, y, q) => ({ kind: "windfall", x, y, r: 5 + 2 * q, bad: false, tint: q, solid: false, eaten: false }), rotten: (x, y, q) => ({ kind: "windfall", x, y, r: 5 + 2 * q, bad: true, tint: q, solid: false, eaten: false }) };
+    const W = { seed, CELL, G_MM, o, h, grad, normal, cell, near, integrate, focus: [0, 0], biomeAt, BIOMES, edits, get version() { return version; },
+      // —— 沙盒：往世界里放东西 / 拆东西 / 改地形。改动记在 edits 里，exportEdits() 给页面存到本机 ——
+      place(kind, x, y) { if (!MAKE[kind]) return null; const it = MAKE[kind](x, y, hash(Math.round(x * 10), Math.round(y * 10), edits.added.length, seed)); it.id = "u" + Date.now().toString(36) + edits.added.length; it.user = true; edits.added.push(it); invalidate(x, y, 40); return it; },
+      removeNear(x, y, R) { let best = null, bd = R; near(x, y, R, it => { if (it.kind === "grass" && bd < R) return; const d = Math.hypot(it.x - x, it.y - y) - (it.r || it.s || 2) * 0.5; if (d < bd) { bd = d; best = it; } }); if (!best) return null;
+        if (best.user) edits.added.splice(edits.added.indexOf(best), 1); else edits.removed.add(best.id); best.gone = true; invalidate(best.x, best.y, 60); return best; },
+      dig(x, y, dz, sgm) { const near0 = edits.bumps.find(q => Math.hypot(q.x - x, q.y - y) < 4 && q.s === sgm); if (near0) near0.dz = Math.max(-14, Math.min(14, near0.dz + dz)); else edits.bumps.push({ x, y, s: sgm, dz }); invalidate(x, y, 3 * sgm + 40); },
+      exportEdits() { return { added: edits.added.map(it => { const q = Object.assign({}, it); delete q.gone; return q; }), removed: [...edits.removed], bumps: edits.bumps }; },
+      importEdits(e) { if (!e) return; edits.added.length = 0; for (const it of e.added || []) { it.user = true; if (it.kind === "windfall") it.eaten = false; if (it.kind === "sunrock") it.temp = 0; edits.added.push(it); } edits.removed.clear(); for (const k of e.removed || []) edits.removed.add(k); edits.bumps.length = 0; for (const q of e.bumps || []) edits.bumps.push(q); cache.clear(); version++; },
       weather: { rain: 0, rainT: 0, nextRain: 90 + 120 * hash(1, 2, 3, seed), wet: 0 }, heatFields: new Map(), waterOf: new Map(), fallenOf: new Map(), beetleT: 20, clock: 0,
       // 步行：沿行进方向的坡度让它慢下来 / 快起来（身体做功）
       slopeFactor(x, y, heading, dir) { const [gx, gy] = grad(x, y), along = (gx * Math.cos(heading) + gy * Math.sin(heading)) * (dir < 0 ? -1 : 1); return Math.max(0.45, Math.min(1.25, 1 - o.slopeK * along)); },
@@ -96,13 +122,13 @@
       // 雨点砸到它：频率 = 雨强 × 它的截面（手选 0.12 次 / 秒 @ 满雨强）；一滴水有它体重的几十倍，砸中就是一次踉跄
       if (wx.rain > 0.2 && S.z <= 0.01 && rand() < 0.12 * wx.rain * dt) { const a = rand() * 6.283; S.x += Math.cos(a) * 0.8; S.y += Math.sin(a) * 0.8; S.hitFlash = 0.3; G.score.rainHits = (G.score.rainHits || 0) + 1; G.onEvent && G.onEvent("raindrop", {}); }
       // 附近的东西：石板的温度、洼地的水、浆果丛
-      const seenHeat = new Set(), seenWater = new Set();
+      const seenHeat = new Set(), seenWater = new Set(), seenFall = new Set();
       near(S.x, S.y, 120, it => {
         if (it.kind === "sunrock") { const target = Math.max(0, (CFG.light - 0.45) / 0.55) * (1 - 0.8 * wx.rain); it.temp += (target - it.temp) * Math.min(1, dt / 20);      // 石板升温 / 降温的时间常数 20 s
           if (it.temp > 0.08) { seenHeat.add(it); let f = W.heatFields.get(it); if (!f) { f = G.addField("heat", it.x, it.y, it.r * 1.1, 0); W.heatFields.set(it, f); } f.strength = 1.4 * it.temp; } }
         else if (it.kind === "hollow") { it.level = Math.max(0, Math.min(1, it.level + (0.05 * wx.rain - 0.0025 * CFG.light * (1 - wx.rain)) * dt));
           if (it.level > 0.15) { seenWater.add(it); let w = W.waterOf.get(it); if (!w || !G.pellets.includes(w.p)) { const p = G.addPellet(it.x, it.y, "water"); p.amount = 1e6; p.hollow = it; const f = G.addField("damp", it.x, it.y, it.s * 1.6, 0.8); w = { p, f }; W.waterOf.set(it, w); } w.p.r = it.s * (0.35 + 0.75 * it.level); w.f.strength = 0.4 + 0.5 * it.level; } }
-        else if (it.kind === "windfall" && !it.eaten) { let p = W.fallenOf.get(it);
+        else if (it.kind === "windfall" && !it.eaten) { seenFall.add(it); let p = W.fallenOf.get(it);
           if (!p) { p = G.addPellet(it.x, it.y, it.bad ? "bitter" : "sugar"); p.r = it.r; p.amount = CFG.lifeFoodAmount; p.berry = true; p.windfall = it; W.fallenOf.set(it, p);
             G.addOdor(it.x, it.y, it.bad ? "geosmin" : "vinegar", 24, 1, 1e9).pellet = p; if (G.MB && !it.bad) G.addOdor(it.x, it.y, "A", 24, 1, 1e9).pellet = p; }
           else if (!G.pellets.includes(p)) { it.eaten = true; W.fallenOf.delete(it); } }                       // 吃完了就没了（这一格不会再长出来）
@@ -112,6 +138,7 @@
             b.z = h(b.x, b.y) + it.hgt * (0.55 + 0.4 * rand()); G.balls.push(b); G.onEvent && G.onEvent("launch", b); } }
       });
       for (const [it, f] of W.heatFields) if (!seenHeat.has(it)) { const k = G.fields.indexOf(f); if (k >= 0) { G.fields.splice(k, 1); G.onEvent && G.onEvent("removeField", f); } W.heatFields.delete(it); }
+      for (const [it, p] of W.fallenOf) if (!seenFall.has(it)) { const k = G.pellets.indexOf(p); if (k >= 0) { G.pellets.splice(k, 1); G.onEvent && G.onEvent("removePellet", p); } W.fallenOf.delete(it); }   // 走远了，或者被玩家拆掉了
       for (const [it, w] of W.waterOf) if (!seenWater.has(it)) { let k = G.pellets.indexOf(w.p); if (k >= 0) { G.pellets.splice(k, 1); G.onEvent && G.onEvent("removePellet", w.p); } k = G.fields.indexOf(w.f); if (k >= 0) { G.fields.splice(k, 1); G.onEvent && G.onEvent("removeField", w.f); } W.waterOf.delete(it); }
       // 浆果落地停稳 → 变成一块会发酵的果肉（食物 + 气味）；坏的发霉
       for (let i = G.balls.length - 1; i >= 0; i--) { const b = G.balls[i]; if (b.kind !== "berry" || !b.rest) continue;

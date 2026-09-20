@@ -18,16 +18,16 @@
 <!-- videos:begin -->
 ## 🎬 先看视频
 
-<a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4"><img src="media/nature_open_world.gif" alt="果蝇在大自然开放世界里（点击看完整视频）" width="100%"></a>
+<a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/nature_open_world.mp4"><img src="media/nature_open_world.gif" alt="果蝇在大自然开放世界里（点击看完整视频）" width="100%"></a>
 
 <table><tr>
-<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4"><img src="media/nature_open_world.jpg" alt="▶ 大自然 · 开放世界" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4">▶ 大自然 · 开放世界</a></b><br><sub>有重力、有天气、没有边界的 3D 世界；住在里面的是 15,055 个神经元、五感全开的那只<br>43 秒 · 5 MB</sub></td>
-<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/five_senses.mp4"><img src="media/five_senses.jpg" alt="▶ 五感全开" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/five_senses.mp4">▶ 五感全开</a></b><br><sub>视 · 听 · 嗅 · 味 · 触 · 温 · 湿，蘑菇体学习、多巴胺、六条腿<br>3 分 41 秒 · 18 MB</sub></td>
-<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/gomoku.mp4"><img src="media/gomoku.jpg" alt="▶ 与果蝇下五子棋" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/gomoku.mp4">▶ 与果蝇下五子棋</a></b><br><sub>线型 → 果蝇脑 → 一层线性读出；思考过程画在棋盘上<br>3 分 09 秒 · 8 MB</sub></td>
-<td width="25%" valign="top"><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/embodied_physics_body.mp4"><img src="media/embodied_physics_body.jpg" alt="▶ 大脑 + 物理身体闭环" width="100%"></a><br><b><a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/embodied_physics_body.mp4">▶ 大脑 + 物理身体闭环</a></b><br><sub>同一颗大脑驱动 NeuroMechFly（MuJoCo）：走到果子前停下吃，走到 B 味热源前自己掉头<br>32 秒 · 4 MB</sub></td>
+<td width="25%" valign="top"><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/nature_open_world.mp4"><img src="media/nature_open_world.jpg" alt="▶ 大自然 · 开放世界" width="100%"></a><br><b><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/nature_open_world.mp4">▶ 大自然 · 开放世界</a></b><br><sub>有重力、有天气、没有边界的 3D 世界；住在里面的是 15,055 个神经元、五感全开的那只<br>43 秒 · 5 MB · <a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/nature_open_world.mp4">raw 直链</a></sub></td>
+<td width="25%" valign="top"><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/five_senses.mp4"><img src="media/five_senses.jpg" alt="▶ 五感全开" width="100%"></a><br><b><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/five_senses.mp4">▶ 五感全开</a></b><br><sub>视 · 听 · 嗅 · 味 · 触 · 温 · 湿，蘑菇体学习、多巴胺、六条腿<br>3 分 41 秒 · 18 MB · <a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/five_senses.mp4">raw 直链</a></sub></td>
+<td width="25%" valign="top"><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/gomoku.mp4"><img src="media/gomoku.jpg" alt="▶ 与果蝇下五子棋" width="100%"></a><br><b><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/gomoku.mp4">▶ 与果蝇下五子棋</a></b><br><sub>线型 → 果蝇脑 → 一层线性读出；思考过程画在棋盘上<br>3 分 09 秒 · 8 MB · <a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/gomoku.mp4">raw 直链</a></sub></td>
+<td width="25%" valign="top"><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/embodied_physics_body.mp4"><img src="media/embodied_physics_body.jpg" alt="▶ 大脑 + 物理身体闭环" width="100%"></a><br><b><a href="https://github.com/suifei/flywire-fly-lab/blob/main/media/embodied_physics_body.mp4">▶ 大脑 + 物理身体闭环</a></b><br><sub>同一颗大脑驱动 NeuroMechFly（MuJoCo）：走到果子前停下吃，走到 B 味热源前自己掉头<br>32 秒 · 4 MB · <a href="https://raw.githubusercontent.com/suifei/flywire-fly-lab/main/media/embodied_physics_body.mp4">raw 直链</a></sub></td>
 </tr></table>
 
-<sub>点封面直接播放（mp4 是从本仓库 `media/` 目录取的 raw 文件；已压成手机上也能流畅播放的 H.264）。想自己玩：<a href="https://suifei.github.io/flywire-fly-lab/game.html"><b>在线试玩</b></a>。</sub>
+<sub>点封面在 GitHub 的播放页里直接看；「raw 直链」是仓库里那个文件的 raw 地址（raw 服务器按下载文件的类型返回，多数浏览器会直接下载而不是播放）。四段都已压成手机上也能流畅播放的 H.264，放在 `media/`。想自己玩：<a href="https://suifei.github.io/flywire-fly-lab/game.html"><b>在线试玩</b></a>。</sub>
 <!-- videos:end -->
 
 ---
@@ -153,7 +153,9 @@ JON 通路最集中（基尼 0.922），却是只看连线**最预测不了**的
 游戏页第一个标签现在默认进的是**大自然**（「世界」开关还可以切回篮球场）：按种子生成、没有边界的起伏地形，石头、深色石板、蘑菇、花、草、浆果丛、水洼，昼夜、风和雨。
 物理用真实单位：重力 9,810 mm/s²——浆果熟了从枝头掉下来（30 mm 落地 0.08 s，解析值 0.0782 s）、按地形法线反弹、顺坡滚、停稳后发酵；石头不可穿透；上坡走得慢；太阳把石板晒烫；洼地下雨蓄水、晴天蒸发；风把气味吹向下风。
 住在里面的是「五感全开」那只（15,055 个神经元，带蘑菇体和六条腿）。**它只通过真实的感受器知道这个世界**：坡度 → 步速，实心物件 → 挡路 + 触角被压，石板 → 温度感受器，雨 → 湿度感受器和听觉神经元，
-发酵的浆果 → 嗅觉感受神经元，爬过来的甲虫 → 逼近视觉。没有新增任何一条行为规则。九条事先写好的物理判据全过（`node dodge/nature_test.js`）；在里面过 3 分钟：走 3229 mm、被挡住 4.1 s、掉下来 19.3 颗浆果、碰到糖 2.7 次。
+发酵的浆果 → 嗅觉感受神经元，爬过来的甲虫 → 逼近视觉。没有新增任何一条行为规则。九条事先写好的物理判据全过（`node dodge/nature_test.js`）；在里面过 3 分钟：走 2676 mm、被挡住 26.0 s、掉下来 17.3 颗浆果、碰到糖 1.0 次。
+
+**玩法像「我的世界」**（画面不学它的方块，尽量拟态）：场景底部一条工具栏，数字键选、点地面用——放果子、挖水洼、放石头、种蘑菇 / 浆果丛 / 花、放甲虫、抬高 / 挖低地形、拆除；改的是同一个世界对象，所以放下的石头真的挡路、种的浆果丛真的掉果子；改动按种子存在本机。世界分草甸 / 林下 / 砾石滩 / 湿地四种生物群系。`C` 切视角（轨道 / 跟在身后 / 第一人称），按住 `A` `D` `S` 空格 = 直接驱动真实的转向 / 后退 / 巨纤维神经元。`F` 把场景铺满窗口：大脑和实时 spike 改在同一个 3D 画面里渲染，别的面板停画。
 
 如实说明：默认的视觉前端仍是手写的逼近检测，石头和草不在它的视觉里（真实像素那条通路可选、默认关）；果蝇自己的身体是运动学，不会摔倒；威胁从「飞来的球」换成了「爬过来的甲虫」，因为毫米尺度上慢慢滚过来的球不物理。细节：[docs/log/report.md §49](docs/log/report.md)。
 <!-- nature:end -->

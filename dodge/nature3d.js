@@ -30,13 +30,15 @@ const FlyNature3D = (() => {
     function put(m, x, y, z, rx, ry, rz, sx, sy, sz, r, g, b) { if (m.count >= m.instanceMatrix.count) return; pos.set(x, y, z); quat.setFromEuler(eul.set(rx, ry, rz, "ZYX")); scl.set(sx, sy, sz); mat4.compose(pos, quat, scl); m.setMatrixAt(m.count, mat4); m.setColorAt(m.count, col.setRGB(r, g, b)); m.count++; }
     function putOnGround(m, x, y, lift, rz, sx, sy, sz, r, g, b) { if (m.count >= m.instanceMatrix.count) return; const n = W.normal(x, y); nrm.set(n[0], n[1], n[2]); quat.setFromUnitVectors(up, nrm); quat.multiply(new THREE.Quaternion().setFromAxisAngle(up, rz));
       pos.set(x, y, W.h(x, y) + lift); scl.set(sx, sy, sz); mat4.compose(pos, quat, scl); m.setMatrixAt(m.count, mat4); m.setColorAt(m.count, col.setRGB(r, g, b)); m.count++; }
-    let center = [1e9, 1e9]; const bushes = [];
+    let center = [1e9, 1e9], builtVersion = -1; const bushes = [];
+    const TINT = { meadow: [1, 1, 1], woodland: [0.78, 0.7, 0.62], gravel: [1.32, 1.3, 1.34], wetland: [0.72, 0.95, 0.78] };      // 各生物群系的地面色调（乘在基色上）
     function rebuild(cx, cy) {
-      cx = Math.round(cx / STEP) * STEP; cy = Math.round(cy / STEP) * STEP; center = [cx, cy]; terrain.position.set(cx, cy, 0);
+      cx = Math.round(cx / STEP) * STEP; cy = Math.round(cy / STEP) * STEP; center = [cx, cy]; builtVersion = W.version; terrain.position.set(cx, cy, 0);
       const P = tg.attributes.position, C = tg.attributes.color;
       for (let i = 0; i < P.count; i++) { const x = cx + P.getX(i), y = cy + P.getY(i), z = W.h(x, y); P.setZ(i, z);
         const moss = Math.min(1, Math.max(0, soft(x, y, 46) * 1.5 - 0.25 + z * 0.03)), grit = 0.85 + 0.3 * hash2(Math.round(x / STEP), Math.round(y / STEP)), low = Math.max(0, Math.min(1, (-z - 4) / 5));
-        C.setXYZ(i, (0.43 + (0.27 - 0.43) * moss) * grit * (1 - 0.35 * low), (0.34 + (0.43 - 0.34) * moss) * grit * (1 - 0.25 * low), (0.21 + (0.16 - 0.21) * moss) * grit * (1 - 0.1 * low)); }
+        const bk = W.biomeAt(x + 14 * (hash2(x, y) - 0.5), y + 14 * (hash2(y, x) - 0.5)).key, tn = TINT[bk], mm = bk === "gravel" ? moss * 0.25 : moss;      // 边界抖一下，别是一条直线
+        C.setXYZ(i, (0.43 + (0.27 - 0.43) * mm) * grit * (1 - 0.35 * low) * tn[0], (0.34 + (0.43 - 0.34) * mm) * grit * (1 - 0.25 * low) * tn[1], (0.21 + (0.16 - 0.21) * mm) * grit * (1 - 0.1 * low) * tn[2]); }
       P.needsUpdate = true; C.needsUpdate = true; tg.computeVertexNormals(); tg.computeBoundingSphere();
       for (const m of Object.values(M)) m.count = 0; bushes.length = 0;
       W.near(cx, cy, R_ITEMS, it => { const t = it.tint, z = W.h(it.x, it.y);
@@ -73,7 +75,7 @@ const FlyNature3D = (() => {
     let tAcc = 0;
     function update(dt, g, camera) {
       const S = g.S, wx = W.weather; tAcc += dt; uni.uT.value = tAcc; uni.uW.value = g.CFG.wind && g.wind ? g.wind.speed : 0.1;
-      if (Math.hypot(S.x - center[0], S.y - center[1]) > 28) rebuild(S.x, S.y);
+      if (Math.hypot(S.x - center[0], S.y - center[1]) > 28) rebuild(S.x, S.y); else if (W.version !== builtVersion) rebuild(center[0], center[1]);   // 玩家改了世界：原地重建
       // 昼夜：太阳按 game_core 的时钟走一圈（light = 0.575 + 0.425·cos），雨天压暗、发灰
       const ph = 2 * Math.PI * (g.clock || 0) / g.CFG.dayLength, elev = Math.cos(ph), L = Math.max(0, Math.min(1, (elev + 0.25) / 1.25));
       const dir = new THREE.Vector3(Math.sin(ph) * 0.8, -0.45, Math.max(0.12, elev * 0.9 + 0.15)).normalize(), gz = S.ground || 0;
@@ -104,7 +106,7 @@ const FlyNature3D = (() => {
       for (const [o, m] of dyn) if (!alive.has(o)) { grp.remove(m); dyn.delete(o); }
     }
     function show(v) { if (v === grp.visible) return; grp.visible = v; if (v) { saved.bg = scene.background; saved.fog = scene.fog; center = [1e9, 1e9]; } else { scene.background = saved.bg; scene.fog = saved.fog; } }
-    return { group: grp, update, show, rebuild, counts: () => ({ grass: M.grass.count, rocks: M.rock.count, bushes: bushes.length, puddles: puddles.size, dynamic: dyn.size }) };
+    return { group: grp, terrain, update, show, rebuild, counts: () => ({ grass: M.grass.count, rocks: M.rock.count, bushes: bushes.length, puddles: puddles.size, dynamic: dyn.size }) };
   }
   return { build };
 })();
