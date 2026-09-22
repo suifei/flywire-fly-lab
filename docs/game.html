@@ -6945,12 +6945,12 @@ function bootFlyEye(netJson, retinaMeta, retinaPngDataUri, decodersJson) {
     c.width = im.width; c.height = im.height;
     const g = c.getContext("2d", { willReadFrequently: true });
     g.drawImage(im, 0, 0);
-    const data = g.getImageData(0, 0, im.width, im.height).data;
-    initFlyEye({
-      net: netJson,
-      decoders: decodersJson,
-      retina: Retina.fromImageData(data, retinaMeta),
-    });
+    const data = g.getImageData(0, 0, im.width, im.height).data, assets = { net: netJson, decoders: decodersJson, retina: Retina.fromImageData(data, retinaMeta) };
+    // 等果蝇自己的 3D 网格就位再装配复眼：selfMeshes 是第一帧渲染时才填的。页面在后台 / 不可见时加载（例如 Artifact 的外框还没显示），
+    //   浏览器暂停动画帧，采样表却已经解码完——原来直接读 selfMeshes[0] 就是 undefined，报「Cannot read properties of undefined (reading 'traverse')」
+    const ready = () => { const fs = window.__flyScene; return fs && fs.selfMeshes && fs.selfMeshes.length > 0; };
+    const go = () => { if (ready()) initFlyEye(assets); else setTimeout(go, 150); };
+    go();
   };
   im.onerror = () => { const s = document.getElementById("eStatus"); if (s) s.textContent = "视网膜采样表加载失败"; };
   im.src = retinaPngDataUri;
