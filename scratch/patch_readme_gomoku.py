@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parent.parent; R = ROOT / "results/gomoku"
 S = json.loads((R / "lines_summary.json").read_text()); A = S["train"]["arms"]; P = S["play"]; RL = S["rl"]; OL = S["opto_leak"]
 pct = lambda v: f"{v * 100:.1f}%"; wl = lambda r: f"{r['win']}–{r['loss']}" + (f"–{r['draw']}" if r.get("draw") else "")
 E = P["engine"]["fly_intact"]; HH = P["head_to_head"]
-p = ROOT / "README.md"; s = p.read_text()
+p = ROOT / "README.md"; s = p.read_text(); ANCHOR = "<!-- limits:begin" if "<!-- limits:begin" in s else "## 它做不到什么（同样重要）"
 item5 = f'''**5. 训练它下五子棋：能学会，但功劳要分清。**
 果蝇脑（一个突触都不训练）+ 一层线性读出，学会了给五子棋的每条线估价——14,641 种线型每一种都在脑子里跑过一遍，
 它自己排出的顺序（成五 > 活四 > 冲四、活三 > …）全部正确，第一选择与深度 8 搜索一致的比例 **{pct(A['fly_intact']['test_top1'])}**（随机 {pct(S['train']['random_top1'])}、不经过脑子 {pct(A['raw24']['test_top1'])}）。
@@ -16,8 +16,8 @@ item5 = f'''**5. 训练它下五子棋：能学会，但功劳要分清。**
 
 '''
 import re
-if "**5. 训练它下五子棋" in s: s = re.sub(r"\*\*5\. 训练它下五子棋.*?(?=## 它做不到什么)", lambda m: item5, s, flags=re.S)
-else: s = s.replace("## 它做不到什么（同样重要）", item5 + "## 它做不到什么（同样重要）", 1)
+if "**5. 训练它下五子棋" in s: s = re.sub(r"\*\*5\. 训练它下五子棋.*?详见 \[docs/log/report\.md §46\]\(docs/log/report\.md\)。\n\n", lambda m: item5, s, count=1, flags=re.S)   # 只换这一条自己（2026-09-23 修：原来一路匹配到「它做不到什么」，把后面几节全吞了）
+else: s = s.replace(ANCHOR, item5 + ANCHOR, 1)
 row = f"| 自对弈强化（「多巴胺」式三因子规则）让它越下越强 | **阴性**：强化后的表对强化前 {wl(RL['final']['d4_vs_supervised_d4'])}（{pct(RL['win_rate_vs_supervised'])}，事先定的线是 55%）。而且奖励预测误差是在连接组**外面**算的——这个模型自己的多巴胺神经元不放电（[§46.7](docs/log/report.md)） |\n"
 if "自对弈强化（「多巴胺」" in s: s = re.sub(r"\| 自对弈强化（「多巴胺」[^\n]*\n", lambda m: row, s)
 else: s = s.replace("| 学习 / 记忆 / 可塑性 |", row + "| 学习 / 记忆 / 可塑性 |", 1)
@@ -38,7 +38,7 @@ if DM:
 sec = f"""<!-- gomoku:begin （本节由 scratch/patch_readme_gomoku.py 从结果文件渲染）-->
 ## 五子棋：和一颗果蝇脑下棋
 
-游戏页（[数字果蝇实验室](https://suifei.github.io/flywire-fly-lab/game.html)）顶部有两个模式标签：**篮球场**和**五子棋**。切到五子棋，球场那只果蝇连同它的世界一起冻结，
+游戏页（[数字果蝇实验室](https://suifei.github.io/flywire-fly-lab/game.html)）顶部的模式标签里有**五子棋**。切过去，另外那只果蝇连同它的世界一起冻结，
 主画面换成 15×15 的棋盘，左边的三块面板（实时 spike、下行神经元、感觉输入）改为显示**正在下棋的那只果蝇**。
 
 **怎么玩**
@@ -75,11 +75,11 @@ sec = f"""<!-- gomoku:begin （本节由 scratch/patch_readme_gomoku.py 从结�
 2. **自对弈强化（「多巴胺」式三因子规则）是阴性结果**：强化后的表对强化前 {wl(RL['final']['d4_vs_supervised_d4'])}；而且奖励预测误差是在连接组外面算的——这个模型自己的多巴胺神经元不放电。
 3. **五子棋第一版的全部数字已作废**：当时给大脑换输入不清上一批刺激，每个棋盘喂进去几乎是同一个输入。
 
-复现：`AGENTS.md` 里「五子棋 v2」一段是完整命令；细节与踩过的坑见 [docs/log/report.md §46](docs/log/report.md)；改了 `gomoku/` 或 `dodge/brain.js` 之后跑 `node gomoku/test_engine.js`。
+复现：本地工程笔记 `AGENTS.md`（未入库）里「五子棋 v2」一段是完整命令；细节与踩过的坑见 [docs/log/report.md §46](docs/log/report.md)；改了 `gomoku/` 或 `dodge/brain.js` 之后跑 `node gomoku/test_engine.js`。
 <!-- gomoku:end -->
 """
 if "<!-- gomoku:begin" in s: s = re.sub(r"<!-- gomoku:begin.*?<!-- gomoku:end -->\n", lambda m: sec, s, flags=re.S)
-else: s = s.replace("## 它做不到什么（同样重要）", sec + "\n## 它做不到什么（同样重要）", 1)
+else: s = s.replace(ANCHOR, sec + "\n" + ANCHOR, 1)
 # ── 生活模式一节（<!-- life:begin/end -->）─────────────────────────────────
 LF = ROOT / "results/dodge/life_summary.json"
 if LF.exists():
@@ -106,5 +106,5 @@ if LF.exists():
 <!-- life:end -->
 """
     if "<!-- life:begin" in s: s = re.sub(r"<!-- life:begin.*?<!-- life:end -->\n", lambda m: life, s, flags=re.S)
-    else: s = s.replace("## 它做不到什么（同样重要）", life + "\n## 它做不到什么（同样重要）", 1)
+    else: s = s.replace(ANCHOR, life + "\n" + ANCHOR, 1)
 p.write_text(s); print("README 已更新")

@@ -1,0 +1,9 @@
+{
+ "source": "results/sugar_brian2/（run_experiment.py --preset sugar --t_run 1）",
+ "n_neurons": 138639,
+ "sim_s": 2.47,
+ "active_neurons": 398,
+ "MN9_left": 98.0,
+ "MN9_right": 69.0,
+ "other_readouts_all_zero": true
+}
