@@ -2769,7 +2769,7 @@ code { font: 12px var(--mono); }
       g.onSpike = i => { const k = map43[i]; if (k >= 0) { spikeBuf.push(k); brainBuf.push(k); } };
       g.onEvent = (type, o) => { if (type === "sound") note("嗡——"); else if (type === "dopamine" && o.on) { const now = g.body.age; daNote[o.cluster] = daNote[o.cluster] || -99; if (now - daNote[o.cluster] > 5) { daNote[o.cluster] = now; note(o.cluster === "PAM" ? "（奖赏多巴胺神经元 PAM 开始放电）" : "（惩罚多巴胺神经元 PPL1 开始放电）"); } } };
       try { const st = JSON.parse(localStorage.getItem(KEY) || "null"); if (st && st.body) { Object.assign(g.body, st.body); born = st.born || born; for (const d of st.diary || []) diary.push(d);
-        if (st.mem && g.MB) g.MB.plast.loadSparse(st.mem); for (const L of st.cut || []) legs.amputate(L, true); note("（它还活着，接着上次过——记忆也还在）"); } } catch (e) {}
+        if (st.mem && g.MB) g.MB.plast.loadSparse(st.mem); for (const L of st.cut || []) legs.amputate(L, true); note("（它还活着，接着上次过——记忆也还在" + ((st.cut || []).length ? "；上次截掉的 " + st.cut.map(L => LEGCN[L]).join("、") + "腿也还没接回去" : "") + "）"); } } catch (e) {}
       syncLegButtons();
       window.__life = g;
     }
@@ -2876,7 +2876,7 @@ code { font: 12px var(--mono); }
       // 世界视图左下角的浮层：步态图（六条腿的支撑 / 回摆）+ 蘑菇体（多巴胺、记忆）
       if (legs && g.MB) {
         const bw = Math.min(340, gw - 16), bh = 166, bx = x0 + 8, by = y0 + gh - bh - 8 - (v3 && world === "nature" ? 50 : 0), MBs = g.MB; x.fillStyle = "rgba(255,255,255,.86)"; x.fillRect(bx, by, bw, bh); x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 1; x.strokeRect(bx + .5, by + .5, bw, bh);
-        x.font = "600 11px " + fnt; x.fillStyle = "#222"; x.fillText("六条腿（黑 = 支撑相，脚钉在地上推身体）", bx + 6, by + 13);
+        x.font = "600 11px " + fnt; x.fillStyle = "#222"; x.fillText(legs && legs.legs.some(l => !l.attached) ? "六条腿（黑 = 支撑相；红 = 截掉了，在下面按钮里点一下接回去）" : "六条腿（黑 = 支撑相，脚钉在地上推身体）", bx + 6, by + 13);
         const rx = bx + 34, rw = bw - 40, rh = 8, rp = 11; x.font = "9.5px " + fnt;
         LEGN.forEach((L, r) => { const yy = by + 19 + r * rp; x.fillStyle = "#555"; x.fillText(LEGCN[L], bx + 6, yy + rh - 0.5); x.fillStyle = "rgba(0,0,0,.07)"; x.fillRect(rx, yy, rw, rh);
           for (let i = 0; i < gaitHist.length; i++) { const v = gaitHist[i][r]; if (!v) continue; x.fillStyle = v === 2 ? "#c0392b" : "#1a1c20"; x.fillRect(rx + rw * i / 160, yy, Math.ceil(rw / 160), rh); } });
