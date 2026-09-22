@@ -44,6 +44,7 @@ const chromePath = () => [process.env.CHROME_PATH,
   const browser = await puppeteer.launch({ executablePath: exe, headless: "new",
     args: ["--no-sandbox", "--allow-file-access-from-files"] });
   const page = await browser.newPage();
+  await page.evaluateOnNewDocument(l => { try { localStorage.setItem("fly-lang", l); } catch (e) {} }, process.env.LANG_UI || "zh");   // 这些检查针对中文界面；英文模式由 i18n/residue.js 单独测
   await page.setViewport({ width: 1200, height: 900 });
   const errs = [];
   page.on("pageerror", e => errs.push(e.message));

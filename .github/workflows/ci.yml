@@ -95,12 +95,23 @@ jobs:
           python3 eco/collect_results.py && python3 eco/build.py
           node eco/page_test.js
 
+      - name: 页面中英双语：词典自检、每条中文都有译文、英文模式下真浏览器里没有残留的中文
+        # 页面源码写中文，英文由 i18n/i18n.js 按浏览器语言换上（词典 i18n/en.json）。改了页面上的中文却没补译文，这里就红：
+        #   extract.js --missing 从刚构建出来的三个页面重新抽目录；residue.js 用英文模式把各个模式点一遍，数还剩几种中文句子
+        #   （页面里有随机生成的内容，留 10 种的余量）。补译文：见 i18n/GLOSSARY.md 与 python3 i18n/build_dict.py 的说明。
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python3 i18n/build_dict.py --check
+          node i18n/extract.js --missing
+          node i18n/residue.js --max 10
+
       - name: 复现台账校验（每条主张引用的脚本与结果文件必须存在）
         # 台账是「复现了什么」的唯一事实源，REPRODUCTION.md 与游戏页都从它渲染。
         # 死链接就是台账开始腐烂的信号，所以在 CI 里挡住。
         run: python3 scripts/reproduction.py --check
 
-      - name: 中英两份 README 与结果文件一致（README.en.md 整份渲染；数字不手抄）
+      - name: 中英两份 README 与结果文件一致（README.md 英文、README.zh-CN.md 中文；数字不手抄）
         run: python3 scripts/render_readme.py --check
 
       - name: 报告数字与结果文件一致（防手抄）

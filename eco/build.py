@@ -15,7 +15,8 @@ surf = json.load(open(os.path.join(ROOT, "results/eco/brain_surface.json")))
 slim = {k: surf[k] for k in ("inputs", "features", "maxhz", "layers")}; slim["heldout"] = {f: {"usable": v["usable"]} for f, v in surf["heldout"].items()}
 summary = json.load(open(os.path.join(ROOT, "results/eco/summary.json")))
 dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-html = tpl.replace("/*__ECO_MODULES__*/", js).replace("/*__SURF__*/null", dump(slim)).replace("/*__RESULTS__*/null", dump(summary))
+_d = os.path.join(ROOT, "i18n/dict_eco.json"); i18n = open(os.path.join(ROOT, "i18n/i18n.js"), encoding="utf-8").read().replace("/*__I18N_DICT__*/{}", open(_d, encoding="utf-8").read() if os.path.exists(_d) else "{}")   # 中文 / English
+html = tpl.replace("/*__I18N__*/", i18n).replace("/*__ECO_MODULES__*/", js).replace("/*__SURF__*/null", dump(slim)).replace("/*__RESULTS__*/null", dump(summary))
 assert "/*__" not in html, "还有没替换的占位符"
 for out in ("docs/ecobox.html", "results/eco/ecobox.html"):
     open(os.path.join(ROOT, out), "w", encoding="utf-8").write(html)

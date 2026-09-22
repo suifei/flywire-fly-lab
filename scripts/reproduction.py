@@ -120,7 +120,7 @@ for _m in _re.finditer(r"^\|\s*(\d+)\s*\|\s*[^|]+\|[^|]+\|[^|]+\|\s*$", _rep, _r
 if _r3 != set(range(1, max(_r3) + 1)) if _r3 else True:
     bad.append(f"错误账本第三轮编号不连续：{sorted(_r3)}")
 _total = ROUND12 + len(_r3)
-for _f, _pat in [("README.md", r"共查出 \*\*(\d+) 处\*\*问题"),
+for _f, _pat in [("README.zh-CN.md", r"共查出 \*\*(\d+) 处\*\*问题"), ("README.md", r"found \*\*(\d+)\*\* problems"),
                  ("docs/index.html", r"共查出 (\d+) 处问题")]:
     _t = (ROOT / _f).read_text()
     _m = _re.search(_pat, _t)
@@ -156,68 +156,60 @@ def plain(t):
     return t.replace("**", "")
 
 
-# ── 渲染 Markdown ────────────────────────────────────
-L = ["# 复现台账",
-     "",
-     "**这是本项目的「复现了什么」的唯一事实源。** 每次迭代先读这里；要看怎么一步步做的、"
-     "中途错在哪、改过几版，去 [`docs/log/report.md`](docs/log/report.md)（过程日志，约 6.5 万字）。",
-     "",
-     "本文件由 `python3 scripts/reproduction.py` 从 `scripts/reproduction_data.py` 渲染，**不要手改**。",
-     "渲染时会校验每条主张引用的脚本与结果文件是否存在。",
-     "",
-     "| 状态 | 条数 |", "|---|---|"]
-for k, (icon, name) in LABEL.items():
-    if n[k]:
-        L.append(f"| {icon} {name} | {n[k]} |")
-L += ["", "---", ""]
-
-for p in PAPERS:
-    L.append(f"## {p['cite']}")
-    L.append("")
-    if p.get("url"):
-        L.append(f"<{p['url']}>")
+# ── 渲染 Markdown（中文 REPRODUCTION.md；英文 REPRODUCTION.en.md 用同一个函数，数据文字经 i18n/en.json 翻译）────
+LABEL_EN = {"reproduced": "reproduced", "partial": "partial", "negative": "negative result", "not_done": "not done", "blocked": "blocked"}
+def render(en=False):
+    if en:
+        sys.path.insert(0, str(ROOT / "i18n")); import tr as _tr; T = _tr.t
+    else:
+        T = lambda x: x
+    H = (lambda zh, e: e) if en else (lambda zh, e: zh)
+    lab = lambda k: (LABEL[k][0], LABEL_EN[k] if en else LABEL[k][1])
+    L = [H("# 复现台账", "# Reproduction ledger"), "",
+         H("**这是本项目的「复现了什么」的唯一事实源。** 每次迭代先读这里；要看怎么一步步做的、中途错在哪、改过几版，去 [`docs/log/report.md`](docs/log/report.md)（过程日志，约 6.5 万字）。",
+           "**This is the single source of truth for what this project reproduced.** For how it was done step by step — including the mistakes and revisions — see the lab notebook [`docs/log/report.md`](docs/log/report.md) (Chinese). [中文版](REPRODUCTION.md)"), "",
+         H("本文件由 `python3 scripts/reproduction.py` 从 `scripts/reproduction_data.py` 渲染，**不要手改**。", "Rendered by `python3 scripts/reproduction.py` from `scripts/reproduction_data.py` — **do not edit by hand**. The English text is translated through `i18n/en.json`; the numbers are the same as in the Chinese ledger."),
+         H("渲染时会校验每条主张引用的脚本与结果文件是否存在。", "Rendering checks that every script and result file a claim cites exists."), "",
+         H("| 状态 | 条数 |", "| Status | Count |"), "|---|---|"]
+    for k in LABEL:
+        if n[k]: ic, nm = lab(k); L.append(f"| {ic} {nm} | {n[k]} |")
+    L += ["", "---", ""]
+    for p in PAPERS:
+        L.append(f"## {T(p['cite'])}"); L.append("")
+        if p.get("url"): L += [f"<{p['url']}>", ""]
+        if p.get("note"): L += [f"> {T(p['note'])}", ""]
+        L += [H("| 状态 | 主张 | 我们的结果 | 脚本 |", "| Status | Claim | Our result | Script |"), "|---|---|---|---|"]
+        for c in p["claims"]:
+            sc = f"`{c['script']}`" if c.get("script") else "—"
+            L.append(f"| {LABEL[c['status']][0]} | {T(c['what'])} | {T(c['result'])} | {sc} |")
         L.append("")
-    if p.get("note"):
-        L.append(f"> {p['note']}")
+        for c in p["claims"]:
+            if c.get("caveat"): L.append(f"- **{plain(T(c['what']))}** — {T(c['caveat'])}" + ((f"（日志 {c['log']}）" if not en else f" (notebook {c['log']})") if c.get("log") else ""))
         L.append("")
-    L.append("| 状态 | 主张 | 我们的结果 | 脚本 |")
-    L.append("|---|---|---|---|")
-    for c in p["claims"]:
-        icon = LABEL[c["status"]][0]
-        sc = f"`{c['script']}`" if c.get("script") else "—"
-        L.append(f"| {icon} | {c['what']} | {c['result']} | {sc} |")
+    L += ["---", "", H("## 关键参数", "## Key parameters"), "",
+          H("凡是**我们自己标定**或**手选**的参数都标出来了——不标就等于冒充论文值。", "Every parameter we **calibrated ourselves** or **picked by hand** is listed — leaving one out would pass it off as a published value."), "",
+          H("| 参数 | 取值 | 来源 | 说明 |", "| Parameter | Value | Source | Note |"), "|---|---|---|---|"]
+    for q in PARAMETERS: L.append(f"| `{T(q['name'])}` | **{T(q['value'])}** | {T(q['source'])} | {T(q['note'])} |")
+    L += ["", "---", "", H("## 本项目自己的结果", "## This project's own results"), "",
+          H("下面这些不是对某篇论文的复现，是这个项目自己做出来的结论——**阴性的也在里面**。", "These are not reproductions of a paper but conclusions this project reached itself — **negative results included**."), "",
+          H("| 问题 | 结果 | 脚本 |", "| Question | Result | Script |"), "|---|---|---|"]
+    for f_ in FINDINGS: L.append(f"| {T(f_['what'])} | {T(f_['result'])} | `{f_['script']}` |")
     L.append("")
-    for c in p["claims"]:
-        if c.get("caveat"):
-            L.append(f"- **{plain(c['what'])}** — {c['caveat']}" + (f"（日志 {c['log']}）" if c.get("log") else ""))
+    for f_ in FINDINGS:
+        if f_.get("caveat"): L.append(f"- **{plain(T(f_['what']))}** — {T(f_['caveat'])}" + ((f"（日志 {f_['log']}）" if not en else f" (notebook {f_['log']})") if f_.get("log") else ""))
+    L += ["", "---", "", H("## 还没做的（按可行性排序）", "## Not done yet (most feasible first)"), ""]
+    for p, c in [(p, c) for p in PAPERS for c in p["claims"] if c["status"] in ("not_done", "blocked")]:
+        L.append(f"- {LABEL[c['status']][0]} **{plain(T(c['what']))}**" + (f"（{p['cite'].split(',')[0]}）：" if not en else f" ({p['cite'].split(',')[0]}): ") + (T(c.get('caveat')) or '—'))
     L.append("")
+    return L, (_tr.MISSING if en else {})
 
-L += ["---", "", "## 关键参数", "",
-      "凡是**我们自己标定**或**手选**的参数都标出来了——不标就等于冒充论文值。", "",
-      "| 参数 | 取值 | 来源 | 说明 |", "|---|---|---|---|"]
-for q in PARAMETERS:
-    L.append(f"| `{q['name']}` | **{q['value']}** | {q['source']} | {q['note']} |")
-L += ["", "---", "", "## 本项目自己的结果", "",
-      "下面这些不是对某篇论文的复现，是这个项目自己做出来的结论——**阴性的也在里面**。", "",
-      "| 问题 | 结果 | 脚本 |", "|---|---|---|"]
-for f_ in FINDINGS:
-    L.append(f"| {f_['what']} | {f_['result']} | `{f_['script']}` |")
-L.append("")
-for f_ in FINDINGS:
-    if f_.get("caveat"):
-        L.append(f"- **{plain(f_['what'])}** — {f_['caveat']}" + (f"（日志 {f_['log']}）" if f_.get("log") else ""))
-
-L += ["", "---", "",
-      "## 还没做的（按可行性排序）", ""]
-todo = [(p, c) for p in PAPERS for c in p["claims"] if c["status"] in ("not_done", "blocked")]
-for p, c in todo:
-    icon = LABEL[c["status"]][0]
-    L.append(f"- {icon} **{plain(c['what'])}**（{p['cite'].split(',')[0]}）：{c.get('caveat') or '—'}")
-L.append("")
-
+L, _ = render(False)
 (ROOT / "REPRODUCTION.md").write_text("\n".join(L))
 doc = dict(说明="复现台账，由 scripts/reproduction.py 渲染；页面与 REPRODUCTION.md 都从这里取数，不许手抄",
            counts=n, total_claims=tot, papers=PAPERS, parameters=PARAMETERS, findings=FINDINGS)
 (ROOT / "results/reproduction.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1))
 print(f"\n→ REPRODUCTION.md（{len('\n'.join(L))/1024:.1f} KB）")
 print("→ results/reproduction.json")
+L_en, miss = render(True)
+(ROOT / "REPRODUCTION.en.md").write_text("\n".join(L_en))
+print(f"→ REPRODUCTION.en.md（{len(chr(10).join(L_en))/1024:.1f} KB；" + (f"{len(miss)} 段没有译文，保留了中文：先跑 node i18n/extract.js 与翻译，再 python3 i18n/build_dict.py" if miss else "每一段都有译文") + "）")

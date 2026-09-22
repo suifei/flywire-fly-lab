@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parent.parent; R = ROOT / "results/gomoku"
 S = json.loads((R / "lines_summary.json").read_text()); A = S["train"]["arms"]; P = S["play"]; RL = S["rl"]; OL = S["opto_leak"]
 pct = lambda v: f"{v * 100:.1f}%"; wl = lambda r: f"{r['win']}–{r['loss']}" + (f"–{r['draw']}" if r.get("draw") else "")
 E = P["engine"]["fly_intact"]; HH = P["head_to_head"]
-p = ROOT / "README.md"; s = p.read_text(); ANCHOR = "<!-- limits:begin" if "<!-- limits:begin" in s else "## 它做不到什么（同样重要）"
+p = ROOT / "README.zh-CN.md"; s = p.read_text(); ANCHOR = "<!-- limits:begin" if "<!-- limits:begin" in s else "## 它做不到什么（同样重要）"
 item5 = f'''**5. 训练它下五子棋：能学会，但功劳要分清。**
 果蝇脑（一个突触都不训练）+ 一层线性读出，学会了给五子棋的每条线估价——14,641 种线型每一种都在脑子里跑过一遍，
 它自己排出的顺序（成五 > 活四 > 冲四、活三 > …）全部正确，第一选择与深度 8 搜索一致的比例 **{pct(A['fly_intact']['test_top1'])}**（随机 {pct(S['train']['random_top1'])}、不经过脑子 {pct(A['raw24']['test_top1'])}）。

@@ -1,11 +1,12 @@
 <title>数字果蝇实验室</title>
+<script>/*__I18N__*/</script>
 <link rel="icon" type="image/png" href="data:image/png;base64,/*__BRAND_ICON__*/">
 <meta property="og:title" content="数字果蝇实验室 · flywire-fly-lab">
 <meta property="og:description" content="15,055 个真实的果蝇神经元在浏览器里实时放电：五感全开，生活在一个有重力、有天气的 3D 大自然里；还能和它下五子棋。">
 <meta property="og:image" content="https://suifei.github.io/flywire-fly-lab/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://suifei.github.io/flywire-fly-lab/og.jpg">
-<meta name="description" content="数字果蝇游乐场：4,599 个 FlyWire 连接组神经元在浏览器里实时决定躲球、起飞、进食、梳理与后退">
+<meta name="description" content="数字果蝇实验室：FlyWire 连接组的真实神经元在浏览器里实时放电，决定躲避、起飞、进食、梳理与后退">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+QingKe+HuangYou&display=swap">
@@ -2898,7 +2899,8 @@ code { font: 12px var(--mono); }
       let px = v3 ? 14 : vw + 6, py = 8; const pw = v3 ? 226 : W - px - 10, o = m.hz, B = g.body, colBottom = v3 ? y0 + gh - 166 - 16 - (world === "nature" ? 50 : 0) : H;
       if (v3) { x.fillStyle = "rgba(252,252,250,.86)"; x.fillRect(6, 4, pw + 18, colBottom - 4); x.strokeStyle = "rgba(0,0,0,.2)"; x.lineWidth = 1; x.strokeRect(6.5, 4.5, pw + 18, colBottom - 4); }
       const head = t => { py += 10; x.fillStyle = ink; x.font = "600 12.5px " + fnt; x.fillText(t, px, py); py += 9; };
-      const meter = (lab, v, max, c, txt) => { x.fillStyle = mut; x.font = "11px " + fnt; x.fillText(lab, px, py + 8); const bx = px + 34, bw = pw - 34 - 46; x.fillStyle = "rgba(128,128,128,.22)"; x.fillRect(bx, py, bw, 9);
+      const LW = window.I18N && window.I18N.lang === "en" ? 104 : 34;   /* 标签栏：中文两个字 34 px；英文标签长，放宽 */
+      const meter = (lab, v, max, c, txt) => { x.fillStyle = mut; x.font = "11px " + fnt; x.fillText(lab, px, py + 8); const bx = px + LW, bw = pw - LW - 46; x.fillStyle = "rgba(128,128,128,.22)"; x.fillRect(bx, py, bw, 9);
         x.fillStyle = c; x.fillRect(bx, py, bw * Math.max(0, Math.min(1, v / max)), 9); x.fillStyle = ink; x.fillText(txt, bx + bw + 5, py + 8); py += 14; };
       head("身体（不属于大脑）"); meter("能量", B.energy, 1, "#d08a2a", (B.energy * 100).toFixed(0) + "%"); meter("水分", B.hydration, 1, "#3c8de0", (B.hydration * 100).toFixed(0) + "%"); py += 4;
       head("五感 → 真实感受器（Hz）");
@@ -2909,7 +2911,7 @@ code { font: 12px var(--mono); }
       head("连接组的决定（读出，Hz）");
       meter("起飞", o.gf, 250, palette["--gf"] || "#1baf7a", o.gf); meter("左转", o.dnaL, 120, "#5b7fd6", o.dnaL); meter("右转", o.dnaR, 120, "#d6795b", o.dnaR); meter("伸喙", o.mn9, 100, "#ce7828", o.mn9); meter("梳理", o.adn1, 60, "#4aa08a", o.adn1); meter("后退", o.mdn, 60, "#888", o.mdn); py += 4;
       head("它在想什么"); x.font = "11px " + fnt;
-      const lines = diary.slice(-Math.max(2, Math.floor((colBottom - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + d.s; while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2); x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
+      const lines = diary.slice(-Math.max(2, Math.floor((colBottom - py - 6) / 15))); for (const d of lines) { x.fillStyle = mut; const t = Math.floor(d.t / 60) + ":" + String(Math.floor(d.t % 60)).padStart(2, "0"); let str = t + "  " + (window.I18N ? window.I18N.t(d.s) : d.s); while (x.measureText(str).width > pw && str.length > 8) str = str.slice(0, -2);   /* 先翻译再截短（截的是中文原句的话，画出来是半截中文，查不到译文） */ x.fillStyle = d === diary[diary.length - 1] ? ink : mut; x.fillText(str, px, py + 8); py += 15; }
     }
     function show(v, threeD) {                                // threeD: false = 俯视开放世界；true / "court" = 3D 篮球场；"nature" = 3D 大自然
       on = v; view = v && threeD ? "3d" : "2d"; const wantWorld = !v ? world : threeD === "nature" ? "nature" : threeD ? "3d" : "2d"; cv.hidden = !v; cv.style.pointerEvents = view === "3d" ? "none" : ""; window.__life3d = view === "3d";

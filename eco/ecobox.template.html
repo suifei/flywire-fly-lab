@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<script>/*__I18N__*/</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>数字果蝇生态箱</title>
 <meta name="description" content="无人值守的数字果蝇生态箱：你只设计世界规则，果蝇在生存压力下自己学、自己进化。连接组是固定的身体，可塑性层是后天学习。">
@@ -134,9 +135,10 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px
   // 可塑性层的特征名 → 人话
   const FB = { vinegar: "醋味", geosmin: "土臭味", hygro: "湿度", thermo: "温度", jo: "风", odorA: "好果子的气味", audio: "声音", lc4: "逼近的黑影", touch: "触碰" }, FI = { hunger: "饿", thirst: "渴", tired: "累", hurt: "受伤", scent: "气味重", hot: "热", cold: "冷" },
     FBR = { dnaL: "左转神经元", dnaR: "右转神经元", gf: "巨纤维", mn9: "伸喙神经元", adn1: "梳理神经元", mdn: "后退神经元", odn1: "oDN1", bdn2: "BDN2", mbonReward: "蘑菇体输出·奖赏侧", mbonPunish: "蘑菇体输出·惩罚侧", pam: "PAM", ppl1: "PPL1" }, FT = { sugar: "甜味", water: "水味", bitter: "苦味" };
-  function featName(n) { let m; const sens = t => { const q = /^([a-zA-Z0-9]+)([ΣΔ′])$/.exec(t); return q ? FB[q[1]] + { "Σ": "（强弱）", "Δ": "（左右差）", "′": "（在变强）" }[q[2]] : t; };
+  const L10 = x => window.I18N ? window.I18N.t(x) : x;   /* 拼接前先各自翻译：拼好的「好果子的气味（强弱）」词典里没有，拆开的两半有 */
+  function featName(n) { let m; const sens = t => { const q = /^([a-zA-Z0-9]+)([ΣΔ′])$/.exec(t); return q ? L10(FB[q[1]]) + L10({ "Σ": "（强弱）", "Δ": "（左右差）", "′": "（在变强）" }[q[2]]) : t; };
     if ((m = /^脑:(.+)$/.exec(n))) return FBR[m[1]] || n; if ((m = /^感:(.+)$/.exec(n))) return sens(m[1]); if ((m = /^味:(.+)$/.exec(n))) return FT[m[1]] || n; if ((m = /^内:(.+)$/.exec(n))) return FI[m[1]] || n;
-    if ((m = /^([a-z]+)×(.+)$/.exec(n))) return FI[m[1]] + "的时候 · " + sens(m[2]); if ((m = /^([a-zA-Z]+)Σ×joΔ$/.exec(n))) return "闻到" + FB[m[1]] + "时风从哪边来"; return { "坡:pitch": "上坡", "坡:roll": "侧坡", "光": "亮度", "1": "（总是）" }[n] || n; }
+    if ((m = /^([a-z]+)×(.+)$/.exec(n))) return L10(FI[m[1]] + "的时候") + " · " + sens(m[2]); if ((m = /^([a-zA-Z]+)Σ×joΔ$/.exec(n))) return L10("闻到" + FB[m[1]] + "时风从哪边来"); return { "坡:pitch": "上坡", "坡:roll": "侧坡", "光": "亮度", "1": "（总是）" }[n] || n; }
   const meter = (name, v, txt, color) => `<div class="meter"><span>${name}</span><i><b style="width:${Math.max(0, Math.min(100, v * 100)).toFixed(0)}%${color ? ";background:" + color : ""}"></b></i><span>${txt}</span></div>`;
   function paneFly() { const a = focus() || E.sim.agents.find(x => x.alive); if (!a) return `<p class="small">箱子里现在没有活着的果蝇。</p>`; if (!focus()) focusId = a.id; const p = a.phys, g = a.genome.genes, o = a.out, F = CH.FEATURES, x = a.xin, IX = EcoSenses.IX;
     const top = (w, n) => Array.from(w).map((v, i) => [Plastic.NAMES[i], v]).filter(e => Math.abs(e[1]) > 0.02).sort((u, v) => Math.abs(v[1]) - Math.abs(u[1])).slice(0, n).map(e => `<span class="chip" title="${esc(e[0])}">${esc(featName(e[0]))} ${e[1] > 0 ? "+" : ""}${e[1].toFixed(2)}</span>`).join("") || `<span class="small">还是白纸</span>`;

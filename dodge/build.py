@@ -96,6 +96,7 @@ for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/do
                   ("/*__LEGS_JS__*/", (D / "legs.js").read_text()),
                   ("/*__NATURE_JS__*/", (D / "nature.js").read_text()),
                   ("/*__NATURE3D_JS__*/", (D / "nature3d.js").read_text()),
+                  ("/*__I18N__*/", (ROOT / "i18n/i18n.js").read_text().replace("/*__I18N_DICT__*/{}", (ROOT / "i18n/dict_game.json").read_text() if (ROOT / "i18n/dict_game.json").exists() else "{}")),   # 中文 / English（按浏览器语言；词典由 i18n/build_dict.py 生成）
                   ("/*__ECO_JS__*/", "\n".join((ROOT / "eco" / m).read_text() for m in ["channels.js", "world.js", "physiology.js", "senses.js", "plastic.js", "sim.js", "overlay.js"])),   # 生态箱的可塑性层 + 身体（挂到大自然那只上，默认不装）
                   ("/*__ECO_TRANSFER__*/", (ROOT / "results/eco/nature_transfer.json").read_text() if (ROOT / "results/eco/nature_transfer.json").exists() else "null"),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text()),
