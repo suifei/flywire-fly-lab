@@ -1,1 +1,1 @@
-{"arm":"trained","seed":904,"life_s":900,"alive":true,"cause":null,"drink_s":159.41,"eat_s":91.19,"rest_s":0,"drinks":158,"meals":19,"waterVisits":24,"foodVisits":17,"hits":0,"thirst_mean":0.1,"thirst_end":0.189,"hunger_end":0,"health_end":1,"dist_mm":11609,"jumps":30,"wall_s":998}
+{"arm":"trained","seed":904,"life_s":900,"alive":true,"cause":null,"drink_s":224.1,"eat_s":53.71,"rest_s":0,"drinks":334,"meals":11,"waterVisits":42,"foodVisits":11,"hits":0,"thirst_mean":0.057,"thirst_end":0.111,"hunger_end":0.024,"health_end":1,"dist_mm":10932,"jumps":31,"wall_s":785}

@@ -2,12 +2,12 @@
  "checks": {
   "S1_resume_bit_identical": {
    "pass": true,
-   "uninterrupted": "0c5cef30:230564",
-   "resumed": "0c5cef30:230564",
-   "save_bytes": 887658,
+   "uninterrupted": "1f6c4944:245817",
+   "resumed": "1f6c4944:245817",
+   "save_bytes": 916159,
    "agents": 6,
-   "births": 1,
-   "lives": 32
+   "births": 4,
+   "lives": 30
   },
   "S2_format_stable": {
    "pass": true

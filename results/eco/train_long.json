@@ -9,23 +9,23 @@
   "test_seeds": "5000–5019",
   "retest_seeds": "5100–5119"
  },
- "baseline_median": 443.15,
- "baseline_retest_median": 445.25,
- "need_s": 664.7,
+ "baseline_median": 433.45000000000005,
+ "baseline_retest_median": 423.05,
+ "need_s": 650.2,
  "n_learned": 10,
  "n_retest_ok": 10,
  "n": 10,
- "total_lives": 130,
+ "total_lives": 210,
  "rounds_to_learn": [
-  1,
-  1,
-  1,
-  1,
   2,
   2,
+  2,
+  3,
+  3,
   1,
+  3,
   1,
-  1,
+  2,
   2
  ],
  "individuals": [
@@ -33,43 +33,49 @@
    "k": 0,
    "base": 40000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 2,
+   "lives": 20,
    "last": {
-    "round": 1,
-    "median": 1215.8000000000002,
-    "drink": 0.008,
-    "eat": 0.178,
-    "wall": 0.232,
+    "round": 2,
+    "median": 1217.35,
+    "drink": 0.01,
+    "eat": 0.163,
+    "wall": 0.225,
     "rest": 0,
-    "alive": 6,
+    "alive": 5,
     "causes": {
-     "thirst": 13,
-     "alive": 6,
+     "thirst": 14,
+     "alive": 5,
      "starve": 1
     }
    },
    "retest": {
     "ok": true,
-    "median": 871,
-    "drink": 0.008,
-    "eat": 0.188,
-    "wall": 0.228,
+    "median": 1352.3000000000002,
+    "drink": 0.01,
+    "eat": 0.168,
+    "wall": 0.234,
     "rest": 0,
-    "alive": 7,
+    "alive": 8,
     "causes": {
-     "alive": 7,
-     "thirst": 11,
-     "starve": 2
+     "thirst": 12,
+     "alive": 8
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1215.8000000000002,
-     "wall": 0.232,
+     "median": 403.95,
+     "wall": 0.073,
+     "rest": 0.418,
+     "drink": 0
+    },
+    {
+     "round": 2,
+     "median": 1217.35,
+     "wall": 0.225,
      "rest": 0,
-     "drink": 0.008
+     "drink": 0.01
     }
    ]
   },
@@ -77,42 +83,49 @@
    "k": 1,
    "base": 41000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 2,
+   "lives": 20,
    "last": {
-    "round": 1,
-    "median": 1800,
-    "drink": 0.04,
-    "eat": 0.184,
-    "wall": 0.215,
+    "round": 2,
+    "median": 700.5,
+    "drink": 0.042,
+    "eat": 0.069,
+    "wall": 0.139,
     "rest": 0,
-    "alive": 17,
+    "alive": 2,
     "causes": {
-     "alive": 17,
-     "thirst": 2,
-     "starve": 1
+     "starve": 8,
+     "thirst": 10,
+     "alive": 2
     }
    },
    "retest": {
     "ok": true,
-    "median": 1800,
-    "drink": 0.038,
-    "eat": 0.178,
-    "wall": 0.231,
+    "median": 677.55,
+    "drink": 0.058,
+    "eat": 0.061,
+    "wall": 0.148,
     "rest": 0,
-    "alive": 17,
+    "alive": 0,
     "causes": {
-     "alive": 17,
-     "thirst": 3
+     "starve": 11,
+     "thirst": 9
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.215,
+     "median": 498.45000000000005,
+     "wall": 0.178,
      "rest": 0,
-     "drink": 0.04
+     "drink": 0.003
+    },
+    {
+     "round": 2,
+     "median": 700.5,
+     "wall": 0.139,
+     "rest": 0,
+     "drink": 0.042
     }
    ]
   },
@@ -120,42 +133,49 @@
    "k": 2,
    "base": 42000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 2,
+   "lives": 20,
    "last": {
-    "round": 1,
+    "round": 2,
     "median": 1800,
-    "drink": 0.018,
-    "eat": 0.197,
-    "wall": 0.26,
+    "drink": 0.181,
+    "eat": 0.151,
+    "wall": 0.153,
     "rest": 0,
-    "alive": 12,
+    "alive": 18,
     "causes": {
-     "alive": 12,
-     "thirst": 8
+     "alive": 18,
+     "thirst": 2
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.021,
-    "eat": 0.188,
-    "wall": 0.248,
+    "drink": 0.225,
+    "eat": 0.136,
+    "wall": 0.135,
     "rest": 0,
-    "alive": 16,
+    "alive": 15,
     "causes": {
-     "alive": 16,
-     "thirst": 2,
-     "starve": 2
+     "alive": 15,
+     "starve": 3,
+     "thirst": 2
     }
    },
    "history": [
     {
      "round": 1,
+     "median": 407.85,
+     "wall": 0.099,
+     "rest": 0.636,
+     "drink": 0
+    },
+    {
+     "round": 2,
      "median": 1800,
-     "wall": 0.26,
+     "wall": 0.153,
      "rest": 0,
-     "drink": 0.018
+     "drink": 0.181
     }
    ]
   },
@@ -163,43 +183,57 @@
    "k": 3,
    "base": 43000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 3,
+   "lives": 30,
    "last": {
-    "round": 1,
+    "round": 3,
     "median": 1800,
-    "drink": 0.017,
-    "eat": 0.159,
-    "wall": 0.206,
+    "drink": 0.159,
+    "eat": 0.123,
+    "wall": 0.186,
     "rest": 0,
-    "alive": 11,
+    "alive": 17,
     "causes": {
-     "starve": 3,
-     "alive": 11,
-     "thirst": 6
+     "alive": 17,
+     "starve": 2,
+     "thirst": 1
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.021,
-    "eat": 0.149,
-    "wall": 0.197,
+    "drink": 0.154,
+    "eat": 0.167,
+    "wall": 0.15,
     "rest": 0,
     "alive": 13,
     "causes": {
      "alive": 13,
-     "thirst": 5,
-     "starve": 2
+     "thirst": 6,
+     "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.206,
+     "median": 457.5,
+     "wall": 0.178,
      "rest": 0,
-     "drink": 0.017
+     "drink": 0.002
+    },
+    {
+     "round": 2,
+     "median": 542.35,
+     "wall": 0.281,
+     "rest": 0,
+     "drink": 0.003
+    },
+    {
+     "round": 3,
+     "median": 1800,
+     "wall": 0.186,
+     "rest": 0,
+     "drink": 0.159
     }
    ]
   },
@@ -207,50 +241,57 @@
    "k": 4,
    "base": 44000,
    "learned": true,
-   "rounds": 2,
-   "lives": 20,
+   "rounds": 3,
+   "lives": 30,
    "last": {
-    "round": 2,
+    "round": 3,
     "median": 1800,
-    "drink": 0.044,
-    "eat": 0.181,
-    "wall": 0.217,
+    "drink": 0.113,
+    "eat": 0.154,
+    "wall": 0.198,
     "rest": 0,
-    "alive": 15,
+    "alive": 17,
     "causes": {
-     "thirst": 4,
-     "alive": 15,
+     "alive": 17,
+     "thirst": 2,
      "starve": 1
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.049,
-    "eat": 0.16,
-    "wall": 0.215,
+    "drink": 0.126,
+    "eat": 0.169,
+    "wall": 0.174,
     "rest": 0,
-    "alive": 14,
+    "alive": 18,
     "causes": {
-     "alive": 14,
-     "thirst": 5,
+     "alive": 18,
+     "thirst": 1,
      "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 656.3499999999999,
-     "wall": 0.165,
+     "median": 425.8,
+     "wall": 0.173,
      "rest": 0,
-     "drink": 0.005
+     "drink": 0
     },
     {
      "round": 2,
+     "median": 423.15,
+     "wall": 0.106,
+     "rest": 0.558,
+     "drink": 0.002
+    },
+    {
+     "round": 3,
      "median": 1800,
-     "wall": 0.217,
+     "wall": 0.198,
      "rest": 0,
-     "drink": 0.044
+     "drink": 0.113
     }
    ]
   },
@@ -258,49 +299,40 @@
    "k": 5,
    "base": 45000,
    "learned": true,
-   "rounds": 2,
-   "lives": 20,
+   "rounds": 1,
+   "lives": 10,
    "last": {
-    "round": 2,
-    "median": 1800,
-    "drink": 0.036,
-    "eat": 0.163,
-    "wall": 0.215,
+    "round": 1,
+    "median": 655.8,
+    "drink": 0.005,
+    "eat": 0.23,
+    "wall": 0.135,
     "rest": 0,
-    "alive": 19,
+    "alive": 1,
     "causes": {
-     "alive": 19,
-     "thirst": 1
+     "thirst": 19,
+     "alive": 1
     }
    },
    "retest": {
     "ok": true,
-    "median": 1800,
-    "drink": 0.03,
-    "eat": 0.169,
-    "wall": 0.208,
+    "median": 891.9000000000001,
+    "drink": 0.007,
+    "eat": 0.243,
+    "wall": 0.153,
     "rest": 0,
-    "alive": 13,
+    "alive": 0,
     "causes": {
-     "thirst": 6,
-     "alive": 13,
-     "starve": 1
+     "thirst": 20
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 407.35,
-     "wall": 0.147,
-     "rest": 0.399,
-     "drink": 0.001
-    },
-    {
-     "round": 2,
-     "median": 1800,
-     "wall": 0.215,
+     "median": 655.8,
+     "wall": 0.135,
      "rest": 0,
-     "drink": 0.036
+     "drink": 0.005
     }
    ]
   },
@@ -308,42 +340,57 @@
    "k": 6,
    "base": 46000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 3,
+   "lives": 30,
    "last": {
-    "round": 1,
-    "median": 1337.7,
-    "drink": 0.01,
-    "eat": 0.172,
-    "wall": 0.295,
+    "round": 3,
+    "median": 1800,
+    "drink": 0.168,
+    "eat": 0.155,
+    "wall": 0.15,
     "rest": 0,
-    "alive": 9,
+    "alive": 14,
     "causes": {
-     "alive": 9,
-     "thirst": 11
+     "thirst": 4,
+     "alive": 14,
+     "starve": 2
     }
    },
    "retest": {
     "ok": true,
-    "median": 1747.35,
-    "drink": 0.015,
-    "eat": 0.155,
-    "wall": 0.33,
+    "median": 1800,
+    "drink": 0.209,
+    "eat": 0.142,
+    "wall": 0.15,
     "rest": 0,
-    "alive": 9,
+    "alive": 16,
     "causes": {
-     "alive": 9,
-     "thirst": 10,
-     "starve": 1
+     "alive": 16,
+     "starve": 2,
+     "thirst": 2
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1337.7,
-     "wall": 0.295,
+     "median": 438.1,
+     "wall": 0.207,
      "rest": 0,
-     "drink": 0.01
+     "drink": 0.001
+    },
+    {
+     "round": 2,
+     "median": 544.4000000000001,
+     "wall": 0.194,
+     "rest": 0.064,
+     "drink": 0.005
+    },
+    {
+     "round": 3,
+     "median": 1800,
+     "wall": 0.15,
+     "rest": 0,
+     "drink": 0.168
     }
    ]
   },
@@ -356,37 +403,37 @@
    "last": {
     "round": 1,
     "median": 1800,
-    "drink": 0.028,
-    "eat": 0.145,
-    "wall": 0.158,
+    "drink": 0.054,
+    "eat": 0.179,
+    "wall": 0.171,
     "rest": 0,
-    "alive": 14,
+    "alive": 12,
     "causes": {
-     "alive": 14,
-     "starve": 4,
-     "thirst": 2
+     "alive": 12,
+     "thirst": 7,
+     "starve": 1
     }
    },
    "retest": {
     "ok": true,
-    "median": 1641.65,
-    "drink": 0.024,
-    "eat": 0.153,
-    "wall": 0.16,
+    "median": 1800,
+    "drink": 0.092,
+    "eat": 0.163,
+    "wall": 0.173,
     "rest": 0,
-    "alive": 10,
+    "alive": 16,
     "causes": {
-     "alive": 10,
-     "thirst": 10
+     "alive": 16,
+     "thirst": 4
     }
    },
    "history": [
     {
      "round": 1,
      "median": 1800,
-     "wall": 0.158,
+     "wall": 0.171,
      "rest": 0,
-     "drink": 0.028
+     "drink": 0.054
     }
    ]
   },
@@ -394,43 +441,50 @@
    "k": 8,
    "base": 48000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 2,
+   "lives": 20,
    "last": {
-    "round": 1,
+    "round": 2,
     "median": 1800,
-    "drink": 0.035,
-    "eat": 0.157,
-    "wall": 0.195,
+    "drink": 0.145,
+    "eat": 0.158,
+    "wall": 0.167,
     "rest": 0,
-    "alive": 15,
+    "alive": 16,
     "causes": {
-     "alive": 15,
-     "thirst": 4,
+     "alive": 16,
+     "thirst": 3,
      "starve": 1
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.037,
-    "eat": 0.174,
-    "wall": 0.203,
+    "drink": 0.134,
+    "eat": 0.151,
+    "wall": 0.158,
     "rest": 0,
-    "alive": 18,
+    "alive": 16,
     "causes": {
-     "alive": 18,
-     "thirst": 1,
+     "alive": 16,
+     "thirst": 3,
      "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.195,
+     "median": 485.05,
+     "wall": 0.238,
      "rest": 0,
-     "drink": 0.035
+     "drink": 0.002
+    },
+    {
+     "round": 2,
+     "median": 1800,
+     "wall": 0.167,
+     "rest": 0,
+     "drink": 0.145
     }
    ]
   },
@@ -443,45 +497,45 @@
    "last": {
     "round": 2,
     "median": 1800,
-    "drink": 0.041,
-    "eat": 0.201,
-    "wall": 0.207,
+    "drink": 0.161,
+    "eat": 0.138,
+    "wall": 0.158,
     "rest": 0,
-    "alive": 15,
+    "alive": 12,
     "causes": {
-     "alive": 15,
-     "starve": 1,
-     "thirst": 4
+     "alive": 12,
+     "starve": 5,
+     "thirst": 3
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.043,
-    "eat": 0.19,
-    "wall": 0.214,
+    "drink": 0.142,
+    "eat": 0.15,
+    "wall": 0.167,
     "rest": 0,
-    "alive": 17,
+    "alive": 13,
     "causes": {
-     "alive": 17,
-     "thirst": 2,
-     "starve": 1
+     "alive": 13,
+     "thirst": 5,
+     "starve": 2
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 516.05,
-     "wall": 0.21,
-     "rest": 0,
-     "drink": 0.003
+     "median": 400.25,
+     "wall": 0.117,
+     "rest": 0.404,
+     "drink": 0
     },
     {
      "round": 2,
      "median": 1800,
-     "wall": 0.207,
+     "wall": 0.158,
      "rest": 0,
-     "drink": 0.041
+     "drink": 0.161
     }
    ]
   }

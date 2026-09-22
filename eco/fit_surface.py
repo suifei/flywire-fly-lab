@@ -108,6 +108,10 @@ out = {"inputs": inputs, "features": feats, "maxhz": maxhz.tolist(), "hidden": H
        "n_samples": int(len(X)), "n_train": int(len(tr)), "n_test": int(len(te)), "settle_ms": meta["settle_ms"], "read_ms": meta["read_ms"],
        "heldout": rep, "criterion": {"features": need, "r2_hz_min": 0.85, "pass": bool(all(rep[f]["usable"] for f in need)),
                      "note": "事先写定的口径：留出集单次试验、原始 Hz。"}, "noise_ceiling_exploratory": ceiling, "n_random": int(n_random), "manifold": manifold}
+# 噪声模型（eco/measure_fano.js 从真脑量的）：每个特征的等效单元数与 Fano 因子——响应面按它加噪声，不再一律按单个泊松单元（那样高估一倍，l2_diagnosis.js）
+rn_path = os.path.join(ROOT, "results/eco/readout_noise.json")
+if os.path.exists(rn_path):
+    rn = json.load(open(rn_path)); out["noise"] = {"window_s": rn["window_s"], "units": rn["units"], "fano": {f: (rn["fano"][f] if rn["fano"][f] is not None and rn["n_used"][f] >= 3 else 0.5) for f in feats}, "source": "eco/measure_fano.js（真脑，0.1 s 计数）；样本 < 3 的特征取 0.5"}
 json.dump(out, open(os.path.join(ROOT, "results/eco/brain_surface.json"), "w"))
 print(f"样本 {len(X)}（训练 {len(tr)} / 留出 {len(te)}）")
 for f in feats: print(f"  {f:11s} R²(Hz) {rep[f]['r2_hz']:+.3f}  R²(变换后) {rep[f]['r2_t']:+.3f}  均值 {rep[f]['mean_hz']:7.2f} Hz  非零 {rep[f]['frac_nonzero']:.2f}  MAE {rep[f]['mae_hz']:.2f}  {'从不放电' if rep[f]['silent'] else '可用' if rep[f]['usable'] else '不可用'}")

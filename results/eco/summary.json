@@ -271,234 +271,218 @@
   "individuals": [
    {
     "base": 2000,
-    "off": 444,
+    "off": 425,
     "on": 1800,
-    "ratio_on": 4.05,
-    "ratio_shuffle": 0.903,
-    "ratio_yoked": 0.969,
-    "ratio_nobrain": 4.05,
-    "drinks_per_visit_on": 8.738,
-    "drinks_per_visit_off": 0.944
+    "ratio_on": 4.231,
+    "ratio_shuffle": 1.009,
+    "ratio_yoked": 1.002,
+    "ratio_nobrain": 4.231,
+    "drinks_per_visit_on": 7.792,
+    "drinks_per_visit_off": 0.472
    },
    {
     "base": 3000,
-    "off": 444,
-    "on": 1245,
-    "ratio_on": 2.801,
-    "ratio_shuffle": 0.966,
-    "ratio_yoked": 0.964,
-    "ratio_nobrain": 4.05,
-    "drinks_per_visit_on": 10.342,
-    "drinks_per_visit_off": 0.944
+    "off": 425,
+    "on": 1800,
+    "ratio_on": 4.231,
+    "ratio_shuffle": 0.975,
+    "ratio_yoked": 1.006,
+    "ratio_nobrain": 4.231,
+    "drinks_per_visit_on": 5.534,
+    "drinks_per_visit_off": 0.472
    },
    {
     "base": 4000,
-    "off": 444,
+    "off": 425,
     "on": 1800,
-    "ratio_on": 4.05,
-    "ratio_shuffle": 0.924,
-    "ratio_yoked": 0.979,
-    "ratio_nobrain": 4.05,
-    "drinks_per_visit_on": 9.566,
-    "drinks_per_visit_off": 0.944
+    "ratio_on": 4.231,
+    "ratio_shuffle": 1.008,
+    "ratio_yoked": 0.998,
+    "ratio_nobrain": 4.231,
+    "drinks_per_visit_on": 6.201,
+    "drinks_per_visit_off": 0.472
    }
   ],
   "learned": {
    "turn": [
     [
-     "hygroΣ×joΔ",
-     0.063
-    ],
-    [
-     "感:joΔ",
-     0.057
+     "感:touchΔ",
+     -0.029
     ],
     [
      "坡:roll",
-     -0.037
+     0.015
+    ],
+    [
+     "感:odorAΔ",
+     0.013
+    ],
+    [
+     "感:geosminΔ",
+     0.011
     ],
     [
      "vinegarΣ×joΔ",
-     0.035
+     -0.009
     ],
     [
-     "odorAΣ×joΔ",
-     0.035
-    ],
-    [
-     "感:touchΔ",
-     -0.028
+     "hygroΣ×joΔ",
+     -0.009
     ]
    ],
    "kinesis": [
     [
-     "脑:mbonPunish",
-     -0.186
-    ],
-    [
-     "脑:mbonReward",
-     -0.176
-    ],
-    [
-     "感:odorA′",
-     -0.163
+     "1",
+     -0.043
     ],
     [
      "感:vinegar′",
-     -0.162
+     -0.04
     ],
     [
-     "内:thirst",
-     -0.141
+     "感:odorA′",
+     -0.039
     ],
     [
-     "1",
-     -0.141
+     "脑:mbonReward",
+     0.029
+    ],
+    [
+     "脑:mbonPunish",
+     0.025
+    ],
+    [
+     "内:cold",
+     -0.023
     ]
    ],
    "speed": [
     [
-     "内:thirst",
-     0.118
-    ],
-    [
-     "味:water",
-     -0.11
-    ],
-    [
-     "1",
-     0.079
-    ],
-    [
-     "感:hygro′",
-     -0.055
-    ],
-    [
      "脑:mbonReward",
-     0.052
+     -0.255
     ],
     [
-     "感:audioΣ",
-     0.049
+     "脑:mbonPunish",
+     -0.224
+    ],
+    [
+     "脑:ppl1",
+     -0.161
+    ],
+    [
+     "光",
+     -0.136
+    ],
+    [
+     "内:thirst",
+     -0.114
+    ],
+    [
+     "感:vinegarΣ",
+     -0.098
     ]
    ],
    "ingest": [
     [
      "1",
-     1.657
+     1.496
     ],
     [
      "味:water",
-     1.656
+     1.463
     ],
     [
      "感:hygroΣ",
-     1.352
-    ],
-    [
-     "内:thirst",
-     0.709
+     1.197
     ],
     [
      "光",
-     0.689
+     0.811
     ],
     [
-     "感:hygro′",
-     0.597
+     "内:thirst",
+     0.752
+    ],
+    [
+     "thirst×hygroΣ",
+     0.588
     ]
    ],
    "value": [
     [
      "内:hurt",
-     4.726
-    ],
-    [
-     "thirst×hygroΣ",
-     3.073
+     4.388
     ],
     [
      "hunger×vinegarΣ",
-     2.882
+     2.996
     ],
     [
-     "1",
-     -2.483
-    ],
-    [
-     "脑:mbonReward",
-     1.985
-    ],
-    [
-     "脑:mbonPunish",
-     1.814
+     "thirst×hygroΣ",
+     2.717
     ],
     [
      "内:cold",
-     1.537
+     1.921
     ],
     [
-     "内:scent",
-     1.294
+     "1",
+     -1.903
+    ],
+    [
+     "内:thirst",
+     -1.518
+    ],
+    [
+     "thirst×hygro′",
+     1.149
+    ],
+    [
+     "感:geosminΣ",
+     1.117
     ]
    ]
   },
-  "robust_learned": 10,
+  "robust_learned": 9,
   "robust_n": 10,
-  "drought_off": 419,
-  "drought_on": 397,
-  "long_lives30": 397,
-  "long_lives120": 516,
+  "drought_off": 417,
+  "drought_on": 422,
+  "long_lives30": 422,
+  "long_lives120": 506,
   "worlds": {
    "drought": {
-    "off": 419,
-    "on": 397,
+    "off": 417,
+    "on": 422,
     "causes": {
-     "thirst": 29,
-     "starve": 1
+     "thirst": 30
     },
     "cards": [
      {
       "key": "death-thirst",
       "title": "渴死了",
-      "count": 29
-     },
-     {
-      "key": "lie-flat",
-      "title": "躺平",
-      "count": 2
+      "count": 30
      },
      {
       "key": "learned-drink",
       "title": "学会了喝水",
-      "count": 5
-     },
-     {
-      "key": "circling",
-      "title": "原地打转",
-      "count": 1
-     },
-     {
-      "key": "death-starve",
-      "title": "饿死了",
       "count": 1
      }
     ]
    },
    "beetles": {
-    "off": 416,
-    "on": 1160,
+    "off": 415,
+    "on": 1218,
     "causes": {
-     "thirst": 16,
-     "alive": 10,
-     "exhaust": 2,
-     "starve": 2
+     "alive": 12,
+     "thirst": 13,
+     "starve": 2,
+     "exhaust": 3
     },
     "cards": [
      {
-      "key": "death-thirst",
-      "title": "渴死了",
-      "count": 16
+      "key": "circling",
+      "title": "原地打转",
+      "count": 9
      },
      {
       "key": "learned-drink",
@@ -506,9 +490,9 @@
       "count": 26
      },
      {
-      "key": "death-exhaust",
-      "title": "累死了",
-      "count": 2
+      "key": "death-thirst",
+      "title": "渴死了",
+      "count": 13
      },
      {
       "key": "death-starve",
@@ -516,9 +500,9 @@
       "count": 2
      },
      {
-      "key": "jumpy",
-      "title": "跳个不停",
-      "count": 1
+      "key": "death-exhaust",
+      "title": "累死了",
+      "count": 3
      }
     ]
    },
@@ -530,9 +514,9 @@
     },
     "cards": [
      {
-      "key": "lie-flat",
-      "title": "躺平",
-      "count": 18
+      "key": "circling",
+      "title": "原地打转",
+      "count": 5
      },
      {
       "key": "death-temp",
@@ -540,19 +524,19 @@
       "count": 30
      },
      {
-      "key": "wall-hug",
-      "title": "贴着玻璃走",
-      "count": 2
-     },
-     {
       "key": "learned-drink",
       "title": "学会了喝水",
-      "count": 6
+      "count": 11
+     },
+     {
+      "key": "jumpy",
+      "title": "跳个不停",
+      "count": 1
      }
     ]
    }
   },
-  "seconds": 703.5,
+  "seconds": 688.3,
   "v1_C2": "2/3",
   "v1_shuffle_ratios": [
    1.002,
@@ -560,9 +544,9 @@
    2.076
   ],
   "no_decay": {
-   "learned": "5/10",
+   "learned": "6/10",
    "wall": 1,
-   "rest": 3
+   "rest": 2
   }
  },
  "m3": {
@@ -580,40 +564,40 @@
     "name": "甲虫横行",
     "label": "降",
     "deltas": [
-     -0.36,
-     -1.49,
-     -1.6,
-     -0.56,
-     -1.74
+     -1.06,
+     -2.03,
+     -0.76,
+     -1.75,
+     -2.11
     ],
-    "delta_mean": -1.151,
+    "delta_mean": -1.542,
     "n_up": 0,
-    "n_down": 4,
-    "life_head": 401,
-    "life_tail": 883,
-    "drink": 2.32,
-    "learnRate": 0.0194,
-    "odorTurn": 0.93,
+    "n_down": 5,
+    "life_head": 408,
+    "life_tail": 926,
+    "drink": 2.63,
+    "learnRate": 0.0172,
+    "odorTurn": 0.54,
     "immigrants": [
-     130,
-     70,
-     28,
-     104,
-     51
+     47,
+     110,
+     33,
+     21,
+     103
     ],
     "gen_max": [
-     15,
-     20,
      16,
-     9,
-     14
+     12,
+     16,
+     16,
+     13
     ],
     "flights_tail": [
-     0.426,
-     0.218,
-     0.162,
-     0.413,
-     0.127
+     0.348,
+     0.12,
+     0.577,
+     0.182,
+     0.077
     ]
    },
    {
@@ -621,40 +605,40 @@
     "name": "风平浪静",
     "label": "平",
     "deltas": [
-     -0.17,
-     0.33,
-     -1.42,
-     -0.37,
-     0.16
+     -0.98,
+     -0.29,
+     -0.15,
+     -0.44,
+     0.01
     ],
-    "delta_mean": -0.293,
+    "delta_mean": -0.371,
     "n_up": 0,
     "n_down": 1,
-    "life_head": 481,
-    "life_tail": 1164,
-    "drink": 2.48,
-    "learnRate": 0.012,
-    "odorTurn": 0.53,
+    "life_head": 451,
+    "life_tail": 930,
+    "drink": 1.63,
+    "learnRate": 0.0229,
+    "odorTurn": -0.1,
     "immigrants": [
-     16,
-     67,
-     19,
-     0,
-     48
+     93,
+     127,
+     48,
+     31,
+     30
     ],
     "gen_max": [
-     10,
-     10,
-     11,
      13,
-     11
+     4,
+     8,
+     11,
+     8
     ],
     "flights_tail": [
-     0.675,
-     0.787,
-     0.167,
-     0.472,
-     0.712
+     0.395,
+     0.735,
+     0.868,
+     0.615,
+     0.766
     ]
    },
    {
@@ -662,40 +646,40 @@
     "name": "地广物稀",
     "label": "平",
     "deltas": [
-     -0.37,
-     0.21,
-     -0.74,
-     0.36,
-     0.81
+     0.12,
+     0.15,
+     -1.94,
+     -0.19,
+     -0.95
     ],
-    "delta_mean": 0.055,
-    "n_up": 1,
-    "n_down": 1,
-    "life_head": 401,
-    "life_tail": 431,
-    "drink": 0.67,
-    "learnRate": 0.0149,
-    "odorTurn": 0.08,
+    "delta_mean": -0.563,
+    "n_up": 0,
+    "n_down": 2,
+    "life_head": 406,
+    "life_tail": 481,
+    "drink": 0.39,
+    "learnRate": 0.0172,
+    "odorTurn": 0.28,
     "immigrants": [
-     145,
-     141,
-     139,
-     147,
-     153
+     143,
+     152,
+     128,
+     151,
+     114
     ],
     "gen_max": [
      7,
-     6,
-     6,
-     4,
-     5
+     3,
+     11,
+     7,
+     10
     ],
     "flights_tail": [
-     0.458,
-     0.628,
-     0.319,
-     0.681,
-     0.907
+     0.509,
+     0.574,
+     0.125,
+     0.546,
+     0.27
     ]
    }
   ]
@@ -720,8 +704,8 @@
     "pass": true
    }
   ],
-  "fingerprint": "0c5cef30:230564",
-  "save_bytes": 887658,
+  "fingerprint": "1f6c4944:245817",
+  "save_bytes": 916159,
   "code_chars": 167
  },
  "long": {
@@ -729,93 +713,93 @@
   "n_learned": 10,
   "n_retest_ok": 10,
   "goal_met": true,
-  "total_lives": 130,
-  "baseline": 443,
-  "need": 665,
+  "total_lives": 210,
+  "baseline": 433,
+  "need": 650,
   "lives_per_round": 10,
   "max_rounds": 30,
   "test_worlds": 20,
   "rounds_to_learn": [
-   1,
-   1,
-   1,
-   1,
    2,
    2,
+   2,
+   3,
+   3,
    1,
+   3,
    1,
-   1,
+   2,
    2
   ],
   "individuals": [
    {
     "k": 0,
-    "rounds": 1,
+    "rounds": 2,
     "learned": true,
-    "median": 1216,
-    "wall": 0.232,
+    "median": 1217,
+    "wall": 0.225,
     "rest": 0,
-    "retest": 871,
+    "retest": 1352,
     "retest_ok": true
    },
    {
     "k": 1,
-    "rounds": 1,
+    "rounds": 2,
     "learned": true,
-    "median": 1800,
-    "wall": 0.215,
+    "median": 700,
+    "wall": 0.139,
     "rest": 0,
-    "retest": 1800,
+    "retest": 678,
     "retest_ok": true
    },
    {
     "k": 2,
-    "rounds": 1,
+    "rounds": 2,
     "learned": true,
     "median": 1800,
-    "wall": 0.26,
+    "wall": 0.153,
     "rest": 0,
     "retest": 1800,
     "retest_ok": true
    },
    {
     "k": 3,
-    "rounds": 1,
+    "rounds": 3,
     "learned": true,
     "median": 1800,
-    "wall": 0.206,
+    "wall": 0.186,
     "rest": 0,
     "retest": 1800,
     "retest_ok": true
    },
    {
     "k": 4,
-    "rounds": 2,
+    "rounds": 3,
     "learned": true,
     "median": 1800,
-    "wall": 0.217,
+    "wall": 0.198,
     "rest": 0,
     "retest": 1800,
     "retest_ok": true
    },
    {
     "k": 5,
-    "rounds": 2,
+    "rounds": 1,
     "learned": true,
-    "median": 1800,
-    "wall": 0.215,
+    "median": 656,
+    "wall": 0.135,
     "rest": 0,
-    "retest": 1800,
+    "retest": 892,
     "retest_ok": true
    },
    {
     "k": 6,
-    "rounds": 1,
+    "rounds": 3,
     "learned": true,
-    "median": 1338,
-    "wall": 0.295,
+    "median": 1800,
+    "wall": 0.15,
     "rest": 0,
-    "retest": 1747,
+    "retest": 1800,
     "retest_ok": true
    },
    {
@@ -823,17 +807,17 @@
     "rounds": 1,
     "learned": true,
     "median": 1800,
-    "wall": 0.158,
+    "wall": 0.171,
     "rest": 0,
-    "retest": 1642,
+    "retest": 1800,
     "retest_ok": true
    },
    {
     "k": 8,
-    "rounds": 1,
+    "rounds": 2,
     "learned": true,
     "median": 1800,
-    "wall": 0.195,
+    "wall": 0.167,
     "rest": 0,
     "retest": 1800,
     "retest_ok": true
@@ -843,7 +827,7 @@
     "rounds": 2,
     "learned": true,
     "median": 1800,
-    "wall": 0.207,
+    "wall": 0.158,
     "rest": 0,
     "retest": 1800,
     "retest_ok": true
@@ -855,14 +839,130 @@
   "cap_s": 900,
   "live_median": 900,
   "surface_median": 900,
-  "naive_median": 419,
-  "ratio_live_vs_naive": 2.15,
-  "drink_live": 0.284,
-  "drink_surface": 0.073,
-  "drink_ratio": 3.89,
+  "naive_median": 422,
+  "ratio_live_vs_naive": 2.13,
+  "drink_live": 0.199,
+  "drink_surface": 0.134,
+  "drink_ratio": 1.49,
   "L1": true,
-  "L2": false,
+  "L2": true,
   "v2_drink_ratio": 4.07
+ },
+ "l2": {
+  "arms": {
+   "surface": {
+    "life_s": 400,
+    "drink_s": 13.7,
+    "on_water_s": 15.2,
+    "water_visits": 5,
+    "mean_visit_s": 3.9,
+    "mn9_on_water": 12.97,
+    "mn9_sd_on_water": 6.39,
+    "frac_mn9_below_5": 0.099,
+    "can_frac": 0.901,
+    "p_ingest_given_can": 0.956,
+    "drink_given_on_water": 0.842,
+    "wall_s": 0
+   },
+   "surface_mean": {
+    "life_s": 400,
+    "drink_s": 19.1,
+    "on_water_s": 20.8,
+    "water_visits": 3,
+    "mean_visit_s": 9.9,
+    "mn9_on_water": 13.21,
+    "mn9_sd_on_water": 0.63,
+    "frac_mn9_below_5": 0,
+    "can_frac": 1,
+    "p_ingest_given_can": 0.931,
+    "drink_given_on_water": 0.918,
+    "wall_s": 0
+   },
+   "surface_ema": {
+    "life_s": 400,
+    "drink_s": 43.7,
+    "on_water_s": 46.1,
+    "water_visits": 3,
+    "mean_visit_s": 17,
+    "mn9_on_water": 12.29,
+    "mn9_sd_on_water": 3.56,
+    "frac_mn9_below_5": 0.007,
+    "can_frac": 0.993,
+    "p_ingest_given_can": 0.965,
+    "drink_given_on_water": 0.953,
+    "wall_s": 0
+   },
+   "live": {
+    "life_s": 400,
+    "drink_s": 68.6,
+    "on_water_s": 72.5,
+    "water_visits": 5,
+    "mean_visit_s": 36.25,
+    "mn9_on_water": 13.06,
+    "mn9_sd_on_water": 2.48,
+    "frac_mn9_below_5": 0.003,
+    "can_frac": 0.997,
+    "p_ingest_given_can": 0.955,
+    "drink_given_on_water": 0.946,
+    "wall_s": 266
+   },
+   "live_raw": {
+    "life_s": 400,
+    "drink_s": 0,
+    "on_water_s": 0,
+    "water_visits": 0,
+    "mean_visit_s": 0,
+    "mn9_on_water": 0,
+    "mn9_sd_on_water": 0,
+    "frac_mn9_below_5": 0,
+    "can_frac": 0,
+    "p_ingest_given_can": 0,
+    "drink_given_on_water": 0,
+    "wall_s": 252
+   },
+   "surface_v4": {
+    "life_s": 400,
+    "drink_s": 47.1,
+    "on_water_s": 49.3,
+    "water_visits": 6,
+    "mean_visit_s": 12.32,
+    "mn9_on_water": 12.69,
+    "mn9_sd_on_water": 2.49,
+    "frac_mn9_below_5": 0.006,
+    "can_frac": 0.994,
+    "p_ingest_given_can": 0.96,
+    "drink_given_on_water": 0.953,
+    "wall_s": 0
+   }
+  },
+  "fano": {
+   "dnaL": 0.698,
+   "dnaR": 0.389,
+   "gf": 0.312,
+   "mn9": 0.379,
+   "adn1": 1.236,
+   "mdn": 1.235,
+   "odn1": 0.607,
+   "bdn2": 1.385,
+   "mbonReward": 0.177,
+   "mbonPunish": 0.346,
+   "pam": 0.211,
+   "ppl1": 0.13
+  },
+  "units": {
+   "dnaL": 1,
+   "dnaR": 1,
+   "mbonReward": 1,
+   "mbonPunish": 1,
+   "gf": 2,
+   "mn9": 2,
+   "adn1": 2,
+   "mdn": 4,
+   "odn1": 1,
+   "bdn2": 2,
+   "pam": 307,
+   "ppl1": 16
+  }
  },
  "transfer": {
   "pass": true,
@@ -870,7 +970,7 @@
   "n_informative": 5,
   "X1": {
    "more_drink_time": "5/5",
-   "drinks_per_visit_trained": 6.583333333333333,
+   "drinks_per_visit_trained": 7.111111111111111,
    "drinks_per_visit_naive": 0.7777777777777778,
    "pass": true
   },
@@ -882,13 +982,13 @@
    "life_naive": 434.9,
    "life_trained": 900,
    "drink_s_naive": 1,
-   "drink_s_trained": 280.21,
+   "drink_s_trained": 193.54,
    "thirst_naive": 0.712,
-   "thirst_trained": 0.087,
+   "thirst_trained": 0.108,
    "eat_s_naive": 24.57,
-   "eat_s_trained": 48.44,
+   "eat_s_trained": 40.02,
    "alive_naive": 0,
-   "alive_trained": 4
+   "alive_trained": 5
   },
   "runs": [
    {
@@ -905,11 +1005,11 @@
     },
     "trained": {
      "life_s": 900,
-     "drink_s": 169.34,
-     "drinks": 192,
-     "waterVisits": 30,
-     "thirst_mean": 0.137,
-     "eat_s": 48.52,
+     "drink_s": 250.6,
+     "drinks": 383,
+     "waterVisits": 54,
+     "thirst_mean": 0.044,
+     "eat_s": 10.01,
      "hits": 0
     }
    },
@@ -927,11 +1027,11 @@
     },
     "trained": {
      "life_s": 900,
-     "drink_s": 312.89,
-     "drinks": 341,
-     "waterVisits": 54,
-     "thirst_mean": 0.021,
-     "eat_s": 33.32,
+     "drink_s": 145.74,
+     "drinks": 256,
+     "waterVisits": 36,
+     "thirst_mean": 0.108,
+     "eat_s": 35.59,
      "hits": 0
     }
    },
@@ -949,11 +1049,11 @@
     },
     "trained": {
      "life_s": 900,
-     "drink_s": 280.21,
-     "drinks": 302,
-     "waterVisits": 43,
-     "thirst_mean": 0.087,
-     "eat_s": 37.95,
+     "drink_s": 67.05,
+     "drinks": 99,
+     "waterVisits": 13,
+     "thirst_mean": 0.205,
+     "eat_s": 87.76,
      "hits": 0
     }
    },
@@ -971,11 +1071,11 @@
     },
     "trained": {
      "life_s": 900,
-     "drink_s": 159.41,
-     "drinks": 158,
-     "waterVisits": 24,
-     "thirst_mean": 0.1,
-     "eat_s": 91.19,
+     "drink_s": 224.1,
+     "drinks": 334,
+     "waterVisits": 42,
+     "thirst_mean": 0.057,
+     "eat_s": 53.71,
      "hits": 0
     }
    },
@@ -992,12 +1092,12 @@
      "hits": 0
     },
     "trained": {
-     "life_s": 865.4,
-     "drink_s": 297.3,
-     "drinks": 295,
-     "waterVisits": 41,
-     "thirst_mean": 0.082,
-     "eat_s": 48.44,
+     "life_s": 900,
+     "drink_s": 193.54,
+     "drinks": 348,
+     "waterVisits": 52,
+     "thirst_mean": 0.122,
+     "eat_s": 40.02,
      "hits": 0
     }
    }

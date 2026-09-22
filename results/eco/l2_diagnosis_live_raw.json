@@ -1,0 +1,73 @@
+{
+ "seconds": 400,
+ "seeds": [
+  6000,
+  6001,
+  6002
+ ],
+ "arms": {
+  "live_raw": {
+   "rows": [
+    {
+     "seed": 6000,
+     "life_s": 400,
+     "drink_s": 4.8,
+     "on_water_s": 5.7,
+     "water_visits": 1,
+     "mean_visit_s": 5.7,
+     "mn9_on_water": 13.42,
+     "mn9_sd_on_water": 4.7,
+     "frac_mn9_below_5": 0,
+     "can_frac": 0.912,
+     "p_ingest_given_can": 0.954,
+     "drink_given_on_water": 0.842,
+     "wall_s": 251
+    },
+    {
+     "seed": 6001,
+     "life_s": 400,
+     "drink_s": 0,
+     "on_water_s": 0,
+     "water_visits": 0,
+     "mean_visit_s": 0,
+     "mn9_on_water": 0,
+     "mn9_sd_on_water": 0,
+     "frac_mn9_below_5": 0,
+     "can_frac": 0,
+     "p_ingest_given_can": 0,
+     "drink_given_on_water": 0,
+     "wall_s": 256
+    },
+    {
+     "seed": 6002,
+     "life_s": 400,
+     "drink_s": 0,
+     "on_water_s": 0,
+     "water_visits": 0,
+     "mean_visit_s": 0,
+     "mn9_on_water": 0,
+     "mn9_sd_on_water": 0,
+     "frac_mn9_below_5": 0,
+     "can_frac": 0,
+     "p_ingest_given_can": 0,
+     "drink_given_on_water": 0,
+     "wall_s": 252
+    }
+   ],
+   "median": {
+    "life_s": 400,
+    "drink_s": 0,
+    "on_water_s": 0,
+    "water_visits": 0,
+    "mean_visit_s": 0,
+    "mn9_on_water": 0,
+    "mn9_sd_on_water": 0,
+    "frac_mn9_below_5": 0,
+    "can_frac": 0,
+    "p_ingest_given_can": 0,
+    "drink_given_on_water": 0,
+    "wall_s": 252
+   }
+  }
+ }
+}
