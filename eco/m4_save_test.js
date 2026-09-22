@@ -4,6 +4,7 @@
 //   S2  存档字符串再读再存一遍，字符串逐字节相同（存档格式自身稳定）
 //   S3  挑战码：导出 → 解析，世界规则 / 种子 / 冠军基因原样回来；拿挑战码开的新局与原局的开局指纹相同
 //   S4  坏输入（不是存档、版本太新、挑战码被截断）要报错而不是静默读成别的东西
+//   S5  旧存档（缺后来加的字段、可塑性层维度对不上）读回来能接着跑：补齐或重置，不崩（2026-09-23 页面上真出过：旧存档没有 ema）
 const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, "..");
 const Evolve = require("./evolve.js"), Save = require("./save.js"), Surf = require("./brain_surface.js");
 const brain = Surf.create(JSON.parse(fs.readFileSync(path.join(ROOT, "results/eco/brain_surface.json"), "utf8"))), rules = { predators: 3, food: 24, water: 5, size: 180 }, out = { checks: {} };
@@ -16,5 +17,9 @@ const champ = A.hall[0] ? Object.values(Evolve.flat(A.hall[0].genes)).map(v => +
 out.checks.S3_challenge_roundtrip = { pass: Save.fingerprint(C1) === Save.fingerprint(C0) && JSON.stringify(champ) === JSON.stringify(back) && P.note === "测试挑战", code_chars: code.length };
 let bad = 0; for (const f of [() => Save.restore({ format: "x" }, brain), () => Save.restore({ format: "fly-ecobox", version: 99 }, brain), () => Save.parseChallenge(code.slice(0, 12) + "!"), () => Save.parseChallenge("hello")]) { try { f(); } catch (e) { bad++; } }
 out.checks.S4_bad_input_rejected = { pass: bad === 4, rejected: bad, of: 4 };
+// S5 旧存档：去掉后来才加的字段（ema、lp.odorA）、把一只果蝇的可塑性层截短——读回来必须能接着跑（读档迁移补齐 / 重置），不能崩
+{ const S = JSON.parse(str); for (const a of S.agents) delete a.ema; if (S.agents[0]) S.agents[0].P.Wk = { __f64: [0, 0, 0] }; if (S.agents[1]) delete S.agents[1].lp.odorA; let err = null, reset = 0, finite = true;
+  try { const E5 = Save.restore(S, brain); E5.run(60); reset = E5.sim.agents.filter(a => a.migrated === "plastic-reset").length; finite = E5.sim.agents.every(a => Array.from(a.P.Wt).every(Number.isFinite)); } catch (e) { err = e.message; }
+  out.checks.S5_old_save_migrates = { pass: !err && finite && reset >= 1, error: err, plastic_reset: reset, weights_finite: finite }; }
 out.pass = Object.values(out.checks).every(c => c.pass); fs.writeFileSync(path.join(ROOT, "results/eco/m4_save_test.json"), JSON.stringify(out, null, 1));
 for (const [k, c] of Object.entries(out.checks)) console.log(c.pass ? "通过" : "失败", k, JSON.stringify(c)); process.exit(out.pass ? 0 : 1);

@@ -2332,6 +2332,8 @@
 "存于 external/shiu2024_supp/": "stored in external/shiu2024_supp/",
 "存好了": "Saved",
 "存档 · 分享": "Save · Share",
+"存档与当前版本不兼容：": "This save is not compatible with the current version: ",
+"存档与当前版本不兼容：{0}": "This save is not compatible with the current version: {0}",
 "存档已导出": "Save file exported",
 "存档格式稳定": "Save format stable",
 "存档版本比页面新": "Save file is newer than the page",

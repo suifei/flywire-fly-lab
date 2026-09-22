@@ -91,7 +91,8 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px
   // ———————————————————— 开局 / 续局 ————————————————————
   function hook() { refresh.nr = null; const cl = document.getElementById("cardList"); if (cl) cl.innerHTML = ""; log = []; E.sim.on(ev => { if (ev.kind === "hop" && mode === "evo") return; log.push(ev); if (log.length > 300) log.shift(); }); focusId = null; terrainKey = ""; pendingRules = {}; }
   function start(m, rules, seed, extra) { mode = m; E = Evolve.create(rules || {}, Object.assign({ seed: seed || ((Math.random() * 1e9) >>> 0) || 1, brain, solo: m === "solo" }, extra || {})); hook(); syncSeg(); buildRules(); refresh(true); toast(m === "solo" ? "新箱子：一只果蝇，从零学起" : "新箱子：32 只果蝇，飞行已解锁"); }
-  function resume(S) { E = Save.restore(S, brain); mode = E.solo ? "solo" : "evo"; hook(); syncSeg(); buildRules(); refresh(true); }
+  function resume(S) { try { Save.restore(S, brain).step(); } catch (err) { throw new Error("存档与当前版本不兼容：" + err.message); }   /* 先用一份副本试跑一步：旧存档跑不起来就别接，免得页面每一帧都报错；真正接着跑的那份另读，保证逐位相同 */
+    E = Save.restore(S, brain); mode = E.solo ? "solo" : "evo"; hook(); syncSeg(); buildRules(); refresh(true); }
   function syncSeg() { document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("on", b.dataset.mode === mode)); document.querySelectorAll("#speedSeg button").forEach(b => b.classList.toggle("on", +b.dataset.speed === speed)); document.querySelectorAll("#toolSeg button").forEach(b => b.classList.toggle("on", b.dataset.tool === tool)); $("#odorBtn").classList.toggle("on", showOdor); }
 
   // ———————————————————— 画 ————————————————————

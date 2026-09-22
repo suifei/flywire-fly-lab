@@ -21,5 +21,7 @@
  "吃掉": "Eaten",
  "身体（不属于大脑）": "Body (non-neural)",
  "{0}的时候": "When {0}",
- "的时候": "when"
+ "的时候": "when",
+ "存档与当前版本不兼容：{0}": "This save is not compatible with the current version: {0}",
+ "存档与当前版本不兼容：": "This save is not compatible with the current version: "
 }

@@ -3,7 +3,7 @@
 //   challenge(E) → 一段短的挑战码（只有世界规则 + 种子 + 可选的冠军基因），别人贴进来就能在同一个世界里开局。
 (function (root) {
   const N = typeof module !== "undefined" && module.exports, World = N ? require("./world.js") : root.EcoWorld, Evolve = N ? require("./evolve.js") : root.EcoEvolve, Sim = N ? require("./sim.js") : root.EcoSim;
-  const VERSION = 1, SKIP = new Set(["reborn", "rand", "brain", "onFood", "onWater", "bite", "listeners", "events", "step", "run", "emit", "on", "spawn", "opts", "cfg", "sim"]);
+  const VERSION = 1, SKIP = new Set(["_v", "reborn", "rand", "brain", "onFood", "onWater", "bite", "listeners", "events", "step", "run", "emit", "on", "spawn", "opts", "cfg", "sim"]);
   function enc(v) { if (v === null || v === undefined) return null; if (v instanceof Float64Array) return { __f64: Array.from(v) }; if (v instanceof Float32Array) return { __f32: Array.from(v) }; if (Array.isArray(v)) return v.map(enc); if (typeof v === "function") return undefined;
     if (typeof v === "object") { const o = {}; for (const k in v) { if (SKIP.has(k)) continue; const e = enc(v[k]); if (e !== undefined) o[k] = e; } return o; } return v; }
   function dec(v) { if (v === null || typeof v !== "object") return v; if (v.__f64) return Float64Array.from(v.__f64); if (v.__f32) return Float32Array.from(v.__f32); if (Array.isArray(v)) return v.map(dec); const o = {}; for (const k in v) o[k] = dec(v[k]); return o; }
