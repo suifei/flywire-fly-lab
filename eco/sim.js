@@ -32,13 +32,27 @@
     phi[i++] = Math.max(-1, Math.min(1, along * 2)); phi[i++] = Math.max(-1, Math.min(1, across * 2)); phi[i++] = light; phi[i++] = 1; return phi; }
   function features(a, W) { const gr = W.grad(a.x, a.y), c = Math.cos(a.h), sn = Math.sin(a.h); a.along = gr[0] * c + gr[1] * sn; return buildFeatures(a, a.along, -gr[0] * sn + gr[1] * c, W.light()); }
 
+  // 读档迁移：存档格式随版本演进，旧存档里的果蝇缺后来加的字段。接着跑之前补齐；可塑性层的维度对不上（特征数改过）就重置这只果蝇学到的权重——
+  //   宁可忘掉，也不让页面在 sim.step 里崩掉（2026-09-23：旧存档没有 ema，页面报 Cannot read properties of undefined (reading '0')）
+  const P_KEYS = ["Wt", "Wk", "Ws", "Wi", "Wf", "V", "eT", "eK", "eS", "eI", "eF", "eV", "phi"];
+  function migrate(a) { const nOut = CH.FEATURES.length, nIn = CH.INPUTS.length;
+    if (!(a.ema instanceof Float32Array) || a.ema.length !== nOut) a.ema = new Float32Array(nOut);
+    if (!(a.out instanceof Float32Array) || a.out.length !== nOut) a.out = new Float32Array(nOut);
+    if (!(a.xin instanceof Float32Array) || a.xin.length !== nIn) a.xin = new Float32Array(nIn);
+    if (!(a.phi instanceof Float64Array) || a.phi.length !== NF) a.phi = new Float64Array(NF);
+    a.lp = Object.assign({ vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, a.lp || {}); for (const k in a.lp) if (!Number.isFinite(a.lp[k])) a.lp[k] = 0;
+    if (!a.lastD) a.lastD = []; if (!a.act) a.act = { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 };
+    const P = a.P, okP = P && P_KEYS.every(k => P[k] instanceof Float64Array && P[k].length === NF);
+    if (!okP) { a.P = Plastic.create(a.genome.genes); Plastic.clearTraces(a.P); a.migrated = "plastic-reset"; }   /* 只有真的重置了才清资格迹：正常读档必须与不中断逐位相同 */
+    a._v = 1; }
+
   function create(rules, opts) {
     const o = Object.assign({ seed: 1, dt: 0.1, brain: null, learn: "on", flight: false, noBrainFeatures: false, trail: true }, opts || {});
     const sim = { world: World.create(rules, o.seed), agents: [], dt: o.dt, nextId: 1, events: [], listeners: [], opts: o, brain: o.brain };
     sim.emit = ev => { sim.events.push(ev); if (sim.events.length > 4000) sim.events.splice(0, 1000); for (const f of sim.listeners) f(ev); }; sim.on = f => sim.listeners.push(f);
     sim.spawn = (genome, plastic) => newAgent(sim, genome, plastic);
     sim.step = function () { const W = sim.world, dt = sim.dt, bites = W.step(dt, sim.agents);
-      for (const a of sim.agents) { if (!a.alive) continue; const p = a.phys, g = a.genome.genes, st = a.stats; let bite = 0; a.bite = null; for (const b of bites) if (b.agent === a) { bite += World.K.biteDamage; a.bite = b; } if (bite > 0) { st.bites++; sim.emit({ t: W.t, agent: a.id, kind: "hit", data: { health: +p.health.toFixed(2) } }); }
+      for (const a of sim.agents) { if (!a.alive) continue; if (!a._v) migrate(a); const p = a.phys, g = a.genome.genes, st = a.stats; let bite = 0; a.bite = null; for (const b of bites) if (b.agent === a) { bite += World.K.biteDamage; a.bite = b; } if (bite > 0) { st.bites++; sim.emit({ t: W.t, agent: a.id, kind: "hit", data: { health: +p.health.toFixed(2) } }); }
         Senses.sense(W, a, sim.agents, a.xin); { const br = a.brain || sim.brain; br.eval(a.xin, a.out, a.rand); if (br.kind === "surface" && !br.smoothed) { const al = Math.min(1, dt / SMOOTH); for (let j = 0; j < a.out.length; j++) { a.ema[j] += al * (a.out[j] - a.ema[j]); a.out[j] = a.ema[j] < 0.3 ? 0 : a.ema[j]; } } }   /* 响应面共用一个对象，读出的 τ = 0.3 s 平滑按个体做（与 eco/brain_live.js 一致） */ if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
         const phi = features(a, W); if (o.noBrainFeatures) for (let j = 0; j < 12; j++) phi[j] = 0;
         // 先学（上一步的奖励、这一步的状态），再做

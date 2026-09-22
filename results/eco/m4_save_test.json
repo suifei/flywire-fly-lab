@@ -20,6 +20,12 @@
    "pass": true,
    "rejected": 4,
    "of": 4
+  },
+  "S5_old_save_migrates": {
+   "pass": true,
+   "error": null,
+   "plastic_reset": 1,
+   "weights_finite": true
   }
  },
  "pass": true
