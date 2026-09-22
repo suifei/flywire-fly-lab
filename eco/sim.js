@@ -17,17 +17,20 @@
     Plastic.clearTraces(a.P); a.rand = () => { a.rs = (a.rs + 0x6d2b79f5) >>> 0; let t = a.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
     sim.agents.push(a); sim.emit({ t: W.t, agent: a.id, kind: "birth", data: { generation: a.genome.generation } }); return a; }
 
-  function features(a, W) { const x = a.xin, o = a.out, p = a.phys, g = a.genome.genes, phi = a.phi, dt = a.dt; let i = 0; for (let j = 0; j < 12; j++) phi[i++] = Math.min(2, o[j] / FSCALE[j]);
-    const S = {}, D = {}; /* 可塑性层读的是感觉神经元群的发放，不是干净的物理量：每侧按 30 个神经元、0.1 s 的泊松计数加噪声 */
+  // 可塑性层的特征。生态箱（这里）和 3D 大自然（eco/overlay.js）用的是**同一个函数**：a = { xin(27 路输入 Hz), out(12 个大脑输出 Hz), phys, genome.genes, phi, lp, dt, rand }，
+  //   along / across = 脚下的坡度在体轴方向 / 侧向的分量，light = 光照 0–1
+  function buildFeatures(a, along, across, light) { const x = a.xin, o = a.out, p = a.phys, g = a.genome.genes, phi = a.phi, dt = a.dt; let i = 0; for (let j = 0; j < 12; j++) phi[i++] = Math.min(2, o[j] / FSCALE[j]);
+    /* 可塑性层读的是感觉神经元群的发放，不是干净的物理量：每侧按 30 个神经元、0.1 s 的泊松计数加噪声 */
     const nz = r => { if (r <= 0) return 0; const lam = r * 3; const u = Math.sqrt(-2 * Math.log(1 - a.rand())) * Math.cos(6.283185307 * a.rand()); return Math.max(0, lam + Math.sqrt(lam) * u) / 3; };
-    for (const s of PAIRS) { const L = nz(x[IX[s + "_L"]]), R = nz(x[IX[s + "_R"]]); S[s] = (L + R) / 400; D[s] = (L - R) / (L + R + 20);   /* 左右差用对比度（韦伯定律）：第一版用 (L−R)/200，信号只有 0.04 量级，权重上限 6 根本够不着有效增益（m2_learning_v1.json） */ phi[i++] = S[s]; phi[i++] = D[s]; }
+    const S = {}, D = {}; for (const s of PAIRS) { const L = nz(x[IX[s + "_L"]]), R = nz(x[IX[s + "_R"]]); S[s] = (L + R) / 400; D[s] = (L - R) / (L + R + 20); phi[i++] = S[s]; phi[i++] = D[s]; }
     const dv = {}; for (const s of DERIV) { a.lp[s] += (S[s] - a.lp[s]) * Math.min(1, dt / 1.0); dv[s] = Math.max(-1, Math.min(1, (S[s] - a.lp[s]) * 6)); phi[i++] = dv[s]; }
     phi[i++] = x[IX.sugar] / 200; phi[i++] = x[IX.water] / 200; phi[i++] = x[IX.bitter] / 200;
     const I = { hunger: p.hunger, thirst: p.thirst, hot: Math.max(0, Math.min(1, (p.bodyTemp - g.tempPref) / 10)), cold: Math.max(0, Math.min(1, (g.tempPref - p.bodyTemp) / 10)) };
     phi[i++] = p.hunger; phi[i++] = p.thirst; phi[i++] = 1 - p.stamina; phi[i++] = 1 - p.health; phi[i++] = p.scent; phi[i++] = I.hot; phi[i++] = I.cold;
     for (const [gt, s] of GATED) { phi[i++] = I[gt] * S[s]; phi[i++] = I[gt] * D[s]; phi[i++] = I[gt] * dv[s]; }
     for (const s of ["vinegar", "hygro", "odorA"]) phi[i++] = Math.min(1, S[s] * 2) * D.jo;
-    const gr = W.grad(a.x, a.y), c = Math.cos(a.h), sn = Math.sin(a.h); a.along = gr[0] * c + gr[1] * sn; phi[i++] = Math.max(-1, Math.min(1, a.along * 2)); phi[i++] = Math.max(-1, Math.min(1, (-gr[0] * sn + gr[1] * c) * 2)); phi[i++] = W.light(); phi[i++] = 1; return phi; }
+    phi[i++] = Math.max(-1, Math.min(1, along * 2)); phi[i++] = Math.max(-1, Math.min(1, across * 2)); phi[i++] = light; phi[i++] = 1; return phi; }
+  function features(a, W) { const gr = W.grad(a.x, a.y), c = Math.cos(a.h), sn = Math.sin(a.h); a.along = gr[0] * c + gr[1] * sn; return buildFeatures(a, a.along, -gr[0] * sn + gr[1] * c, W.light()); }
 
   function create(rules, opts) {
     const o = Object.assign({ seed: 1, dt: 0.1, brain: null, learn: "on", flight: false, noBrainFeatures: false, trail: true }, opts || {});
@@ -51,10 +54,10 @@
           p.stamina = Math.max(0, p.stamina - BODY.hopCost); st.hops++; a.state = "hop"; sim.emit({ t: W.t, agent: a.id, kind: "hop", data: {} }); }
         else if (a.act.takeoff && p.stamina > BODY.flightMinStamina) { a.air = BODY.flightTime; a.flying = true; a.avx = Math.cos(a.h) * BODY.flightSpeed; a.avy = Math.sin(a.h) * BODY.flightSpeed; st.flights++; a.state = "fly"; sim.emit({ t: W.t, agent: a.id, kind: "takeoff", data: {} }); }
         else { const omega = Math.max(-BODY.turnMax, Math.min(BODY.turnMax, BODY.turnGain * (out[0] - out[1]) + a.act.turn)) * Math.PI / 180; a.h += omega * dt; if (a.h > 6.2832) a.h -= 6.2832; else if (a.h < 0) a.h += 6.2832;
-          const vigor = 0.35 + 0.65 * Math.min(1, p.stamina / 0.3), sf = Math.max(0.35, Math.min(1.25, 1 - BODY.slopeK * a.along)); let v = 0;
+          const vigor = 0.35 + 0.65 * Math.min(1, p.stamina / 0.3), sf = Math.max(0.45, Math.min(1.25, 1 - BODY.slopeK * a.along)); let v = 0;
           if (out[5] > BODY.mdnThreshold) { v = -BODY.backSpeed * vigor; a.state = "back"; }
           else if (canIngest && a.act.ingest) { if (a.onFood) { eating = true; a.onFood.amount -= Phys.C.eatAmount * dt; if (a.state !== "eat") { st.meals++; if (W.t - (a.evT || -99) > 8) { a.evT = W.t; sim.emit({ t: W.t, agent: a.id, kind: "eat", data: { rotten: +a.rotten.toFixed(2), hunger: +p.hunger.toFixed(2) } }); } } a.state = "eat"; st.tEat += dt; if (a.rotten > 0) st.tRotten += dt; }
-            else { drinking = true; if (!a.onWater.rainwater) a.onWater.level = Math.max(0, a.onWater.level - Phys.C.drinkAmount * dt); if (a.state !== "drink") { st.drinks++; if (W.t - (a.evT || -99) > 8) { a.evT = W.t; sim.emit({ t: W.t, agent: a.id, kind: "drink", data: { thirst: +p.thirst.toFixed(2) } }); } } a.state = "drink"; st.tDrink += dt; } }
+            else { drinking = true; a.onWater.level = Math.max(0, a.onWater.level - Phys.C.drinkAmount * dt); if (a.state !== "drink") { st.drinks++; if (W.t - (a.evT || -99) > 8) { a.evT = W.t; sim.emit({ t: W.t, agent: a.id, kind: "drink", data: { thirst: +p.thirst.toFixed(2) } }); } } a.state = "drink"; st.tDrink += dt; } }
           else { const cmd = a.act.speed < BODY.restSpeed ? 0 : a.act.speed; v = BODY.walkSpeed * g.metabolism * cmd * vigor * sf * (W.rain > 0 ? 0.75 : 1);   /* 代谢快 = 走得快、饿得快、产卵快 */ a.state = cmd === 0 ? "rest" : "walk"; if (cmd === 0) { resting = true; st.tRest += dt; } }
           a.x += Math.cos(a.h) * v * dt; a.y += Math.sin(a.h) * v * dt; effort = Math.abs(v) / (BODY.walkSpeed * g.metabolism); uphill = Math.max(0, a.along * Math.sign(v)) * 3; st.dist += Math.abs(v) * dt; }
         { const on = (a.onFood ? 1 : 0) | (a.onWater ? 2 : 0); if ((on & 1) && !(a.wasOn & 1)) st.foodVisits++; if ((on & 2) && !(a.wasOn & 2)) st.waterVisits++; a.wasOn = on; const ck = Math.floor(a.x / 10) + "," + Math.floor(a.y / 10); if (!st.cells[ck]) { st.cells[ck] = 1; st.nCells++; }
@@ -66,5 +69,5 @@
     };
     return sim;
   }
-  const API = { create, GENES, BODY, FSCALE }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoSim = API;
+  const API = { create, buildFeatures, GENES, BODY, FSCALE }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoSim = API;
 })(typeof window !== "undefined" ? window : globalThis);

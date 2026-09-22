@@ -1,5 +1,5 @@
 // 生态箱 M3：跨代进化。32 只同时活在一个箱子里；活得好（吃饱、喝足、健康）的攒够了就产卵；后代带着**少量可遗传参数**的变异出生。
-//   能遗传的只有 10 个数：学习率、探索幅度、飞行倾向、偏好体温、代谢快慢、警觉度（逃逸起跳的阈值倍率）、四个先天偏置（饿时朝醋味转、渴时朝湿处转、尝到水就喝、朝 / 背着捕食者气味转）。
+//   能遗传的只有 10 个数：学习率、探索幅度、飞行倾向、偏好体温、代谢快慢、警觉度（逃逸起跳的阈值倍率）、四个先天偏置（饿时朝醋味转、渴时朝湿处转、尝到水就喝、朝 / 背着声音转）。
 //   **可塑性层不遗传**——每只果蝇出生时是一张白纸，一生里学到的东西随它一起死掉。连接组更不变：所有个体、所有世代共用同一个大脑。
 //   没有适应度函数：没人给「活得久」打分。能不能留下后代只取决于身体状态够不够产卵——选择压力全部来自世界规则。
 (function (root) {
@@ -7,7 +7,7 @@
   const CFG = { n: 32, reproTime: 100, reproHunger: 0.5, reproThirst: 0.5, reproHealth: 0.6, eggCost: 0.15, minAge: 60, immigrateBelow: 6, bin: 60, maxReplays: 40, hall: 12 };
   const MUT = { p: 0.5, learnRate: ["log", 0.25, 0.001, 0.1], explore: ["log", 0.2, 0.05, 1.2], flightBias: ["add", 0.6, -8, 2], tempPref: ["add", 1.0, 12, 36], metabolism: ["log", 0.08, 0.6, 1.6], caution: ["log", 0.15, 0.4, 2.5], innateTurn: ["add", 0.5, -6, 6] };
   const GENE_KEYS = ["learnRate", "explore", "flightBias", "tempPref", "metabolism", "caution", "innateTurn0", "innateTurn1", "innateTurn2", "innateTurn3"];
-  const GENE_NAMES = { learnRate: "学习率", explore: "探索幅度", flightBias: "飞行倾向", tempPref: "偏好体温 ℃", metabolism: "代谢快慢", caution: "警觉度", innateTurn0: "先天：饿时朝醋味转", innateTurn1: "先天：渴时朝湿处转", innateTurn2: "先天：尝到水就喝", innateTurn3: "先天：朝捕食者气味转" };
+  const GENE_NAMES = { learnRate: "学习率", explore: "探索幅度", flightBias: "飞行倾向", tempPref: "偏好体温 ℃", metabolism: "代谢快慢", caution: "警觉度", innateTurn0: "先天：饿时朝醋味转", innateTurn1: "先天：渴时朝湿处转", innateTurn2: "先天：尝到水就喝", innateTurn3: "先天：朝声音转" };
   const flat = g => ({ learnRate: g.learnRate, explore: g.explore, flightBias: g.flightBias, tempPref: g.tempPref, metabolism: g.metabolism, caution: g.caution, innateTurn0: g.innateTurn[0], innateTurn1: g.innateTurn[1], innateTurn2: g.innateTurn[2], innateTurn3: g.innateTurn[3] });
   function mutate(genes, rand) { const gauss = () => Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(6.283185307 * rand()), g = Object.assign({}, genes, { innateTurn: genes.innateTurn.slice() });
     const one = (v, [mode, sd, lo, hi]) => { if (rand() > MUT.p) return v; v = mode === "log" ? v * Math.exp(sd * gauss()) : v + sd * gauss(); return Math.max(lo, Math.min(hi, v)); };

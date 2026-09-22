@@ -17,6 +17,12 @@ if sf:
                       "features": [{"name": f, "r2": sf["heldout"][f]["r2_hz"], "silent": sf["heldout"][f].get("silent", False)} for f in sf["features"]],
                       "vs_mean": {f: v["model_vs_mean"] for f, v in (sf.get("noise_ceiling_exploratory") or {}).get("per_feature", {}).items()},
                       "ceiling": {f: v["single_vs_rest"] for f, v in (sf.get("noise_ceiling_exploratory") or {}).get("per_feature", {}).items()}}
+    mf = sf.get("manifold")
+    if mf:
+        out["surface"]["manifold"] = {"n": mf["n"], "n_test": mf["n_test"], "index": mf["index"], "T2": mf["T2"], "T3": mf["T3"], "points": mf["points"],
+                                      "features": [{"name": f, "r2": v["r2_hz"], "over_ceiling": (mf.get("r2_over_ceiling") or {}).get(f)} for f, v in mf["per_feature"].items() if not v["silent"]], "dnaL_ceiling": mf.get("dnaL_manifold_ceiling_scratch")}
+    sf2 = load("surface_fit_v2.json")
+    if sf2: out["surface"]["v2_water_mn9"] = None
     if sf1: out["surface"].update({"v1_samples": sf1["n_samples"], "v1_dna": f'{sf1["heldout"]["dnaL"]["r2_hz"]:.2f} / {sf1["heldout"]["dnaR"]["r2_hz"]:.2f}', "v1_pass": sf1["criterion"]["pass"]})
 m2, m21 = load("m2_learning.json"), load("m2_learning_v1.json")
 if m2:
@@ -51,5 +57,9 @@ if lg:
                                     "retest": round(d["retest"]["median"]) if d["retest"] else None, "retest_ok": bool(d["retest"] and d["retest"]["ok"])} for d in lg["individuals"]]}
 lv = load("live_check.json")
 if lv: out["live"] = lv["summary"]
+lv_old = load("old_body/live_check_surface_v2.json")
+if lv_old and lv: out["live"]["v2_drink_ratio"] = lv_old["summary"]["drink_ratio"]
+nt = load("nature_transfer.json")
+if nt: out["transfer"] = {"pass": nt["pass"], "conclusive": nt["conclusive"], "n_informative": nt["n_informative"], "X1": nt["X1"], "X2": nt["X2"], "report": nt["report"], "runs": [{"seed": r["seed"], "informative": r["informative"], "naive": {k: r["naive"][k] for k in ("life_s", "drink_s", "drinks", "waterVisits", "thirst_mean", "eat_s", "hits")}, "trained": {k: r["trained"][k] for k in ("life_s", "drink_s", "drinks", "waterVisits", "thirst_mean", "eat_s", "hits")}} for r in nt["runs"]]}
 json.dump(out, open(os.path.join(D, "summary.json"), "w"), ensure_ascii=False, indent=1)
 print("写了 results/eco/summary.json：", "、".join(out.keys()))

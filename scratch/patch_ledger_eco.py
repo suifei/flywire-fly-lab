@@ -4,7 +4,7 @@ import json, re
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 S = json.loads((ROOT / "results/eco/summary.json").read_text()); sf, m2, m3, m4, lv, au = (S[k] for k in ("surface", "m2", "m3", "m4", "live", "audit"))
-r2 = {f["name"]: f["r2"] for f in sf["features"]}; i0 = m2["individuals"][0]; lg = S["long"]; nd = m2.get("no_decay") or {"learned": "?", "wall": "?", "rest": "?"}
+r2 = {f["name"]: f["r2"] for f in sf["features"]}; i0 = m2["individuals"][0]; lg = S["long"]; nd = m2.get("no_decay"); tr = S["transfer"]; mf = sf["manifold"] or {"learned": "?", "wall": "?", "rest": "?"}
 m3w = "；".join(f"{w['name']} {w['label']}（Δ 均值 {w['delta_mean']:+.2f}，寿命 {w['life_head']} → {w['life_tail']} s，先天喝水 {w['drink']:+.2f}）" for w in m3["worlds"])
 new = f'''    dict(id="eco_surface", what="生态箱：把 15,055 个神经元的真脑蒸馏成响应面（27 路输入 → 12 个读出），好让 32 只果蝇的进化跑得动",
          status="{'reproduced' if sf['pass'] else 'partial'}",
@@ -33,6 +33,13 @@ new = f'''    dict(id="eco_surface", what="生态箱：把 15,055 个神经元�
          caveat="只有 3 条命、上限 {lv['cap_s']} s（真脑约 1.2 倍实时）。真脑的读出按约 300 ms 平滑以对齐响应面的噪声窗口",
          script="eco/live_check.js", result_file="results/eco/summary.json", log="§50.7",
          verify=[("live.live_median", {lv['live_median']}, 0), ("live.naive_median", {lv['naive_median']}, 0)]),
+    dict(id="eco_transfer", what="生态箱学成的个体搬进 3D 大自然（真脑 + 有重力天气甲虫的世界）还管不管用；训练条件先对齐到大自然",
+         status="{'reproduced' if tr['pass'] else 'partial' if tr['X1']['pass'] or tr['X2']['pass'] else 'negative'}",
+         result="5 个世界种子 × 900 s，同种子对比白纸，权重冻结；有信息的种子 {tr['n_informative']} 个。X1（喝得更久 {tr['X1']['more_drink_time']}，每次碰到水喝 {tr['X1']['drinks_per_visit_trained']} 对 {tr['X1']['drinks_per_visit_naive']} 次）{'通过' if tr['X1']['pass'] else '未通过'}；X2（更不渴 {tr['X2']['lower_mean_thirst']}）{'通过' if tr['X2']['pass'] else '未通过'}。"
+                "响应面第三版加了闭环工况（{mf['n']:,} 组，含大自然里记下的 9,000 组）：只尝到水的 MN9 误差 {100 * mf['points'][0]['rel_err']:.1f}%（第二版约 40%），真脑指数 {mf['index']}",
+         caveat="学成的只是「碰到水就喝」与趋湿；大自然里能喝的水（洼地）少，5 个种子里有的臂整条命没碰到水。响应面 T2 未通过（左转 DNa {mf['features'][0]['r2']:.3f}，闭环工况上它的噪声天花板实测 {mf['dnaL_ceiling']}，线定得高于真脑的可重复性，照原线登记）。旧感觉编码下的 M2 / M3 / 长期训练结果留在本机 old_senses/，不入库",
+         script="eco/nature_transfer.js", result_file="results/eco/summary.json", log="§50.7b",
+         verify=[("transfer.pass", {1 if tr['pass'] else 0}, 0), ("transfer.n_informative", {tr['n_informative']}, 0), ("surface.manifold.index", {mf['index']}, 0.01)]),
     dict(id="eco_m4_save", what="生态箱 M4：存档 → 清空 → 读回 → 接着跑，是否与不中断逐位相同",
          status="{'reproduced' if m4['pass'] else 'partial'}",
          result="四项全过：续跑状态指纹相同（{m4['fingerprint']}）、存档格式稳定、挑战码（{m4['code_chars']} 个字符）来回无损、坏输入被拒绝。页面里再验一次（eco/page_test.js）",

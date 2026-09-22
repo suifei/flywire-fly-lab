@@ -1,0 +1,1 @@
+{"arm":"naive","seed":903,"life_s":405.9,"alive":false,"cause":"thirst","drink_s":0.3,"eat_s":24.57,"rest_s":0,"drinks":3,"meals":5,"waterVisits":5,"foodVisits":5,"hits":0,"thirst_mean":0.718,"thirst_end":1,"hunger_end":0.181,"health_end":0,"dist_mm":6477,"jumps":15,"wall_s":584}

@@ -83,9 +83,7 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
   border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px;
   font: 600 12px/1.3 var(--sans); color: var(--ink-2);
   background: color-mix(in oklab, var(--panel) 90%, transparent); transition: border-color .15s, color .15s; }
-.sister-link { display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px; font: 600 12px/1.3 var(--sans); color: var(--ink-2); background: color-mix(in oklab, var(--panel) 90%, transparent); transition: border-color .15s, color .15s; }
-.sister-link:hover { border-color: var(--gf); color: var(--ink); }
-.sister-link:focus-visible { outline: 2px solid var(--gf); outline-offset: 2px; }
+a.mode-link { text-decoration: none; color: inherit; }
 .repo-btn svg { width: 14px; height: 14px; flex: none; }
 .repo-btn:hover { border-color: var(--gf); color: var(--ink); }
 .repo-btn.star:hover { border-color: #e3b341; color: #e3b341; }
@@ -284,12 +282,12 @@ code { font: 12px var(--mono); }
             <span>Star</span><b id="starN" hidden></b>
           </a>
         </nav>
-        <a class="sister-link" href="https://suifei.github.io/flywire-fly-lab/ecobox.html" title="无人值守的生态箱：你只设计世界规则，果蝇自己学、自己进化">生态箱 →</a>
       </div>
       <div class="modes" role="tablist" aria-label="游戏模式">
         <button id="viewCourt" class="mode" role="tab" aria-pressed="true"><b>大自然 / 篮球场</b><small>3D 世界 · 五感全开 · 任务</small></button>
         <button id="viewGomoku" class="mode" role="tab" aria-pressed="false"><b>五子棋</b><small>和果蝇下棋 · 看它怎么想</small></button>
         <button id="viewLife" class="mode" role="tab" aria-pressed="false"><b>生活</b><small>五感全开 · 它自己过日子</small></button>
+        <a id="viewEco" class="mode mode-link" href="https://suifei.github.io/flywire-fly-lab/ecobox.html" title="无人值守的生态箱（另一个页面）：你只设计世界规则，果蝇自己学、自己进化"><b>生态箱 ↗</b><small>只改世界 · 它自己学、自己进化</small></a>
       </div>
       <p id="mastNature" hidden>一个没有边界的 3D 大自然：起伏的地形、石头、蘑菇、花、浆果丛、水洼、昼夜、风和雨，<b>有重力</b>——浆果熟了会掉下来、弹几下、顺坡滚，停稳后发酵；石头挡路；上坡走得慢；太阳把石板晒烫；风把气味吹向下风；甲虫会爬过来。
         果蝇只通过真实的感受器知道这个世界；往哪转、飞不飞、吃不吃，由这颗 <b>15,055</b> 个神经元的连接组决定——没有一条"看见甲虫就跑""闻到果子就过去"的规则。</p>
@@ -404,7 +402,7 @@ code { font: 12px var(--mono); }
             <span class="row" style="gap:6px" title="往世界里放东西。放进去的只是物理量，果蝇怎么反应由连接组决定">
               <button class="btn" data-drop="fruit">烂果子</button><button class="btn" data-drop="mold">发霉的</button><button class="btn" data-drop="water">水</button>
               <button class="btn" data-drop="sound">嗡一声</button><button class="btn" data-drop="heat">热源</button><button class="btn" data-drop="ball" id="dropBall">扔球</button>
-              <button class="btn" data-drop="berry" data-nature hidden title="从它头顶 30 mm 处放下一颗浆果：自由落体、弹几下、顺坡滚，停稳后发酵">头顶掉一颗浆果</button><button class="btn" data-drop="rain" data-nature hidden>下一场雨</button>
+              <button class="btn" data-drop="berry" data-nature hidden title="从它头顶 30 mm 处放下一颗浆果：自由落体、弹几下、顺坡滚，停稳后发酵">头顶掉一颗浆果</button><button class="btn" data-drop="rain" data-nature hidden>下一场雨</button><button class="btn" id="ecoLoad" data-nature hidden title="把生态箱里训练出来的那只（它学到的权重 + 它的基因）放进这个 3D 大自然：身体换成生态箱的六种内部状态，决策 = 真脑的反射 + 它学到的偏置。载入后大自然里的这只就是它">载入生态箱存档</button><input type="file" id="ecoFile" accept=".json,application/json" hidden><span id="ecoLine" class="muted" style="font-size:12px"></span><button class="btn" id="ecoOff" data-nature hidden>卸下生态箱</button>
             </span>
             <label class="toggle" title="切断听觉神经元的全部传出突触"><input type="checkbox" id="lifeDeaf"> 失聪</label>
             <label class="toggle" title="切断两个嗅小球感受神经元的传出突触"><input type="checkbox" id="lifeAnosmic"> 失嗅</label>
@@ -2865,7 +2863,7 @@ code { font: 12px var(--mono); }
    "id": "eco_surface",
    "what": "生态箱：把 15,055 个神经元的真脑蒸馏成响应面（27 路输入 → 12 个读出），好让 32 只果蝇的进化跑得动",
    "status": "reproduced",
-   "result": "真脑一只 1.18 倍实时、32 只 0.037 倍。用真脑跑 7,200 组输入拟合；留出集（单次试验、原始 Hz）R²：左转 0.927、右转 0.907、巨纤维 0.993、MN9 0.951（事先定的线 ≥ 0.85）。第一版（3,600 个样本、log1p 目标）转向只有 0.67 / 0.79，没过线，留档在 surface_fit_v1.json",
+   "result": "真脑一只 1.18 倍实时、32 只 0.037 倍。用真脑跑 7,200 组输入拟合；留出集（单次试验、原始 Hz）R²：左转 0.914、右转 0.904、巨纤维 0.993、MN9 0.942（事先定的线 ≥ 0.85）。第一版（3,600 个样本、log1p 目标）转向只有 0.67 / 0.79，没过线，留档在 surface_fit_v1.json",
    "caveat": "响应面没有记忆（真脑在两次决策之间保留状态），给的是 300 ms 窗的平均发放率，单次试验的噪声按泊松加回去。PAM 在全部样本里从不放电，响应面里恒为 0。判据没动，动的是目标变换（log1p → sqrt）和样本量",
    "script": "eco/fit_surface.py",
    "result_file": "results/eco/summary.json",
@@ -2883,12 +2881,12 @@ code { font: 12px var(--mono); }
     ],
     [
      "surface.features.0.r2",
-     0.9266,
+     0.914,
      0.0001
     ],
     [
      "surface.features.2.r2",
-     0.9926,
+     0.9925,
      0.0001
     ]
    ]
@@ -2897,8 +2895,8 @@ code { font: 12px var(--mono); }
    "id": "eco_m2_learning",
    "what": "生态箱 M2：只给物理量和内生奖励（身体不适的减少），接在固定连接组旁边的可塑性层能不能自己学会活得更久",
    "status": "partial",
-   "result": "3 个个体各连续 30 条命后冻结学习，在 30 个没见过的世界上测：不学习 460 s，学习 ≥ 1800 s（截尾，× 3.913）；C1（≥ 1.5 ×）3/3 通过，C2（打乱奖励不提升）3/3 通过；另换 10 个个体 10/10 学成；长期训练任务（eco/train_long.js，又 10 个新个体，学成即毕业）10/10 学成、换新世界复测 10/10，共 100 条命。学到的是「碰到水就停下来喝」（连接组里水味先天不够伸喙）和「湿度上升时少拐弯」",
-   "caveat": "标 partial 的原因：**远距离找水 / 找食物没学会**（干旱世界不学习 383 s、学习 386 s，训练 120 条命 387 s）；可塑性层看不到大脑输出时学得一样好（× 3.913）——连接组在这里给的是身体和反射，不是学习信号。第一版 C2 只过了 2/3（打乱对照是漏的：奖励只延后 20–60 s，与持续几十秒的喝水仍相关；事后加的轭式对照不提升）。关掉「不用就忘」10 个个体只有 4/10 学成（3 个贴墙、3 个躺平）。寿命在 1,800 s 截尾，倍数是下限",
+   "result": "3 个个体各连续 30 条命后冻结学习，在 30 个没见过的世界上测：不学习 444 s，学习 ≥ 1800 s（截尾，× 4.05）；C1（≥ 1.5 ×）3/3 通过，C2（打乱奖励不提升）3/3 通过；另换 10 个个体 10/10 学成；长期训练任务（eco/train_long.js，又 10 个新个体，学成即毕业）10/10 学成、换新世界复测 10/10，共 130 条命。学到的是「碰到水就停下来喝」（连接组里水味先天不够伸喙）和「湿度上升时少拐弯」",
+   "caveat": "标 partial 的原因：**远距离找水 / 找食物没学会**（干旱世界不学习 419 s、学习 397 s，训练 120 条命 516 s）；可塑性层看不到大脑输出时学得一样好（× 4.05）——连接组在这里给的是身体和反射，不是学习信号。第一版 C2 只过了 2/3（打乱对照是漏的：奖励只延后 20–60 s，与持续几十秒的喝水仍相关；事后加的轭式对照不提升）。关掉「不用就忘」10 个个体只有 5/10 学成（1 个贴墙、3 个躺平）。寿命在 1,800 s 截尾，倍数是下限",
    "script": "eco/m2_learning.js",
    "result_file": "results/eco/summary.json",
    "log": "§50.4",
@@ -2915,7 +2913,7 @@ code { font: 12px var(--mono); }
     ],
     [
      "m2.individuals.0.ratio_on",
-     3.913,
+     4.05,
      0.001
     ],
     [
@@ -2935,7 +2933,7 @@ code { font: 12px var(--mono); }
     ],
     [
      "m2.drought_on",
-     386,
+     397,
      0
     ]
    ]
@@ -2944,7 +2942,7 @@ code { font: 12px var(--mono); }
    "id": "eco_m3_evolution",
    "what": "生态箱 M3：32 只果蝇、10 个可遗传参数、没有适应度函数——不同的世界规则会不会把「飞行倾向」推向不同方向",
    "status": "reproduced",
-   "result": "三个世界各 5 个种子 × 10,800 s：甲虫横行 平（Δ 均值 -0.51，寿命 445 → 1841 s，先天喝水 +1.65）；风平浪静 平（Δ 均值 -0.04，寿命 604 → 2779 s，先天喝水 +1.02）；地广物稀 降（Δ 均值 -1.39，寿命 617 → 1339 s，先天喝水 +1.23）。事先写定的判据（至少两个世界标签不同）通过",
+   "result": "三个世界各 5 个种子 × 10,800 s：甲虫横行 降（Δ 均值 -1.15，寿命 401 → 883 s，先天喝水 +2.32）；风平浪静 平（Δ 均值 -0.29，寿命 481 → 1164 s，先天喝水 +2.48）；地广物稀 平（Δ 均值 +0.06，寿命 401 → 431 s，先天喝水 +0.67）。事先写定的判据（至少两个世界标签不同）通过",
    "caveat": "飞行是固定的 1.2 s / 72 mm 弹道，能进化 / 能学的只有「起不起飞」（飞行控制没接进连接组，见 docs/ecobox/AUDIT.md）。3 小时箱内时间只有几到十几代，种群 32 只，漂变不小。可塑性层不遗传；种群快灭绝时从名人堂补进来的个体单独计数（迁入）。变异幅度手选",
    "script": "eco/m3_evolution.js",
    "result_file": "results/eco/summary.json",
@@ -2957,17 +2955,17 @@ code { font: 12px var(--mono); }
     ],
     [
      "m3.worlds.0.delta_mean",
-     -0.509,
+     -1.151,
      0.001
     ],
     [
      "m3.worlds.1.delta_mean",
-     -0.037,
+     -0.293,
      0.001
     ],
     [
      "m3.worlds.2.delta_mean",
-     -1.394,
+     0.055,
      0.001
     ]
    ]
@@ -2976,7 +2974,7 @@ code { font: 12px var(--mono); }
    "id": "eco_live_check",
    "what": "生态箱：在响应面上学成的个体，放回真的 15,055 神经元脉冲网络里还管不管用",
    "status": "partial",
-   "result": "3 个世界种子、上限 900 s：真脑 900 s，响应面 825 s，白纸 469 s。L1（真脑 ≥ 1.5 × 白纸）通过（× 1.92）；L2（喝水时间占比在响应面的 0.5–2 倍内）未通过（0.167 对 0.041）",
+   "result": "3 个世界种子、上限 900 s：真脑 900 s，响应面 900 s，白纸 419 s。L1（真脑 ≥ 1.5 × 白纸）通过（× 2.15）；L2（喝水时间占比在响应面的 0.5–2 倍内）未通过（0.284 对 0.073）",
    "caveat": "只有 3 条命、上限 900 s（真脑约 1.2 倍实时）。真脑的读出按约 300 ms 平滑以对齐响应面的噪声窗口",
    "script": "eco/live_check.js",
    "result_file": "results/eco/summary.json",
@@ -2989,8 +2987,35 @@ code { font: 12px var(--mono); }
     ],
     [
      "live.naive_median",
-     469,
+     419,
      0
+    ]
+   ]
+  },
+  {
+   "id": "eco_transfer",
+   "what": "生态箱学成的个体搬进 3D 大自然（真脑 + 有重力天气甲虫的世界）还管不管用；训练条件先对齐到大自然",
+   "status": "reproduced",
+   "result": "5 个世界种子 × 900 s，同种子对比白纸，权重冻结；有信息的种子 5 个。X1（喝得更久 5/5，每次碰到水喝 6.583333333333333 对 0.7777777777777778 次）通过；X2（更不渴 5/5）通过。响应面第三版加了闭环工况（11,339 组，含大自然里记下的 9,000 组）：只尝到水的 MN9 误差 2.9%（第二版约 40%），真脑指数 86.6",
+   "caveat": "学成的只是「碰到水就喝」与趋湿；大自然里能喝的水（洼地）少，5 个种子里有的臂整条命没碰到水。响应面 T2 未通过（左转 DNa 0.829，闭环工况上它的噪声天花板实测 0.827，线定得高于真脑的可重复性，照原线登记）。旧感觉编码下的 M2 / M3 / 长期训练结果留在本机 old_senses/，不入库",
+   "script": "eco/nature_transfer.js",
+   "result_file": "results/eco/summary.json",
+   "log": "§50.7b",
+   "verify": [
+    [
+     "transfer.pass",
+     1,
+     0
+    ],
+    [
+     "transfer.n_informative",
+     5,
+     0
+    ],
+    [
+     "surface.manifold.index",
+     86.6,
+     0.01
     ]
    ]
   },
@@ -2998,7 +3023,7 @@ code { font: 12px var(--mono); }
    "id": "eco_m4_save",
    "what": "生态箱 M4：存档 → 清空 → 读回 → 接着跑，是否与不中断逐位相同",
    "status": "reproduced",
-   "result": "四项全过：续跑状态指纹相同（ae890128:764327）、存档格式稳定、挑战码（167 个字符）来回无损、坏输入被拒绝。页面里再验一次（eco/page_test.js）",
+   "result": "四项全过：续跑状态指纹相同（0c5cef30:230564）、存档格式稳定、挑战码（167 个字符）来回无损、坏输入被拒绝。页面里再验一次（eco/page_test.js）",
    "caveat": "「逐位相同」指同一份页面代码、同一个 JS 引擎；存档约 0.9 MB，超出本机存储配额时要用导出文件。云端保存没做",
    "script": "eco/m4_save_test.js",
    "result_file": "results/eco/summary.json",
@@ -7560,6 +7585,667 @@ const FlyNature3D = (() => {
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3D;
 </script>
+<script>// 生态箱：大脑的输入通道与读出特征的**唯一定义**（真脑、响应面、采样脚本、仿真都从这里取）。
+// 输入 = 26 个通道的泊松频率（Hz）；输出 = 12 个特征群的发放率（Hz）。真脑和响应面是同一个接口的两种实现。
+(function (root) {
+  const WATER_IDS = ["720575940612950568", "720575940631898285", "720575940606002609", "720575940612579053", "720575940622902535", "720575940616177458", "720575940660292225", "720575940622486922", "720575940613786774",
+    "720575940629852866", "720575940625861168", "720575940613996959", "720575940617857694", "720575940644965399", "720575940625203504", "720575940630553415", "720575940635172191", "720575940634796536"];
+  // [通道名, 最大频率 Hz, 家族]；带 _L / _R 的是分侧的
+  const FAMILIES = [["lc4", 200, 2], ["lplc2", 200, 2], ["lc16", 200, 2], ["jo", 200, 2], ["touch", 200, 2], ["thermo", 200, 2], ["hygro", 200, 2], ["audio", 200, 2], ["odorA", 200, 2], ["odorB", 200, 2], ["vinegar", 200, 2], ["geosmin", 200, 2],
+    ["sugar", 320, 1], ["water", 320, 1], ["bitter", 320, 1]];
+  const INPUTS = FAMILIES.flatMap(([n, , k]) => k === 2 ? [n + "_L", n + "_R"] : [n]), MAXHZ = Object.fromEntries(FAMILIES.flatMap(([n, m, k]) => k === 2 ? [[n + "_L", m], [n + "_R", m]] : [[n, m]]));
+  const FEATURES = ["dnaL", "dnaR", "gf", "mn9", "adn1", "mdn", "odn1", "bdn2", "mbonReward", "mbonPunish", "pam", "ppl1"];
+
+  // 把通道 / 特征映射到某个子回路（v5）的神经元下标
+  function bind(SUB) {
+    const G = SUB.groups, side = SUB.sides, typ = SUB.types, n = SUB.meta.n, pos = new Map(SUB.fids.map((f, i) => [String(f), i]));
+    const glom = (names, sd) => names.flatMap(g => (SUB.meta.glomeruli[g] || []).filter(i => side[i] === sd)), sdn = { L: "left", R: "right" };
+    const two = (f, fn) => ({ [f + "_L"]: fn("left"), [f + "_R"]: fn("right") });
+    const idx = Object.assign({}, two("lc4", s => G["LC4_" + s]), two("lplc2", s => G["LPLC2_" + s]), two("lc16", s => G["LC16_" + s]), two("jo", s => G["JO_" + s]), two("touch", s => G["TOUCH_" + s]), two("thermo", s => G["THERMO_" + s]),
+      two("hygro", s => G["HYGRO_" + s]), two("audio", s => G["AUDIO_" + s]), two("odorA", s => glom(SUB.meta.odors.A, s)), two("odorB", s => glom(SUB.meta.odors.B, s)), two("vinegar", s => glom(["DM1"], s)), two("geosmin", s => glom(["DA2"], s)),
+      { sugar: [...G.SUGAR_left, ...G.SUGAR_right], water: WATER_IDS.map(f => pos.get(f)).filter(i => i !== undefined), bitter: [...G.BITTER_left, ...G.BITTER_right] });
+    const waterSet = new Set(idx.water); idx.sugar = idx.sugar.filter(i => !waterSet.has(i));          // 水味觉神经元在注释里属于糖那一组；分开驱动
+    const byType = t => { const o = []; for (let i = 0; i < n; i++) if (typ[i] === t) o.push(i); return o; };
+    // MBON 按隔室：它的多巴胺输入（≥3 突触的边）里来自 PAM / PPL1 的比例（只看连接组，见 §48.3）
+    const mbon = [], fr = { PAM: [], PPL1: [] }; { const isDan = new Map(); for (const c of ["PAM", "PPL1"]) for (const s of ["left", "right"]) for (const i of G[c + "_" + s]) isDan.set(i, c);
+      const dec = (k, T) => { const bin = Buffer.from(SUB[k], "base64"); return new T(bin.buffer, bin.byteOffset, bin.length / T.BYTES_PER_ELEMENT); }, ip = dec("indptr", Int32Array), po = dec("post", Int32Array), w = dec("w", Float32Array);
+      const mi = new Map(); for (let i = 0; i < n; i++) if (SUB.mb_tag[i] === "MBON") { mi.set(i, mbon.length); mbon.push(i); } const tot = new Float64Array(mbon.length), part = { PAM: new Float64Array(mbon.length), PPL1: new Float64Array(mbon.length) };
+      for (const [d, c] of isDan) for (let e = ip[d]; e < ip[d + 1]; e++) { const m = mi.get(po[e]); if (m === undefined) continue; const cnt = Math.round(Math.abs(w[e]) / 0.275); if (cnt < 3) continue; tot[m] += cnt; part[c][m] += cnt; }
+      for (const c of ["PAM", "PPL1"]) fr[c] = Array.from(part[c], (v, m) => tot[m] > 0 ? v / tot[m] : 0); }
+    const feat = { dnaL: [...G.DNa01_left, ...G.DNa02_left], dnaR: [...G.DNa01_right, ...G.DNa02_right], gf: [...G.DNp01_left, ...G.DNp01_right], mn9: [...G.MN9_left, ...G.MN9_right], adn1: [...G.aDN1_left, ...G.aDN1_right], mdn: [...G.MDN_left, ...G.MDN_right],
+      odn1: byType("DNg97"), bdn2: byType("DNg100"), pam: [...G.PAM_left, ...G.PAM_right], ppl1: [...G.PPL1_left, ...G.PPL1_right] };
+    // 从一段时间的脉冲计数算 12 个特征（Hz）。DNa = 两种细胞合计；巨纤维 / MN9 / MDN / 前进 / 多巴胺 = 群均值；aDN1 = 左右取大；MBON = 按隔室加权的总发放
+    function read(cnt, sec) { const mean = ix => ix.length ? ix.reduce((s, i) => s + cnt[i], 0) / ix.length / sec : 0, sum = ix => ix.reduce((s, i) => s + cnt[i], 0) / sec, o = {};
+      o.dnaL = sum(feat.dnaL); o.dnaR = sum(feat.dnaR); o.gf = mean(feat.gf); o.mn9 = mean(feat.mn9); o.adn1 = Math.max(...feat.adn1.map(i => cnt[i] / sec), 0); o.mdn = mean(feat.mdn); o.odn1 = mean(feat.odn1); o.bdn2 = mean(feat.bdn2); o.pam = mean(feat.pam); o.ppl1 = mean(feat.ppl1);
+      let a = 0, b = 0; mbon.forEach((i, m) => { a += fr.PAM[m] * cnt[i]; b += fr.PPL1[m] * cnt[i]; }); o.mbonReward = a / sec; o.mbonPunish = b / sec; return o; }
+    return { idx, feat, mbon, read };
+  }
+  const API = { INPUTS, MAXHZ, FEATURES, FAMILIES, bind };
+  if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoChannels = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱：世界。一个圆形的玻璃箱（半径 rules.size mm），里面有地形、食物（会烂）、水洼（会干）、昼夜冷热、晒热的石头、荫凉、风、雨、捕食者。
+// **玩家只能改 RULES 里的这些量**；奖励函数不在这里，也不对玩家开放（见 eco/physiology.js）。
+// 全部状态都是普通对象 + 一个 32 位随机数状态，可以原样存成 JSON 再读回来接着跑（M4 的逐位复现靠这个）。
+(function (root) {
+  const RULES = {            // 玩家可调的世界规则（默认 = 「温和」）。每一项的含义与范围见 META
+    size: 140, food: 10, foodRegrow: 45, rot: 1, water: 3, evaporation: 1, rain: 1, dayLength: 240, tempDay: 28, tempNight: 18,
+    wind: 0.4, predators: 1, predatorSpeed: 6, roughness: 1, sunrocks: 3, shade: 3 };
+  const META = { size: ["箱子半径 mm", 80, 300], food: ["同时存在的食物数", 0, 40], foodRegrow: ["吃完 / 烂掉后多久再长出来 s", 5, 300], rot: ["腐烂速度倍率", 0, 5], water: ["水洼数", 0, 12], evaporation: ["蒸发速度倍率", 0, 5],
+    rain: ["下雨频率倍率", 0, 4], dayLength: ["一昼夜 s", 60, 1200], tempDay: ["白天气温 ℃", 10, 42], tempNight: ["夜里气温 ℃", 0, 35], wind: ["风 0–1", 0, 1], predators: ["捕食者数", 0, 8], predatorSpeed: ["捕食者速度 mm/s", 3, 25],
+    roughness: ["地形起伏倍率", 0, 3], sunrocks: ["晒热的石头数", 0, 10], shade: ["荫凉数", 0, 10] };
+  // 世界的物理常数（手选；不对玩家开放，登记在 docs/ecobox 里）
+  const K = { foodSigma: 24, foodReach: 6, rotAge: 260, goneAge: 420, waterSigma: 24, rockHeatC: 10, rockTau: 20, rockGain: 1.4, soundRef: 60, earBias: 0.25, rainHygro: 0.7, shadeSigma: 20, shadeCool: 5, puddleCool: 2, windMax: 30, plumeStretch: 1.6,
+    predR: 3.5, biteReach: 3.0, biteDamage: 0.12, biteCooldown: 3.0, predDetect: 22, predScent: 55, chaseMax: 8, chaseRest: 12, rainEvery: 300, rainLen: 35 };
+  const fade = t => t * t * (3 - 2 * t);
+  function hash(ix, iy, k, seed) { let h = (ix * 374761393 + iy * 668265263 + k * 1274126177 + seed * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
+
+  function create(rules, seed) {
+    const W = { rules: Object.assign({}, RULES, rules || {}), seed: (seed >>> 0) || 1, rs: ((seed >>> 0) || 1) ^ 0x9e3779b9, t: 0, food: [], water: [], rocks: [], shade: [], predators: [], pendingFood: [],
+      wind: { dir: 0, speed: 0 }, wet: 0, rain: 0, rainLeft: 0, nextRain: 0, stats: { eaten: 0, rotted: 0, bites: 0 } };
+    attach(W); const r = W.rules, R = r.size;
+    W.wind.dir = W.rand() * 6.2832; W.nextRain = r.rain > 0 ? K.rainEvery / r.rain * (0.5 + W.rand()) : 1e18;   /* 不用 Infinity：存档要过 JSON */
+    const spot = (margin) => { const a = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * (R - margin); return [Math.cos(a) * d, Math.sin(a) * d]; };
+    for (let i = 0; i < r.water; i++) { const [x, y] = spot(25); W.water.push({ x, y, r: 9 + 6 * W.rand(), level: 0.7 + 0.3 * W.rand() }); }
+    for (let i = 0; i < r.sunrocks; i++) { const [x, y] = spot(20); W.rocks.push({ x, y, r: 6 + 5 * W.rand(), temp: 0 }); }
+    for (let i = 0; i < r.shade; i++) { const [x, y] = spot(20); W.shade.push({ x, y }); }
+    for (let i = 0; i < r.food; i++) W.food.push(W.newFood(true));
+    for (let i = 0; i < r.predators; i++) { const [x, y] = spot(15); W.predators.push({ x, y, h: W.rand() * 6.2832, cool: 0, target: -1, chase: 0, rest: 0 }); }
+    return W;
+  }
+
+  // 方法单独挂（存档里只有数据；读回来再 attach 一次）
+  function attach(W) {
+    const r = W.rules, R = r.size, seed = W.seed;
+    W.rand = () => { W.rs = (W.rs + 0x6d2b79f5) >>> 0; let t = W.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const vnoise = (x, y, k) => { const ix = Math.floor(x), iy = Math.floor(y), fx = fade(x - ix), fy = fade(y - iy), a = hash(ix, iy, k, seed), b = hash(ix + 1, iy, k, seed), c = hash(ix, iy + 1, k, seed), d = hash(ix + 1, iy + 1, k, seed);
+      return (a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy) * 2 - 1; };
+    W.height = (x, y) => r.roughness * (6 * vnoise(x / 90 + 3.7, y / 90 - 1.3, 1) + 2 * vnoise(x / 32 - 8.1, y / 32 + 4.4, 2));
+    W.grad = (x, y) => { const e = 1.5; return [(W.height(x + e, y) - W.height(x - e, y)) / (2 * e), (W.height(x, y + e) - W.height(x, y - e)) / (2 * e)]; };
+    W.phase = () => (W.t / r.dayLength) % 1;                                     // 0 = 日出，0.25 = 正午，0.5 = 日落
+    W.sun = () => Math.max(0, Math.sin(W.phase() * 6.2832)) * (W.rain > 0 ? 0.35 : 1);
+    W.light = () => Math.min(1, 0.12 + 1.6 * W.sun());                        /* 夜里有月光：看得见，但逼近信号只剩一成多 */
+    W.ambient = () => (r.tempDay + r.tempNight) / 2 + (r.tempDay - r.tempNight) / 2 * Math.sin((W.phase() - 0.06) * 6.2832) - (W.rain > 0 ? 2 : 0);
+    const g2 = (dx, dy, s) => Math.exp(-(dx * dx + dy * dy) / (2 * s * s));
+    // 热：与 dodge/nature.js 同一口径——晒热的石板 temp ∈ [0,1]，热场强度 = 1.4 × temp × 高斯（σ = 1.1 × 石板半径）。温度感受器读的就是这个强度（不含气温；气温只通过体温这个内部状态被感到）
+    W.heat = (x, y) => { let v = 0; for (const k of W.rocks) if (k.temp > 0.08) v += K.rockGain * k.temp * g2(x - k.x, y - k.y, k.r * 1.1); return v; };
+    W.temp = (x, y) => { let T = W.ambient() + K.rockHeatC * W.heat(x, y) / K.rockGain; const sun = W.sun(); if (sun > 0) for (const s of W.shade) T -= K.shadeCool * sun * g2(x - s.x, y - s.y, K.shadeSigma);
+      for (const p of W.water) if (p.level > 0.05) T -= K.puddleCool * g2(x - p.x, y - p.y, p.r); return T; };
+    // 气味羽流：与 dodge/nature.js 的 plume 同式（顺风拉长 1 + 2.2·风，逆风压短，侧向略收）
+    const plume = (px, py, sx, sy, sigma) => { const sp = W.wind.speed / K.windMax, c = Math.cos(W.wind.dir), sn = Math.sin(W.wind.dir), dx = px - sx, dy = py - sy, par = dx * c + dy * sn, perp = -dx * sn + dy * c,
+      sPar = sigma * (par > 0 ? 1 + 2.2 * sp : Math.max(0.35, 1 - 0.6 * sp)), sPerp = sigma * (1 - 0.25 * sp); return Math.exp(-(par * par) / (2 * sPar * sPar) - (perp * perp) / (2 * sPerp * sPerp)); };
+    // 气味：好的果子 = 醋味 + 气味 A（与大自然一致）；烂的 = 土臭味（不再有醋味）。out = [醋, 土臭, A]
+    W.smell = (x, y, out) => { let v = 0, g = 0, a = 0; for (const f of W.food) { const c = plume(x, y, f.x, f.y, K.foodSigma) * Math.min(1, f.amount * 2); if (f.age > K.rotAge) g += c; else { v += c; a += c; } } out[0] = v; out[1] = g; out[2] = a; return out; };
+    // 声音：与 game_core 同式——level / (1 + (d / 60)²)，两耳按方位差 ±25%。追着果蝇跑的甲虫会响（大自然里甲虫出现时先听到振翅声）；别的果蝇也有一点声音
+    W.sound = (a, agents, out) => { let L = 0, R = 0; const add = (ox, oy, level) => { const d = Math.hypot(ox - a.x, oy - a.y), v = level / (1 + (d / K.soundRef) * (d / K.soundRef)), rel = Math.sin(Math.atan2(oy - a.y, ox - a.x) - a.h); L += v * (1 + K.earBias * rel); R += v * (1 - K.earBias * rel); };
+      for (const p of W.predators) if (p.target >= 0) add(p.x, p.y, 1.0); if (agents.length > 1) for (const o of agents) if (o !== a && o.alive && Math.hypot(o.x - a.x, o.y - a.y) < 40) add(o.x, o.y, 0.35); if (W.rain > 0) { L += 0.55 * W.rain; R += 0.55 * W.rain; } out[0] = L; out[1] = R; return out; };
+    /* 湿度：与大自然同口径——水洼的潮气场强度 0.4 + 0.5 × 水位、σ = 1.6 × 半径；下过雨到处 +0.7 × 地面湿度 */
+    W.humidity = (x, y) => { let h = K.rainHygro * W.wet; for (const p of W.water) if (p.level > 0.15) h += (0.4 + 0.5 * p.level) * g2(x - p.x, y - p.y, p.r * 1.6); return Math.min(1, h); };
+    W.foodAt = (x, y) => { let best = null, bd = 1e9; for (const f of W.food) { const d = Math.hypot(f.x - x, f.y - y); if (d < K.foodReach && d < bd && f.amount > 0) { best = f; bd = d; } } return best; };
+    /* 能喝的只有水洼（大自然里也是：雨只是把洼地灌满、把地面打湿，不是到处都能喝）；水面半径 = 半径 × (0.35 + 0.75 × 水位) */
+    W.waterAt = (x, y) => { for (const p of W.water) if (p.level > 0.15 && Math.hypot(p.x - x, p.y - y) < p.r * (0.35 + 0.75 * p.level)) return p; return null; };
+    W.newFood = (initial) => { const a = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * (R - 15); return { x: Math.cos(a) * d, y: Math.sin(a) * d, amount: 0.6 + 0.4 * W.rand(), age: initial ? W.rand() * K.rotAge * 0.6 : 0 }; };
+    W.isRotten = f => f.age > K.rotAge;
+
+    W.step = function (dt, agents) {
+      W.t += dt;
+      // 风：方向慢慢漂，强弱有阵性
+      W.wind.dir += (W.rand() - 0.5) * 0.25 * dt; W.wind.speed = r.wind * K.windMax * (0.55 + 0.45 * Math.sin(W.t / 37 + 1.3) * Math.sin(W.t / 11));
+      // 雨
+      if (W.rainLeft > 0) { W.rainLeft -= dt; W.rain = 1; if (W.rainLeft <= 0) { W.rain = 0; W.nextRain = W.t + K.rainEvery / Math.max(0.05, r.rain) * (0.5 + W.rand()); } } else if (W.t >= W.nextRain && r.rain > 0) { W.rainLeft = K.rainLen * (0.6 + 0.8 * W.rand()); W.rain = 1; }
+      // 水洼：蒸发（越热越快）、下雨补满
+      const amb = W.ambient(); for (const p of W.water) { p.level += dt * (W.rain > 0 ? 0.05 : -0.00045 * r.evaporation * (1 + Math.max(0, amb - 20) / 8)); p.level = Math.max(0, Math.min(1, p.level)); }
+      W.wet += ((W.rain > 0.3 ? 1 : 0) - W.wet) * Math.min(1, dt / (W.rain > 0.3 ? 8 : 60 / (0.3 + W.light())));   /* 地面湿度：雨里很快湿透，晴天慢慢干（同 nature.js） */
+      // 石板：光照 > 0.45 才晒得热，时间常数 20 s（同 nature.js）
+      { const target = Math.max(0, (W.light() - 0.45) / 0.55) * (1 - 0.8 * W.rain); for (const k of W.rocks) k.temp += (target - k.temp) * Math.min(1, dt / K.rockTau); }
+      // 食物：变老、烂掉、消失、过一阵在别处长出来
+      for (let i = W.food.length - 1; i >= 0; i--) { const f = W.food[i]; f.age += dt * r.rot; if (f.amount <= 0 || f.age > K.goneAge) { if (f.amount > 0) W.stats.rotted++; W.food.splice(i, 1); W.pendingFood.push(W.t + r.foodRegrow * (0.5 + W.rand())); } }
+      for (let i = W.pendingFood.length - 1; i >= 0; i--) if (W.t >= W.pendingFood[i] && W.food.length < r.food) { W.pendingFood.splice(i, 1); W.food.push(W.newFood(false)); }
+      while (W.food.length + W.pendingFood.length < r.food) W.pendingFood.push(W.t + r.foodRegrow * W.rand());
+      // 捕食者（地面甲虫）：闲逛；闻到 / 看到果蝇就追；够得着就咬。飞在空中的咬不到。越脏（气味越重）越容易被盯上；夜里更活跃
+      const night = W.sun() <= 0; const bites = [];
+      for (const p of W.predators) { p.cool = Math.max(0, p.cool - dt); p.rest = Math.max(0, p.rest - dt); let tgt = null, td = 1e9;
+        if (p.rest === 0) for (const a of agents) { if (!a.alive || a.air > 0) continue; const d = Math.hypot(a.x - p.x, a.y - p.y), reach = K.predDetect + K.predScent * a.phys.scent; if (d < reach && d < td) { tgt = a; td = d; } }
+        const sp = r.predatorSpeed * (night ? 1.25 : 1) * (tgt ? 1 : 0.45) * (p.cool > 0.3 ? 0.1 : 1);   /* 咬了一口之后要停下来嚼一会儿（3 s），被咬的有机会跑 */
+        if (tgt) { const want = Math.atan2(tgt.y - p.y, tgt.x - p.x); let dh = want - p.h; dh = Math.atan2(Math.sin(dh), Math.cos(dh)); p.h += Math.max(-3 * dt, Math.min(3 * dt, dh)); p.target = tgt.id; p.chase += dt; if (p.chase > K.chaseMax) { p.chase = 0; p.rest = K.chaseRest; }   /* 追不上就歇一阵 */
+          if (td < K.biteReach && p.cool === 0) { p.cool = K.biteCooldown; bites.push({ agent: tgt, x: p.x, y: p.y }); W.stats.bites++; } } else { p.h += (W.rand() - 0.5) * 1.6 * dt; p.target = -1; p.chase = Math.max(0, p.chase - dt); }
+        p.x += Math.cos(p.h) * sp * dt; p.y += Math.sin(p.h) * sp * dt; const d = Math.hypot(p.x, p.y); if (d > R - 4) { p.x *= (R - 4) / d; p.y *= (R - 4) / d; p.h = Math.atan2(-p.y, -p.x) + (W.rand() - 0.5); } }
+      return bites;
+    };
+    return W;
+  }
+  // 玩家中途改规则（「改环境继续逼它」）：原地改 W.rules，把水洼 / 石头 / 荫凉 / 甲虫的个数补齐或裁掉，再重新挂一次方法（箱子半径是闭包里的常数）。用 W.rand，所以仍然可复现
+  function applyRules(W, patch) { const r = W.rules; for (const k in patch) if (k in META) r[k] = Math.max(META[k][1], Math.min(META[k][2], +patch[k])); for (const k of ["food", "water", "predators", "sunrocks", "shade"]) r[k] = Math.round(r[k]); attach(W);
+    const R = r.size, spot = m => { const a = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * Math.max(10, R - m); return [Math.cos(a) * d, Math.sin(a) * d]; }, fit = (arr, n, make) => { while (arr.length > n) arr.pop(); while (arr.length < n) arr.push(make()); };
+    fit(W.water, r.water, () => { const [x, y] = spot(25); return { x, y, r: 9 + 6 * W.rand(), level: 0.8 }; }); fit(W.rocks, r.sunrocks, () => { const [x, y] = spot(20); return { x, y, r: 6 + 5 * W.rand(), temp: 0 }; }); fit(W.shade, r.shade, () => { const [x, y] = spot(20); return { x, y }; });
+    fit(W.predators, r.predators, () => { const [x, y] = spot(15); return { x, y, h: W.rand() * 6.2832, cool: 0, target: -1, chase: 0, rest: 0 }; }); while (W.food.length > r.food) W.food.pop(); W.pendingFood.length = Math.min(W.pendingFood.length, Math.max(0, r.food - W.food.length));
+    if (W.nextRain > 1e17 && r.rain > 0) W.nextRain = W.t + K.rainEvery / r.rain * (0.5 + W.rand()); if (r.rain <= 0) W.nextRain = 1e18;
+    for (const list of [W.food, W.water, W.rocks, W.shade, W.predators]) for (const o of list) { const d = Math.hypot(o.x, o.y); if (d > R - 6) { o.x *= (R - 6) / d; o.y *= (R - 6) / d; } } return W; }
+  const PRESETS = { mild: ["温和", {}], drought: ["干旱", { water: 1, evaporation: 2.5, rain: 0.3 }], beetles: ["甲虫横行", { predators: 8, predatorSpeed: 10, size: 200, food: 30, water: 6 }], coldnight: ["寒夜", { tempNight: 6, tempDay: 24, sunrocks: 5 }],
+    sparse: ["地广物稀", { size: 300, food: 14, water: 3, predators: 0 }], feast: ["丰饶", { food: 30, water: 6, predators: 0, rot: 0.5 }] };
+  const API = { create, attach, applyRules, RULES, META, K, PRESETS }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoWorld = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱：生理。六种内部状态 + 内生奖励。
+//   饥饿 hunger、口渴 thirst（0 = 满足，1 = 极限）；体力 stamina、健康 health（1 = 满）；气味 scent（0 = 干净，1 = 很重，容易被捕食者盯上）；体温 bodyTemp（℃）。
+// **奖励不是玩家给的目标**：它只是「身体离舒适点有多远」这个量的减少（drive reduction，Keramati & Gutkin 2014 的稳态强化学习）。
+//   drive D = Σ wᵢ·(偏离ᵢ)²，reward = D(之前) − D(之后)。吃到东西 → 饥饿下降 → D 下降 → 正奖励；被咬 → 健康下降 → 负奖励。没有任何一项写着「去找食物」。
+// 这些常数是**身体**，不是世界规则：玩家改不了（手选值，登记在 docs/ecobox/PLAN.md）。只有 metabolism / tempPref 两项可以遗传。
+(function (root) {
+  const C = { hungerTime: 600, thirstTime: 480, eatRate: 0.10, eatAmount: 0.035, drinkRate: 0.22, drinkAmount: 0.004, tempTau: 12, tempTol: 7, tempSpan: 5, starveDamage: 0.006, thirstDamage: 0.007, tempDamage: 0.006, toxinDamage: 0.035,
+    exhaustDamage: 0.004, regen: 0.0035, walkCost: 0.0025, restGain: 0.045, flyCost: 0.10, scentRate: 0.0015, scentEat: 0.015, scentFade: 0.004, groom: 0.05, rainWash: 0.08, wadeWash: 0.06, senescence: 3600, senesceDamage: 0.004,
+    w: { hunger: 1, thirst: 1, stamina: 0.25, health: 3, scent: 0.12, temp: 0.6 } };
+  function create(genes) { return { hunger: 0.25, thirst: 0.25, stamina: 1, health: 1, scent: 0.1, bodyTemp: (genes && genes.tempPref) || 25, age: 0, dmg: { starve: 0, thirst: 0, temp: 0, toxin: 0, bite: 0, exhaust: 0, age: 0 } }; }
+  function drive(p, genes) { const w = C.w, dT = (p.bodyTemp - genes.tempPref) / 10; return w.hunger * p.hunger * p.hunger + w.thirst * p.thirst * p.thirst + w.stamina * (1 - p.stamina) * (1 - p.stamina) + w.health * (1 - p.health) * (1 - p.health) + w.scent * p.scent * p.scent + w.temp * dT * dT; }
+  // ctx: { eating, rotten(0–1), drinking, bites, ambient, effort(0–1), flying, raining, resting, wet, wind(0–1), uphill } → 返回奖励
+  function step(p, genes, dt, ctx) {
+    const D0 = drive(p, genes), m = genes.metabolism, cl = v => Math.max(0, Math.min(1, v)), d = p.dmg;
+    p.age += dt; p.bodyTemp += dt * (ctx.ambient - p.bodyTemp) / C.tempTau;
+    const cold = Math.max(0, genes.tempPref - p.bodyTemp), hot = Math.max(0, p.bodyTemp - genes.tempPref);
+    p.hunger = cl(p.hunger + dt * m / C.hungerTime * (1 + 0.15 * ctx.effort + (ctx.flying ? 3 : 0))   /* 走路的代谢只比静息高一两成（昆虫步行很省），飞行才贵 */ * (1 + 0.03 * cold) - (ctx.eating ? C.eatRate * dt : 0));
+    p.thirst = cl(p.thirst + dt * m / C.thirstTime * (1 + 0.1 * ctx.effort + (ctx.flying ? 1.5 : 0)) * (1 + 0.07 * hot) * (1 + 0.3 * ctx.wind) - (ctx.drinking ? C.drinkRate * dt : 0));
+    p.stamina = cl(p.stamina + dt * (ctx.flying ? -C.flyCost : ctx.effort > 0.05 ? -C.walkCost * ctx.effort * ctx.effort * (1 + ctx.uphill) : C.restGain * (1 - 0.6 * Math.max(p.hunger, p.thirst))));
+    p.scent = cl(p.scent + dt * (C.scentRate + (ctx.eating ? C.scentEat : 0) - C.scentFade * p.scent - (ctx.resting ? C.groom : 0) - (ctx.raining ? C.rainWash : ctx.wet ? C.wadeWash : 0)));   /* 第一版气味涨得太快、只有歇着和下雨能降 → 恒为 1，六种状态里有一种成了常数。现在：累积减半多、随时间自己消散（−scentFade × 气味，不吃东西时平衡在 ~0.37）、蹚水也能洗掉 */
+    let loss = 0, x;
+    x = C.starveDamage * Math.max(0, p.hunger - 0.85) / 0.15 * dt; d.starve += x; loss += x;
+    x = C.thirstDamage * Math.max(0, p.thirst - 0.85) / 0.15 * dt; d.thirst += x; loss += x;
+    x = C.tempDamage * Math.min(3, Math.max(0, Math.abs(p.bodyTemp - genes.tempPref) - C.tempTol) / C.tempSpan) * dt; d.temp += x; loss += x;
+    x = (ctx.eating ? C.toxinDamage * ctx.rotten * dt : 0); d.toxin += x; loss += x;
+    x = ctx.bites; d.bite += x; loss += x;
+    x = p.stamina < 0.05 ? C.exhaustDamage * dt : 0; d.exhaust += x; loss += x;
+    x = p.age > C.senescence ? C.senesceDamage * dt : 0; d.age += x; loss += x;
+    const regen = (p.hunger < 0.5 && p.thirst < 0.5 && loss === 0) ? C.regen * dt : 0;
+    p.health = cl(p.health - loss + regen);
+    return D0 - drive(p, genes);
+  }
+  function causeOfDeath(p) { let best = "age", bv = -1; for (const k in p.dmg) if (p.dmg[k] > bv) { bv = p.dmg[k]; best = k; } return best; }
+  const CAUSE = { starve: "饿死", thirst: "渴死", temp: "冷 / 热死", toxin: "吃坏了", bite: "被吃掉", exhaust: "累死", age: "老死" };
+  const API = { create, step, drive, causeOfDeath, C, CAUSE }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoPhysiology = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱：感觉。把世界里的**物理量**换算成 27 路感觉神经元的发放率（与 dodge/game_core.js 同一套换算：场强 1.0 = 200 Hz；逼近 = Ache 2019 的形式）。
+// 这里不做任何判断——不写「饿了就去找吃的」。食物只是一团醋味 + 碰到时的甜味；水只是湿度 + 碰到时的水味；危险只是一个变大的黑影 + 一种气味。
+(function (root) {
+  const CH = (typeof module !== "undefined" && module.exports) ? require("./channels.js") : root.EcoChannels, WK = ((typeof module !== "undefined" && module.exports) ? require("./world.js") : root.EcoWorld).K;
+  const IX = Object.fromEntries(CH.INPUTS.map((c, i) => [c, i])), RATE = 200, ANT_A = 0.61, ANT_L = 1.6, FLY_R = 1.2, sm = new Float64Array(3), sm2 = new Float64Array(2);
+  const loomLP = (thetaDeg) => 200 * Math.exp(-((thetaDeg - 42) ** 2) / (2 * 15 * 15));
+  function sense(W, a, agents, x) {
+    x.fill(0); const R = W.rules.size, cl = v => v < 0 ? 0 : v > 1 ? 1 : v;
+    const snd = W.sound(a, agents, sm2);
+    for (let s = 0; s < 2; s++) { const ang = a.h + (s === 0 ? ANT_A : -ANT_A), ax = a.x + Math.cos(ang) * ANT_L, ay = a.y + Math.sin(ang) * ANT_L, sd = s === 0 ? "_L" : "_R";
+      W.smell(ax, ay, sm); x[IX["vinegar" + sd]] = RATE * cl(sm[0]); x[IX["geosmin" + sd]] = RATE * cl(sm[1]); x[IX["odorA" + sd]] = RATE * cl(sm[2]);
+      x[IX["hygro" + sd]] = RATE * cl(W.humidity(ax, ay)); x[IX["thermo" + sd]] = RATE * cl(W.heat(ax, ay)); x[IX["audio" + sd]] = RATE * cl(snd[s]);
+      const over = Math.hypot(ax, ay) - R; if (over > 0) x[IX["touch" + sd]] = RATE * cl(over / ANT_L); }
+    // 风：与 game_core 同式——120 Hz × 风速(0–1) × (0.35 + 0.65 × 迎风分量)，两根触角在体轴 ±35°
+    { const wf = W.wind.speed / WK.windMax, rel = ang => 0.35 + 0.65 * Math.max(0, Math.cos(W.wind.dir + Math.PI - (a.h + ang))); x[IX.jo_L] = Math.min(RATE, 120 * wf * rel(ANT_A)); x[IX.jo_R] = Math.min(RATE, 120 * wf * rel(-ANT_A)); }
+    // 逼近的东西：与 game_core 同式——θ = 2·atan(r/d)，只对正在变大的反应；LC4 = 0.5 × 角速度，LPLC2 = 角大小的高斯(42°, 15°)，LC16 = 0.5 × 角速度；方位 > −15° 记左、< 15° 记右（正前方两侧都记）；多个物体相加；光照增益 0.35 + 0.65 × 光
+    const gain = 0.35 + 0.65 * Math.max(0, Math.min(1, W.light())); let k = 0, l4L = 0, l4R = 0, lpL = 0, lpR = 0;
+    const loom = (ox, oy, r) => { const dx = ox - a.x, dy = oy - a.y, d = Math.max(r + 0.01, Math.hypot(dx, dy)), theta = 2 * Math.atan(r / d), prev = a.lastD[k]; a.lastD[k] = theta; k++; if (prev === undefined || prev === null) return; const dth = (theta - prev) / a.dt; if (dth <= 0 || theta < 0.05) return;
+      let b = Math.atan2(dy, dx) - a.h; b = Math.atan2(Math.sin(b), Math.cos(b)) * 57.2958; const vel = dth * 57.2958, l4 = 0.5 * vel * gain, lp = loomLP(theta * 57.2958) * gain; if (b > -15) { l4L += l4; lpL += lp; } if (b < 15) { l4R += l4; lpR += lp; }
+      if (l4 + lp > a.threatLP) { a.threatLP = l4 + lp; a.threatDir = Math.atan2(dy, dx); } };
+    a.threatLP = 0; for (const p of W.predators) loom(p.x, p.y, WK.predR); if (agents.length > 1) for (const o of agents) if (o !== a && o.alive && Math.hypot(o.x - a.x, o.y - a.y) < 40) loom(o.x, o.y, FLY_R); else k++;
+    x[IX.lc4_L] = Math.min(RATE, l4L); x[IX.lc4_R] = Math.min(RATE, l4R); x[IX.lplc2_L] = Math.min(RATE, lpL); x[IX.lplc2_R] = Math.min(RATE, lpR); x[IX.lc16_L] = Math.min(RATE, l4L); x[IX.lc16_R] = Math.min(RATE, l4R);
+    // 被咬 = 一次很重的机械接触：送进刚毛触觉通道（哪一侧由甲虫的方位定）
+    if (a.bite) { let b = Math.atan2(a.bite.y - a.y, a.bite.x - a.x) - a.h; const s = Math.sin(b); x[IX.touch_L] = Math.max(x[IX.touch_L], RATE * cl(0.5 + s)); x[IX.touch_R] = Math.max(x[IX.touch_R], RATE * cl(0.5 - s)); }
+    // 味觉：腿 / 喙碰到才有
+    a.onFood = a.air > 0 ? null : W.foodAt(a.x, a.y); a.onWater = a.air > 0 ? null : W.waterAt(a.x, a.y);
+    if (a.onFood) { const rot = W.isRotten(a.onFood) ? 1 : 0; a.rotten = rot; if (rot) x[IX.bitter] = RATE; else x[IX.sugar] = RATE; } else a.rotten = 0;   /* 同 game_core：好的果子只有甜、烂的只有苦 */
+    if (a.onWater) x[IX.water] = RATE;
+    return x;
+  }
+  const API = { sense, IX }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoSenses = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱：**可塑性层**——后天学习发生的地方。它**不是连接组**：连接组（15,055 个神经元）是固定的身体，一生不变、也不遗传变异；
+//   这一层是接在旁边的一组可变权重（演员 - 评论家），读三样东西：① 感觉神经元群的发放率，② 大脑的输出（下行神经元、蘑菇体输出、多巴胺），③ 身体内部状态；
+//   输出的是对先天反射的**偏置**：转向偏置、走多快、碰到东西肯不肯吃喝、（解锁之后）要不要起飞。先天反射（巨纤维起跳、MN9 伸喙、DNa 转向、MDN 后退）一直在，学不掉。
+// 学习规则是三因子的：Δw = 学习率 × δ × 资格迹，δ = 奖励 + γ·V(之后) − V(之前)；转向 / 速度的资格迹 = 探索噪声 × 输入（node perturbation）。
+//   奖励只来自 eco/physiology.js 的 drive 下降。可塑性层**不遗传**；能遗传的只有学习率、探索幅度和四个先天偏置（genes）。
+(function (root) {
+  const NAMES = (() => { const n = ["dnaL", "dnaR", "gf", "mn9", "adn1", "mdn", "odn1", "bdn2", "mbonReward", "mbonPunish", "pam", "ppl1"].map(s => "脑:" + s);
+    for (const s of ["vinegar", "geosmin", "hygro", "thermo", "jo", "odorA", "audio", "lc4", "touch"]) n.push("感:" + s + "Σ", "感:" + s + "Δ"); for (const s of ["vinegar", "hygro", "thermo", "odorA"]) n.push("感:" + s + "′");
+    n.push("味:sugar", "味:water", "味:bitter", "内:hunger", "内:thirst", "内:tired", "内:hurt", "内:scent", "内:hot", "内:cold");
+    for (const [g, s] of [["hunger", "vinegar"], ["thirst", "hygro"], ["hot", "thermo"], ["cold", "thermo"]]) n.push(g + "×" + s + "Σ", g + "×" + s + "Δ", g + "×" + s + "′");
+    for (const s of ["vinegar", "hygro", "odorA"]) n.push(s + "Σ×joΔ");                       // 闻到气味时风从哪边来（迎风找源头要用；真实果蝇主要靠这个）
+    n.push("坡:pitch", "坡:roll", "光", "1"); return n; })();
+  // 身体左右对称：**往哪边转**只能由分左右的信号（名字以 Δ 结尾的、以及侧倾）决定；不分侧的信号只能决定**转得多不多**（趋激性 kinesis：探索噪声的幅度）
+  const LATERAL = NAMES.map(s => (s.endsWith("Δ") || s === "坡:roll") ? 1 : 0);
+  const NF = NAMES.length, IDX = Object.fromEntries(NAMES.map((s, i) => [s, i])), INNATE = [["Wt", "hunger×vinegarΔ"], ["Wt", "thirst×hygroΔ"], ["Wi", "味:water"], ["Wt", "感:audioΔ"]];   // 四个可遗传的先天偏置：饿时朝醋味转、渴时朝湿处转、尝到水就喝、朝（或背着）声音转（追过来的甲虫会响）
+  const HP = { gamma: 0.995, lambda: 0.9, alphaV: 0.03, ingestGain: 6, moveGain: 1, decay: 1e-4, rScale: 20, ouTau: 0.8, speedBias: 2.2, speedSigma: 0.5, wMax: 6, turnMax: 200 };
+  function innate(genes) { const w = new Float64Array(NF); INNATE.forEach(([m, f], i) => { if (m === "Wt") w[IDX[f]] = genes.innateTurn[i]; }); return w; }
+  function create(genes) { const z = () => new Float64Array(NF), P = { Wt: z(), Wk: z(), Ws: z(), Wi: z(), Wf: z(), V: z(), eT: z(), eK: z(), eS: z(), eI: z(), eF: z(), eV: z(), phi: z(), v: 0, nT: 0, nS: 0, has: false, steps: 0, dSum: 0 };
+    INNATE.forEach(([m, f], i) => { P[m][IDX[f]] = genes.innateTurn[i]; }); return P; }
+  const dot = (w, p) => { let s = 0; for (let i = 0; i < NF; i++) s += w[i] * p[i]; return s; }, sig = u => 1 / (1 + Math.exp(-u));
+  function gauss(rand) { return Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(6.283185307 * rand()); }
+  // act：phi = 此刻的特征；innate = { ingestLogit（MN9 给的先天伸喙倾向）, canIngest, flight（是否解锁） }
+  function act(P, phi, genes, dt, rand, innate, out) {
+    const k = Math.exp(-dt / HP.ouTau), kin = Math.exp(Math.max(-1.5, Math.min(1.5, dot(P.Wk, phi)))), sT = genes.explore * kin; P.zT = k * (P.zT || 0) + Math.sqrt(1 - k * k) * gauss(rand); P.nT = sT * P.zT; P.nS = k * P.nS + Math.sqrt(1 - k * k) * HP.speedSigma * gauss(rand);
+    let mu = 0; for (let i = 0; i < NF; i++) if (LATERAL[i]) mu += P.Wt[i] * phi[i]; mu = Math.max(-1, Math.min(1, mu)); out.turn = (mu + P.nT) * HP.turnMax; out.speed = sig(dot(P.Ws, phi) + HP.speedBias + P.nS);
+    const pI = innate.canIngest ? sig(dot(P.Wi, phi) + innate.ingestLogit) : 0; out.ingest = rand() < pI ? 1 : 0; out.pIngest = pI;
+    const pF = innate.flight ? sig(dot(P.Wf, phi) + genes.flightBias) * dt : 0; out.takeoff = rand() < pF ? 1 : 0;
+    // 资格迹：这一步「往哪边试了一下」× 当时的输入
+    const gl = HP.gamma * HP.lambda, nt = P.zT, nk = P.zT * P.zT - 1, ns = P.nS / HP.speedSigma, gi = innate.canIngest ? out.ingest - pI : 0, gf = innate.flight ? out.takeoff - pF : 0;
+    for (let i = 0; i < NF; i++) { const f = phi[i]; P.eT[i] = gl * P.eT[i] + (LATERAL[i] ? nt * f : 0); P.eK[i] = gl * P.eK[i] + (LATERAL[i] ? 0 : nk * f); P.eS[i] = gl * P.eS[i] + ns * f; P.eI[i] = gl * P.eI[i] + gi * f; P.eF[i] = gl * P.eF[i] + gf * f; P.eV[i] = gl * P.eV[i] + f; }
+    P.v = dot(P.V, phi); P.has = true; return out;
+  }
+  // learn：r = 这一步的 drive 下降；phiNext = 之后的特征（死了就传 null）
+  function learn(P, r, phiNext, genes, mode) {
+    if (!P.has) return 0; const vN = phiNext ? dot(P.V, phiNext) : 0, delta = HP.rScale * r + HP.gamma * vN - P.v; P.steps++; P.dSum += Math.abs(delta);
+    if (mode === "off") return delta; let n2 = 1; if (phiNext) for (let i = 0; i < NF; i++) n2 += phiNext[i] * phiNext[i];
+    const aV = HP.alphaV / n2 * delta, aA = genes.learnRate / n2 * delta, M = HP.wMax, c = v => v > M ? M : v < -M ? -M : v;
+    const aM = aA * HP.moveGain, kd = 1 - HP.decay, w0 = P.w0 || (P.w0 = innate(genes));   /* 不用就忘：策略权重慢慢衰减回先天值（τ ≈ 1,000 s）；没有奖励进来时，评论家的噪声不至于把策略带着漂走 */
+    for (let i = 0; i < NF; i++) { P.V[i] = c(P.V[i] + aV * P.eV[i]); P.Wt[i] = c(w0[i] + (P.Wt[i] - w0[i]) * kd + aM * P.eT[i]); P.Wk[i] = c(P.Wk[i] * kd + 0.3 * aM * P.eK[i]); P.Ws[i] = c(P.Ws[i] * kd + aM * P.eS[i]); P.Wi[i] = c(P.Wi[i] + aA * HP.ingestGain * P.eI[i]);   /* 吃喝这一路不衰减：它的奖励是即时的，漂不走；衰减只会让它在两次喝水之间把刚学的忘掉（实测 1/10） */ P.Wf[i] = c(P.Wf[i] * kd + aA * P.eF[i]); }
+    return delta;
+  }
+  function clearTraces(P) { for (const k of ["eT", "eK", "eS", "eI", "eF", "eV"]) P[k].fill(0); P.has = false; P.nT = 0; P.zT = 0; P.nS = 0; }
+  const API = { create, act, learn, clearTraces, NAMES, NF, IDX, INNATE, LATERAL, HP }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoPlastic = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱：仿真循环。无渲染、可快进、多只。一步 = 0.1 s：感觉 → 大脑（真脑或响应面）→ 可塑性层 → 先天反射 + 学到的偏置 → 身体 → 生理 → 奖励 → 学习。
+// 先天的部分与 dodge/game_core.js 同一套常数：转向 = 6 °/s × (左 DNa − 右 DNa)；巨纤维 > 90 Hz 起跳；MDN > 20 Hz 后退；MN9 30 Hz 左右伸喙。
+(function (root) {
+  const N = typeof module !== "undefined" && module.exports, World = N ? require("./world.js") : root.EcoWorld, Phys = N ? require("./physiology.js") : root.EcoPhysiology, Senses = N ? require("./senses.js") : root.EcoSenses,
+    Plastic = N ? require("./plastic.js") : root.EcoPlastic, CH = N ? require("./channels.js") : root.EcoChannels;
+  const GENES = { learnRate: 0.012, explore: 0.35, flightBias: -4, tempPref: 25, metabolism: 1, caution: 1, innateTurn: [0, 0, 0, 0] };
+  const BODY = { walkSpeed: 18, backSpeed: 12, turnGain: 6, turnMax: 420, gfThreshold: 90, mdnThreshold: 20, feedThreshold: 30, feedSlope: 6, mn9Min: 5, hopDist: 22, hopTime: 0.35, hopCost: 0.035, hopCooldown: 1.2,
+    flightSpeed: 60, flightTime: 1.2, flightMinStamina: 0.3, slopeK: 1.2, restSpeed: 0.15 };
+  const FSCALE = [40, 40, 250, 100, 30, 30, 30, 80, 100, 200, 10, 10], IX = Senses.IX, PI = Plastic.IDX, NF = Plastic.NF;
+  const PAIRS = ["vinegar", "geosmin", "hygro", "thermo", "jo", "odorA", "audio", "lc4", "touch"], DERIV = ["vinegar", "hygro", "thermo", "odorA"], GATED = [["hunger", "vinegar"], ["thirst", "hygro"], ["hot", "thermo"], ["cold", "thermo"]];
+
+  function newAgent(sim, genome, plastic) { const W = sim.world, a0 = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * W.rules.size * 0.5, genes = Object.assign({}, GENES, genome && genome.genes, { innateTurn: ((genome && genome.genes && genome.genes.innateTurn) || GENES.innateTurn).slice() });
+    const a = { id: sim.nextId++, genome: { id: (genome && genome.id) || sim.nextId, parent: genome ? genome.parent : null, generation: genome ? genome.generation || 0 : 0, genes }, phys: Phys.create(genes), P: plastic || Plastic.create(genes),
+      x: Math.cos(a0) * d, y: Math.sin(a0) * d, h: W.rand() * 6.2832, air: 0, avx: 0, avy: 0, flying: false, cool: 0, lastD: [], dt: sim.dt, state: "walk", alive: true, born: W.t, deathT: null, cause: null, r: 0, rs: (W.rand() * 4294967296) >>> 0,
+      xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), phi: new Float64Array(NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, threatLP: 0, threatDir: 0, onFood: null, onWater: null, rotten: 0,
+      stats: { tEat: 0, tDrink: 0, tRest: 0, tWall: 0, tWet: 0, tAir: 0, tRotten: 0, meals: 0, drinks: 0, hops: 0, flights: 0, bites: 0, dist: 0, reward: 0, rPos: 0, foodVisits: 0, waterVisits: 0, nCells: 0, cells: {}, tNight: 0, tHot: 0, tCold: 0 }, wasOn: 0, trail: [], trailT: 0, rbuf: [], lag: 300 };
+    Plastic.clearTraces(a.P); a.rand = () => { a.rs = (a.rs + 0x6d2b79f5) >>> 0; let t = a.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    sim.agents.push(a); sim.emit({ t: W.t, agent: a.id, kind: "birth", data: { generation: a.genome.generation } }); return a; }
+
+  // 可塑性层的特征。生态箱（这里）和 3D 大自然（eco/overlay.js）用的是**同一个函数**：a = { xin(27 路输入 Hz), out(12 个大脑输出 Hz), phys, genome.genes, phi, lp, dt, rand }，
+  //   along / across = 脚下的坡度在体轴方向 / 侧向的分量，light = 光照 0–1
+  function buildFeatures(a, along, across, light) { const x = a.xin, o = a.out, p = a.phys, g = a.genome.genes, phi = a.phi, dt = a.dt; let i = 0; for (let j = 0; j < 12; j++) phi[i++] = Math.min(2, o[j] / FSCALE[j]);
+    /* 可塑性层读的是感觉神经元群的发放，不是干净的物理量：每侧按 30 个神经元、0.1 s 的泊松计数加噪声 */
+    const nz = r => { if (r <= 0) return 0; const lam = r * 3; const u = Math.sqrt(-2 * Math.log(1 - a.rand())) * Math.cos(6.283185307 * a.rand()); return Math.max(0, lam + Math.sqrt(lam) * u) / 3; };
+    const S = {}, D = {}; for (const s of PAIRS) { const L = nz(x[IX[s + "_L"]]), R = nz(x[IX[s + "_R"]]); S[s] = (L + R) / 400; D[s] = (L - R) / (L + R + 20); phi[i++] = S[s]; phi[i++] = D[s]; }
+    const dv = {}; for (const s of DERIV) { a.lp[s] += (S[s] - a.lp[s]) * Math.min(1, dt / 1.0); dv[s] = Math.max(-1, Math.min(1, (S[s] - a.lp[s]) * 6)); phi[i++] = dv[s]; }
+    phi[i++] = x[IX.sugar] / 200; phi[i++] = x[IX.water] / 200; phi[i++] = x[IX.bitter] / 200;
+    const I = { hunger: p.hunger, thirst: p.thirst, hot: Math.max(0, Math.min(1, (p.bodyTemp - g.tempPref) / 10)), cold: Math.max(0, Math.min(1, (g.tempPref - p.bodyTemp) / 10)) };
+    phi[i++] = p.hunger; phi[i++] = p.thirst; phi[i++] = 1 - p.stamina; phi[i++] = 1 - p.health; phi[i++] = p.scent; phi[i++] = I.hot; phi[i++] = I.cold;
+    for (const [gt, s] of GATED) { phi[i++] = I[gt] * S[s]; phi[i++] = I[gt] * D[s]; phi[i++] = I[gt] * dv[s]; }
+    for (const s of ["vinegar", "hygro", "odorA"]) phi[i++] = Math.min(1, S[s] * 2) * D.jo;
+    phi[i++] = Math.max(-1, Math.min(1, along * 2)); phi[i++] = Math.max(-1, Math.min(1, across * 2)); phi[i++] = light; phi[i++] = 1; return phi; }
+  function features(a, W) { const gr = W.grad(a.x, a.y), c = Math.cos(a.h), sn = Math.sin(a.h); a.along = gr[0] * c + gr[1] * sn; return buildFeatures(a, a.along, -gr[0] * sn + gr[1] * c, W.light()); }
+
+  function create(rules, opts) {
+    const o = Object.assign({ seed: 1, dt: 0.1, brain: null, learn: "on", flight: false, noBrainFeatures: false, trail: true }, opts || {});
+    const sim = { world: World.create(rules, o.seed), agents: [], dt: o.dt, nextId: 1, events: [], listeners: [], opts: o, brain: o.brain };
+    sim.emit = ev => { sim.events.push(ev); if (sim.events.length > 4000) sim.events.splice(0, 1000); for (const f of sim.listeners) f(ev); }; sim.on = f => sim.listeners.push(f);
+    sim.spawn = (genome, plastic) => newAgent(sim, genome, plastic);
+    sim.step = function () { const W = sim.world, dt = sim.dt, bites = W.step(dt, sim.agents);
+      for (const a of sim.agents) { if (!a.alive) continue; const p = a.phys, g = a.genome.genes, st = a.stats; let bite = 0; a.bite = null; for (const b of bites) if (b.agent === a) { bite += World.K.biteDamage; a.bite = b; } if (bite > 0) { st.bites++; sim.emit({ t: W.t, agent: a.id, kind: "hit", data: { health: +p.health.toFixed(2) } }); }
+        Senses.sense(W, a, sim.agents, a.xin); (a.brain || sim.brain).eval(a.xin, a.out, a.rand); if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
+        const phi = features(a, W); if (o.noBrainFeatures) for (let j = 0; j < 12; j++) phi[j] = 0;
+        // 先学（上一步的奖励、这一步的状态），再做
+        let r = a.r; if (o.learn === "shuffle") { a.rbuf.push(r); if (a.rbuf.length > 700) a.rbuf.shift(); if (a.rand() < dt / 30) a.lag = 200 + Math.floor(a.rand() * 400); r = a.rbuf.length > a.lag ? a.rbuf[a.rbuf.length - 1 - a.lag] : 0; }
+        else if (o.learn === "yoked") { a.stepN = (a.stepN || 0) + 1; r = o.yoke && o.yoke.length ? o.yoke[a.stepN % o.yoke.length] : 0; }   /* 轭式对照：别的命的奖励序列原样回放，与自己的行为无关 */
+        if (o.recordReward) (a.rtrace || (a.rtrace = [])).push(a.r);
+        Plastic.learn(a.P, r, phi, g, o.learn === "off" ? "off" : "on");
+        const out = a.out, mn9 = out[3], canIngest = a.air <= 0 && (a.onFood || a.onWater) && mn9 > BODY.mn9Min;
+        Plastic.act(a.P, phi, g, dt, a.rand, { canIngest, ingestLogit: (mn9 - BODY.feedThreshold) / BODY.feedSlope, flight: o.flight && a.air <= 0 }, a.act);
+        let eating = false, drinking = false, effort = 0, resting = false, uphill = 0; a.cool = Math.max(0, a.cool - dt);
+        if (a.air > 0) { a.x += a.avx * dt; a.y += a.avy * dt; if (a.flying) { a.x += Math.cos(W.wind.dir) * W.wind.speed * 0.6 * dt; a.y += Math.sin(W.wind.dir) * W.wind.speed * 0.6 * dt; } a.air -= dt; st.tAir += dt; a.state = a.flying ? "fly" : "hop"; if (a.air <= 0) { a.air = 0; a.flying = false; a.lastD.length = 0; } }
+        else if (out[2] > BODY.gfThreshold * g.caution && a.cool <= 0) { const dir = a.threatLP > 0 ? a.threatDir + Math.PI + (a.rand() - 0.5) * 0.8 : a.h; a.air = BODY.hopTime; a.avx = Math.cos(dir) * BODY.hopDist / BODY.hopTime; a.avy = Math.sin(dir) * BODY.hopDist / BODY.hopTime; a.h = dir; a.cool = BODY.hopCooldown;
+          p.stamina = Math.max(0, p.stamina - BODY.hopCost); st.hops++; a.state = "hop"; sim.emit({ t: W.t, agent: a.id, kind: "hop", data: {} }); }
+        else if (a.act.takeoff && p.stamina > BODY.flightMinStamina) { a.air = BODY.flightTime; a.flying = true; a.avx = Math.cos(a.h) * BODY.flightSpeed; a.avy = Math.sin(a.h) * BODY.flightSpeed; st.flights++; a.state = "fly"; sim.emit({ t: W.t, agent: a.id, kind: "takeoff", data: {} }); }
+        else { const omega = Math.max(-BODY.turnMax, Math.min(BODY.turnMax, BODY.turnGain * (out[0] - out[1]) + a.act.turn)) * Math.PI / 180; a.h += omega * dt; if (a.h > 6.2832) a.h -= 6.2832; else if (a.h < 0) a.h += 6.2832;
+          const vigor = 0.35 + 0.65 * Math.min(1, p.stamina / 0.3), sf = Math.max(0.45, Math.min(1.25, 1 - BODY.slopeK * a.along)); let v = 0;
+          if (out[5] > BODY.mdnThreshold) { v = -BODY.backSpeed * vigor; a.state = "back"; }
+          else if (canIngest && a.act.ingest) { if (a.onFood) { eating = true; a.onFood.amount -= Phys.C.eatAmount * dt; if (a.state !== "eat") { st.meals++; if (W.t - (a.evT || -99) > 8) { a.evT = W.t; sim.emit({ t: W.t, agent: a.id, kind: "eat", data: { rotten: +a.rotten.toFixed(2), hunger: +p.hunger.toFixed(2) } }); } } a.state = "eat"; st.tEat += dt; if (a.rotten > 0) st.tRotten += dt; }
+            else { drinking = true; a.onWater.level = Math.max(0, a.onWater.level - Phys.C.drinkAmount * dt); if (a.state !== "drink") { st.drinks++; if (W.t - (a.evT || -99) > 8) { a.evT = W.t; sim.emit({ t: W.t, agent: a.id, kind: "drink", data: { thirst: +p.thirst.toFixed(2) } }); } } a.state = "drink"; st.tDrink += dt; } }
+          else { const cmd = a.act.speed < BODY.restSpeed ? 0 : a.act.speed; v = BODY.walkSpeed * g.metabolism * cmd * vigor * sf * (W.rain > 0 ? 0.75 : 1);   /* 代谢快 = 走得快、饿得快、产卵快 */ a.state = cmd === 0 ? "rest" : "walk"; if (cmd === 0) { resting = true; st.tRest += dt; } }
+          a.x += Math.cos(a.h) * v * dt; a.y += Math.sin(a.h) * v * dt; effort = Math.abs(v) / (BODY.walkSpeed * g.metabolism); uphill = Math.max(0, a.along * Math.sign(v)) * 3; st.dist += Math.abs(v) * dt; }
+        { const on = (a.onFood ? 1 : 0) | (a.onWater ? 2 : 0); if ((on & 1) && !(a.wasOn & 1)) st.foodVisits++; if ((on & 2) && !(a.wasOn & 2)) st.waterVisits++; a.wasOn = on; const ck = Math.floor(a.x / 10) + "," + Math.floor(a.y / 10); if (!st.cells[ck]) { st.cells[ck] = 1; st.nCells++; }
+          if (W.sun() <= 0) st.tNight += dt; if (p.bodyTemp > g.tempPref + 5) st.tHot += dt; else if (p.bodyTemp < g.tempPref - 5) st.tCold += dt; }
+        const R = W.rules.size - 0.5, d = Math.hypot(a.x, a.y); if (d > R) { a.x *= R / d; a.y *= R / d; } if (d > R - 4) st.tWall += dt; if (a.onWater) st.tWet += dt;
+        a.r = Phys.step(p, g, dt, { eating, rotten: a.rotten, drinking, bites: bite, ambient: W.temp(a.x, a.y), effort, flying: a.flying, raining: W.rain > 0, resting, wet: !!a.onWater && a.air <= 0, wet: !!a.onWater && a.air <= 0, wind: W.wind.speed / World.K.windMax, uphill }); st.reward += a.r; if (a.r > 0) st.rPos += a.r;
+        if (o.trail) { a.trailT += dt; if (a.trailT >= 0.5) { a.trailT = 0; a.trail.push([+W.t.toFixed(1), +a.x.toFixed(1), +a.y.toFixed(1), +a.h.toFixed(2), a.state, +p.health.toFixed(2)]); if (a.trail.length > 240) a.trail.shift(); } }
+        if (p.health <= 0) { a.alive = false; a.deathT = W.t; a.cause = Phys.causeOfDeath(p); Plastic.learn(a.P, a.r, null, g, o.learn === "off" ? "off" : "on"); sim.emit({ t: W.t, agent: a.id, kind: "death", data: { cause: a.cause, age: +(W.t - a.born).toFixed(1) } }); } }
+    };
+    return sim;
+  }
+  const API = { create, buildFeatures, GENES, BODY, FSCALE }; if (typeof module !== "undefined" && module.exports) module.exports = API; else root.EcoSim = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+// 生态箱 → 3D 大自然：把生态箱的可塑性层 + 六种内部状态挂到 dodge/game_core.js 的那只果蝇上（G.attachEco，**默认不装**）。
+//   与生态箱共用同一份代码：27 路输入的定义（channels.js）、特征（sim.js 的 buildFeatures）、可塑性层（plastic.js）、身体与内生奖励（physiology.js）。
+//   大脑是 game_core 自己那个真的脉冲网络（v5）；这里只读它：感觉神经元此刻被驱动的频率、12 个读出特征最近 ~300 ms 的发放率。
+//   对行为的影响只有三处，全是「先天反射 + 学到的偏置」：转向加一个偏置、走路速度乘一个系数（太低 = 歇着）、碰到东西肯不肯吃喝（MN9 必须先动）。
+(function (root) {
+  const N = typeof module !== "undefined" && module.exports, CH = N ? require("./channels.js") : root.EcoChannels, Plastic = N ? require("./plastic.js") : root.EcoPlastic, Phys = N ? require("./physiology.js") : root.EcoPhysiology, Sim = N ? require("./sim.js") : root.EcoSim, WK = (N ? require("./world.js") : root.EcoWorld).K;
+  const IX = Object.fromEntries(CH.INPUTS.map((c, i) => [c, i])), TICK = 0.1, SMOOTH = 0.3;
+  // opts: { SUB, genes, P（学成的权重；不给 = 白纸）, learn: "on" | "off", seed, tempDay, tempNight, record（记下每次决策时的 27 路输入，给 collect_manifold 用） }
+  function create(opts) { const o = Object.assign({ learn: "off", seed: 1, tempDay: 28, tempNight: 18 }, opts || {}), genes = Object.assign({}, Sim.GENES, o.genes || {}, { innateTurn: ((o.genes && o.genes.innateTurn) || Sim.GENES.innateTurn).slice() }), B = CH.bind(o.SUB);
+    let rs = (o.seed >>> 0) || 1; const rand = () => { rs = (rs + 0x6d2b79f5) >>> 0; let t = rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const cnt = new Float32Array(o.SUB.meta.n), ema = new Float32Array(CH.FEATURES.length);
+    const a = { xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), phi: new Float64Array(Plastic.NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, dt: TICK, rand, genome: { genes }, phys: Phys.create(genes), P: o.P || Plastic.create(genes) };
+    Plastic.clearTraces(a.P);
+    const E = { agent: a, genes, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, speedFactor: 1, rest: false, vigor: 1, alive: true, cause: null, t: 0, acc: 0, r: 0, lastHits: 0, effortAcc: 0, effortN: 0, record: o.record ? [] : null,
+      stats: { tEat: 0, tDrink: 0, tRest: 0, meals: 0, drinks: 0, waterVisits: 0, foodVisits: 0, bites: 0, reward: 0, thirstSum: 0, n: 0 }, wasOn: 0, wasState: "" };
+    E.spike = i => { cnt[i]++; };
+    // 每个游戏步（5 ms）调一次；每 0.1 s 做一次决策
+    E.tick = function (G, out, dt) { if (!E.alive) return; const S = G.S, st = E.stats; E.t += dt; E.acc += dt; E.effortAcc += Math.abs(S.speed || 0) / G.CFG.walkSpeed; E.effortN++;
+      const p = G.onPellet, eatingNow = S.state === "feed" && p && p.type !== "water", drinkingNow = S.state === "feed" && p && p.type === "water"; if (eatingNow) st.tEat += dt; if (drinkingNow) st.tDrink += dt; if (E.rest && S.state === "walk") st.tRest += dt;
+      if (E.acc < TICK - 1e-9) return; const T = E.acc; E.acc = 0;
+      // 12 个读出特征：这 0.1 s 的脉冲计数 → ~300 ms 平滑（与 eco/brain_live.js 一致）
+      const y = B.read(cnt, T), al = Math.min(1, T / SMOOTH); CH.FEATURES.forEach((f, j) => { ema[j] += al * (y[f] - ema[j]); a.out[j] = ema[j] < 0.3 ? 0 : ema[j]; }); cnt.fill(0);
+      // 27 路输入：直接读 game_core 此刻送进感觉神经元的频率
+      const x = a.xin, L = G.loom || {}, Sn = G.senses || {}, F = G.fieldLR, olf = G.CFG.olfRate, conc = (G.MB && G.MB.conc) || {}, c1 = k => conc[k] || { L: 0, R: 0 }; x.fill(0);
+      x[IX.lc4_L] = L.lc4L || 0; x[IX.lc4_R] = L.lc4R || 0; x[IX.lplc2_L] = L.lplc2L || 0; x[IX.lplc2_R] = L.lplc2R || 0; x[IX.lc16_L] = L.lc16L || 0; x[IX.lc16_R] = L.lc16R || 0;
+      x[IX.jo_L] = (G.joInput && G.joInput.L) || 0; x[IX.jo_R] = (G.joInput && G.joInput.R) || 0; x[IX.touch_L] = (G.touch && G.touch.L) || 0; x[IX.touch_R] = (G.touch && G.touch.R) || 0;
+      if (F) { x[IX.thermo_L] = F.tL; x[IX.thermo_R] = F.tR; x[IX.hygro_L] = F.hL; x[IX.hygro_R] = F.hR; } else if (G.field) { const t = Math.min(200, G.field.thermo * 200), h = Math.min(200, G.field.hygro * 200); x[IX.thermo_L] = x[IX.thermo_R] = t; x[IX.hygro_L] = x[IX.hygro_R] = h; }
+      x[IX.audio_L] = Sn.audioL || 0; x[IX.audio_R] = Sn.audioR || 0;
+      for (const [kind, ch] of [["vinegar", "vinegar"], ["geosmin", "geosmin"], ["A", "odorA"], ["B", "odorB"]]) { const c = c1(kind); x[IX[ch + "_L"]] = Math.min(olf, c.L * olf); x[IX[ch + "_R"]] = Math.min(olf, c.R * olf); }
+      if (G.gust) { x[IX.sugar] = G.gust.sugar; x[IX.bitter] = G.gust.bitter; x[IX.water] = G.gust.water; }
+      if (E.record && E.record.length < 20000) E.record.push(Array.from(x, q => Math.round(q)));
+      // 身体：吃 / 喝 / 被撞 / 冷热 / 用力
+      const hits = G.score.hit - E.lastHits; E.lastHits = G.score.hit; if (hits > 0) st.bites += hits; const light = Math.max(0, Math.min(1, G.CFG.light)), rain = G.world && G.world.weather ? G.world.weather.rain : 0, thermo = G.field ? G.field.thermo : 0;
+      const ambient = o.tempNight + (o.tempDay - o.tempNight) * light + WK.rockHeatC * thermo / WK.rockGain - (rain > 0.3 ? 2 : 0), effort = E.effortN ? E.effortAcc / E.effortN : 0; E.effortAcc = 0; E.effortN = 0;
+      let along = 0, across = 0; if (G.world && G.world.grad) { const gr = G.world.grad(S.x, S.y), c = Math.cos(S.h), sn = Math.sin(S.h); along = gr[0] * c + gr[1] * sn; across = -gr[0] * sn + gr[1] * c; }
+      const on = (p ? (p.type === "water" ? 2 : 1) : 0); if ((on & 1) && !(E.wasOn & 1)) st.foodVisits++; if ((on & 2) && !(E.wasOn & 2)) st.waterVisits++; E.wasOn = on;
+      if (eatingNow && E.wasState !== "eat") st.meals++; if (drinkingNow && E.wasState !== "drink") st.drinks++; E.wasState = eatingNow ? "eat" : drinkingNow ? "drink" : "";
+      E.r = Phys.step(a.phys, genes, T, { eating: eatingNow, rotten: p && p.type === "bitter" ? 1 : p && p.type === "mixed" ? 0.5 : 0, drinking: drinkingNow, bites: hits * WK.biteDamage, ambient, effort, flying: S.z > 0.01, raining: rain > 0.3, resting: E.rest && S.state === "walk", wet: !!(p && p.type === "water") && S.z <= 0.01, wind: (G.wind && G.wind.speed) || 0, uphill: Math.max(0, along) * 3 });
+      st.reward += E.r; st.thirstSum += a.phys.thirst; st.n++;
+      if (a.phys.health <= 0) { E.alive = false; E.cause = Phys.causeOfDeath(a.phys); Plastic.learn(a.P, E.r, null, genes, o.learn === "on" ? "on" : "off"); E.speedFactor = 0; E.act.ingest = 0; return; }
+      // 先学（上一次决策之后的奖励、此刻的状态），再决策
+      const phi = Sim.buildFeatures(a, along, across, light); Plastic.learn(a.P, E.r, phi, genes, o.learn === "on" ? "on" : "off");
+      const mn9 = out.mn9 || 0, can = !!p && S.z <= 0.01 && mn9 > Sim.BODY.mn9Min; Plastic.act(a.P, phi, genes, T, rand, { canIngest: can, ingestLogit: (mn9 - Sim.BODY.feedThreshold) / Sim.BODY.feedSlope, flight: false }, E.act);
+      E.rest = E.act.speed < Sim.BODY.restSpeed; E.speedFactor = E.rest ? 0 : E.act.speed; E.vigor = 0.35 + 0.65 * Math.min(1, a.phys.stamina / 0.3); };
+    // 死了以后同一只重生（单只模式的语义）：身体复位，学到的权重留着
+    E.reborn = () => { a.phys = Phys.create(genes); Plastic.clearTraces(a.P); ema.fill(0); cnt.fill(0); E.alive = true; E.cause = null; E.speedFactor = 1; E.rest = false; for (const k in E.stats) E.stats[k] = 0; E.t = 0; };
+    return E; }
+  const API = { create }; if (N) module.exports = API; else root.EcoOverlay = API;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>const ECO_TRANSFER = {
+ "protocol": {
+  "seeds": [
+   901,
+   902,
+   903,
+   904,
+   905
+  ],
+  "cap_s": 900,
+  "brain": "live v5",
+  "champion": "results/eco/m2_champion.json（冻结）"
+ },
+ "runs": [
+  {
+   "seed": 901,
+   "naive": {
+    "arm": "naive",
+    "seed": 901,
+    "life_s": 462.4,
+    "alive": false,
+    "cause": "starve",
+    "drink_s": 4.6,
+    "eat_s": 0,
+    "rest_s": 0,
+    "drinks": 43,
+    "meals": 0,
+    "waterVisits": 52,
+    "foodVisits": 0,
+    "hits": 0,
+    "thirst_mean": 0.439,
+    "thirst_end": 0.515,
+    "hunger_end": 1,
+    "health_end": 0,
+    "dist_mm": 6904,
+    "jumps": 13,
+    "wall_s": 697
+   },
+   "trained": {
+    "arm": "trained",
+    "seed": 901,
+    "life_s": 900,
+    "alive": true,
+    "cause": null,
+    "drink_s": 169.34,
+    "eat_s": 48.52,
+    "rest_s": 0,
+    "drinks": 192,
+    "meals": 8,
+    "waterVisits": 30,
+    "foodVisits": 12,
+    "hits": 0,
+    "thirst_mean": 0.137,
+    "thirst_end": 0,
+    "hunger_end": 0.43,
+    "health_end": 1,
+    "dist_mm": 12582,
+    "jumps": 34,
+    "wall_s": 978
+   },
+   "informative": true
+  },
+  {
+   "seed": 902,
+   "naive": {
+    "arm": "naive",
+    "seed": 902,
+    "life_s": 434.9,
+    "alive": false,
+    "cause": "starve",
+    "drink_s": 2.9,
+    "eat_s": 0,
+    "rest_s": 0,
+    "drinks": 28,
+    "meals": 0,
+    "waterVisits": 36,
+    "foodVisits": 0,
+    "hits": 0,
+    "thirst_mean": 0.572,
+    "thirst_end": 0.815,
+    "hunger_end": 1,
+    "health_end": 0,
+    "dist_mm": 6257,
+    "jumps": 15,
+    "wall_s": 629
+   },
+   "trained": {
+    "arm": "trained",
+    "seed": 902,
+    "life_s": 900,
+    "alive": true,
+    "cause": null,
+    "drink_s": 312.89,
+    "eat_s": 33.32,
+    "rest_s": 0,
+    "drinks": 341,
+    "meals": 6,
+    "waterVisits": 54,
+    "foodVisits": 7,
+    "hits": 0,
+    "thirst_mean": 0.021,
+    "thirst_end": 0.012,
+    "hunger_end": 0.895,
+    "health_end": 0.978,
+    "dist_mm": 10200,
+    "jumps": 27,
+    "wall_s": 966
+   },
+   "informative": true
+  },
+  {
+   "seed": 903,
+   "naive": {
+    "arm": "naive",
+    "seed": 903,
+    "life_s": 405.9,
+    "alive": false,
+    "cause": "thirst",
+    "drink_s": 0.3,
+    "eat_s": 24.57,
+    "rest_s": 0,
+    "drinks": 3,
+    "meals": 5,
+    "waterVisits": 5,
+    "foodVisits": 5,
+    "hits": 0,
+    "thirst_mean": 0.718,
+    "thirst_end": 1,
+    "hunger_end": 0.181,
+    "health_end": 0,
+    "dist_mm": 6477,
+    "jumps": 15,
+    "wall_s": 584
+   },
+   "trained": {
+    "arm": "trained",
+    "seed": 903,
+    "life_s": 900,
+    "alive": true,
+    "cause": null,
+    "drink_s": 280.21,
+    "eat_s": 37.95,
+    "rest_s": 0,
+    "drinks": 302,
+    "meals": 6,
+    "waterVisits": 43,
+    "foodVisits": 7,
+    "hits": 0,
+    "thirst_mean": 0.087,
+    "thirst_end": 0.078,
+    "hunger_end": 0.102,
+    "health_end": 1,
+    "dist_mm": 10465,
+    "jumps": 32,
+    "wall_s": 1006
+   },
+   "informative": true
+  },
+  {
+   "seed": 904,
+   "naive": {
+    "arm": "naive",
+    "seed": 904,
+    "life_s": 439.8,
+    "alive": false,
+    "cause": "thirst",
+    "drink_s": 1,
+    "eat_s": 27.99,
+    "rest_s": 0,
+    "drinks": 10,
+    "meals": 9,
+    "waterVisits": 8,
+    "foodVisits": 8,
+    "hits": 0,
+    "thirst_mean": 0.712,
+    "thirst_end": 1,
+    "hunger_end": 0.198,
+    "health_end": 0,
+    "dist_mm": 6934,
+    "jumps": 15,
+    "wall_s": 617
+   },
+   "trained": {
+    "arm": "trained",
+    "seed": 904,
+    "life_s": 900,
+    "alive": true,
+    "cause": null,
+    "drink_s": 159.41,
+    "eat_s": 91.19,
+    "rest_s": 0,
+    "drinks": 158,
+    "meals": 19,
+    "waterVisits": 24,
+    "foodVisits": 17,
+    "hits": 0,
+    "thirst_mean": 0.1,
+    "thirst_end": 0.189,
+    "hunger_end": 0,
+    "health_end": 1,
+    "dist_mm": 11609,
+    "jumps": 30,
+    "wall_s": 998
+   },
+   "informative": true
+  },
+  {
+   "seed": 905,
+   "naive": {
+    "arm": "naive",
+    "seed": 905,
+    "life_s": 429.8,
+    "alive": false,
+    "cause": "thirst",
+    "drink_s": 0.6,
+    "eat_s": 54.57,
+    "rest_s": 0,
+    "drinks": 6,
+    "meals": 9,
+    "waterVisits": 17,
+    "foodVisits": 9,
+    "hits": 0,
+    "thirst_mean": 0.747,
+    "thirst_end": 1,
+    "hunger_end": 0.149,
+    "health_end": 0,
+    "dist_mm": 6711,
+    "jumps": 17,
+    "wall_s": 614
+   },
+   "trained": {
+    "arm": "trained",
+    "seed": 905,
+    "life_s": 865.4,
+    "alive": false,
+    "cause": "starve",
+    "drink_s": 297.3,
+    "eat_s": 48.44,
+    "rest_s": 0,
+    "drinks": 295,
+    "meals": 13,
+    "waterVisits": 41,
+    "foodVisits": 12,
+    "hits": 0,
+    "thirst_mean": 0.082,
+    "thirst_end": 0.017,
+    "hunger_end": 1,
+    "health_end": 0,
+    "dist_mm": 9279,
+    "jumps": 28,
+    "wall_s": 974
+   },
+   "informative": true
+  }
+ ],
+ "n_informative": 5,
+ "conclusive": true,
+ "X1": {
+  "more_drink_time": "5/5",
+  "drinks_per_visit_trained": 6.583333333333333,
+  "drinks_per_visit_naive": 0.7777777777777778,
+  "pass": true
+ },
+ "X2": {
+  "lower_mean_thirst": "5/5",
+  "pass": true
+ },
+ "report": {
+  "life_naive": 434.9,
+  "life_trained": 900,
+  "drink_s_naive": 1,
+  "drink_s_trained": 280.21,
+  "thirst_naive": 0.712,
+  "thirst_trained": 0.087,
+  "eat_s_naive": 24.57,
+  "eat_s_trained": 48.44,
+  "alive_naive": 0,
+  "alive_trained": 4
+ },
+ "pass": true
+};</script>
 <script>// 果蝇闪避：与渲染无关的游戏核心（浏览器与 node 共用）
 // 连接组部分在 brain.js；这里是手写的部分：视觉前端、运动映射、起跳规则、球与判定。
 (function (root) {
@@ -7643,7 +8329,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     // 触感：触角碰到围栏 → 该侧 JO。这是**物理量**，不是判断逻辑——
     // 碰到之后转不转、跳不跳、还是去梳理，完全由连接组决定。
     // 默认关，理由同 wallVision：已发布的对局数字都是在没有它的条件下测的。
-    touch: false, touchRate: 200, antennaLen: 1.6,
+    touch: false, touchRate: 200, antennaLen: 1.6, fieldLR: false,
     // 温度 / 湿度场：G.fields 里每个源 {type:"heat"|"damp", x, y, sigma, strength}
     // 强度 1.0 对应 fieldRate Hz。同样是**物理量**，没有任何"太热就走开"之类的规则。
     fieldRate: 200,
@@ -7924,6 +8610,8 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     // 大自然（dodge/nature.js，可选）：有地形、石头、天气与重力的开放世界。装上之后：步行受坡度影响、实心物件挡路并压到触角、气味被风吹歪、
     // 浆果按重力下落弹跳滚动、雨带来声音与湿度。没装时下面所有 G.world 分支都不走，已发布的数字不受影响。
     G.world = null; G.ambient = null; G.attachWorld = W => { G.world = W; return W; };
+    // 生态箱的可塑性层 + 六种内部状态（eco/overlay.js，**默认不装**）：装上之后才走下面所有 G.eco 分支；不装时一个字节的行为都不变
+    G.eco = null; G.attachEco = e => { G.eco = e; return e; };
     G.legs = null; G.attachLegs = legs => { G.legs = legs; return legs; };   // 六条腿的身体（可选）
     G.mind = () => {
       const o = G.readout(), S = G.S, Sn = G.senses, B = G.body, felt = [], fThr = CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold;
@@ -8186,14 +8874,18 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
         }
       }
       if (G.world && G.ambient) hygro += G.ambient.hygro;                  // 下过雨，到处都是潮的
-      G.field = { thermo, hygro };
+      G.field = { thermo, hygro }; G.fieldLR = null;
+      if (CFG.fieldLR && (has("THERMO_left") || has("HYGRO_left"))) {     /* 温 / 湿感受器长在触角上：两根触角各读各的（与生态箱同口径；默认关，关着时两侧相同 = 原来的行为） */
+        const at = a => { const ax = S.x + Math.cos(S.h + a) * CFG.antennaLen, ay = S.y + Math.sin(S.h + a) * CFG.antennaLen; let t = 0, h = G.world && G.ambient ? G.ambient.hygro : 0; for (const f of G.fields) { const g2 = Math.exp(-((f.x - ax) ** 2 + (f.y - ay) ** 2) / (2 * f.sigma * f.sigma)); if (f.type === "heat") t += f.strength * g2; else if (f.type === "damp") h += f.strength * g2; } return [Math.min(CFG.fieldRate, t * CFG.fieldRate), Math.min(CFG.fieldRate, h * CFG.fieldRate)]; };
+        const [tL, hL] = at(0.61), [tR, hR] = at(-0.61); G.fieldLR = { tL, tR, hL, hR };
+      }
       if (has("THERMO_left")) {
         const t = Math.min(CFG.fieldRate, thermo * CFG.fieldRate);
-        brain.setRate("THERMO_left", t); brain.setRate("THERMO_right", t);
+        brain.setRate("THERMO_left", G.fieldLR ? G.fieldLR.tL : t); brain.setRate("THERMO_right", G.fieldLR ? G.fieldLR.tR : t);
       }
       if (has("HYGRO_left")) {
         const h2 = Math.min(CFG.fieldRate, hygro * CFG.fieldRate);
-        brain.setRate("HYGRO_left", h2); brain.setRate("HYGRO_right", h2);
+        brain.setRate("HYGRO_left", G.fieldLR ? G.fieldLR.hL : h2); brain.setRate("HYGRO_right", G.fieldLR ? G.fieldLR.hR : h2);
       }
       // —— v4：听觉、嗅觉、内感受 + 身体状态对味觉感受器灵敏度的调制 ——
       if (G.V4) {
@@ -8270,7 +8962,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
       brain.run(CFG.chunkSteps, (i, s) => {
         const k = targetOf[i]; if (k >= 0) counts[k]++;
         const k2 = target2Of[i]; if (k2 >= 0) counts2[k2]++;
-        G.onSpike && G.onSpike(i);
+        G.onSpike && G.onSpike(i); if (G.eco) G.eco.spike(i);
         if (MB) { MB.plast.spike(i); const m = MB.mLocal[i]; if (m >= 0) MB.mbonCount[m]++; else { const q = MB.kcLocal[i]; if (q >= 0) MB.kcCount[q]++; else if (SUB.mb_tag[i] === "DAN") MB.danCount[SUB.types[i].startsWith("PAM") ? "PAM" : SUB.types[i].startsWith("PPL1") ? "PPL1" : "other"]++; } }
       });
       if (MB) mbStep(dt);
@@ -8280,6 +8972,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
         ema[k] += (dt / (tau + dt)) * (counts[k] / dt / SUB.groups[TG[k]].length - ema[k]);
       }
       const out = G.readout();
+      if (G.eco) G.eco.tick(G, out, dt);
       windStep(dt);
       S.thirst = Math.max(0, Math.min(1, S.thirst + CFG.thirstRise * dt
         - (S.state === "feed" && G.onPellet && G.onPellet.type === "water" ? CFG.thirstDrop : 0) * dt));
@@ -8302,6 +8995,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
         MB.navT = (MB.navT || 0) - dt; if (MB.navT <= 0) { MB.navT = 0.5; MB.navV = {}; for (const kind of Object.keys(MB.conc)) { const m = G.memoryOf(kind); MB.navV[kind] = m ? (1 - m.PAM) - (1 - m.PPL1) : 0; } }
         for (const [kind, c] of Object.entries(MB.conc)) { const v = (MB.navV || {})[kind] || 0; if (v && Math.max(c.L, c.R) > 0.02 && Math.abs(c.L - c.R) > 1e-5) odorTurn += Math.sign(c.L - c.R) * v * CFG.memoryTurn; }
       }
+      if (G.eco) odorTurn += G.eco.act.turn;                          /* 可塑性层学到的转向偏置（°/s），加在先天的 DNa 转向上 */
       const omega = Math.max(-CFG.turnMax, Math.min(CFG.turnMax, G.mapSign * CFG.turnGain * (out.dnaL - out.dnaR) + odorTurn)) * Math.PI / 180;
       S.cooldown = Math.max(0, S.cooldown - dt);
       if (S.jumpT < 0 && S.cooldown === 0 && out.gf > CFG.gfThreshold) {
@@ -8349,14 +9043,16 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
         let state = "walk";
         if (V3) {
           if (out.mdn > CFG.mdnThreshold) state = "back";
-          else if (G.onPellet && out.mn9 > (G.onPellet.type === "water" && !CFG.physiology
-                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : (CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold))) state = "feed";
+          else if (G.eco ? (G.onPellet && G.eco.act.ingest && G.eco.alive)        /* 生态箱的可塑性层：MN9 先动（> 5 Hz）才谈得上，肯不肯吃喝是「先天的伸喙倾向 + 学到的偏置」 */
+                   : (G.onPellet && out.mn9 > (G.onPellet.type === "water" && !CFG.physiology
+                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : (CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold)))) state = "feed";
           else if (S.groomT > 0 || (out.adn1 > CFG.groomThreshold && G.dust.length)) state = "groom";
         }
         if (state !== S.state) { G.onEvent && G.onEvent("state", { from: S.state, to: state }); if (state === "groom" && S.groomT <= 0) { S.groomT = CFG.groomDur; G.score.groom++; } }
         S.state = state;
         const vigor = CFG.physiology ? 0.45 + 0.55 * G.body.energy : 1;      // 能量低了走得慢（身体，不是决策）
         let speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
+        if (G.eco) speed *= (state === "walk" ? G.eco.speedFactor : 1) * G.eco.vigor * (G.eco.alive ? 1 : 0);
         if (G.world && speed) speed *= G.world.slopeFactor(S.x, S.y, S.h, speed);        // 上坡慢、下坡快：身体对抗重力做功，不是决策
         if (G.legs) {
           // 六条腿的身体（dodge/legs.js，默认不装）：上面算出的 speed / omega 只是**指令**，身体实际怎么动由支撑腿的运动学解出来。
@@ -14723,6 +15419,16 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
       window.__life = g;
     }
     function note(t) { diary.push({ t: g ? g.body.age : 0, s: t }); if (diary.length > 60) diary.shift(); }
+    // —— 生态箱 → 大自然（eco/overlay.js）：读生态箱的存档（eco/save.js 的格式），取一只果蝇的可塑性层权重与基因，挂到这只上。默认不装；卸下就回到原来的行为 ——
+    const ECO_KEY = "fly-eco-loaded"; let eco = null;
+    const decF = v => (v && v.__f64) ? Float64Array.from(v.__f64) : v;
+    function ecoPick(S) { if (!S || S.format !== "fly-ecobox" || !S.agents || !S.agents.length) throw new Error("不是生态箱存档"); const alive = S.agents.filter(a => a.alive), pool = alive.length ? alive : S.agents;
+      const a = pool.reduce((b, q) => (q.phys && b.phys && q.phys.age > b.phys.age) ? q : b, pool[0]); const P = {}; for (const k in a.P) P[k] = decF(a.P[k]); return { P, genes: a.genome.genes, id: a.id, generation: a.genome.generation, solo: !!S.evolve && !!S.evolve.solo }; }
+    function ecoAttach(pick, learn) { ensure(); if (world !== "nature") setWorld("nature"); const seed = (Date.now() % 100000) + 3;
+      eco = window.EcoOverlay.create({ SUB: SUB4, seed, learn: learn ? "on" : "off", P: pick.P, genes: pick.genes }); g.CFG.physiology = false; g.CFG.fieldLR = true; g.attachEco(eco); $("ecoOff").hidden = false;
+      note(`（生态箱里的果蝇 #${pick.id}${pick.solo ? "" : "，第 " + pick.generation + " 代"} 进了这片大自然：它学到的偏置${learn ? "会继续学" : "已冻结"}）`); }
+    function ecoDetach() { if (!eco) return; g.attachEco(null); eco = null; g.CFG.physiology = true; g.CFG.fieldLR = false; $("ecoOff").hidden = true; try { localStorage.removeItem(ECO_KEY); } catch (e) {} note("（卸下了生态箱的身体和可塑性层，回到原来的它）"); }
+    function ecoLine() { if (!eco) return ""; const p = eco.agent.phys, f = v => v.toFixed(2); return `生态箱身体 · 饿 ${f(p.hunger)} 渴 ${f(p.thirst)} 体力 ${f(p.stamina)} 健康 ${f(p.health)} 气味 ${f(p.scent)} 体温 ${p.bodyTemp.toFixed(1)} ℃ · ${eco.rest ? "歇着" : "速度 ×" + eco.speedFactor.toFixed(2)} · 转向偏置 ${eco.act.turn.toFixed(0)} °/s${eco.alive ? "" : " · 死了（" + (window.EcoPhysiology.CAUSE[eco.cause] || eco.cause) + "）"}`; }
     // 同一只果蝇、同一颗大脑、同一份记忆，两个世界：俯视的开放世界（没有墙），和 3D 的篮球场（有边界，和球场版一样开着触感与围栏视觉）。
     // 换世界时把地上的东西清掉（坐标系不同），果蝇放到球场版那只所在的位置。
     function setWorld(w) {
@@ -14766,6 +15472,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
                         JO_left: g.joInput ? g.joInput.L : 0, JO_right: g.joInput ? g.joInput.R : 0 };
       GMSTATS.t = performance.now();
       diaryT -= dt; if (m.sentence && m.sentence !== lastLine && diaryT <= 0) { lastLine = m.sentence; note(m.sentence); diaryT = 1.2; }
+      if (eco) { const el = $("ecoLine"); if (el) el.textContent = ecoLine(); if (!eco.alive && !eco._noted) { eco._noted = true; note("（它在大自然里死了：" + (window.EcoPhysiology.CAUSE[eco.cause] || eco.cause) + "。点「卸下生态箱」或再载入一次）"); } }
       if (Math.floor(g.body.age) % 15 === 0 && n) save();
       $("lifePill").textContent = "第 " + (Math.floor(g.body.age / g.CFG.dayLength) + 1) + " 天 · " + (g.CFG.light < 0.3 ? "夜" : g.CFG.light < 0.6 ? "晨昏" : "昼");
       draw(m); return n * g.chunkDt;
@@ -14876,6 +15583,9 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     $("lifeLearn").onchange = e => { ensure(); g.CFG.learning = e.target.checked; note(e.target.checked ? "（可塑性打开）" : "（可塑性关掉了：突触不再变）"); };
     $("lifeReinf").onchange = e => { ensure(); g.CFG.reinforce = e.target.checked; note(e.target.checked ? "（糖 / 烫 → 多巴胺 接上了）" : "（糖 / 烫 → 多巴胺 断开了）"); };
     $("lifeMemNav").onchange = e => { ensure(); g.CFG.memoryNav = e.target.checked; note(e.target.checked ? "（手写的桥打开：记忆开始影响转向）" : "（手写的桥关掉）"); };
+    if ($("ecoLoad")) { $("ecoLoad").onclick = () => $("ecoFile").click(); $("ecoOff").onclick = ecoDetach;
+      $("ecoFile").onchange = e => { const f = e.target.files[0]; if (!f) return; const fr = new FileReader(); fr.onload = () => { try { const pick = ecoPick(JSON.parse(fr.result)); ecoAttach(pick, false); try { localStorage.setItem(ECO_KEY, JSON.stringify({ P: Object.fromEntries(Object.entries(pick.P).map(([k, v]) => [k, v instanceof Float64Array ? { __f64: Array.from(v) } : v])), genes: pick.genes, id: pick.id, generation: pick.generation, solo: pick.solo })); } catch (e2) {} } catch (err) { note("（读不了这个文件：" + err.message + "）"); } }; fr.readAsText(f); e.target.value = ""; };
+      try { const st = JSON.parse(localStorage.getItem(ECO_KEY) || "null"); if (st && st.P) { const P = {}; for (const k in st.P) P[k] = decF(st.P[k]); window.__ecoResume = () => ecoAttach({ P, genes: st.genes, id: st.id, generation: st.generation, solo: st.solo }, false); } } catch (e) {} }
     $("lifeForget").onclick = () => { ensure(); g.forget(); note("（所有 KC→MBON 突触回到原值：什么都不记得了）"); save(); };
     // 身体：截腿 / 接回
     function syncLegButtons() { for (const bt of document.querySelectorAll("#lifeLegs [data-leg]")) { const l = legs && legs.byName[bt.dataset.leg]; bt.setAttribute("aria-pressed", l && !l.attached ? "true" : "false"); bt.style.textDecoration = l && !l.attached ? "line-through" : ""; } }
