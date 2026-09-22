@@ -12,7 +12,7 @@
     n.push("坡:pitch", "坡:roll", "光", "1"); return n; })();
   // 身体左右对称：**往哪边转**只能由分左右的信号（名字以 Δ 结尾的、以及侧倾）决定；不分侧的信号只能决定**转得多不多**（趋激性 kinesis：探索噪声的幅度）
   const LATERAL = NAMES.map(s => (s.endsWith("Δ") || s === "坡:roll") ? 1 : 0);
-  const NF = NAMES.length, IDX = Object.fromEntries(NAMES.map((s, i) => [s, i])), INNATE = [["Wt", "hunger×vinegarΔ"], ["Wt", "thirst×hygroΔ"], ["Wi", "味:water"], ["Wt", "感:odorAΔ"]];   // 四个可遗传的先天偏置：饿时朝醋味转、渴时朝湿处转、尝到水就喝、朝（或背着）捕食者气味转
+  const NF = NAMES.length, IDX = Object.fromEntries(NAMES.map((s, i) => [s, i])), INNATE = [["Wt", "hunger×vinegarΔ"], ["Wt", "thirst×hygroΔ"], ["Wi", "味:water"], ["Wt", "感:audioΔ"]];   // 四个可遗传的先天偏置：饿时朝醋味转、渴时朝湿处转、尝到水就喝、朝（或背着）声音转（追过来的甲虫会响）
   const HP = { gamma: 0.995, lambda: 0.9, alphaV: 0.03, ingestGain: 6, moveGain: 1, decay: 1e-4, rScale: 20, ouTau: 0.8, speedBias: 2.2, speedSigma: 0.5, wMax: 6, turnMax: 200 };
   function innate(genes) { const w = new Float64Array(NF); INNATE.forEach(([m, f], i) => { if (m === "Wt") w[IDX[f]] = genes.innateTurn[i]; }); return w; }
   function create(genes) { const z = () => new Float64Array(NF), P = { Wt: z(), Wk: z(), Ws: z(), Wi: z(), Wf: z(), V: z(), eT: z(), eK: z(), eS: z(), eI: z(), eF: z(), eV: z(), phi: z(), v: 0, nT: 0, nS: 0, has: false, steps: 0, dSum: 0 };

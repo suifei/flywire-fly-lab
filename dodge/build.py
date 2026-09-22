@@ -96,6 +96,8 @@ for key, text in [("/*__SUBCIRCUIT__*/", _compact(json.loads((ROOT / "results/do
                   ("/*__LEGS_JS__*/", (D / "legs.js").read_text()),
                   ("/*__NATURE_JS__*/", (D / "nature.js").read_text()),
                   ("/*__NATURE3D_JS__*/", (D / "nature3d.js").read_text()),
+                  ("/*__ECO_JS__*/", "\n".join((ROOT / "eco" / m).read_text() for m in ["channels.js", "world.js", "physiology.js", "senses.js", "plastic.js", "sim.js", "overlay.js"])),   # 生态箱的可塑性层 + 身体（挂到大自然那只上，默认不装）
+                  ("/*__ECO_TRANSFER__*/", (ROOT / "results/eco/nature_transfer.json").read_text() if (ROOT / "results/eco/nature_transfer.json").exists() else "null"),
                   ("/*__GAME_CORE_JS__*/", (D / "game_core.js").read_text()),
                   ("/*__MISSIONS_JS__*/", (D / "missions.js").read_text()),
                   ("/*__MISSIONS__*/", (ROOT / "results/dodge/missions_v3.json").read_text()),

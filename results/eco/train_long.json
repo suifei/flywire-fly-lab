@@ -9,24 +9,24 @@
   "test_seeds": "5000–5019",
   "retest_seeds": "5100–5119"
  },
- "baseline_median": 478.4,
- "baseline_retest_median": 463.79999999999995,
- "need_s": 717.6,
+ "baseline_median": 443.15,
+ "baseline_retest_median": 445.25,
+ "need_s": 664.7,
  "n_learned": 10,
  "n_retest_ok": 10,
  "n": 10,
- "total_lives": 100,
+ "total_lives": 130,
  "rounds_to_learn": [
   1,
   1,
   1,
   1,
+  2,
+  2,
   1,
   1,
   1,
-  1,
-  1,
-  1
+  2
  ],
  "individuals": [
   {
@@ -37,37 +37,39 @@
    "lives": 10,
    "last": {
     "round": 1,
-    "median": 1800,
-    "drink": 0.058,
-    "eat": 0.184,
-    "wall": 0.23,
+    "median": 1215.8000000000002,
+    "drink": 0.008,
+    "eat": 0.178,
+    "wall": 0.232,
     "rest": 0,
-    "alive": 20,
+    "alive": 6,
     "causes": {
-     "alive": 20
+     "thirst": 13,
+     "alive": 6,
+     "starve": 1
     }
    },
    "retest": {
     "ok": true,
-    "median": 1800,
-    "drink": 0.047,
-    "eat": 0.191,
-    "wall": 0.241,
+    "median": 871,
+    "drink": 0.008,
+    "eat": 0.188,
+    "wall": 0.228,
     "rest": 0,
-    "alive": 17,
+    "alive": 7,
     "causes": {
-     "alive": 17,
-     "bite": 2,
-     "toxin": 1
+     "alive": 7,
+     "thirst": 11,
+     "starve": 2
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.23,
+     "median": 1215.8000000000002,
+     "wall": 0.232,
      "rest": 0,
-     "drink": 0.058
+     "drink": 0.008
     }
    ]
   },
@@ -80,37 +82,37 @@
    "last": {
     "round": 1,
     "median": 1800,
-    "drink": 0.047,
-    "eat": 0.162,
-    "wall": 0.284,
+    "drink": 0.04,
+    "eat": 0.184,
+    "wall": 0.215,
     "rest": 0,
-    "alive": 18,
+    "alive": 17,
     "causes": {
-     "alive": 18,
-     "thirst": 2
+     "alive": 17,
+     "thirst": 2,
+     "starve": 1
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.048,
-    "eat": 0.171,
-    "wall": 0.301,
+    "drink": 0.038,
+    "eat": 0.178,
+    "wall": 0.231,
     "rest": 0,
-    "alive": 18,
+    "alive": 17,
     "causes": {
-     "alive": 18,
-     "thirst": 1,
-     "toxin": 1
+     "alive": 17,
+     "thirst": 3
     }
    },
    "history": [
     {
      "round": 1,
      "median": 1800,
-     "wall": 0.284,
+     "wall": 0.215,
      "rest": 0,
-     "drink": 0.047
+     "drink": 0.04
     }
    ]
   },
@@ -122,42 +124,38 @@
    "lives": 10,
    "last": {
     "round": 1,
-    "median": 1779.35,
-    "drink": 0.028,
-    "eat": 0.095,
-    "wall": 0.326,
-    "rest": 0.001,
-    "alive": 9,
+    "median": 1800,
+    "drink": 0.018,
+    "eat": 0.197,
+    "wall": 0.26,
+    "rest": 0,
+    "alive": 12,
     "causes": {
-     "alive": 9,
-     "bite": 5,
-     "starve": 3,
-     "toxin": 1,
-     "thirst": 2
+     "alive": 12,
+     "thirst": 8
     }
    },
    "retest": {
     "ok": true,
-    "median": 1349.8,
-    "drink": 0.032,
-    "eat": 0.088,
-    "wall": 0.297,
-    "rest": 0.001,
-    "alive": 7,
+    "median": 1800,
+    "drink": 0.021,
+    "eat": 0.188,
+    "wall": 0.248,
+    "rest": 0,
+    "alive": 16,
     "causes": {
-     "alive": 7,
-     "starve": 8,
-     "thirst": 3,
-     "bite": 2
+     "alive": 16,
+     "thirst": 2,
+     "starve": 2
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1779.35,
-     "wall": 0.326,
-     "rest": 0.001,
-     "drink": 0.028
+     "median": 1800,
+     "wall": 0.26,
+     "rest": 0,
+     "drink": 0.018
     }
    ]
   },
@@ -170,9 +168,104 @@
    "last": {
     "round": 1,
     "median": 1800,
-    "drink": 0.041,
-    "eat": 0.185,
-    "wall": 0.249,
+    "drink": 0.017,
+    "eat": 0.159,
+    "wall": 0.206,
+    "rest": 0,
+    "alive": 11,
+    "causes": {
+     "starve": 3,
+     "alive": 11,
+     "thirst": 6
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.021,
+    "eat": 0.149,
+    "wall": 0.197,
+    "rest": 0,
+    "alive": 13,
+    "causes": {
+     "alive": 13,
+     "thirst": 5,
+     "starve": 2
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 1800,
+     "wall": 0.206,
+     "rest": 0,
+     "drink": 0.017
+    }
+   ]
+  },
+  {
+   "k": 4,
+   "base": 44000,
+   "learned": true,
+   "rounds": 2,
+   "lives": 20,
+   "last": {
+    "round": 2,
+    "median": 1800,
+    "drink": 0.044,
+    "eat": 0.181,
+    "wall": 0.217,
+    "rest": 0,
+    "alive": 15,
+    "causes": {
+     "thirst": 4,
+     "alive": 15,
+     "starve": 1
+    }
+   },
+   "retest": {
+    "ok": true,
+    "median": 1800,
+    "drink": 0.049,
+    "eat": 0.16,
+    "wall": 0.215,
+    "rest": 0,
+    "alive": 14,
+    "causes": {
+     "alive": 14,
+     "thirst": 5,
+     "starve": 1
+    }
+   },
+   "history": [
+    {
+     "round": 1,
+     "median": 656.3499999999999,
+     "wall": 0.165,
+     "rest": 0,
+     "drink": 0.005
+    },
+    {
+     "round": 2,
+     "median": 1800,
+     "wall": 0.217,
+     "rest": 0,
+     "drink": 0.044
+    }
+   ]
+  },
+  {
+   "k": 5,
+   "base": 45000,
+   "learned": true,
+   "rounds": 2,
+   "lives": 20,
+   "last": {
+    "round": 2,
+    "median": 1800,
+    "drink": 0.036,
+    "eat": 0.163,
+    "wall": 0.215,
     "rest": 0,
     "alive": 19,
     "causes": {
@@ -183,106 +276,31 @@
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.043,
-    "eat": 0.167,
-    "wall": 0.227,
+    "drink": 0.03,
+    "eat": 0.169,
+    "wall": 0.208,
     "rest": 0,
-    "alive": 20,
+    "alive": 13,
     "causes": {
-     "alive": 20
-    }
-   },
-   "history": [
-    {
-     "round": 1,
-     "median": 1800,
-     "wall": 0.249,
-     "rest": 0,
-     "drink": 0.041
-    }
-   ]
-  },
-  {
-   "k": 4,
-   "base": 44000,
-   "learned": true,
-   "rounds": 1,
-   "lives": 10,
-   "last": {
-    "round": 1,
-    "median": 1800,
-    "drink": 0.067,
-    "eat": 0.174,
-    "wall": 0.228,
-    "rest": 0,
-    "alive": 19,
-    "causes": {
-     "alive": 19,
-     "toxin": 1
-    }
-   },
-   "retest": {
-    "ok": true,
-    "median": 1800,
-    "drink": 0.07,
-    "eat": 0.173,
-    "wall": 0.223,
-    "rest": 0,
-    "alive": 20,
-    "causes": {
-     "alive": 20
-    }
-   },
-   "history": [
-    {
-     "round": 1,
-     "median": 1800,
-     "wall": 0.228,
-     "rest": 0,
-     "drink": 0.067
-    }
-   ]
-  },
-  {
-   "k": 5,
-   "base": 45000,
-   "learned": true,
-   "rounds": 1,
-   "lives": 10,
-   "last": {
-    "round": 1,
-    "median": 1800,
-    "drink": 0.046,
-    "eat": 0.145,
-    "wall": 0.289,
-    "rest": 0,
-    "alive": 17,
-    "causes": {
-     "alive": 17,
-     "thirst": 2,
+     "thirst": 6,
+     "alive": 13,
      "starve": 1
     }
    },
-   "retest": {
-    "ok": true,
-    "median": 1800,
-    "drink": 0.044,
-    "eat": 0.16,
-    "wall": 0.3,
-    "rest": 0,
-    "alive": 18,
-    "causes": {
-     "alive": 18,
-     "thirst": 2
-    }
-   },
    "history": [
     {
      "round": 1,
+     "median": 407.35,
+     "wall": 0.147,
+     "rest": 0.399,
+     "drink": 0.001
+    },
+    {
+     "round": 2,
      "median": 1800,
-     "wall": 0.289,
+     "wall": 0.215,
      "rest": 0,
-     "drink": 0.046
+     "drink": 0.036
     }
    ]
   },
@@ -294,40 +312,38 @@
    "lives": 10,
    "last": {
     "round": 1,
-    "median": 1800,
-    "drink": 0.018,
-    "eat": 0.177,
-    "wall": 0.171,
+    "median": 1337.7,
+    "drink": 0.01,
+    "eat": 0.172,
+    "wall": 0.295,
     "rest": 0,
-    "alive": 14,
+    "alive": 9,
     "causes": {
-     "alive": 14,
-     "bite": 4,
-     "starve": 1,
-     "thirst": 1
+     "alive": 9,
+     "thirst": 11
     }
    },
    "retest": {
     "ok": true,
-    "median": 1800,
-    "drink": 0.018,
-    "eat": 0.193,
-    "wall": 0.172,
+    "median": 1747.35,
+    "drink": 0.015,
+    "eat": 0.155,
+    "wall": 0.33,
     "rest": 0,
-    "alive": 15,
+    "alive": 9,
     "causes": {
-     "alive": 15,
-     "bite": 3,
-     "thirst": 2
+     "alive": 9,
+     "thirst": 10,
+     "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.171,
+     "median": 1337.7,
+     "wall": 0.295,
      "rest": 0,
-     "drink": 0.018
+     "drink": 0.01
     }
    ]
   },
@@ -341,37 +357,34 @@
     "round": 1,
     "median": 1800,
     "drink": 0.028,
-    "eat": 0.13,
-    "wall": 0.372,
+    "eat": 0.145,
+    "wall": 0.158,
     "rest": 0,
     "alive": 14,
     "causes": {
-     "starve": 2,
      "alive": 14,
-     "thirst": 2,
-     "bite": 2
+     "starve": 4,
+     "thirst": 2
     }
    },
    "retest": {
     "ok": true,
-    "median": 1800,
-    "drink": 0.028,
-    "eat": 0.127,
-    "wall": 0.358,
+    "median": 1641.65,
+    "drink": 0.024,
+    "eat": 0.153,
+    "wall": 0.16,
     "rest": 0,
-    "alive": 16,
+    "alive": 10,
     "causes": {
-     "alive": 16,
-     "thirst": 2,
-     "bite": 1,
-     "toxin": 1
+     "alive": 10,
+     "thirst": 10
     }
    },
    "history": [
     {
      "round": 1,
      "median": 1800,
-     "wall": 0.372,
+     "wall": 0.158,
      "rest": 0,
      "drink": 0.028
     }
@@ -386,36 +399,38 @@
    "last": {
     "round": 1,
     "median": 1800,
-    "drink": 0.065,
-    "eat": 0.184,
-    "wall": 0.249,
+    "drink": 0.035,
+    "eat": 0.157,
+    "wall": 0.195,
     "rest": 0,
-    "alive": 17,
+    "alive": 15,
     "causes": {
-     "alive": 17,
-     "bite": 2,
-     "thirst": 1
+     "alive": 15,
+     "thirst": 4,
+     "starve": 1
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.064,
-    "eat": 0.188,
-    "wall": 0.262,
+    "drink": 0.037,
+    "eat": 0.174,
+    "wall": 0.203,
     "rest": 0,
-    "alive": 20,
+    "alive": 18,
     "causes": {
-     "alive": 20
+     "alive": 18,
+     "thirst": 1,
+     "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
      "median": 1800,
-     "wall": 0.249,
+     "wall": 0.195,
      "rest": 0,
-     "drink": 0.065
+     "drink": 0.035
     }
    ]
   },
@@ -423,40 +438,50 @@
    "k": 9,
    "base": 49000,
    "learned": true,
-   "rounds": 1,
-   "lives": 10,
+   "rounds": 2,
+   "lives": 20,
    "last": {
-    "round": 1,
+    "round": 2,
     "median": 1800,
-    "drink": 0.04,
-    "eat": 0.164,
-    "wall": 0.287,
+    "drink": 0.041,
+    "eat": 0.201,
+    "wall": 0.207,
     "rest": 0,
-    "alive": 20,
+    "alive": 15,
     "causes": {
-     "alive": 20
+     "alive": 15,
+     "starve": 1,
+     "thirst": 4
     }
    },
    "retest": {
     "ok": true,
     "median": 1800,
-    "drink": 0.039,
-    "eat": 0.17,
-    "wall": 0.303,
+    "drink": 0.043,
+    "eat": 0.19,
+    "wall": 0.214,
     "rest": 0,
-    "alive": 18,
+    "alive": 17,
     "causes": {
-     "alive": 18,
-     "thirst": 2
+     "alive": 17,
+     "thirst": 2,
+     "starve": 1
     }
    },
    "history": [
     {
      "round": 1,
-     "median": 1800,
-     "wall": 0.287,
+     "median": 516.05,
+     "wall": 0.21,
      "rest": 0,
-     "drink": 0.04
+     "drink": 0.003
+    },
+    {
+     "round": 2,
+     "median": 1800,
+     "wall": 0.207,
+     "rest": 0,
+     "drink": 0.041
     }
    ]
   }

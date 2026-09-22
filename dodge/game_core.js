@@ -81,7 +81,7 @@
     // 触感：触角碰到围栏 → 该侧 JO。这是**物理量**，不是判断逻辑——
     // 碰到之后转不转、跳不跳、还是去梳理，完全由连接组决定。
     // 默认关，理由同 wallVision：已发布的对局数字都是在没有它的条件下测的。
-    touch: false, touchRate: 200, antennaLen: 1.6,
+    touch: false, touchRate: 200, antennaLen: 1.6, fieldLR: false,
     // 温度 / 湿度场：G.fields 里每个源 {type:"heat"|"damp", x, y, sigma, strength}
     // 强度 1.0 对应 fieldRate Hz。同样是**物理量**，没有任何"太热就走开"之类的规则。
     fieldRate: 200,
@@ -362,6 +362,8 @@
     // 大自然（dodge/nature.js，可选）：有地形、石头、天气与重力的开放世界。装上之后：步行受坡度影响、实心物件挡路并压到触角、气味被风吹歪、
     // 浆果按重力下落弹跳滚动、雨带来声音与湿度。没装时下面所有 G.world 分支都不走，已发布的数字不受影响。
     G.world = null; G.ambient = null; G.attachWorld = W => { G.world = W; return W; };
+    // 生态箱的可塑性层 + 六种内部状态（eco/overlay.js，**默认不装**）：装上之后才走下面所有 G.eco 分支；不装时一个字节的行为都不变
+    G.eco = null; G.attachEco = e => { G.eco = e; return e; };
     G.legs = null; G.attachLegs = legs => { G.legs = legs; return legs; };   // 六条腿的身体（可选）
     G.mind = () => {
       const o = G.readout(), S = G.S, Sn = G.senses, B = G.body, felt = [], fThr = CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold;
@@ -624,14 +626,18 @@
         }
       }
       if (G.world && G.ambient) hygro += G.ambient.hygro;                  // 下过雨，到处都是潮的
-      G.field = { thermo, hygro };
+      G.field = { thermo, hygro }; G.fieldLR = null;
+      if (CFG.fieldLR && (has("THERMO_left") || has("HYGRO_left"))) {     /* 温 / 湿感受器长在触角上：两根触角各读各的（与生态箱同口径；默认关，关着时两侧相同 = 原来的行为） */
+        const at = a => { const ax = S.x + Math.cos(S.h + a) * CFG.antennaLen, ay = S.y + Math.sin(S.h + a) * CFG.antennaLen; let t = 0, h = G.world && G.ambient ? G.ambient.hygro : 0; for (const f of G.fields) { const g2 = Math.exp(-((f.x - ax) ** 2 + (f.y - ay) ** 2) / (2 * f.sigma * f.sigma)); if (f.type === "heat") t += f.strength * g2; else if (f.type === "damp") h += f.strength * g2; } return [Math.min(CFG.fieldRate, t * CFG.fieldRate), Math.min(CFG.fieldRate, h * CFG.fieldRate)]; };
+        const [tL, hL] = at(0.61), [tR, hR] = at(-0.61); G.fieldLR = { tL, tR, hL, hR };
+      }
       if (has("THERMO_left")) {
         const t = Math.min(CFG.fieldRate, thermo * CFG.fieldRate);
-        brain.setRate("THERMO_left", t); brain.setRate("THERMO_right", t);
+        brain.setRate("THERMO_left", G.fieldLR ? G.fieldLR.tL : t); brain.setRate("THERMO_right", G.fieldLR ? G.fieldLR.tR : t);
       }
       if (has("HYGRO_left")) {
         const h2 = Math.min(CFG.fieldRate, hygro * CFG.fieldRate);
-        brain.setRate("HYGRO_left", h2); brain.setRate("HYGRO_right", h2);
+        brain.setRate("HYGRO_left", G.fieldLR ? G.fieldLR.hL : h2); brain.setRate("HYGRO_right", G.fieldLR ? G.fieldLR.hR : h2);
       }
       // —— v4：听觉、嗅觉、内感受 + 身体状态对味觉感受器灵敏度的调制 ——
       if (G.V4) {
@@ -708,7 +714,7 @@
       brain.run(CFG.chunkSteps, (i, s) => {
         const k = targetOf[i]; if (k >= 0) counts[k]++;
         const k2 = target2Of[i]; if (k2 >= 0) counts2[k2]++;
-        G.onSpike && G.onSpike(i);
+        G.onSpike && G.onSpike(i); if (G.eco) G.eco.spike(i);
         if (MB) { MB.plast.spike(i); const m = MB.mLocal[i]; if (m >= 0) MB.mbonCount[m]++; else { const q = MB.kcLocal[i]; if (q >= 0) MB.kcCount[q]++; else if (SUB.mb_tag[i] === "DAN") MB.danCount[SUB.types[i].startsWith("PAM") ? "PAM" : SUB.types[i].startsWith("PPL1") ? "PPL1" : "other"]++; } }
       });
       if (MB) mbStep(dt);
@@ -718,6 +724,7 @@
         ema[k] += (dt / (tau + dt)) * (counts[k] / dt / SUB.groups[TG[k]].length - ema[k]);
       }
       const out = G.readout();
+      if (G.eco) G.eco.tick(G, out, dt);
       windStep(dt);
       S.thirst = Math.max(0, Math.min(1, S.thirst + CFG.thirstRise * dt
         - (S.state === "feed" && G.onPellet && G.onPellet.type === "water" ? CFG.thirstDrop : 0) * dt));
@@ -740,6 +747,7 @@
         MB.navT = (MB.navT || 0) - dt; if (MB.navT <= 0) { MB.navT = 0.5; MB.navV = {}; for (const kind of Object.keys(MB.conc)) { const m = G.memoryOf(kind); MB.navV[kind] = m ? (1 - m.PAM) - (1 - m.PPL1) : 0; } }
         for (const [kind, c] of Object.entries(MB.conc)) { const v = (MB.navV || {})[kind] || 0; if (v && Math.max(c.L, c.R) > 0.02 && Math.abs(c.L - c.R) > 1e-5) odorTurn += Math.sign(c.L - c.R) * v * CFG.memoryTurn; }
       }
+      if (G.eco) odorTurn += G.eco.act.turn;                          /* 可塑性层学到的转向偏置（°/s），加在先天的 DNa 转向上 */
       const omega = Math.max(-CFG.turnMax, Math.min(CFG.turnMax, G.mapSign * CFG.turnGain * (out.dnaL - out.dnaR) + odorTurn)) * Math.PI / 180;
       S.cooldown = Math.max(0, S.cooldown - dt);
       if (S.jumpT < 0 && S.cooldown === 0 && out.gf > CFG.gfThreshold) {
@@ -787,14 +795,16 @@
         let state = "walk";
         if (V3) {
           if (out.mdn > CFG.mdnThreshold) state = "back";
-          else if (G.onPellet && out.mn9 > (G.onPellet.type === "water" && !CFG.physiology
-                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : (CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold))) state = "feed";
+          else if (G.eco ? (G.onPellet && G.eco.act.ingest && G.eco.alive)        /* 生态箱的可塑性层：MN9 先动（> 5 Hz）才谈得上，肯不肯吃喝是「先天的伸喙倾向 + 学到的偏置」 */
+                   : (G.onPellet && out.mn9 > (G.onPellet.type === "water" && !CFG.physiology
+                   ? CFG.feedThreshold * Math.max(CFG.waterThreshRatio, 1 - S.thirst) : (CFG.physiology ? CFG.lifeFeedThreshold : CFG.feedThreshold)))) state = "feed";
           else if (S.groomT > 0 || (out.adn1 > CFG.groomThreshold && G.dust.length)) state = "groom";
         }
         if (state !== S.state) { G.onEvent && G.onEvent("state", { from: S.state, to: state }); if (state === "groom" && S.groomT <= 0) { S.groomT = CFG.groomDur; G.score.groom++; } }
         S.state = state;
         const vigor = CFG.physiology ? 0.45 + 0.55 * G.body.energy : 1;      // 能量低了走得慢（身体，不是决策）
         let speed = state === "walk" ? CFG.walkSpeed * vigor : state === "back" ? -CFG.backSpeed * vigor : 0;
+        if (G.eco) speed *= (state === "walk" ? G.eco.speedFactor : 1) * G.eco.vigor * (G.eco.alive ? 1 : 0);
         if (G.world && speed) speed *= G.world.slopeFactor(S.x, S.y, S.h, speed);        // 上坡慢、下坡快：身体对抗重力做功，不是决策
         if (G.legs) {
           // 六条腿的身体（dodge/legs.js，默认不装）：上面算出的 speed / omega 只是**指令**，身体实际怎么动由支撑腿的运动学解出来。

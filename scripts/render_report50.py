@@ -5,9 +5,9 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parent.parent
 S = json.loads((ROOT / "results/eco/summary.json").read_text())
-need = [k for k in ("audit", "surface", "m2", "m3", "m4", "live", "long") if k not in S]
+need = [k for k in ("audit", "surface", "m2", "m3", "m4", "live", "long", "transfer") if k not in S]
 if need: sys.exit("summary.json 里还缺：" + "、".join(need) + "（先把对应实验跑完，再 python3 eco/collect_results.py）")
-au, sf, m2, m3, m4, lv = (S[k] for k in ("audit", "surface", "m2", "m3", "m4", "live")); lg = S["long"]
+au, sf, m2, m3, m4, lv = (S[k] for k in ("audit", "surface", "m2", "m3", "m4", "live")); lg = S["long"]; mf = sf["manifold"]; tr = S["transfer"]
 yn = lambda b: "通过" if b else "**未通过**"
 FN = {"dnaL": "左转 DNa", "dnaR": "右转 DNa", "gf": "巨纤维", "mn9": "MN9 伸喙", "adn1": "aDN1 梳理", "mdn": "MDN 后退", "odn1": "oDN1", "bdn2": "BDN2", "mbonReward": "MBON 奖赏侧", "mbonPunish": "MBON 惩罚侧", "pam": "PAM", "ppl1": "PPL1"}
 surf_rows = "\n".join(f"| {FN[f['name']]} | {'从不放电' if f['silent'] else format(f['r2'], '.3f')} | {sf['vs_mean'].get(f['name'], float('nan')):.3f} | {sf['ceiling'].get(f['name'], float('nan')):.3f} |" for f in sf["features"] if not f["silent"])
@@ -51,6 +51,17 @@ body = f"""
 | 特征 | 留出 R²（单次，Hz） | 对 4 次均值的 R² | 噪声天花板 |
 |---|---|---|---|
 {surf_rows}
+
+**第三版：真脑指数（2026-09-22）。** 第二版在随机输入上过了线，闭环里却不准：「只尝到水」时 MN9 估 7–9 Hz，真脑 13 Hz，真脑闭环里喝水时间因此是响应面的 {lv.get('v2_drink_ratio', '?')} 倍（第一次 live_check 的 L2 没过）。
+原因是随机采样在决策最要紧的工作点附近样本太少。于是把**闭环工况**——果蝇真的活着时大脑实际收到的输入（`eco/collect_manifold.js`，按「哪几类感觉同时在场」分层抽样，{mf['n']:,} 组，其中 9,000 组来自 3D 大自然里记下的）——也交给真脑作答、一起拟合。
+判据在看到新结果之前写定：T1 原判据不动；T2 闭环留出集四个特征 R² ≥ 0.85；T3 三个关键工作点（只尝到水 / 只尝到糖的 MN9、有逼近信号的巨纤维）相对误差 ≤ 15%；T4 = 真脑闭环复核的 L2。
+
+| 特征 | 闭环留出 R²（Hz） | 相对噪声天花板 |
+|---|---|---|
+{chr(10).join(f"| {FN[f['name']]} | {f['r2']:.3f} | {'' if f['over_ceiling'] is None else format(f['over_ceiling'], '.2f')} |" for f in mf['features'])}
+
+关键工作点：{'；'.join(f"{q['name']} {q['feature']} 真脑 {q['true_hz']} Hz、预测 {q['pred_hz']} Hz（误差 {100 * q['rel_err']:.1f}%）" for q in mf['points'])}。
+T2 {yn(mf['T2'])}——差在左转 DNa（{mf['features'][0]['r2']:.3f} 对 0.85），而闭环工况上这条通路**单次试验的噪声天花板实测只有 {mf['dnaL_ceiling']}**（150 个 DNa 活跃的输入 × 4 个种子，scratch）：线定得高于真脑自己的可重复性。照原线登记未通过，另报相对天花板的读数。T3 {yn(mf['T3'])}。真脑指数（闭环留出集上会放电的特征 R² 均值 × 100）= **{mf['index']}**。
 
 PAM 在全部 {sf['n_samples']:,} 个样本里一次都没放电（§48 的阴性结果在这里又出现一次），响应面里恒为 0。
 
@@ -100,6 +111,21 @@ M3 判据 {yn(m3['pass'])}（标签：{'、'.join(f"{next(w['name'] for w in m3[
 
 把 M2 里在响应面上学成的个体冻结权重，放回真的 {au['n_neurons']:,} 神经元脉冲网络（{lv['lives']} 个世界种子，上限 {lv['cap_s']} s）：真脑 {lv['live_median']} s，响应面 {lv['surface_median']} s，白纸 {lv['naive_median']} s。
 L1（真脑 ≥ 1.5 × 白纸）{yn(lv['L1'])}（× {lv['ratio_live_vs_naive']}）；L2（喝水时间占比在响应面的 0.5–2 倍内）{yn(lv['L2'])}（{lv['drink_live']} 对 {lv['drink_surface']}）。
+响应面第三版把「只尝到水」的 MN9 对齐到真脑之后 L2 仍然没过（第二版 {lv.get('v2_drink_ratio', '?')} 倍，第三版 {lv['drink_ratio']} 倍）；查过真脑在持续 12 s 水输入下 MN9 不爬升（12–15 Hz，scratch），所以不是慢动力学。**原因没查清**，照实登记。方向上是真脑喝得更多，对生存有利，迁移实测（{{N}}.7b）不受它影响。
+
+### {{N}}.7b 搬进 3D 大自然（`eco/overlay.js`、`eco/nature_harness.js`、`eco/nature_transfer.js`）
+
+先把生态箱的**训练条件对齐到 3D 大自然**（用户定的处理两个风险的办法）：感觉编码逐项改成与 `dodge/game_core.js` / `dodge/nature.js` 同一套公式（气味羽流、湿度场、晒热的石板、风吹触角、逼近的 θ / dθ/dt 编码与左右分配、声音的距离衰减与双耳差、味觉的口径、只有水洼能喝；捕食者不再有气味——大自然里的甲虫也没有，靠逼近视觉与振翅声）；大脑用第三版响应面（闭环工况含大自然里记下的 9,000 组输入）；身体与可塑性层本来就是同一份代码。
+对齐之后 M2 / 长期训练 / M3 全部重跑（结果在上面各节；旧感觉编码的结果留在本机 `results/eco/old_senses/`，不入库）。
+
+然后把 M2 学成的个体**冻结权重**放进真的 3D 大自然（真脑 v5 + `dodge/nature.js` + 六条腿），与白纸对比，同一个世界种子。判据写在跑之前：5 个种子、900 s；「有信息」= 至少一个臂碰到过水；X1 学成臂喝水总时间更长的占 ≥ 80% 且每次碰到水喝的次数中位 ≥ 3 × 白纸；X2 平均口渴更低的占 ≥ 80%。
+
+| 种子 | 白纸：喝 s / 碰水 / 平均口渴 / 活 s | 学成：喝 s / 碰水 / 平均口渴 / 活 s |
+|---|---|---|
+{chr(10).join(f"| {r['seed']}{'' if r['informative'] else '（没碰到水，不计）'} | {r['naive']['drink_s']} / {r['naive']['waterVisits']} / {r['naive']['thirst_mean']} / {r['naive']['life_s']} | {r['trained']['drink_s']} / {r['trained']['waterVisits']} / {r['trained']['thirst_mean']} / {r['trained']['life_s']} |" for r in tr['runs'])}
+
+有信息的种子 {tr['n_informative']} 个。X1 {yn(tr['X1']['pass'])}（{tr['X1']['more_drink_time']}；每次碰到水喝 {tr['X1']['drinks_per_visit_trained']:.2f} 对 {tr['X1']['drinks_per_visit_naive']:.2f} 次）；X2 {yn(tr['X2']['pass'])}（{tr['X2']['lower_mean_thirst']}）。{'' if tr['conclusive'] else '**有信息的种子不足 3 个：没有结论。**'}
+页面：实验室页「生活」的大自然里有「载入生态箱存档」（`G.attachEco`，默认不装；装上后 game_core 只在三处读它：转向偏置、走路速度、碰到东西肯不肯吃喝）；「生态箱 ↗」入口与「五子棋」「生活」并排。
 
 ### {{N}}.8 这一轮自己查出来的错
 
@@ -109,8 +135,9 @@ L1（真脑 ≥ 1.5 × 白纸）{yn(lv['L1'])}（× {lv['ratio_live_vs_naive']}�
 4. **转向策略里混进了不分左右的特征**，学出恒定的单向偏置 = 原地转圈。按身体的左右对称性拆成两路：往哪边转只看分侧信号，转得多不多看不分侧的信号。
 5. **打乱奖励的对照是漏的**（见 {{N}}.4）。
 6. **3/3 成功有运气成分**，换 10 个个体才看出来。
-7. **「气味」这个内部状态第一版几分钟后就恒为 1.00**（涨得太快，只有歇着和下雨能降）——六种状态里有一种成了常数，是看页面截图才发现的。改成：累积减半多、随时间自己消散、蹚水能洗掉。身体变了，所以 M2 / M3 / 真脑复核 / 长期训练全部用最终代码重跑；旧身体的结果留在 `results/eco/old_body/`（本机，不入库）。
-8. 进化模块里新生儿在同一步被数了两次（种群一度超过上限）；页面测试里手机宽度那项拿 `innerWidth` 比，内容把布局撑宽时两个数一起变大，假通过了。
+7. **响应面的判据 T2 定得高于真脑自己的可重复性**：左转 DNa 在闭环工况上单次试验的噪声天花板 0.827，线是 0.85。先量天花板再定线才对；这里照原线登记未通过，不改线。
+8. **「气味」这个内部状态第一版几分钟后就恒为 1.00**（涨得太快，只有歇着和下雨能降）——六种状态里有一种成了常数，是看页面截图才发现的。改成：累积减半多、随时间自己消散、蹚水能洗掉。身体变了，所以 M2 / M3 / 真脑复核 / 长期训练全部用最终代码重跑；旧身体的结果留在 `results/eco/old_body/`（本机，不入库）。
+9. 进化模块里新生儿在同一步被数了两次（种群一度超过上限）；页面测试里手机宽度那项拿 `innerWidth` 比，内容把布局撑宽时两个数一起变大，假通过了。
 
 ### {{N}}.9 能说什么、不能说什么
 

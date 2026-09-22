@@ -11,112 +11,112 @@
   "naive": {
    "lives": [
     {
-     "life": 499.4,
+     "life": 414,
      "cause": "thirst",
-     "drink": 0.003,
-     "eat": 0.239,
-     "hops": 0,
-     "drinks": 15,
-     "waterVisits": 6,
-     "wall_s": 0
+     "drink": 0,
+     "eat": 0.189,
+     "hops": 10,
+     "drinks": 0,
+     "waterVisits": 1,
+     "wall_s": 1
     },
     {
-     "life": 469.3,
-     "cause": "bite",
-     "drink": 0.004,
-     "eat": 0.274,
-     "hops": 2,
-     "drinks": 20,
-     "waterVisits": 2,
-     "wall_s": 0
-    },
-    {
-     "life": 454,
+     "life": 425,
      "cause": "thirst",
-     "drink": 0.003,
-     "eat": 0.187,
-     "hops": 1,
-     "drinks": 10,
+     "drink": 0,
+     "eat": 0.17,
+     "hops": 13,
+     "drinks": 2,
      "waterVisits": 4,
+     "wall_s": 1
+    },
+    {
+     "life": 418.8,
+     "cause": "thirst",
+     "drink": 0.001,
+     "eat": 0.157,
+     "hops": 7,
+     "drinks": 5,
+     "waterVisits": 8,
      "wall_s": 0
     }
    ],
-   "median_life": 469.3,
-   "median_drink": 0.003,
-   "median_eat": 0.239
+   "median_life": 418.8,
+   "median_drink": 0,
+   "median_eat": 0.17
   },
   "surface": {
    "lives": [
     {
      "life": 900,
      "cause": "alive",
-     "drink": 0.041,
-     "eat": 0.162,
-     "hops": 1,
-     "drinks": 99,
-     "waterVisits": 7,
-     "wall_s": 0
+     "drink": 0.073,
+     "eat": 0.139,
+     "hops": 11,
+     "drinks": 70,
+     "waterVisits": 8,
+     "wall_s": 1
     },
     {
-     "life": 330,
-     "cause": "thirst",
-     "drink": 0,
-     "eat": 0.116,
-     "hops": 2,
-     "drinks": 0,
-     "waterVisits": 1,
-     "wall_s": 0
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.108,
+     "eat": 0.173,
+     "hops": 10,
+     "drinks": 164,
+     "waterVisits": 19,
+     "wall_s": 1
     },
     {
-     "life": 824.9,
-     "cause": "starve",
-     "drink": 0.052,
-     "eat": 0.03,
-     "hops": 6,
-     "drinks": 132,
-     "waterVisits": 10,
-     "wall_s": 0
+     "life": 900,
+     "cause": "alive",
+     "drink": 0.058,
+     "eat": 0.262,
+     "hops": 14,
+     "drinks": 84,
+     "waterVisits": 9,
+     "wall_s": 1
     }
    ],
-   "median_life": 824.9,
-   "median_drink": 0.041,
-   "median_eat": 0.116
+   "median_life": 900,
+   "median_drink": 0.073,
+   "median_eat": 0.173
   },
   "live": {
    "lives": [
     {
      "life": 900,
      "cause": "alive",
-     "drink": 0.224,
-     "eat": 0.151,
-     "hops": 4,
-     "drinks": 174,
-     "waterVisits": 10,
-     "wall_s": 502
+     "drink": 0.198,
+     "eat": 0.223,
+     "hops": 8,
+     "drinks": 111,
+     "waterVisits": 17,
+     "wall_s": 912
     },
     {
      "life": 900,
      "cause": "alive",
-     "drink": 0.167,
-     "eat": 0.225,
-     "hops": 3,
-     "drinks": 123,
-     "waterVisits": 11,
-     "wall_s": 524
-    },
-    {
-     "life": 900,
-     "cause": "alive",
-     "drink": 0.124,
+     "drink": 0.284,
      "eat": 0.163,
-     "hops": 10,
-     "drinks": 114,
-     "waterVisits": 7,
-     "wall_s": 549
+     "hops": 9,
+     "drinks": 145,
+     "waterVisits": 11,
+     "wall_s": 572
+    },
+    {
+     "life": 523.1,
+     "cause": "starve",
+     "drink": 0.671,
+     "eat": 0.001,
+     "hops": 5,
+     "drinks": 61,
+     "waterVisits": 8,
+     "wall_s": 343
     }
    ],
    "median_life": 900,
-   "median_drink": 0.167,
+   "median_drink": 0.284,
    "median_eat": 0.163
   }
  },
@@ -124,12 +124,12 @@
   "lives": 3,
   "cap_s": 900,
   "live_median": 900,
-  "surface_median": 825,
-  "naive_median": 469,
-  "ratio_live_vs_naive": 1.92,
-  "drink_live": 0.167,
-  "drink_surface": 0.041,
-  "drink_ratio": 4.07,
+  "surface_median": 900,
+  "naive_median": 419,
+  "ratio_live_vs_naive": 2.15,
+  "drink_live": 0.284,
+  "drink_surface": 0.073,
+  "drink_ratio": 3.89,
   "L1": true,
   "L2": false
  }

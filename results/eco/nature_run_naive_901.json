@@ -1,0 +1,1 @@
+{"arm":"naive","seed":901,"life_s":462.4,"alive":false,"cause":"starve","drink_s":4.6,"eat_s":0,"rest_s":0,"drinks":43,"meals":0,"waterVisits":52,"foodVisits":0,"hits":0,"thirst_mean":0.439,"thirst_end":0.515,"hunger_end":1,"health_end":0,"dist_mm":6904,"jumps":13,"wall_s":697}

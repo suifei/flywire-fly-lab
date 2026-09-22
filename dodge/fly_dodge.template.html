@@ -83,9 +83,7 @@ body { margin: 0; font: 14px/1.55 var(--sans); padding-inline: clamp(16px, 2.6vw
   border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px;
   font: 600 12px/1.3 var(--sans); color: var(--ink-2);
   background: color-mix(in oklab, var(--panel) 90%, transparent); transition: border-color .15s, color .15s; }
-.sister-link { display: inline-flex; align-items: center; text-decoration: none; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px; font: 600 12px/1.3 var(--sans); color: var(--ink-2); background: color-mix(in oklab, var(--panel) 90%, transparent); transition: border-color .15s, color .15s; }
-.sister-link:hover { border-color: var(--gf); color: var(--ink); }
-.sister-link:focus-visible { outline: 2px solid var(--gf); outline-offset: 2px; }
+a.mode-link { text-decoration: none; color: inherit; }
 .repo-btn svg { width: 14px; height: 14px; flex: none; }
 .repo-btn:hover { border-color: var(--gf); color: var(--ink); }
 .repo-btn.star:hover { border-color: #e3b341; color: #e3b341; }
@@ -284,12 +282,12 @@ code { font: 12px var(--mono); }
             <span>Star</span><b id="starN" hidden></b>
           </a>
         </nav>
-        <a class="sister-link" href="https://suifei.github.io/flywire-fly-lab/ecobox.html" title="无人值守的生态箱：你只设计世界规则，果蝇自己学、自己进化">生态箱 →</a>
       </div>
       <div class="modes" role="tablist" aria-label="游戏模式">
         <button id="viewCourt" class="mode" role="tab" aria-pressed="true"><b>大自然 / 篮球场</b><small>3D 世界 · 五感全开 · 任务</small></button>
         <button id="viewGomoku" class="mode" role="tab" aria-pressed="false"><b>五子棋</b><small>和果蝇下棋 · 看它怎么想</small></button>
         <button id="viewLife" class="mode" role="tab" aria-pressed="false"><b>生活</b><small>五感全开 · 它自己过日子</small></button>
+        <a id="viewEco" class="mode mode-link" href="https://suifei.github.io/flywire-fly-lab/ecobox.html" title="无人值守的生态箱（另一个页面）：你只设计世界规则，果蝇自己学、自己进化"><b>生态箱 ↗</b><small>只改世界 · 它自己学、自己进化</small></a>
       </div>
       <p id="mastNature" hidden>一个没有边界的 3D 大自然：起伏的地形、石头、蘑菇、花、浆果丛、水洼、昼夜、风和雨，<b>有重力</b>——浆果熟了会掉下来、弹几下、顺坡滚，停稳后发酵；石头挡路；上坡走得慢；太阳把石板晒烫；风把气味吹向下风；甲虫会爬过来。
         果蝇只通过真实的感受器知道这个世界；往哪转、飞不飞、吃不吃，由这颗 <b>15,055</b> 个神经元的连接组决定——没有一条"看见甲虫就跑""闻到果子就过去"的规则。</p>
@@ -404,7 +402,7 @@ code { font: 12px var(--mono); }
             <span class="row" style="gap:6px" title="往世界里放东西。放进去的只是物理量，果蝇怎么反应由连接组决定">
               <button class="btn" data-drop="fruit">烂果子</button><button class="btn" data-drop="mold">发霉的</button><button class="btn" data-drop="water">水</button>
               <button class="btn" data-drop="sound">嗡一声</button><button class="btn" data-drop="heat">热源</button><button class="btn" data-drop="ball" id="dropBall">扔球</button>
-              <button class="btn" data-drop="berry" data-nature hidden title="从它头顶 30 mm 处放下一颗浆果：自由落体、弹几下、顺坡滚，停稳后发酵">头顶掉一颗浆果</button><button class="btn" data-drop="rain" data-nature hidden>下一场雨</button>
+              <button class="btn" data-drop="berry" data-nature hidden title="从它头顶 30 mm 处放下一颗浆果：自由落体、弹几下、顺坡滚，停稳后发酵">头顶掉一颗浆果</button><button class="btn" data-drop="rain" data-nature hidden>下一场雨</button><button class="btn" id="ecoLoad" data-nature hidden title="把生态箱里训练出来的那只（它学到的权重 + 它的基因）放进这个 3D 大自然：身体换成生态箱的六种内部状态，决策 = 真脑的反射 + 它学到的偏置。载入后大自然里的这只就是它">载入生态箱存档</button><input type="file" id="ecoFile" accept=".json,application/json" hidden><span id="ecoLine" class="muted" style="font-size:12px"></span><button class="btn" id="ecoOff" data-nature hidden>卸下生态箱</button>
             </span>
             <label class="toggle" title="切断听觉神经元的全部传出突触"><input type="checkbox" id="lifeDeaf"> 失聪</label>
             <label class="toggle" title="切断两个嗅小球感受神经元的传出突触"><input type="checkbox" id="lifeAnosmic"> 失嗅</label>
@@ -1128,6 +1126,8 @@ code { font: 12px var(--mono); }
 <script>/*__LEGS_JS__*/</script>
 <script>/*__NATURE_JS__*/</script>
 <script>/*__NATURE3D_JS__*/</script>
+<script>/*__ECO_JS__*/</script>
+<script>const ECO_TRANSFER = /*__ECO_TRANSFER__*/;</script>
 <script>/*__GAME_CORE_JS__*/</script>
 <script>/*__MISSIONS_JS__*/</script>
 <script id="missions-data" type="application/json">/*__MISSIONS__*/</script>
@@ -2774,6 +2774,16 @@ code { font: 12px var(--mono); }
       window.__life = g;
     }
     function note(t) { diary.push({ t: g ? g.body.age : 0, s: t }); if (diary.length > 60) diary.shift(); }
+    // —— 生态箱 → 大自然（eco/overlay.js）：读生态箱的存档（eco/save.js 的格式），取一只果蝇的可塑性层权重与基因，挂到这只上。默认不装；卸下就回到原来的行为 ——
+    const ECO_KEY = "fly-eco-loaded"; let eco = null;
+    const decF = v => (v && v.__f64) ? Float64Array.from(v.__f64) : v;
+    function ecoPick(S) { if (!S || S.format !== "fly-ecobox" || !S.agents || !S.agents.length) throw new Error("不是生态箱存档"); const alive = S.agents.filter(a => a.alive), pool = alive.length ? alive : S.agents;
+      const a = pool.reduce((b, q) => (q.phys && b.phys && q.phys.age > b.phys.age) ? q : b, pool[0]); const P = {}; for (const k in a.P) P[k] = decF(a.P[k]); return { P, genes: a.genome.genes, id: a.id, generation: a.genome.generation, solo: !!S.evolve && !!S.evolve.solo }; }
+    function ecoAttach(pick, learn) { ensure(); if (world !== "nature") setWorld("nature"); const seed = (Date.now() % 100000) + 3;
+      eco = window.EcoOverlay.create({ SUB: SUB4, seed, learn: learn ? "on" : "off", P: pick.P, genes: pick.genes }); g.CFG.physiology = false; g.CFG.fieldLR = true; g.attachEco(eco); $("ecoOff").hidden = false;
+      note(`（生态箱里的果蝇 #${pick.id}${pick.solo ? "" : "，第 " + pick.generation + " 代"} 进了这片大自然：它学到的偏置${learn ? "会继续学" : "已冻结"}）`); }
+    function ecoDetach() { if (!eco) return; g.attachEco(null); eco = null; g.CFG.physiology = true; g.CFG.fieldLR = false; $("ecoOff").hidden = true; try { localStorage.removeItem(ECO_KEY); } catch (e) {} note("（卸下了生态箱的身体和可塑性层，回到原来的它）"); }
+    function ecoLine() { if (!eco) return ""; const p = eco.agent.phys, f = v => v.toFixed(2); return `生态箱身体 · 饿 ${f(p.hunger)} 渴 ${f(p.thirst)} 体力 ${f(p.stamina)} 健康 ${f(p.health)} 气味 ${f(p.scent)} 体温 ${p.bodyTemp.toFixed(1)} ℃ · ${eco.rest ? "歇着" : "速度 ×" + eco.speedFactor.toFixed(2)} · 转向偏置 ${eco.act.turn.toFixed(0)} °/s${eco.alive ? "" : " · 死了（" + (window.EcoPhysiology.CAUSE[eco.cause] || eco.cause) + "）"}`; }
     // 同一只果蝇、同一颗大脑、同一份记忆，两个世界：俯视的开放世界（没有墙），和 3D 的篮球场（有边界，和球场版一样开着触感与围栏视觉）。
     // 换世界时把地上的东西清掉（坐标系不同），果蝇放到球场版那只所在的位置。
     function setWorld(w) {
@@ -2817,6 +2827,7 @@ code { font: 12px var(--mono); }
                         JO_left: g.joInput ? g.joInput.L : 0, JO_right: g.joInput ? g.joInput.R : 0 };
       GMSTATS.t = performance.now();
       diaryT -= dt; if (m.sentence && m.sentence !== lastLine && diaryT <= 0) { lastLine = m.sentence; note(m.sentence); diaryT = 1.2; }
+      if (eco) { const el = $("ecoLine"); if (el) el.textContent = ecoLine(); if (!eco.alive && !eco._noted) { eco._noted = true; note("（它在大自然里死了：" + (window.EcoPhysiology.CAUSE[eco.cause] || eco.cause) + "。点「卸下生态箱」或再载入一次）"); } }
       if (Math.floor(g.body.age) % 15 === 0 && n) save();
       $("lifePill").textContent = "第 " + (Math.floor(g.body.age / g.CFG.dayLength) + 1) + " 天 · " + (g.CFG.light < 0.3 ? "夜" : g.CFG.light < 0.6 ? "晨昏" : "昼");
       draw(m); return n * g.chunkDt;
@@ -2927,6 +2938,9 @@ code { font: 12px var(--mono); }
     $("lifeLearn").onchange = e => { ensure(); g.CFG.learning = e.target.checked; note(e.target.checked ? "（可塑性打开）" : "（可塑性关掉了：突触不再变）"); };
     $("lifeReinf").onchange = e => { ensure(); g.CFG.reinforce = e.target.checked; note(e.target.checked ? "（糖 / 烫 → 多巴胺 接上了）" : "（糖 / 烫 → 多巴胺 断开了）"); };
     $("lifeMemNav").onchange = e => { ensure(); g.CFG.memoryNav = e.target.checked; note(e.target.checked ? "（手写的桥打开：记忆开始影响转向）" : "（手写的桥关掉）"); };
+    if ($("ecoLoad")) { $("ecoLoad").onclick = () => $("ecoFile").click(); $("ecoOff").onclick = ecoDetach;
+      $("ecoFile").onchange = e => { const f = e.target.files[0]; if (!f) return; const fr = new FileReader(); fr.onload = () => { try { const pick = ecoPick(JSON.parse(fr.result)); ecoAttach(pick, false); try { localStorage.setItem(ECO_KEY, JSON.stringify({ P: Object.fromEntries(Object.entries(pick.P).map(([k, v]) => [k, v instanceof Float64Array ? { __f64: Array.from(v) } : v])), genes: pick.genes, id: pick.id, generation: pick.generation, solo: pick.solo })); } catch (e2) {} } catch (err) { note("（读不了这个文件：" + err.message + "）"); } }; fr.readAsText(f); e.target.value = ""; };
+      try { const st = JSON.parse(localStorage.getItem(ECO_KEY) || "null"); if (st && st.P) { const P = {}; for (const k in st.P) P[k] = decF(st.P[k]); window.__ecoResume = () => ecoAttach({ P, genes: st.genes, id: st.id, generation: st.generation, solo: st.solo }, false); } } catch (e) {} }
     $("lifeForget").onclick = () => { ensure(); g.forget(); note("（所有 KC→MBON 突触回到原值：什么都不记得了）"); save(); };
     // 身体：截腿 / 接回
     function syncLegButtons() { for (const bt of document.querySelectorAll("#lifeLegs [data-leg]")) { const l = legs && legs.byName[bt.dataset.leg]; bt.setAttribute("aria-pressed", l && !l.attached ? "true" : "false"); bt.style.textDecoration = l && !l.attached ? "line-through" : ""; } }
