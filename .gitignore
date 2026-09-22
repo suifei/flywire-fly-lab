@@ -196,3 +196,9 @@ studio/
 
 # 本地工程笔记（给编码代理读的），不入库
 AGENTS.md
+
+# npm 依赖（CI 里 npm install 装）
+node_modules/
+
+# 派给翻译子代理的分块（随时可由 i18n/catalog.json 重新生成）
+i18n/chunks/

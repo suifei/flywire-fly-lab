@@ -58,6 +58,7 @@ function chromePath() {
     args: ["--no-sandbox", "--disable-dev-shm-usage", "--allow-file-access-from-files"],
   });
   const page = await browser.newPage();
+  await page.evaluateOnNewDocument(l => { try { localStorage.setItem("fly-lang", l); } catch (e) {} }, process.env.LANG_UI || "zh");   // 这些检查针对中文界面；英文模式由 i18n/residue.js 单独测
   await page.setViewport({ width: 1400, height: 1000 });
   // THROTTLE=6 node dodge/browser_test.js：把浏览器 CPU 限到 1/6，在本机模拟没有 GPU 的 CI 机器，专门用来抓"按墙上时间等"的脆弱测试
   if (process.env.THROTTLE) await page.emulateCPUThrottling(+process.env.THROTTLE);

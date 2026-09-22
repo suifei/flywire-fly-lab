@@ -63,8 +63,8 @@ Wang-Chen, S. et al. (2024). NeuroMechFly v2: simulating embodied sensorimotor c
 | FlyWire 全脑连接组原始包 / FlyWire whole-brain release | 见第 2 节 / see §2 | 体积 1.5 GB，且应从官方渠道获取 / 1.5 GB, and should come from the official source |
 | flyconnectome 注释表 / flyconnectome annotations | 未声明 SPDX / no SPDX identifier | 请从上游获取 / get it upstream |
 
-跑完整流程需要自己按 [`README.md`](README.md)（[English](README.en.md)）的说明获取这些上游项目。
-To run the full pipeline, fetch these upstream projects as described in [`README.en.md`](README.en.md).
+跑完整流程需要自己按 [`README.zh-CN.md`](README.zh-CN.md)（中文）或 [`README.md`](README.md)（English）的说明获取这些上游项目。
+To run the full pipeline, fetch these upstream projects as described in [`README.md`](README.md).
 
 ## 5. 免责 / Disclaimer
 

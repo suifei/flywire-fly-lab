@@ -31,7 +31,7 @@ sec = f"""<!-- eco:begin （本节由 scratch/patch_readme_eco.py 渲染）-->
 如实说明：连接组一个突触都没变，学习发生在手写的可塑性层里；「看不到大脑输出」的对照学得一样好——在这个任务里连接组给的是身体和反射，不是学习信号。计划、审计、全部实测：[docs/ecobox/](docs/ecobox/)，日志 [§50](docs/log/report.md)。
 <!-- eco:end -->
 """
-p = ROOT / "README.md"; s = p.read_text()
+p = ROOT / "README.zh-CN.md"; s = p.read_text()
 if "<!-- eco:begin" in s: s = re.sub(r"<!-- eco:begin.*?<!-- eco:end -->\n", lambda m: sec, s, flags=re.S)
 else: s = s.replace("<!-- nature:begin", sec + "\n<!-- nature:begin", 1)
 p.write_text(s); print("README 已更新（生态箱一节）")

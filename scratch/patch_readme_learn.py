@@ -27,7 +27,7 @@ sec = f"""<!-- learn:begin （本节由 scratch/patch_readme_learn.py 从 result
 细节、第一次失败的尝试、只试一次没采用的那一刀：[docs/log/report.md §48](docs/log/report.md)。复现：`learn/` 下每个脚本开头的文档字符串写了用法和判据；`node dodge/legs_test.js`、`node learn/parity_js.js` + `python learn/parity_py.py compare`。
 <!-- learn:end -->
 """
-p = ROOT / "README.md"; s = p.read_text()
+p = ROOT / "README.zh-CN.md"; s = p.read_text()
 if "<!-- learn:begin" in s: s = re.sub(r"<!-- learn:begin.*?<!-- learn:end -->\n", lambda m: sec, s, flags=re.S)
 else: ANCHOR = "<!-- limits:begin" if "<!-- limits:begin" in s else "## 它做不到什么（同样重要）"; s = s.replace(ANCHOR, sec + "\n" + ANCHOR, 1)
 if "| `learn/` |" not in s: s = s.replace("| `language/` |", "| `learn/` | 蘑菇体学习回路：气味编码、强化通路、条件化、记忆→运动、全脑复核、页面引擎一致性、物理身体闭环 |\n| `language/` |", 1)

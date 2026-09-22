@@ -17,7 +17,7 @@ sec = f"""<!-- nature:begin （本节由 scratch/patch_readme_nature.py 渲染�
 如实说明：默认的视觉前端仍是手写的逼近检测，石头和草不在它的视觉里（真实像素那条通路可选、默认关）；果蝇自己的身体是运动学，不会摔倒；威胁从「飞来的球」换成了「爬过来的甲虫」，因为毫米尺度上慢慢滚过来的球不物理。细节：[docs/log/report.md §49](docs/log/report.md)。
 <!-- nature:end -->
 """
-p = ROOT / "README.md"; s = p.read_text()
+p = ROOT / "README.zh-CN.md"; s = p.read_text()
 if "<!-- nature:begin" in s: s = re.sub(r"<!-- nature:begin.*?<!-- nature:end -->\n", lambda m: sec, s, flags=re.S)
 else: s = s.replace("<!-- learn:begin", sec + "\n<!-- learn:begin", 1)
 p.write_text(s); print("README 已更新（大自然一节）")
