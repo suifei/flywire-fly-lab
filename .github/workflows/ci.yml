@@ -100,6 +100,9 @@ jobs:
         # 死链接就是台账开始腐烂的信号，所以在 CI 里挡住。
         run: python3 scripts/reproduction.py --check
 
+      - name: 中英两份 README 与结果文件一致（README.en.md 整份渲染；数字不手抄）
+        run: python3 scripts/render_readme.py --check
+
       - name: 报告数字与结果文件一致（防手抄）
         run: |
           python3 vision/check_report_numbers.py        # §28.16–28.20（视觉那几节）
