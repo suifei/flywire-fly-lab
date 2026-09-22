@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+// 查清 live_check 的 L2：真脑闭环里喝水时间是响应面的 ~4 倍，可 MN9 在「只尝到水」这个工作点上两者只差 3%，也没有慢爬升。喝水时间 = 在水上的时间 × 在水上时决定喝的概率，先把这两个因子拆开，再做消融：
+//   surface        响应面（原样：每次决策按 0.3 s 窗的泊松计数把噪声加回去）
+//   surface_mean   响应面不加噪声（给均值）
+//   surface_ema    响应面加噪声后再按 τ = 0.3 s 平滑（模仿真脑那边的读出）
+//   live           真脑（原样：0.1 s 计数 → τ = 0.3 s 平滑）
+//   live_raw       真脑不平滑（0.1 s 计数直接当频率）
+// 用法：node eco/l2_diagnosis.js [秒=400] [种子数=3]（真脑两个臂各 ~7 min / 种子，可并行跑：ARM=live node eco/l2_diagnosis.js …）→ results/eco/l2_diagnosis[_<arm>].json
+const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, ".."), Sim = require("./sim.js"), Surf = require("./brain_surface.js"), Live = require("./brain_live.js"), CH = require("./channels.js"), { ConnectomeBrain } = require("../dodge/brain.js");
+const SURF = JSON.parse(fs.readFileSync(path.join(ROOT, "results/eco/brain_surface.json"), "utf8")), SUB = JSON.parse(fs.readFileSync(path.join(ROOT, "results/dodge/subcircuit_v5.json"), "utf8"));
+const champ = JSON.parse(fs.readFileSync(path.join(ROOT, "results/eco/m2_champion.json"), "utf8")), mkP = () => Object.fromEntries(Object.entries(champ.P).map(([k, v]) => [k, Array.isArray(v) ? Float64Array.from(v) : v]));
+const T = +(process.argv[2] || 400), NS = +(process.argv[3] || 3), SEEDS = Array.from({ length: NS }, (_, i) => 6000 + i), ARMS = process.env.ARM ? process.env.ARM.split(",") : ["surface", "surface_mean", "surface_ema", "live", "live_raw"];
+function brainFor(arm, seed) { if (arm === "surface") return Surf.create(SURF); if (arm === "surface_mean") { const b = Surf.create(SURF); return { eval: (x, out) => b.eval(x, out, null) }; }
+  if (arm === "surface_ema") { const b = Surf.create(SURF), ema = new Float32Array(12), al = 0.1 / 0.3; return { eval: (x, out, rand) => { b.eval(x, out, rand); for (let j = 0; j < 12; j++) { ema[j] += al * (out[j] - ema[j]); out[j] = ema[j] < 0.3 ? 0 : ema[j]; } return out; } }; }
+  if (arm === "live") return Live.create(SUB, ConnectomeBrain, CH, seed); if (arm === "live_raw") return Live.create(SUB, ConnectomeBrain, CH, seed, { smooth: 0.1 }); }
+const out = {}; for (const arm of ARMS) { const rows = []; for (const seed of SEEDS) { const A = { n: 0, onW: 0, onWcan: 0, pSum: 0, ingest: 0, mn9Sum: 0, mn9Sq: 0, mn9Lt5: 0, visits: 0, drinkS: 0 }, t0 = Date.now(); let was = false;
+    const sim = Sim.create({}, { seed, brain: brainFor(arm, seed), learn: "off", trail: false, trace: (a, d) => { A.n++; if (d.onWater) { A.onW++; A.mn9Sum += d.mn9; A.mn9Sq += d.mn9 * d.mn9; if (d.mn9 < 5) A.mn9Lt5++; if (d.canIngest) { A.onWcan++; A.pSum += d.pIngest; } if (d.ingest) A.ingest++; if (!was) A.visits++; } was = d.onWater; } }), a = sim.spawn(null, mkP()); let n = 0; while (a.alive && n < T * 10) { sim.step(); n++; }
+    const m = A.mn9Sum / Math.max(1, A.onW); rows.push({ seed, life_s: n / 10, drink_s: +a.stats.tDrink.toFixed(1), on_water_s: A.onW / 10, water_visits: A.visits, mean_visit_s: +(A.onW / 10 / Math.max(1, A.visits)).toFixed(2), mn9_on_water: +m.toFixed(2), mn9_sd_on_water: +Math.sqrt(Math.max(0, A.mn9Sq / Math.max(1, A.onW) - m * m)).toFixed(2), frac_mn9_below_5: +(A.mn9Lt5 / Math.max(1, A.onW)).toFixed(3), can_frac: +(A.onWcan / Math.max(1, A.onW)).toFixed(3), p_ingest_given_can: +(A.pSum / Math.max(1, A.onWcan)).toFixed(3), drink_given_on_water: +(A.ingest / Math.max(1, A.onW)).toFixed(3), wall_s: +((Date.now() - t0) / 1000).toFixed(0) });
+    console.log(arm, JSON.stringify(rows[rows.length - 1])); }
+  const med = k => { const v = rows.map(r => r[k]).sort((x, y) => x - y); return v[v.length >> 1]; }; out[arm] = { rows, median: Object.fromEntries(Object.keys(rows[0]).filter(k => k !== "seed").map(k => [k, med(k)])) }; }
+fs.writeFileSync(path.join(ROOT, `results/eco/l2_diagnosis${process.env.ARM ? "_" + process.env.ARM.replace(/,/g, "+") : ""}.json`), JSON.stringify({ seconds: T, seeds: SEEDS, arms: out }, null, 1));
+console.log("\n臂            喝水 s  在水上 s  碰水次  每次停留 s  水上MN9  sd   MN9<5   能吃占比  p喝|能吃  喝|在水上"); for (const [arm, o] of Object.entries(out)) { const m = o.median; console.log(arm.padEnd(13), String(m.drink_s).padStart(6), String(m.on_water_s).padStart(8), String(m.water_visits).padStart(6), String(m.mean_visit_s).padStart(9), String(m.mn9_on_water).padStart(8), String(m.mn9_sd_on_water).padStart(5), String(m.frac_mn9_below_5).padStart(6), String(m.can_frac).padStart(9), String(m.p_ingest_given_can).padStart(9), String(m.drink_given_on_water).padStart(9)); }

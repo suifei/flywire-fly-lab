@@ -2895,8 +2895,8 @@ code { font: 12px var(--mono); }
    "id": "eco_m2_learning",
    "what": "生态箱 M2：只给物理量和内生奖励（身体不适的减少），接在固定连接组旁边的可塑性层能不能自己学会活得更久",
    "status": "partial",
-   "result": "3 个个体各连续 30 条命后冻结学习，在 30 个没见过的世界上测：不学习 444 s，学习 ≥ 1800 s（截尾，× 4.05）；C1（≥ 1.5 ×）3/3 通过，C2（打乱奖励不提升）3/3 通过；另换 10 个个体 10/10 学成；长期训练任务（eco/train_long.js，又 10 个新个体，学成即毕业）10/10 学成、换新世界复测 10/10，共 130 条命。学到的是「碰到水就停下来喝」（连接组里水味先天不够伸喙）和「湿度上升时少拐弯」",
-   "caveat": "标 partial 的原因：**远距离找水 / 找食物没学会**（干旱世界不学习 419 s、学习 397 s，训练 120 条命 516 s）；可塑性层看不到大脑输出时学得一样好（× 4.05）——连接组在这里给的是身体和反射，不是学习信号。第一版 C2 只过了 2/3（打乱对照是漏的：奖励只延后 20–60 s，与持续几十秒的喝水仍相关；事后加的轭式对照不提升）。关掉「不用就忘」10 个个体只有 5/10 学成（1 个贴墙、3 个躺平）。寿命在 1,800 s 截尾，倍数是下限",
+   "result": "3 个个体各连续 30 条命后冻结学习，在 30 个没见过的世界上测：不学习 425 s，学习 ≥ 1800 s（截尾，× 4.231）；C1（≥ 1.5 ×）3/3 通过，C2（打乱奖励不提升）3/3 通过；另换 10 个个体 9/10 学成；长期训练任务（eco/train_long.js，又 10 个新个体，学成即毕业）10/10 学成、换新世界复测 10/10，共 210 条命。学到的是「碰到水就停下来喝」（连接组里水味先天不够伸喙）和「湿度上升时少拐弯」",
+   "caveat": "标 partial 的原因：**远距离找水 / 找食物没学会**（干旱世界不学习 417 s、学习 422 s，训练 120 条命 506 s）；可塑性层看不到大脑输出时学得一样好（× 4.231）——连接组在这里给的是身体和反射，不是学习信号。第一版 C2 只过了 2/3（打乱对照是漏的：奖励只延后 20–60 s，与持续几十秒的喝水仍相关；事后加的轭式对照不提升）。关掉「不用就忘」10 个个体只有 6/10 学成（1 个贴墙、2 个躺平）。寿命在 1,800 s 截尾，倍数是下限",
    "script": "eco/m2_learning.js",
    "result_file": "results/eco/summary.json",
    "log": "§50.4",
@@ -2913,12 +2913,12 @@ code { font: 12px var(--mono); }
     ],
     [
      "m2.individuals.0.ratio_on",
-     4.05,
+     4.231,
      0.001
     ],
     [
      "m2.robust_learned",
-     10,
+     9,
      0
     ],
     [
@@ -2933,7 +2933,7 @@ code { font: 12px var(--mono); }
     ],
     [
      "m2.drought_on",
-     397,
+     422,
      0
     ]
    ]
@@ -2942,7 +2942,7 @@ code { font: 12px var(--mono); }
    "id": "eco_m3_evolution",
    "what": "生态箱 M3：32 只果蝇、10 个可遗传参数、没有适应度函数——不同的世界规则会不会把「飞行倾向」推向不同方向",
    "status": "reproduced",
-   "result": "三个世界各 5 个种子 × 10,800 s：甲虫横行 降（Δ 均值 -1.15，寿命 401 → 883 s，先天喝水 +2.32）；风平浪静 平（Δ 均值 -0.29，寿命 481 → 1164 s，先天喝水 +2.48）；地广物稀 平（Δ 均值 +0.06，寿命 401 → 431 s，先天喝水 +0.67）。事先写定的判据（至少两个世界标签不同）通过",
+   "result": "三个世界各 5 个种子 × 10,800 s：甲虫横行 降（Δ 均值 -1.54，寿命 408 → 926 s，先天喝水 +2.63）；风平浪静 平（Δ 均值 -0.37，寿命 451 → 930 s，先天喝水 +1.63）；地广物稀 平（Δ 均值 -0.56，寿命 406 → 481 s，先天喝水 +0.39）。事先写定的判据（至少两个世界标签不同）通过",
    "caveat": "飞行是固定的 1.2 s / 72 mm 弹道，能进化 / 能学的只有「起不起飞」（飞行控制没接进连接组，见 docs/ecobox/AUDIT.md）。3 小时箱内时间只有几到十几代，种群 32 只，漂变不小。可塑性层不遗传；种群快灭绝时从名人堂补进来的个体单独计数（迁入）。变异幅度手选",
    "script": "eco/m3_evolution.js",
    "result_file": "results/eco/summary.json",
@@ -2955,17 +2955,17 @@ code { font: 12px var(--mono); }
     ],
     [
      "m3.worlds.0.delta_mean",
-     -1.151,
+     -1.542,
      0.001
     ],
     [
      "m3.worlds.1.delta_mean",
-     -0.293,
+     -0.371,
      0.001
     ],
     [
      "m3.worlds.2.delta_mean",
-     0.055,
+     -0.563,
      0.001
     ]
    ]
@@ -2973,8 +2973,8 @@ code { font: 12px var(--mono); }
   {
    "id": "eco_live_check",
    "what": "生态箱：在响应面上学成的个体，放回真的 15,055 神经元脉冲网络里还管不管用",
-   "status": "partial",
-   "result": "3 个世界种子、上限 900 s：真脑 900 s，响应面 900 s，白纸 419 s。L1（真脑 ≥ 1.5 × 白纸）通过（× 2.15）；L2（喝水时间占比在响应面的 0.5–2 倍内）未通过（0.284 对 0.073）",
+   "status": "reproduced",
+   "result": "3 个世界种子、上限 900 s：真脑 900 s，响应面 900 s，白纸 422 s。L1（真脑 ≥ 1.5 × 白纸）通过（× 2.13）；L2（喝水时间占比在响应面的 0.5–2 倍内）通过（0.199 对 0.134）",
    "caveat": "只有 3 条命、上限 900 s（真脑约 1.2 倍实时）。真脑的读出按约 300 ms 平滑以对齐响应面的噪声窗口",
    "script": "eco/live_check.js",
    "result_file": "results/eco/summary.json",
@@ -2987,7 +2987,7 @@ code { font: 12px var(--mono); }
     ],
     [
      "live.naive_median",
-     419,
+     422,
      0
     ]
    ]
@@ -2996,7 +2996,7 @@ code { font: 12px var(--mono); }
    "id": "eco_transfer",
    "what": "生态箱学成的个体搬进 3D 大自然（真脑 + 有重力天气甲虫的世界）还管不管用；训练条件先对齐到大自然",
    "status": "reproduced",
-   "result": "5 个世界种子 × 900 s，同种子对比白纸，权重冻结；有信息的种子 5 个。X1（喝得更久 5/5，每次碰到水喝 6.583333333333333 对 0.7777777777777778 次）通过；X2（更不渴 5/5）通过。响应面第三版加了闭环工况（11,339 组，含大自然里记下的 9,000 组）：只尝到水的 MN9 误差 2.9%（第二版约 40%），真脑指数 86.6",
+   "result": "5 个世界种子 × 900 s，同种子对比白纸，权重冻结；有信息的种子 5 个。X1（喝得更久 5/5，每次碰到水喝 7.111111111111111 对 0.7777777777777778 次）通过；X2（更不渴 5/5）通过。响应面第三版加了闭环工况（11,339 组，含大自然里记下的 9,000 组）：只尝到水的 MN9 误差 2.9%（第二版约 40%），真脑指数 86.6",
    "caveat": "学成的只是「碰到水就喝」与趋湿；大自然里能喝的水（洼地）少，5 个种子里有的臂整条命没碰到水。响应面 T2 未通过（左转 DNa 0.829，闭环工况上它的噪声天花板实测 0.827，线定得高于真脑的可重复性，照原线登记）。旧感觉编码下的 M2 / M3 / 长期训练结果留在本机 old_senses/，不入库",
    "script": "eco/nature_transfer.js",
    "result_file": "results/eco/summary.json",
@@ -3023,7 +3023,7 @@ code { font: 12px var(--mono); }
    "id": "eco_m4_save",
    "what": "生态箱 M4：存档 → 清空 → 读回 → 接着跑，是否与不中断逐位相同",
    "status": "reproduced",
-   "result": "四项全过：续跑状态指纹相同（0c5cef30:230564）、存档格式稳定、挑战码（167 个字符）来回无损、坏输入被拒绝。页面里再验一次（eco/page_test.js）",
+   "result": "四项全过：续跑状态指纹相同（1f6c4944:245817）、存档格式稳定、挑战码（167 个字符）来回无损、坏输入被拒绝。页面里再验一次（eco/page_test.js）",
    "caveat": "「逐位相同」指同一份页面代码、同一个 JS 引擎；存档约 0.9 MB，超出本机存储配额时要用导出文件。云端保存没做",
    "script": "eco/m4_save_test.js",
    "result_file": "results/eco/summary.json",
@@ -7849,13 +7849,13 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
   const GENES = { learnRate: 0.012, explore: 0.35, flightBias: -4, tempPref: 25, metabolism: 1, caution: 1, innateTurn: [0, 0, 0, 0] };
   const BODY = { walkSpeed: 18, backSpeed: 12, turnGain: 6, turnMax: 420, gfThreshold: 90, mdnThreshold: 20, feedThreshold: 30, feedSlope: 6, mn9Min: 5, hopDist: 22, hopTime: 0.35, hopCost: 0.035, hopCooldown: 1.2,
     flightSpeed: 60, flightTime: 1.2, flightMinStamina: 0.3, slopeK: 1.2, restSpeed: 0.15 };
-  const FSCALE = [40, 40, 250, 100, 30, 30, 30, 80, 100, 200, 10, 10], IX = Senses.IX, PI = Plastic.IDX, NF = Plastic.NF;
+  const SMOOTH = 0.3, FSCALE = [40, 40, 250, 100, 30, 30, 30, 80, 100, 200, 10, 10], IX = Senses.IX, PI = Plastic.IDX, NF = Plastic.NF;
   const PAIRS = ["vinegar", "geosmin", "hygro", "thermo", "jo", "odorA", "audio", "lc4", "touch"], DERIV = ["vinegar", "hygro", "thermo", "odorA"], GATED = [["hunger", "vinegar"], ["thirst", "hygro"], ["hot", "thermo"], ["cold", "thermo"]];
 
   function newAgent(sim, genome, plastic) { const W = sim.world, a0 = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * W.rules.size * 0.5, genes = Object.assign({}, GENES, genome && genome.genes, { innateTurn: ((genome && genome.genes && genome.genes.innateTurn) || GENES.innateTurn).slice() });
     const a = { id: sim.nextId++, genome: { id: (genome && genome.id) || sim.nextId, parent: genome ? genome.parent : null, generation: genome ? genome.generation || 0 : 0, genes }, phys: Phys.create(genes), P: plastic || Plastic.create(genes),
       x: Math.cos(a0) * d, y: Math.sin(a0) * d, h: W.rand() * 6.2832, air: 0, avx: 0, avy: 0, flying: false, cool: 0, lastD: [], dt: sim.dt, state: "walk", alive: true, born: W.t, deathT: null, cause: null, r: 0, rs: (W.rand() * 4294967296) >>> 0,
-      xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), phi: new Float64Array(NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, threatLP: 0, threatDir: 0, onFood: null, onWater: null, rotten: 0,
+      xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), ema: new Float32Array(CH.FEATURES.length), phi: new Float64Array(NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, threatLP: 0, threatDir: 0, onFood: null, onWater: null, rotten: 0,
       stats: { tEat: 0, tDrink: 0, tRest: 0, tWall: 0, tWet: 0, tAir: 0, tRotten: 0, meals: 0, drinks: 0, hops: 0, flights: 0, bites: 0, dist: 0, reward: 0, rPos: 0, foodVisits: 0, waterVisits: 0, nCells: 0, cells: {}, tNight: 0, tHot: 0, tCold: 0 }, wasOn: 0, trail: [], trailT: 0, rbuf: [], lag: 300 };
     Plastic.clearTraces(a.P); a.rand = () => { a.rs = (a.rs + 0x6d2b79f5) >>> 0; let t = a.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
     sim.agents.push(a); sim.emit({ t: W.t, agent: a.id, kind: "birth", data: { generation: a.genome.generation } }); return a; }
@@ -7882,7 +7882,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     sim.spawn = (genome, plastic) => newAgent(sim, genome, plastic);
     sim.step = function () { const W = sim.world, dt = sim.dt, bites = W.step(dt, sim.agents);
       for (const a of sim.agents) { if (!a.alive) continue; const p = a.phys, g = a.genome.genes, st = a.stats; let bite = 0; a.bite = null; for (const b of bites) if (b.agent === a) { bite += World.K.biteDamage; a.bite = b; } if (bite > 0) { st.bites++; sim.emit({ t: W.t, agent: a.id, kind: "hit", data: { health: +p.health.toFixed(2) } }); }
-        Senses.sense(W, a, sim.agents, a.xin); (a.brain || sim.brain).eval(a.xin, a.out, a.rand); if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
+        Senses.sense(W, a, sim.agents, a.xin); { const br = a.brain || sim.brain; br.eval(a.xin, a.out, a.rand); if (br.kind === "surface" && !br.smoothed) { const al = Math.min(1, dt / SMOOTH); for (let j = 0; j < a.out.length; j++) { a.ema[j] += al * (a.out[j] - a.ema[j]); a.out[j] = a.ema[j] < 0.3 ? 0 : a.ema[j]; } } }   /* 响应面共用一个对象，读出的 τ = 0.3 s 平滑按个体做（与 eco/brain_live.js 一致） */ if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
         const phi = features(a, W); if (o.noBrainFeatures) for (let j = 0; j < 12; j++) phi[j] = 0;
         // 先学（上一步的奖励、这一步的状态），再做
         let r = a.r; if (o.learn === "shuffle") { a.rbuf.push(r); if (a.rbuf.length > 700) a.rbuf.shift(); if (a.rand() < dt / 30) a.lag = 200 + Math.floor(a.rand() * 400); r = a.rbuf.length > a.lag ? a.rbuf[a.rbuf.length - 1 - a.lag] : 0; }
@@ -7891,6 +7891,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
         Plastic.learn(a.P, r, phi, g, o.learn === "off" ? "off" : "on");
         const out = a.out, mn9 = out[3], canIngest = a.air <= 0 && (a.onFood || a.onWater) && mn9 > BODY.mn9Min;
         Plastic.act(a.P, phi, g, dt, a.rand, { canIngest, ingestLogit: (mn9 - BODY.feedThreshold) / BODY.feedSlope, flight: o.flight && a.air <= 0 }, a.act);
+        if (o.trace) o.trace(a, { onWater: !!a.onWater, onFood: !!a.onFood, mn9, canIngest, pIngest: a.act.pIngest, ingest: a.act.ingest, dnaL: out[0], dnaR: out[1], speed: a.act.speed, turn: a.act.turn });   /* 诊断用：每次决策回调（L2 那 4 倍就是靠它拆开的） */
         let eating = false, drinking = false, effort = 0, resting = false, uphill = 0; a.cool = Math.max(0, a.cool - dt);
         if (a.air > 0) { a.x += a.avx * dt; a.y += a.avy * dt; if (a.flying) { a.x += Math.cos(W.wind.dir) * W.wind.speed * 0.6 * dt; a.y += Math.sin(W.wind.dir) * W.wind.speed * 0.6 * dt; } a.air -= dt; st.tAir += dt; a.state = a.flying ? "fly" : "hop"; if (a.air <= 0) { a.air = 0; a.flying = false; a.lastD.length = 0; } }
         else if (out[2] > BODY.gfThreshold * g.caution && a.cool <= 0) { const dir = a.threatLP > 0 ? a.threatDir + Math.PI + (a.rand() - 0.5) * 0.8 : a.h; a.air = BODY.hopTime; a.avx = Math.cos(dir) * BODY.hopDist / BODY.hopTime; a.avy = Math.sin(dir) * BODY.hopDist / BODY.hopTime; a.h = dir; a.cool = BODY.hopCooldown;
@@ -8001,7 +8002,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "health_end": 0,
     "dist_mm": 6904,
     "jumps": 13,
-    "wall_s": 697
+    "wall_s": 530
    },
    "trained": {
     "arm": "trained",
@@ -8009,21 +8010,21 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "life_s": 900,
     "alive": true,
     "cause": null,
-    "drink_s": 169.34,
-    "eat_s": 48.52,
+    "drink_s": 250.6,
+    "eat_s": 10.01,
     "rest_s": 0,
-    "drinks": 192,
-    "meals": 8,
-    "waterVisits": 30,
-    "foodVisits": 12,
+    "drinks": 383,
+    "meals": 3,
+    "waterVisits": 54,
+    "foodVisits": 4,
     "hits": 0,
-    "thirst_mean": 0.137,
-    "thirst_end": 0,
-    "hunger_end": 0.43,
-    "health_end": 1,
-    "dist_mm": 12582,
-    "jumps": 34,
-    "wall_s": 978
+    "thirst_mean": 0.044,
+    "thirst_end": 0.041,
+    "hunger_end": 1,
+    "health_end": 0.498,
+    "dist_mm": 11158,
+    "jumps": 29,
+    "wall_s": 750
    },
    "informative": true
   },
@@ -8049,7 +8050,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "health_end": 0,
     "dist_mm": 6257,
     "jumps": 15,
-    "wall_s": 629
+    "wall_s": 480
    },
    "trained": {
     "arm": "trained",
@@ -8057,21 +8058,21 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "life_s": 900,
     "alive": true,
     "cause": null,
-    "drink_s": 312.89,
-    "eat_s": 33.32,
+    "drink_s": 145.74,
+    "eat_s": 35.59,
     "rest_s": 0,
-    "drinks": 341,
-    "meals": 6,
-    "waterVisits": 54,
-    "foodVisits": 7,
+    "drinks": 256,
+    "meals": 14,
+    "waterVisits": 36,
+    "foodVisits": 10,
     "hits": 0,
-    "thirst_mean": 0.021,
-    "thirst_end": 0.012,
-    "hunger_end": 0.895,
-    "health_end": 0.978,
-    "dist_mm": 10200,
-    "jumps": 27,
-    "wall_s": 966
+    "thirst_mean": 0.108,
+    "thirst_end": 0.142,
+    "hunger_end": 0.796,
+    "health_end": 0.993,
+    "dist_mm": 12211,
+    "jumps": 25,
+    "wall_s": 788
    },
    "informative": true
   },
@@ -8097,7 +8098,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "health_end": 0,
     "dist_mm": 6477,
     "jumps": 15,
-    "wall_s": 584
+    "wall_s": 440
    },
    "trained": {
     "arm": "trained",
@@ -8105,21 +8106,21 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "life_s": 900,
     "alive": true,
     "cause": null,
-    "drink_s": 280.21,
-    "eat_s": 37.95,
+    "drink_s": 67.05,
+    "eat_s": 87.76,
     "rest_s": 0,
-    "drinks": 302,
-    "meals": 6,
-    "waterVisits": 43,
-    "foodVisits": 7,
+    "drinks": 99,
+    "meals": 15,
+    "waterVisits": 13,
+    "foodVisits": 15,
     "hits": 0,
-    "thirst_mean": 0.087,
-    "thirst_end": 0.078,
-    "hunger_end": 0.102,
+    "thirst_mean": 0.205,
+    "thirst_end": 0.17,
+    "hunger_end": 0.004,
     "health_end": 1,
-    "dist_mm": 10465,
-    "jumps": 32,
-    "wall_s": 1006
+    "dist_mm": 11976,
+    "jumps": 26,
+    "wall_s": 770
    },
    "informative": true
   },
@@ -8145,7 +8146,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "health_end": 0,
     "dist_mm": 6934,
     "jumps": 15,
-    "wall_s": 617
+    "wall_s": 470
    },
    "trained": {
     "arm": "trained",
@@ -8153,21 +8154,21 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "life_s": 900,
     "alive": true,
     "cause": null,
-    "drink_s": 159.41,
-    "eat_s": 91.19,
+    "drink_s": 224.1,
+    "eat_s": 53.71,
     "rest_s": 0,
-    "drinks": 158,
-    "meals": 19,
-    "waterVisits": 24,
-    "foodVisits": 17,
+    "drinks": 334,
+    "meals": 11,
+    "waterVisits": 42,
+    "foodVisits": 11,
     "hits": 0,
-    "thirst_mean": 0.1,
-    "thirst_end": 0.189,
-    "hunger_end": 0,
+    "thirst_mean": 0.057,
+    "thirst_end": 0.111,
+    "hunger_end": 0.024,
     "health_end": 1,
-    "dist_mm": 11609,
-    "jumps": 30,
-    "wall_s": 998
+    "dist_mm": 10932,
+    "jumps": 31,
+    "wall_s": 785
    },
    "informative": true
   },
@@ -8193,29 +8194,29 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
     "health_end": 0,
     "dist_mm": 6711,
     "jumps": 17,
-    "wall_s": 614
+    "wall_s": 466
    },
    "trained": {
     "arm": "trained",
     "seed": 905,
-    "life_s": 865.4,
-    "alive": false,
-    "cause": "starve",
-    "drink_s": 297.3,
-    "eat_s": 48.44,
+    "life_s": 900,
+    "alive": true,
+    "cause": null,
+    "drink_s": 193.54,
+    "eat_s": 40.02,
     "rest_s": 0,
-    "drinks": 295,
-    "meals": 13,
-    "waterVisits": 41,
-    "foodVisits": 12,
+    "drinks": 348,
+    "meals": 8,
+    "waterVisits": 52,
+    "foodVisits": 9,
     "hits": 0,
-    "thirst_mean": 0.082,
-    "thirst_end": 0.017,
+    "thirst_mean": 0.122,
+    "thirst_end": 0.068,
     "hunger_end": 1,
-    "health_end": 0,
-    "dist_mm": 9279,
-    "jumps": 28,
-    "wall_s": 974
+    "health_end": 0.718,
+    "dist_mm": 11641,
+    "jumps": 30,
+    "wall_s": 823
    },
    "informative": true
   }
@@ -8224,7 +8225,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
  "conclusive": true,
  "X1": {
   "more_drink_time": "5/5",
-  "drinks_per_visit_trained": 6.583333333333333,
+  "drinks_per_visit_trained": 7.111111111111111,
   "drinks_per_visit_naive": 0.7777777777777778,
   "pass": true
  },
@@ -8236,13 +8237,13 @@ if (typeof module !== "undefined" && module.exports) module.exports = FlyNature3
   "life_naive": 434.9,
   "life_trained": 900,
   "drink_s_naive": 1,
-  "drink_s_trained": 280.21,
+  "drink_s_trained": 193.54,
   "thirst_naive": 0.712,
-  "thirst_trained": 0.087,
+  "thirst_trained": 0.108,
   "eat_s_naive": 24.57,
-  "eat_s_trained": 48.44,
+  "eat_s_trained": 40.02,
   "alive_naive": 0,
-  "alive_trained": 4
+  "alive_trained": 5
  },
  "pass": true
 };</script>

@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parent.parent
 S = json.loads((ROOT / "results/eco/summary.json").read_text())
 need = [k for k in ("audit", "surface", "m2", "m3", "m4", "live", "long", "transfer") if k not in S]
 if need: sys.exit("summary.json 里还缺：" + "、".join(need) + "（先把对应实验跑完，再 python3 eco/collect_results.py）")
-au, sf, m2, m3, m4, lv = (S[k] for k in ("audit", "surface", "m2", "m3", "m4", "live")); lg = S["long"]; mf = sf["manifold"]; tr = S["transfer"]
+au, sf, m2, m3, m4, lv = (S[k] for k in ("audit", "surface", "m2", "m3", "m4", "live")); lg = S["long"]; mf = sf["manifold"]; tr = S["transfer"]; l2 = S.get("l2") or {"arms": {}, "fano": {}}
 yn = lambda b: "通过" if b else "**未通过**"
 FN = {"dnaL": "左转 DNa", "dnaR": "右转 DNa", "gf": "巨纤维", "mn9": "MN9 伸喙", "adn1": "aDN1 梳理", "mdn": "MDN 后退", "odn1": "oDN1", "bdn2": "BDN2", "mbonReward": "MBON 奖赏侧", "mbonPunish": "MBON 惩罚侧", "pam": "PAM", "ppl1": "PPL1"}
 surf_rows = "\n".join(f"| {FN[f['name']]} | {'从不放电' if f['silent'] else format(f['r2'], '.3f')} | {sf['vs_mean'].get(f['name'], float('nan')):.3f} | {sf['ceiling'].get(f['name'], float('nan')):.3f} |" for f in sf["features"] if not f["silent"])
@@ -112,6 +112,18 @@ M3 判据 {yn(m3['pass'])}（标签：{'、'.join(f"{next(w['name'] for w in m3[
 把 M2 里在响应面上学成的个体冻结权重，放回真的 {au['n_neurons']:,} 神经元脉冲网络（{lv['lives']} 个世界种子，上限 {lv['cap_s']} s）：真脑 {lv['live_median']} s，响应面 {lv['surface_median']} s，白纸 {lv['naive_median']} s。
 L1（真脑 ≥ 1.5 × 白纸）{yn(lv['L1'])}（× {lv['ratio_live_vs_naive']}）；L2（喝水时间占比在响应面的 0.5–2 倍内）{yn(lv['L2'])}（{lv['drink_live']} 对 {lv['drink_surface']}）。
 响应面第三版把「只尝到水」的 MN9 对齐到真脑之后 L2 仍然没过（第二版 {lv.get('v2_drink_ratio', '?')} 倍，第三版 {lv['drink_ratio']} 倍）；查过真脑在持续 12 s 水输入下 MN9 不爬升（12–15 Hz，scratch），所以不是慢动力学。**原因没查清**，照实登记。方向上是真脑喝得更多，对生存有利，迁移实测（{{N}}.7b）不受它影响。
+
+### {{N}}.7a 那 4 倍是哪来的（`eco/l2_diagnosis.js`、`eco/measure_fano.js`）
+
+真脑闭环里喝水时间曾是响应面的 {lv.get('v2_drink_ratio', '?')} 倍（第二版）/ 3.89 倍（第三版），可「只尝到水」时的 MN9 两者只差 3%，持续 12 s 也不爬升。把喝水时间拆成「每次碰到水停多久 × 在水上时决定喝的概率」，逐次决策记下来（400 s × 3 个种子，取中位）：
+
+| 臂 | 水上 MN9 | 逐步标准差 | 跌破 5 Hz 门槛 | 决定喝的概率 | 每次停留 | 喝水 |
+|---|---|---|---|---|---|---|
+{chr(10).join(f"| {n} | {a['mn9_on_water']} | {a['mn9_sd_on_water']} | {100 * a['frac_mn9_below_5']:.1f}% | {a['p_ingest_given_can']} | {a['mean_visit_s']} s | {a['drink_s']} s |" for n, a in [("响应面 · 第一版噪声（每步独立抽 0.3 s 窗的泊松）", l2['arms'].get('surface')), ("响应面 · 去噪声", l2['arms'].get('surface_mean')), ("响应面 · 加真脑同样的平滑", l2['arms'].get('surface_ema')), ("真脑", l2['arms'].get('live')), ("响应面 · 现在", l2['arms'].get('surface_v4'))] if a)}
+
+决策概率与均值都一样，差在**停留时间**：每一步只要没决定喝，果蝇就走 0.1 s（1.8 mm），水洼半径约 10 mm。第一版噪声的逐步标准差是真脑的 2.5 倍，MN9 每 10 步就跌破一次 5 Hz 的进食门槛、被迫走一步，所以待不住。
+真脑的读出是一组神经元的平均、按 τ = 0.3 s 平滑，且真实神经元比泊松更规则（0.1 s 计数的 Fano 因子：MN9 {l2['fano']['mn9']}、巨纤维 {l2['fano']['gf']}、左转 DNa {l2['fano']['dnaL']}）。响应面第四版按真脑量出来的等效单元数与 Fano 因子加噪声（var = hz·Fano/(窗·n)）、再按个体做同样的平滑，逐步标准差与真脑一致。真脑不平滑的对照（live_raw）3 个种子里 2 个整条命没碰到水（转向输出被量化噪声打散），没有信息。
+**换了噪声模型 = 换底座**：M2 / 长期训练 / M3 / 真脑复核 / 迁移全部用第四版重跑（下面各节都是重跑后的数字；旧噪声模型的结果留在本机 `results/eco/old_noise/`）。
 
 ### {{N}}.7b 搬进 3D 大自然（`eco/overlay.js`、`eco/nature_harness.js`、`eco/nature_transfer.js`）
 

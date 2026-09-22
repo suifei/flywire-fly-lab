@@ -1,0 +1,46 @@
+{
+ "window_s": 0.1,
+ "n_inputs": 110,
+ "units": {
+  "dnaL": 1,
+  "dnaR": 1,
+  "mbonReward": 1,
+  "mbonPunish": 1,
+  "gf": 2,
+  "mn9": 2,
+  "adn1": 2,
+  "mdn": 4,
+  "odn1": 1,
+  "bdn2": 2,
+  "pam": 307,
+  "ppl1": 16
+ },
+ "fano": {
+  "dnaL": 0.698,
+  "dnaR": 0.389,
+  "gf": 0.312,
+  "mn9": 0.379,
+  "adn1": 1.236,
+  "mdn": 1.235,
+  "odn1": 0.607,
+  "bdn2": 1.385,
+  "mbonReward": 0.177,
+  "mbonPunish": 0.346,
+  "pam": 0.211,
+  "ppl1": 0.13
+ },
+ "n_used": {
+  "dnaL": 31,
+  "dnaR": 32,
+  "gf": 35,
+  "mn9": 40,
+  "adn1": 3,
+  "mdn": 3,
+  "odn1": 4,
+  "bdn2": 3,
+  "mbonReward": 35,
+  "mbonPunish": 44,
+  "pam": 16,
+  "ppl1": 37
+ }
+}

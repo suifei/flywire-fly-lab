@@ -6,13 +6,13 @@
   const GENES = { learnRate: 0.012, explore: 0.35, flightBias: -4, tempPref: 25, metabolism: 1, caution: 1, innateTurn: [0, 0, 0, 0] };
   const BODY = { walkSpeed: 18, backSpeed: 12, turnGain: 6, turnMax: 420, gfThreshold: 90, mdnThreshold: 20, feedThreshold: 30, feedSlope: 6, mn9Min: 5, hopDist: 22, hopTime: 0.35, hopCost: 0.035, hopCooldown: 1.2,
     flightSpeed: 60, flightTime: 1.2, flightMinStamina: 0.3, slopeK: 1.2, restSpeed: 0.15 };
-  const FSCALE = [40, 40, 250, 100, 30, 30, 30, 80, 100, 200, 10, 10], IX = Senses.IX, PI = Plastic.IDX, NF = Plastic.NF;
+  const SMOOTH = 0.3, FSCALE = [40, 40, 250, 100, 30, 30, 30, 80, 100, 200, 10, 10], IX = Senses.IX, PI = Plastic.IDX, NF = Plastic.NF;
   const PAIRS = ["vinegar", "geosmin", "hygro", "thermo", "jo", "odorA", "audio", "lc4", "touch"], DERIV = ["vinegar", "hygro", "thermo", "odorA"], GATED = [["hunger", "vinegar"], ["thirst", "hygro"], ["hot", "thermo"], ["cold", "thermo"]];
 
   function newAgent(sim, genome, plastic) { const W = sim.world, a0 = W.rand() * 6.2832, d = Math.sqrt(W.rand()) * W.rules.size * 0.5, genes = Object.assign({}, GENES, genome && genome.genes, { innateTurn: ((genome && genome.genes && genome.genes.innateTurn) || GENES.innateTurn).slice() });
     const a = { id: sim.nextId++, genome: { id: (genome && genome.id) || sim.nextId, parent: genome ? genome.parent : null, generation: genome ? genome.generation || 0 : 0, genes }, phys: Phys.create(genes), P: plastic || Plastic.create(genes),
       x: Math.cos(a0) * d, y: Math.sin(a0) * d, h: W.rand() * 6.2832, air: 0, avx: 0, avy: 0, flying: false, cool: 0, lastD: [], dt: sim.dt, state: "walk", alive: true, born: W.t, deathT: null, cause: null, r: 0, rs: (W.rand() * 4294967296) >>> 0,
-      xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), phi: new Float64Array(NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, threatLP: 0, threatDir: 0, onFood: null, onWater: null, rotten: 0,
+      xin: new Float32Array(CH.INPUTS.length), out: new Float32Array(CH.FEATURES.length), ema: new Float32Array(CH.FEATURES.length), phi: new Float64Array(NF), lp: { vinegar: 0, hygro: 0, thermo: 0, odorA: 0 }, act: { turn: 0, speed: 1, ingest: 0, takeoff: 0, pIngest: 0 }, threatLP: 0, threatDir: 0, onFood: null, onWater: null, rotten: 0,
       stats: { tEat: 0, tDrink: 0, tRest: 0, tWall: 0, tWet: 0, tAir: 0, tRotten: 0, meals: 0, drinks: 0, hops: 0, flights: 0, bites: 0, dist: 0, reward: 0, rPos: 0, foodVisits: 0, waterVisits: 0, nCells: 0, cells: {}, tNight: 0, tHot: 0, tCold: 0 }, wasOn: 0, trail: [], trailT: 0, rbuf: [], lag: 300 };
     Plastic.clearTraces(a.P); a.rand = () => { a.rs = (a.rs + 0x6d2b79f5) >>> 0; let t = a.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
     sim.agents.push(a); sim.emit({ t: W.t, agent: a.id, kind: "birth", data: { generation: a.genome.generation } }); return a; }
@@ -39,7 +39,7 @@
     sim.spawn = (genome, plastic) => newAgent(sim, genome, plastic);
     sim.step = function () { const W = sim.world, dt = sim.dt, bites = W.step(dt, sim.agents);
       for (const a of sim.agents) { if (!a.alive) continue; const p = a.phys, g = a.genome.genes, st = a.stats; let bite = 0; a.bite = null; for (const b of bites) if (b.agent === a) { bite += World.K.biteDamage; a.bite = b; } if (bite > 0) { st.bites++; sim.emit({ t: W.t, agent: a.id, kind: "hit", data: { health: +p.health.toFixed(2) } }); }
-        Senses.sense(W, a, sim.agents, a.xin); (a.brain || sim.brain).eval(a.xin, a.out, a.rand); if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
+        Senses.sense(W, a, sim.agents, a.xin); { const br = a.brain || sim.brain; br.eval(a.xin, a.out, a.rand); if (br.kind === "surface" && !br.smoothed) { const al = Math.min(1, dt / SMOOTH); for (let j = 0; j < a.out.length; j++) { a.ema[j] += al * (a.out[j] - a.ema[j]); a.out[j] = a.ema[j] < 0.3 ? 0 : a.ema[j]; } } }   /* 响应面共用一个对象，读出的 τ = 0.3 s 平滑按个体做（与 eco/brain_live.js 一致） */ if (o.noBrainFeatures) { /* 探索性对照：可塑性层看不到大脑输出（先天反射照旧） */ }
         const phi = features(a, W); if (o.noBrainFeatures) for (let j = 0; j < 12; j++) phi[j] = 0;
         // 先学（上一步的奖励、这一步的状态），再做
         let r = a.r; if (o.learn === "shuffle") { a.rbuf.push(r); if (a.rbuf.length > 700) a.rbuf.shift(); if (a.rand() < dt / 30) a.lag = 200 + Math.floor(a.rand() * 400); r = a.rbuf.length > a.lag ? a.rbuf[a.rbuf.length - 1 - a.lag] : 0; }
@@ -48,6 +48,7 @@
         Plastic.learn(a.P, r, phi, g, o.learn === "off" ? "off" : "on");
         const out = a.out, mn9 = out[3], canIngest = a.air <= 0 && (a.onFood || a.onWater) && mn9 > BODY.mn9Min;
         Plastic.act(a.P, phi, g, dt, a.rand, { canIngest, ingestLogit: (mn9 - BODY.feedThreshold) / BODY.feedSlope, flight: o.flight && a.air <= 0 }, a.act);
+        if (o.trace) o.trace(a, { onWater: !!a.onWater, onFood: !!a.onFood, mn9, canIngest, pIngest: a.act.pIngest, ingest: a.act.ingest, dnaL: out[0], dnaR: out[1], speed: a.act.speed, turn: a.act.turn });   /* 诊断用：每次决策回调（L2 那 4 倍就是靠它拆开的） */
         let eating = false, drinking = false, effort = 0, resting = false, uphill = 0; a.cool = Math.max(0, a.cool - dt);
         if (a.air > 0) { a.x += a.avx * dt; a.y += a.avy * dt; if (a.flying) { a.x += Math.cos(W.wind.dir) * W.wind.speed * 0.6 * dt; a.y += Math.sin(W.wind.dir) * W.wind.speed * 0.6 * dt; } a.air -= dt; st.tAir += dt; a.state = a.flying ? "fly" : "hop"; if (a.air <= 0) { a.air = 0; a.flying = false; a.lastD.length = 0; } }
         else if (out[2] > BODY.gfThreshold * g.caution && a.cool <= 0) { const dir = a.threatLP > 0 ? a.threatDir + Math.PI + (a.rand() - 0.5) * 0.8 : a.h; a.air = BODY.hopTime; a.avx = Math.cos(dir) * BODY.hopDist / BODY.hopTime; a.avy = Math.sin(dir) * BODY.hopDist / BODY.hopTime; a.h = dir; a.cool = BODY.hopCooldown;

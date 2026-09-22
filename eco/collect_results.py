@@ -59,6 +59,13 @@ lv = load("live_check.json")
 if lv: out["live"] = lv["summary"]
 lv_old = load("old_body/live_check_surface_v2.json")
 if lv_old and lv: out["live"]["v2_drink_ratio"] = lv_old["summary"]["drink_ratio"]
+l2 = {}
+for name in ("l2_diagnosis_surface+surface_mean+surface_ema", "l2_diagnosis_live", "l2_diagnosis_live_raw", "l2_diagnosis_surface"):
+    d = load(name + ".json")
+    if d:
+        for arm, o in d["arms"].items(): l2.setdefault(arm if name != "l2_diagnosis_surface" else "surface_v4", o["median"])
+if l2:
+    out["l2"] = {"arms": l2, "fano": (sf.get("noise") or {}).get("fano"), "units": (sf.get("noise") or {}).get("units")}
 nt = load("nature_transfer.json")
 if nt: out["transfer"] = {"pass": nt["pass"], "conclusive": nt["conclusive"], "n_informative": nt["n_informative"], "X1": nt["X1"], "X2": nt["X2"], "report": nt["report"], "runs": [{"seed": r["seed"], "informative": r["informative"], "naive": {k: r["naive"][k] for k in ("life_s", "drink_s", "drinks", "waterVisits", "thirst_mean", "eat_s", "hits")}, "trained": {k: r["trained"][k] for k in ("life_s", "drink_s", "drinks", "waterVisits", "thirst_mean", "eat_s", "hits")}} for r in nt["runs"]]}
 json.dump(out, open(os.path.join(D, "summary.json"), "w"), ensure_ascii=False, indent=1)

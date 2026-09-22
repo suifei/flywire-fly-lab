@@ -1,71 +1,71 @@
 {
  "decay": 0,
- "off_median": 444.45000000000005,
+ "off_median": 425.45,
  "individuals": [
   {
    "base": 20000,
    "last10_median": 1800,
-   "wall": 0.072,
+   "wall": 0.147,
    "rest": 0
   },
   {
    "base": 20100,
-   "last10_median": 410.5,
-   "wall": 0.031,
-   "rest": 0.992
+   "last10_median": 706.9,
+   "wall": 0.144,
+   "rest": 0.001
   },
   {
    "base": 20200,
-   "last10_median": 408.1,
-   "wall": 0.904,
+   "last10_median": 1800,
+   "wall": 0.101,
    "rest": 0
   },
   {
    "base": 20300,
    "last10_median": 1800,
-   "wall": 0.253,
+   "wall": 0.143,
    "rest": 0
   },
   {
    "base": 20400,
-   "last10_median": 408.3,
-   "wall": 0,
-   "rest": 0.668
+   "last10_median": 410.8,
+   "wall": 0.167,
+   "rest": 0.993
   },
   {
    "base": 20500,
-   "last10_median": 1800,
-   "wall": 0.12,
-   "rest": 0
+   "last10_median": 410.3,
+   "wall": 0.084,
+   "rest": 0.971
   },
   {
    "base": 20600,
-   "last10_median": 590.7,
-   "wall": 0.153,
-   "rest": 0.011
-  },
-  {
-   "base": 20700,
-   "last10_median": 1800,
-   "wall": 0.077,
+   "last10_median": 424.8,
+   "wall": 0.969,
    "rest": 0
   },
   {
+   "base": 20700,
+   "last10_median": 436.7,
+   "wall": 0.188,
+   "rest": 0.394
+  },
+  {
    "base": 20800,
-   "last10_median": 429.4,
-   "wall": 0.248,
-   "rest": 0.737
+   "last10_median": 1800,
+   "wall": 0.064,
+   "rest": 0
   },
   {
    "base": 20900,
-   "last10_median": 1800,
-   "wall": 0.078,
+   "last10_median": 650,
+   "wall": 0.129,
    "rest": 0
   }
  ],
  "n": 10,
- "n_learned": 5,
+ "n_learned": 6,
  "n_wall": 1,
- "n_rest": 3,
+ "n_rest": 2,
  "note": "按训练后 10 条命的寿命中位数判（不另做冻结测试）"
 }
